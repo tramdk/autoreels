@@ -9,6 +9,11 @@ coverage/
 
 /src/generated/prisma
 
+# SQLite Database
+dev.db
+prisma/dev.db
+*.db-journal
+
 # Video Rendering & Media
 temp_renders/
 temp_renders_test/
