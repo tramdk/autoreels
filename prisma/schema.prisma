@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String   @id @default(uuid())
+  username           String   @unique
+  password           String
+  mustChangePassword Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Account {
+  id           String   @id @default(uuid())
+  platform     String   @unique // e.g., "tiktok"
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  updatedAt    DateTime @updatedAt
+}
+
+model Source {
+  id          String    @id @default(uuid())
+  name        String
+  url         String
+  type        String    // "rss" or "web"
+  lastScraped DateTime?
+  articles    Article[]
+}
+
+model Article {
+  id             String   @id @default(uuid())
+  title          String
+  link           String   @unique
+  contentSnippet String?
+  pubDate        String?
+  status         String   @default("scraped") // scraped, summarized, video_generated, posted
+  script         String?  // Stored as JSON string
+  imageUrl       String?
+  videoId        String?
+  sourceId       String?
+  source         Source?  @relation(fields: [sourceId], references: [id])
+  video          Video?   @relation(fields: [videoId], references: [id])
+  createdAt      DateTime @default(now())
+}
+
+model Video {
+  id          String    @id @default(uuid())
+  title       String
+  videoUrl    String
+  audioUrl    String
+  status      String    @default("ready") // ready, posted
+  publishId   String?
+  platforms   String?   // comma-separated
+  createdAt   DateTime  @default(now())
+  postedAt    DateTime?
+  articles    Article[]
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String   // Store as string or JSON string
+  updatedAt DateTime @updatedAt
+}

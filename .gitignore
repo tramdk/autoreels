@@ -1,0 +1,22 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+/src/generated/prisma
+
+# Video Rendering & Media
+temp_renders/
+temp_renders_test/
+work-*/
+uploads/
+test_output.mp4
+
+# Development Scratchpad
+scratch/
+check_*.ts
+test_*.ts

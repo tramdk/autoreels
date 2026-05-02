@@ -1,0 +1,6 @@
+{
+  "name": "AutoReels",
+  "description": "An automated pipeline that scrapes news articles, uses AI to summarize them into short video scripts, generates videos, and posts them to social media.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

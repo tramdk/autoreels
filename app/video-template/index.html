@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080, user-scalable=no">
+  <title>AutoReels Template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700;900&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body,
+    html {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background-color: transparent;
+      font-family: 'Inter', sans-serif;
+    }
+
+    #root {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      background-color: #000;
+      color: white;
+    }
+
+    #bg-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #brand-header {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    #brand-logo {
+      font-family: 'Anton', sans-serif;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+    }
+
+    /* Grouped Content Stack */
+    #main-content-stack {
+      position: absolute;
+      width: 920px;
+      display: flex;
+      flex-direction: column;
+      z-index: 50;
+    }
+
+    #hook-text {
+      font-family: 'Anton', sans-serif;
+      line-height: 1.15;
+      text-transform: uppercase;
+      max-width: 100%;
+    }
+
+    #divider {
+      height: 6px;
+      border-radius: 10px;
+      width: 0;
+      /* Animated */
+    }
+
+    #body-text {
+      line-height: 1.5;
+      font-weight: 500;
+      max-width: 100%;
+    }
+
+    #bottom-info {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 100;
+    }
+
+    #tag-badge {
+      padding: 10px 25px;
+      font-family: 'Anton', sans-serif;
+      text-transform: uppercase;
+      transform: skewX(-15deg);
+    }
+
+    #datetime {
+      font-size: 24px;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-start="0">
+    <img id="bg-image" src="{{BG_IMAGE_URL}}" style="opacity: {{BG_BRIGHTNESS}}; display: {{BG_IMAGE_DISPLAY}};" alt="">
+
+    <div id="brand-header" style="top: {{LOGO_TOP}}px; left: {{LOGO_LEFT}}px;">
+      <h1 id="brand-logo"
+        style="font-size: {{LOGO_SIZE}}px; color: {{LOGO_COLOR}}; text-shadow: 0 0 30px {{LOGO_COLOR}}88;">{{LOGO_TEXT}}
+      </h1>
+    </div>
+
+    <div id="main-content-stack" style="top: {{MAIN_TOP}}px; left: {{MAIN_LEFT}}px; gap: {{CONTENT_GAP}}px;">
+      <h2 id="hook-text" style="font-size: {{HOOK_SIZE}}px; color: {{HOOK_COLOR}};">{{HOOK_TEXT}}</h2>
+      <div id="divider" style="background-color: {{DIVIDER_COLOR}};"></div>
+      <p id="body-text" style="font-size: {{BODY_SIZE}}px; color: {{BODY_COLOR}};">{{BODY_TEXT}}</p>
+    </div>
+
+    <div id="bottom-info" style="top: {{TAG_TOP}}px; left: {{TAG_LEFT}}px;">
+      <div id="tag-badge" style="background-color: {{TAG_BG}}; color: {{TAG_COLOR}}; font-size: {{TAG_SIZE}}px;">
+        {{TAG_TEXT}}</div>
+      <div id="datetime">{{DATETIME}}</div>
+    </div>
+  </div>
+
+  <script>
+    // 1. MUST EXPOSE API IMMEDIATELY
+    window.__hf = {
+      duration: {{DURATION}},
+      seek: function(t) {
+        if (window._tl && typeof window._tl.seek === 'function') {
+          window._tl.pause().seek(t);
+        }
+      }
+    };
+  </script>
+
+  <script>
+    // 2. RUN ANIMATIONS SYNCHRONOUSLY
+    try {
+      if (typeof gsap !== 'undefined') {
+        window._tl = gsap.timeline({ paused: true });
+        window.__timelines = window.__timelines || {};
+        window.__timelines["main"] = window._tl;
+
+        function applyAnim(selector, type, delay = 0) {
+          const el = document.querySelector(selector);
+          if (!el) return;
+
+          switch (type) {
+            case 'fade': window._tl.from(el, { opacity: 0, duration: 1 }, delay); break;
+            case 'slide-up': window._tl.from(el, { y: 100, opacity: 0, duration: 1 }, delay); break;
+            case 'slide-down': window._tl.from(el, { y: -100, opacity: 0, duration: 1 }, delay); break;
+            case 'slide-left': window._tl.from(el, { x: 100, opacity: 0, duration: 1 }, delay); break;
+            case 'slide-right': window._tl.from(el, { x: -100, opacity: 0, duration: 1 }, delay); break;
+            case 'zoom-in': window._tl.from(el, { scale: 0, opacity: 0, duration: 1 }, delay); break;
+            case 'rotate-in': window._tl.from(el, { rotate: -15, scale: 0.8, opacity: 0, duration: 1.2, ease: 'back.out(1.7)' }, delay); break;
+          }
+        }
+
+        applyAnim('#brand-header', '{{LOGO_ANIM}}', 0.5);
+        window._tl.from('#main-content-stack', { opacity: 0, y: 50, duration: 1 }, 0.8);
+        applyAnim('#hook-text', '{{HOOK_ANIM}}', 1.0);
+
+        const divider = document.querySelector('#divider');
+        if (divider) {
+          window._tl.to(divider, {
+            width: '{{DIVIDER_WIDTH}}px',
+            duration: 0.8,
+            ease: 'power2.inOut'
+          }, 1.5);
+        }
+
+        applyAnim('#body-text', '{{BODY_ANIM}}', 1.8);
+        applyAnim('#bottom-info', '{{TAG_ANIM}}', 2.2);
+
+        // Ensure timeline matches exact video duration using the un-prunable GSAP callback technique
+        const totalDuration = {{DURATION}};
+        window._tl.add(() => {}, totalDuration);
+      }
+    } catch (e) {
+      console.error('Animation Init Error:', e);
+    }
+  </script>
+</body>
+
+</html>
