@@ -30,7 +30,28 @@ interface DashboardViewProps {
   onUpdateScript: (id: string, script: any) => void;
   onCreateManualArticle: (data: { title: string, content: string }) => void;
   renderingVideos: Record<string, number>;
+  stats: { sources: number, articles: number, videos: number, postedVideos: number };
+  page: number;
+  setPage: (page: number) => void;
+  totalPages: number;
 }
+
+
+const ArticleSkeleton = () => (
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-2xl bg-slate-800/40 border border-white/5 gap-4">
+    <div className="flex-1 space-y-2">
+      <div className="flex gap-2">
+        <div className="w-16 h-4 skeleton-item" />
+        <div className="w-20 h-4 skeleton-item" />
+      </div>
+      <div className="w-3/4 h-6 skeleton-item" />
+    </div>
+    <div className="flex gap-2">
+      <div className="w-24 h-10 skeleton-item" />
+      <div className="w-10 h-10 skeleton-item" />
+    </div>
+  </div>
+);
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
   sources,
@@ -42,7 +63,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onGenerateVideo,
   onUpdateScript,
   onCreateManualArticle,
-  renderingVideos
+  renderingVideos,
+  stats,
+  page,
+  setPage,
+  totalPages
 }) => {
   const { t } = useLanguage();
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
@@ -107,10 +132,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard title={t('dashboard.sources')} value={sources.length} icon={<Rss className="w-5 h-5" />} color="rose" />
-        <StatCard title={t('dashboard.articles')} value={articles.length} icon={<FileText className="w-5 h-5" />} color="blue" />
-        <StatCard title={t('dashboard.videos')} value={videos.length} icon={<Video className="w-5 h-5" />} color="purple" />
-        <StatCard title={t('dashboard.posted')} value={videos.filter(v => v.status === 'posted').length} icon={<CheckCircle2 className="w-5 h-5" />} color="green" />
+        <StatCard title={t('dashboard.sources')} value={stats.sources} icon={<Rss className="w-5 h-5" />} color="rose" />
+        <StatCard title={t('dashboard.articles')} value={stats.articles} icon={<FileText className="w-5 h-5" />} color="blue" />
+        <StatCard title={t('dashboard.videos')} value={stats.videos} icon={<Video className="w-5 h-5" />} color="purple" />
+        <StatCard title={t('dashboard.posted')} value={stats.postedVideos} icon={<CheckCircle2 className="w-5 h-5" />} color="green" />
       </div>
       
       <div className="glass rounded-3xl p-8 border border-white/5">
@@ -121,72 +146,104 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
             <h2 className="text-2xl font-bold text-white">{t('dashboard.activePipeline')}</h2>
           </div>
+          {loading && articles.length > 0 && (
+            <div className="flex items-center gap-2 text-primary animate-pulse text-xs font-bold uppercase tracking-widest">
+              <RefreshCw className="w-3 h-3 animate-spin" /> Updating...
+            </div>
+          )}
         </div>
         
-        <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-          <AnimatePresence mode="popLayout">
-            {articles.slice(0, 15).map((article, idx) => (
-              <motion.div 
-                key={article.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-2xl bg-slate-800/40 border border-white/5 hover:bg-slate-800/60 transition-all gap-4"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-900/50 px-2 py-0.5 rounded border border-white/5">
-                      {typeof article.source === 'string' ? article.source : (article.source?.name || 'Unknown')}
-                    </span>
-                    <StatusBadge status={article.status} />
+        <div className="space-y-3 min-h-[400px] max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+          {loading && articles.length === 0 ? (
+            Array(10).fill(0).map((_, i) => <ArticleSkeleton key={i} />)
+          ) : (
+            <AnimatePresence mode="popLayout">
+              {articles.map((article, idx) => (
+                <motion.div 
+                  key={article.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="group flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-2xl bg-slate-800/40 border border-white/5 hover:bg-slate-800/60 transition-all gap-4"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-900/50 px-2 py-0.5 rounded border border-white/5">
+                        {typeof article.source === 'string' ? article.source : (article.source?.name || 'Unknown')}
+                      </span>
+                      <StatusBadge status={article.status} />
+                    </div>
+                    <h3 className="text-base font-semibold text-slate-200 truncate">{article.title}</h3>
                   </div>
-                  <h3 className="text-base font-semibold text-slate-200 truncate">{article.title}</h3>
-                </div>
-                <div className="flex items-center gap-2">
-                  {article.status === 'scraped' && (
-                    <button onClick={() => onSummarize(article.id)} disabled={loading} className="bg-blue-600/10 text-blue-400 hover:bg-blue-600/20 px-4 py-2 rounded-xl text-sm font-bold border border-blue-500/20 transition-all flex items-center gap-2">
-                       <Wand2 className="w-4 h-4" /> {t('dashboard.aiScript')}
-                    </button>
-                  )}
-                  {article.status === 'summarized' && (
-                    <>
-                      <button onClick={() => startEditing(article)} className="p-2.5 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl transition-all border border-white/5">
-                         <Edit className="w-4 h-4" />
+                  <div className="flex items-center gap-2">
+                    {article.status === 'scraped' && (
+                      <button onClick={() => onSummarize(article.id)} disabled={loading} className="bg-blue-600/10 text-blue-400 hover:bg-blue-600/20 px-4 py-2 rounded-xl text-sm font-bold border border-blue-500/20 transition-all flex items-center gap-2">
+                         <Wand2 className="w-4 h-4" /> {t('dashboard.aiScript')}
                       </button>
-                      <button onClick={() => onGenerateVideo(article.id)} disabled={loading} className="bg-purple-600/10 text-purple-400 hover:bg-purple-600/20 px-4 py-2 rounded-xl text-sm font-bold border border-purple-500/20 transition-all flex items-center gap-2 font-mono">
-                         <Video className="w-4 h-4" /> {t('dashboard.generate')}
-                      </button>
-                    </>
-                  )}
-                  {(() => {
-                    const progress = getArticleProgress(article.id);
-                    if (progress !== null && progress < 100) {
-                      return (
-                        <div className="flex flex-col items-end gap-1 min-w-[120px]">
-                          <span className="text-[10px] font-bold text-primary animate-pulse">RENDERING {progress}%</span>
-                          <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                            <motion.div 
-                              initial={{ width: 0 }}
-                              animate={{ width: `${progress}%` }}
-                              className="h-full bg-primary glow-primary"
-                            />
+                    )}
+                    {article.status === 'summarized' && (
+                      <>
+                        <button onClick={() => startEditing(article)} className="p-2.5 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl transition-all border border-white/5">
+                           <Edit className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => onGenerateVideo(article.id)} disabled={loading} className="bg-purple-600/10 text-purple-400 hover:bg-purple-600/20 px-4 py-2 rounded-xl text-sm font-bold border border-purple-500/20 transition-all flex items-center gap-2 font-mono">
+                           <Video className="w-4 h-4" /> {t('dashboard.generate')}
+                        </button>
+                      </>
+                    )}
+                    {(() => {
+                      const progress = getArticleProgress(article.id);
+                      if (progress !== null && progress < 100) {
+                        return (
+                          <div className="flex flex-col items-end gap-1 min-w-[120px]">
+                            <span className="text-[10px] font-bold text-primary animate-pulse">RENDERING {progress}%</span>
+                            <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${progress}%` }}
+                                className="h-full bg-primary glow-primary"
+                              />
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    if (article.status === 'generating') {
-                      return <div className="px-4 py-2 rounded-xl bg-orange-500/10 text-orange-500 text-sm font-bold border border-orange-500/20 animate-pulse">{t('dashboard.rendering')}</div>;
-                    }
-                    return null;
-                  })()}
-                  <a href={article.link} target="_blank" rel="noopener noreferrer" className="p-2 text-slate-600 hover:text-white transition-colors">
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+                        );
+                      }
+                      if (article.status === 'generating') {
+                        return <div className="px-4 py-2 rounded-xl bg-orange-500/10 text-orange-500 text-sm font-bold border border-orange-500/20 animate-pulse">{t('dashboard.rendering')}</div>;
+                      }
+                      return null;
+                    })()}
+                    <a href={article.link} target="_blank" rel="noopener noreferrer" className="p-2 text-slate-600 hover:text-white transition-colors">
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          )}
         </div>
+
+        {/* Pagination controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-8 pt-6 border-t border-white/5">
+            <button 
+              disabled={page <= 1} 
+              onClick={() => setPage(page - 1)}
+              className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none transition-all"
+            >
+              Previous
+            </button>
+            <span className="text-xs font-black uppercase tracking-widest text-slate-600">
+              Page <span className="text-primary">{page}</span> of {totalPages}
+            </span>
+            <button 
+              disabled={page >= totalPages} 
+              onClick={() => setPage(page + 1)}
+              className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none transition-all"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Script Editor Modal */}
@@ -198,7 +255,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               initial={{ scale: 0.9, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 30 }}
               className="glass w-full max-w-2xl p-8 rounded-[40px] border border-white/10 shadow-3xl relative z-10 overflow-hidden"
             >
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-white">{t('articles.editTitle')}</h2>
                   <p className="text-slate-500 text-sm">{t('articles.editSubtitle')}</p>
@@ -206,33 +263,77 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <button onClick={() => setEditingArticle(null)} className="p-2 text-slate-400 hover:text-white"><X className="w-6 h-6" /></button>
               </div>
 
-              <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
-                <div>
-                   <label className="block text-xs font-black uppercase text-slate-600 mb-2">{t('articles.hook')}</label>
-                   <textarea 
-                    value={tempScript.hook} 
-                    onChange={e => setTempScript({...tempScript, hook: e.target.value})}
-                    className="w-full bg-white/5 border border-white/5 rounded-2xl p-4 text-white text-lg font-bold leading-relaxed focus:border-primary/50 focus:outline-none min-h-[100px]"
-                   />
+              {/* Scene-based editor */}
+              {tempScript.scenes && Array.isArray(tempScript.scenes) ? (
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
+                  {tempScript.scenes.map((scene: any, idx: number) => {
+                    const typeColors: Record<string, string> = {
+                      hook: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
+                      body: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
+                      outro: 'text-green-400 bg-green-400/10 border-green-400/20',
+                    };
+                    const color = typeColors[scene.type] || 'text-slate-400 bg-white/5 border-white/10';
+                    return (
+                      <div key={idx} className="p-4 rounded-2xl bg-slate-800/40 border border-white/5 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border ${color}`}>
+                            {scene.type} #{scene.id}
+                          </span>
+                          <input
+                            value={scene.imageKeyword || ''}
+                            onChange={e => {
+                              const updated = [...tempScript.scenes];
+                              updated[idx] = { ...updated[idx], imageKeyword: e.target.value };
+                              setTempScript({ ...tempScript, scenes: updated });
+                            }}
+                            placeholder="image keyword"
+                            className="flex-1 bg-white/5 border border-white/5 rounded-xl px-3 py-1.5 text-xs text-slate-400 placeholder:text-slate-600 focus:border-primary/50 focus:outline-none font-mono"
+                          />
+                        </div>
+                        <textarea
+                          value={scene.voiceText || ''}
+                          onChange={e => {
+                            const updated = [...tempScript.scenes];
+                            updated[idx] = { ...updated[idx], voiceText: e.target.value };
+                            setTempScript({ ...tempScript, scenes: updated });
+                          }}
+                          rows={3}
+                          className="w-full bg-white/5 border border-white/5 rounded-xl p-3 text-white text-sm leading-relaxed focus:border-primary/50 focus:outline-none resize-none"
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
-                <div>
-                   <label className="block text-xs font-black uppercase text-slate-600 mb-2">{t('articles.body')}</label>
-                   <textarea 
-                    value={tempScript.body} 
-                    onChange={e => setTempScript({...tempScript, body: e.target.value})}
-                    className="w-full bg-white/5 border border-white/5 rounded-2xl p-4 text-white leading-relaxed focus:border-primary/50 focus:outline-none min-h-[200px]"
-                   />
+              ) : (
+                /* Fallback: old flat format */
+                <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-600 mb-2">{t('articles.hook')}</label>
+                    <textarea
+                      value={tempScript.hook || ''}
+                      onChange={e => setTempScript({...tempScript, hook: e.target.value})}
+                      className="w-full bg-white/5 border border-white/5 rounded-2xl p-4 text-white text-lg font-bold leading-relaxed focus:border-primary/50 focus:outline-none min-h-[100px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-600 mb-2">{t('articles.body')}</label>
+                    <textarea
+                      value={tempScript.body || ''}
+                      onChange={e => setTempScript({...tempScript, body: e.target.value})}
+                      className="w-full bg-white/5 border border-white/5 rounded-2xl p-4 text-white leading-relaxed focus:border-primary/50 focus:outline-none min-h-[200px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-600 mb-2">{t('articles.cta')}</label>
+                    <input
+                      type="text"
+                      value={tempScript.callToAction || tempScript.cta || ''}
+                      onChange={e => setTempScript({...tempScript, callToAction: e.target.value})}
+                      className="w-full bg-white/5 border border-white/5 rounded-2xl px-4 py-3 text-white font-medium focus:border-primary/50 focus:outline-none"
+                    />
+                  </div>
                 </div>
-                <div>
-                   <label className="block text-xs font-black uppercase text-slate-600 mb-2">{t('articles.cta')}</label>
-                   <input 
-                    type="text"
-                    value={tempScript.cta} 
-                    onChange={e => setTempScript({...tempScript, cta: e.target.value})}
-                    className="w-full bg-white/5 border border-white/5 rounded-2xl px-4 py-3 text-white font-medium focus:border-primary/50 focus:outline-none"
-                   />
-                </div>
-              </div>
+              )}
 
               <div className="flex gap-4 mt-8 pt-6 border-t border-white/5">
                 <button onClick={() => setEditingArticle(null)} className="flex-1 py-4 text-slate-400 font-bold hover:text-white transition-all">{t('common.discard')}</button>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
   <meta charset="UTF-8">
@@ -7,7 +7,7 @@
   <title>AutoReels Template</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700;900&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Be+Vietnam+Pro:wght@400;600;700;900&display=swap"
     rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <style>
@@ -22,114 +22,222 @@
       width: 1080px;
       height: 1920px;
       overflow: hidden;
-      background-color: transparent;
-      font-family: 'Inter', sans-serif;
+      background-color: #000;
+      font-family: 'Be Vietnam Pro', sans-serif;
     }
 
     #root {
       position: relative;
       width: 1080px;
       height: 1920px;
-      background-color: #000;
+      background-color: #111;
       color: white;
+      overflow: hidden;
     }
 
+    /* Background */
     #bg-image {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       object-fit: cover;
+      z-index: 0;
+    }
+    #bg-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.92) 100%);
+      z-index: 1;
     }
 
+    /* Brand */
     #brand-header {
       position: absolute;
-      display: flex;
-      flex-direction: column;
+      top: {{LOGO_TOP}}px;
+      left: {{LOGO_LEFT}}px;
       z-index: 100;
     }
-
     #brand-logo {
       font-family: 'Anton', sans-serif;
+      font-size: {{LOGO_SIZE}}px;
       letter-spacing: 6px;
       text-transform: uppercase;
+      color: {{LOGO_COLOR}};
+      text-shadow: 0 0 30px {{LOGO_COLOR}}88;
     }
 
-    /* Grouped Content Stack */
-    #main-content-stack {
-      position: absolute;
-      width: 920px;
-      display: flex;
-      flex-direction: column;
-      z-index: 50;
-    }
-
-    #hook-text {
-      font-family: 'Anton', sans-serif;
-      line-height: 1.15;
-      text-transform: uppercase;
-      max-width: 100%;
-    }
-
-    #divider {
-      height: 6px;
-      border-radius: 10px;
-      width: 0;
-      /* Animated */
-    }
-
-    #body-text {
-      line-height: 1.5;
-      font-weight: 500;
-      max-width: 100%;
-    }
-
+    /* Bottom bar */
     #bottom-info {
       position: absolute;
+      top: {{TAG_TOP}}px;
+      left: {{TAG_LEFT}}px;
       display: flex;
       align-items: center;
       gap: 20px;
       z-index: 100;
     }
-
     #tag-badge {
-      padding: 10px 25px;
+      padding: 12px 30px;
       font-family: 'Anton', sans-serif;
+      font-size: {{TAG_SIZE}}px;
       text-transform: uppercase;
-      transform: skewX(-15deg);
+      background-color: {{TAG_BG}};
+      color: {{TAG_COLOR}};
+      transform: skewX(-12deg);
+      letter-spacing: 2px;
     }
-
     #datetime {
-      font-size: 24px;
-      color: rgba(255, 255, 255, 0.6);
+      font-size: 26px;
+      color: rgba(255,255,255,0.55);
       font-weight: 700;
       letter-spacing: 2px;
+    }
+
+    /* Progress dots */
+    #scene-dots {
+      position: absolute;
+      top: 60px;
+      right: 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 100;
+    }
+    .scene-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transition: background 0.3s;
+    }
+    .scene-dot.active {
+      background: {{LOGO_COLOR}};
+      box-shadow: 0 0 8px {{LOGO_COLOR}};
+    }
+
+    /* Scene cards */
+    #scene-container {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 50;
+    }
+    .scene-card {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding-top: {{MAIN_TOP}}px;
+      padding-left: {{MAIN_LEFT}}px;
+      padding-right: {{MAIN_LEFT}}px;
+      gap: {{CONTENT_GAP}}px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Hook scene */
+    .scene-card.type-hook .scene-label {
+      font-family: 'Anton', sans-serif;
+      font-size: 28px;
+      letter-spacing: 8px;
+      color: {{DIVIDER_COLOR}};
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+    .scene-card.type-hook .scene-text {
+      font-family: 'Anton', sans-serif;
+      font-size: {{HOOK_SIZE}}px;
+      line-height: 1.1;
+      text-transform: uppercase;
+      color: {{HOOK_COLOR}};
+      text-shadow: 0 4px 40px rgba(0,0,0,0.6);
+    }
+    .scene-card.type-hook .scene-accent {
+      width: 0;
+      height: 6px;
+      border-radius: 4px;
+      background: {{DIVIDER_COLOR}};
+      box-shadow: 0 0 20px {{DIVIDER_COLOR}}88;
+    }
+
+    /* Body scene */
+    .scene-card.type-body .scene-number {
+      font-family: 'Anton', sans-serif;
+      font-size: 200px;
+      line-height: 1;
+      color: {{DIVIDER_COLOR}}18;
+      position: absolute;
+      right: 60px;
+      top: 50%;
+      transform: translateY(-50%);
+      user-select: none;
+    }
+    .scene-card.type-body .scene-text {
+      font-size: {{BODY_SIZE}}px;
+      font-weight: 700;
+      line-height: 1.35;
+      color: {{BODY_COLOR}};
+      text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+      position: relative;
+      z-index: 2;
+    }
+    .scene-card.type-body .scene-bar {
+      width: 60px;
+      height: 5px;
+      border-radius: 3px;
+      background: {{DIVIDER_COLOR}};
+    }
+
+    /* Outro scene */
+    .scene-card.type-outro {
+      justify-content: flex-start;
+    }
+    .scene-card.type-outro .scene-cta-label {
+      font-family: 'Anton', sans-serif;
+      font-size: 32px;
+      letter-spacing: 6px;
+      color: {{TAG_BG}};
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .scene-card.type-outro .scene-text {
+      font-size: {{BODY_SIZE}}px;
+      font-weight: 700;
+      line-height: 1.35;
+      color: {{BODY_COLOR}};
+    }
+    .scene-card.type-outro .scene-follow {
+      margin-top: 40px;
+      font-size: 36px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 1px;
     }
   </style>
 </head>
 
 <body>
   <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-start="0">
-    <img id="bg-image" src="{{BG_IMAGE_URL}}" style="opacity: {{BG_BRIGHTNESS}}; display: {{BG_IMAGE_DISPLAY}};" alt="">
 
-    <div id="brand-header" style="top: {{LOGO_TOP}}px; left: {{LOGO_LEFT}}px;">
-      <h1 id="brand-logo"
-        style="font-size: {{LOGO_SIZE}}px; color: {{LOGO_COLOR}}; text-shadow: 0 0 30px {{LOGO_COLOR}}88;">{{LOGO_TEXT}}
-      </h1>
+    <img id="bg-image" src="{{BG_IMAGE_URL}}"
+      style="opacity: {{BG_BRIGHTNESS}}; display: {{BG_IMAGE_DISPLAY}};" alt="">
+    <div id="bg-overlay"></div>
+
+    <div id="brand-header">
+      <h1 id="brand-logo">{{LOGO_TEXT}}</h1>
     </div>
 
-    <div id="main-content-stack" style="top: {{MAIN_TOP}}px; left: {{MAIN_LEFT}}px; gap: {{CONTENT_GAP}}px;">
-      <h2 id="hook-text" style="font-size: {{HOOK_SIZE}}px; color: {{HOOK_COLOR}};">{{HOOK_TEXT}}</h2>
-      <div id="divider" style="background-color: {{DIVIDER_COLOR}};"></div>
-      <p id="body-text" style="font-size: {{BODY_SIZE}}px; color: {{BODY_COLOR}};">{{BODY_TEXT}}</p>
-    </div>
+    <div id="scene-dots"></div>
+    <div id="scene-container"></div>
 
-    <div id="bottom-info" style="top: {{TAG_TOP}}px; left: {{TAG_LEFT}}px;">
-      <div id="tag-badge" style="background-color: {{TAG_BG}}; color: {{TAG_COLOR}}; font-size: {{TAG_SIZE}}px;">
-        {{TAG_TEXT}}</div>
+    <div id="bottom-info">
+      <div id="tag-badge">{{TAG_TEXT}}</div>
       <div id="datetime">{{DATETIME}}</div>
     </div>
+
   </div>
 
   <script>
@@ -145,50 +253,114 @@
   </script>
 
   <script>
-    // 2. RUN ANIMATIONS SYNCHRONOUSLY
+    // 2. SCENE DATA (injected by renderer)
+    var SCENES_DATA = {{SCENES_JSON}};
+    var TOTAL_DURATION = {{DURATION}};
+    var LOGO_COLOR = '{{LOGO_COLOR}}';
+    var TAG_BG = '{{TAG_BG}}';
+  </script>
+
+  <script>
+    // 3. BUILD SCENE CARDS + ANIMATE
     try {
-      if (typeof gsap !== 'undefined') {
-        window._tl = gsap.timeline({ paused: true });
-        window.__timelines = window.__timelines || {};
-        window.__timelines["main"] = window._tl;
+      if (typeof gsap === 'undefined') throw new Error('GSAP not loaded');
 
-        function applyAnim(selector, type, delay = 0) {
-          const el = document.querySelector(selector);
-          if (!el) return;
+      var scenes = SCENES_DATA;
+      var n = scenes.length;
+      var container = document.getElementById('scene-container');
+      var dotsContainer = document.getElementById('scene-dots');
 
-          switch (type) {
-            case 'fade': window._tl.from(el, { opacity: 0, duration: 1 }, delay); break;
-            case 'slide-up': window._tl.from(el, { y: 100, opacity: 0, duration: 1 }, delay); break;
-            case 'slide-down': window._tl.from(el, { y: -100, opacity: 0, duration: 1 }, delay); break;
-            case 'slide-left': window._tl.from(el, { x: 100, opacity: 0, duration: 1 }, delay); break;
-            case 'slide-right': window._tl.from(el, { x: -100, opacity: 0, duration: 1 }, delay); break;
-            case 'zoom-in': window._tl.from(el, { scale: 0, opacity: 0, duration: 1 }, delay); break;
-            case 'rotate-in': window._tl.from(el, { rotate: -15, scale: 0.8, opacity: 0, duration: 1.2, ease: 'back.out(1.7)' }, delay); break;
-          }
-        }
+      // Timing: reserve 0.5s lead-in, divide rest evenly
+      var leadIn = 0.5;
+      var usable = TOTAL_DURATION - leadIn;
+      var sceneDuration = usable / n;    // time each scene owns
+      var animIn  = Math.min(0.7, sceneDuration * 0.25);
+      var animOut = Math.min(0.5, sceneDuration * 0.2);
+      var holdStart = animIn;
+      var holdEnd   = sceneDuration - animOut;
 
-        applyAnim('#brand-header', '{{LOGO_ANIM}}', 0.5);
-        window._tl.from('#main-content-stack', { opacity: 0, y: 50, duration: 1 }, 0.8);
-        applyAnim('#hook-text', '{{HOOK_ANIM}}', 1.0);
-
-        const divider = document.querySelector('#divider');
-        if (divider) {
-          window._tl.to(divider, {
-            width: '{{DIVIDER_WIDTH}}px',
-            duration: 0.8,
-            ease: 'power2.inOut'
-          }, 1.5);
-        }
-
-        applyAnim('#body-text', '{{BODY_ANIM}}', 1.8);
-        applyAnim('#bottom-info', '{{TAG_ANIM}}', 2.2);
-
-        // Ensure timeline matches exact video duration using the un-prunable GSAP callback technique
-        const totalDuration = {{DURATION}};
-        window._tl.add(() => {}, totalDuration);
+      // Build dots
+      var dots = [];
+      for (var d = 0; d < n; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'scene-dot' + (d === 0 ? ' active' : '');
+        dotsContainer.appendChild(dot);
+        dots.push(dot);
       }
-    } catch (e) {
-      console.error('Animation Init Error:', e);
+
+      window._tl = gsap.timeline({ paused: true });
+      window.__timelines = window.__timelines || {};
+      window.__timelines['main'] = window._tl;
+
+      // Animate brand + bottom in once at start
+      window._tl.from('#brand-header', { y: -60, opacity: 0, duration: 0.6, ease: 'power2.out' }, 0);
+      window._tl.from('#bottom-info',  { y:  60, opacity: 0, duration: 0.6, ease: 'power2.out' }, 0.2);
+
+      // Build each scene card
+      for (var i = 0; i < n; i++) {
+        var s = scenes[i];
+        var sceneStart = leadIn + i * sceneDuration;
+        var card = document.createElement('div');
+        card.className = 'scene-card type-' + s.type;
+        card.id = 'scene-' + i;
+
+        if (s.type === 'hook') {
+          card.innerHTML =
+            '<div class="scene-label">&#9679; BREAKING</div>' +
+            '<div class="scene-text">' + s.voiceText + '</div>' +
+            '<div class="scene-accent" id="scene-accent-' + i + '"></div>';
+        } else if (s.type === 'outro') {
+          card.innerHTML =
+            '<div class="scene-cta-label">&#128172; Bình luận ngay</div>' +
+            '<div class="scene-text">' + s.voiceText + '</div>' +
+            '<div class="scene-follow">Theo dõi để không bỏ lỡ.</div>';
+        } else {
+          // body — scene index shown as ghost number
+          var bodyIdx = i; // ghost number in bg
+          card.innerHTML =
+            '<div class="scene-number">' + bodyIdx + '</div>' +
+            '<div class="scene-bar"></div>' +
+            '<div class="scene-text">' + s.voiceText + '</div>';
+        }
+
+        container.appendChild(card);
+
+        // Animate IN
+        window._tl.to(card, { opacity: 1, duration: animIn, ease: 'power2.out' }, sceneStart);
+        if (s.type === 'hook') {
+          window._tl.from(card.querySelector('.scene-text'), { y: 80, duration: animIn * 1.2, ease: 'back.out(1.5)' }, sceneStart);
+          var accentEl = card.querySelector('.scene-accent');
+          if (accentEl) {
+            window._tl.to(accentEl, { width: 180, duration: 0.6, ease: 'power2.inOut' }, sceneStart + animIn);
+          }
+        } else if (s.type === 'body') {
+          window._tl.from(card.querySelector('.scene-text'), { x: -60, duration: animIn, ease: 'power2.out' }, sceneStart);
+          window._tl.from(card.querySelector('.scene-bar'), { scaleX: 0, transformOrigin: 'left', duration: 0.4 }, sceneStart);
+        } else {
+          window._tl.from(card.querySelector('.scene-text'), { y: 50, duration: animIn, ease: 'power2.out' }, sceneStart);
+        }
+
+        // Animate OUT (only if not last scene)
+        if (i < n - 1) {
+          var outStart = sceneStart + holdEnd;
+          window._tl.to(card, { opacity: 0, y: -30, duration: animOut, ease: 'power2.in' }, outStart);
+        }
+
+        // Dot activation
+        (function(idx, t) {
+          window._tl.call(function() {
+            dots.forEach(function(d, di) {
+              d.classList.toggle('active', di === idx);
+            });
+          }, [], t + 0.05);
+        })(i, sceneStart);
+      }
+
+      // Hold last scene to end
+      window._tl.add(function() {}, TOTAL_DURATION);
+
+    } catch(e) {
+      console.error('Scene Animation Init Error:', e);
     }
   </script>
 </body>

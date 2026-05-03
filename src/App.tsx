@@ -38,8 +38,15 @@ export default function App() {
     handleUpdateScript,
     handleDeleteVideo,
     handleCreateManualArticle,
-    fetchData,
-    renderingVideos
+    reloadCurrentView,
+    renderingVideos,
+    stats,
+    articlesPage,
+    setArticlesPage,
+    articlesTotalPages,
+    videosPage,
+    setVideosPage,
+    videosTotalPages
   } = useAppLogic();
 
   if (authChecking) {
@@ -83,6 +90,10 @@ export default function App() {
             onUpdateScript={handleUpdateScript}
             onCreateManualArticle={handleCreateManualArticle}
             renderingVideos={renderingVideos}
+            stats={stats}
+            page={articlesPage}
+            setPage={setArticlesPage}
+            totalPages={articlesTotalPages}
           />
         );
       case 'sources':
@@ -103,6 +114,9 @@ export default function App() {
             onCheckStatus={handleCheckStatus}
             onDelete={handleDeleteVideo}
             onStartPipeline={() => setActiveTab('dashboard')}
+            page={videosPage}
+            setPage={setVideosPage}
+            totalPages={videosTotalPages}
           />
         );
       case 'social':

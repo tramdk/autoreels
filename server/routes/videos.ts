@@ -4,18 +4,28 @@ import fs from 'fs';
 import prisma from '../lib/prisma';
 import { authenticate } from '../middleware/auth';
 import { generateAudio } from '../services/tts';
-import { renderWithHyperFrames } from '../services/renderer';
+import { renderWithHyperFrames, SceneItem } from '../services/renderer';
 
 
 const router = Router();
 export const videoProgress = new Map<string, number>();
 
 router.get('/', authenticate, async (req, res) => {
-  const videos = await prisma.video.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: { articles: true }
-  });
-  res.json(videos);
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 20;
+  const skip = (page - 1) * limit;
+
+  const [total, items] = await Promise.all([
+    prisma.video.count(),
+    prisma.video.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: { articles: true },
+      skip,
+      take: limit,
+    })
+  ]);
+
+  res.json({ total, items, page, limit, totalPages: Math.ceil(total / limit) });
 });
 
 // Support both /file and /play for backward compatibility
@@ -111,7 +121,15 @@ router.post('/generate/:articleId', authenticate, async (req, res) => {
   (async () => {
     try {
       const script = JSON.parse(article.script as string);
-      const rawScriptText = `${script.hook} ${script.body} ${script.callToAction}`;
+
+      // Support new scene-based format { scenes: [...] } and old flat format { hook, body, callToAction }
+      let rawScriptText: string;
+
+      if (script.scenes && Array.isArray(script.scenes) && script.scenes.length > 0) {
+        rawScriptText = script.scenes.map((s: any) => s.voiceText).join(' ');
+      } else {
+        rawScriptText = `${script.hook || ''} ${script.body || ''} ${script.callToAction || ''}`.trim();
+      }
 
       const audio = await generateAudio(rawScriptText);
       const localTmpDir = path.join(process.cwd(), 'temp_renders');
@@ -122,17 +140,17 @@ router.post('/generate/:articleId', authenticate, async (req, res) => {
 
       await renderWithHyperFrames({
         videoId,
-        hook: script.hook || '',
-        body: script.body || '',
-        cta: script.callToAction || '',
+        scenes: script.scenes || undefined,
+        // Legacy flat fields fallback
+        hook: script.hook,
+        body: script.body,
+        cta: script.callToAction,
         audioBuffer: audio.buffer,
         audioExt: audio.ext,
         audioDuration: audio.durationSeconds,
         outputPath: absoluteOutputPath,
         onProgress: (p) => videoProgress.set(videoId, p),
       });
-
-      videoProgress.set(videoId, 100);
 
       const videoRecord = await prisma.video.create({
         data: {
@@ -148,6 +166,10 @@ router.post('/generate/:articleId', authenticate, async (req, res) => {
         where: { id: article.id },
         data: { videoId: videoRecord.id, status: 'video_generated' },
       });
+
+      // Mark progress as 100 ONLY AFTER database operations are completely finished.
+      // This ensures that when the frontend fetches data upon receiving 100%, the DB is ready.
+      videoProgress.set(videoId, 100);
 
       console.log(`[Render] SUCCESS: ${videoId}`);
     } catch (err: any) {

@@ -13,6 +13,7 @@ import articleRoutes from './server/routes/articles';
 import videoRoutes from './server/routes/videos';
 import sourceRoutes from './server/routes/sources';
 import settingRoutes from './server/routes/settings';
+import statsRoutes from './server/routes/stats';
 
 // Import Services
 import { startCleanupJob } from './server/services/cleanup';
@@ -36,6 +37,7 @@ async function startServer() {
   app.use('/api/videos', videoRoutes);
   app.use('/api/sources', sourceRoutes);
   app.use('/api/settings', settingRoutes);
+  app.use('/api/stats', statsRoutes);
 
   // Serve temp_renders as static files for reliable video streaming
   app.use('/temp_renders', express.static(path.join(process.cwd(), 'temp_renders')));

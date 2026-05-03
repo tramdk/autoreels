@@ -7,11 +7,21 @@ import { genAI, getAIClient } from '../lib/ai';
 const router = Router();
 
 router.get('/', authenticate, async (req, res) => {
-  const allArticles = await prisma.article.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: { source: true }
-  });
-  res.json(allArticles);
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 20;
+  const skip = (page - 1) * limit;
+
+  const [total, items] = await Promise.all([
+    prisma.article.count(),
+    prisma.article.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: { source: true },
+      skip,
+      take: limit,
+    })
+  ]);
+
+  res.json({ total, items, page, limit, totalPages: Math.ceil(total / limit) });
 });
 
 router.post('/scrape', authenticate, async (req, res) => {
@@ -59,21 +69,78 @@ router.post('/summarize/:id', authenticate, async (req, res) => {
   try {
     const model = resolvedAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const prompt = `
-    Summarize this article into a high-retention, viral TikTok script (about 120-150 words total).
-    Language: Vietnamese.
-    Style: Fast-paced, engaging, and detailed enough to fill 30-40 seconds of video.
-    
-    Structure: 
-    1. Hook (15-20 words): A shocking or intriguing opening statement that stops the scroll.
-    2. Body (80-100 words): Detailed explanation of the core facts. Use short, punchy sentences. Avoid being too brief.
-    3. Call to Action (20-30 words): An interactive closing that asks a specific question to the audience.
-    4. Suggested Keywords: 3 keywords for image search.
-    
-    Article Title: ${article.title}
-    Content: ${article.contentSnippet}
-    
-    Return ONLY a JSON object:
-    { "hook": "...", "body": "...", "callToAction": "...", "suggestedImages": ["...", "...", "..."] }
+Bạn là chuyên gia viết kịch bản video TikTok viral bằng tiếng Việt.
+
+Hãy tóm tắt bài báo dưới đây thành một kịch bản video dạng cảnh (scene-based), phù hợp để đọc voice-over bằng TTS (Text-to-Speech).
+
+=== CẤU TRÚC KỊCH BẢN ===
+- Tổng số từ toàn bộ voiceText: khoảng 150-200 từ (tương đương 55-65 giây đọc tốc độ bình thường).
+- Số cảnh: 5-8 cảnh, gồm: 1 hook + 3-6 body + 1 outro.
+- Mỗi cảnh có voiceText từ 1-3 câu ngắn, viết theo văn nói tự nhiên, không văn viết.
+- Kết thúc mỗi câu trong voiceText bằng dấu chấm (.) hoặc dấu hỏi (?) để TTS ngắt nghỉ tự nhiên.
+
+=== QUY TẮC VIẾT VOICETEXT CHO TTS ===
+
+1. SỐ VÀ ĐƠN VỊ — luôn viết thành chữ, KHÔNG dùng ký hiệu số rút gọn:
+   - Số thập phân: dùng "chấm" (văn nói) hoặc "phẩy" (trang trọng) — chọn nhất quán một loại.
+     Ví dụ: 5.5 → "năm chấm năm" | 82.7% → "tám mươi hai phẩy bảy phần trăm"
+   - Phiên bản nguyên: iPhone 17 → "iPhone mười bảy"
+   - Phiên bản có chấm: iOS 18.2 → "iOS mười tám chấm hai"
+   - Thông số kỹ thuật: 200MP → "hai trăm megapixel" | 5000mAh → "năm nghìn miliampe giờ"
+   - Token/số lớn: 1M tokens → "một triệu token" | 1000000 → "một triệu"
+   - Giá VND: 21 triệu đồng → "hai mươi mốt triệu đồng"
+   - Giá USD: $5 → "năm đô la" hoặc "năm đô"
+   - Bội số: 2x → "gấp đôi" | 3x → "gấp ba"
+   - Năm: 2026 → "năm hai nghìn không trăm hai mươi sáu" hoặc "năm 2026" (cách sau TTS đọc OK)
+   - Phần trăm: 30% → "ba mươi phần trăm"
+   - Tỉ lệ: 3:1 → "ba trên một" hoặc "ba so với một"
+   - Thời gian: 60 giây → "sáu mươi giây"
+   - Công nghệ: 5G → "năm gờ"
+
+2. TÊN TIẾNG ANH — giữ nguyên, TTS đọc ổn:
+   Apple, Google, OpenAI, Microsoft, TikTok, YouTube, ChatGPT, Gemini, Meta, Samsung ✓
+
+3. TỪ VIẾT TẮT TIẾNG ANH — viết âm đọc nếu TTS hay đọc sai:
+   - AI → thường OK; nếu cần rõ hơn → "ây ai"
+   - API → "ây pi ai"
+   - GPT → thường OK; nếu cần → "gí pi tí"
+   - iOS → "ai ô ét" nếu cần
+
+4. KÝ HIỆU BỊ CẤM trong voiceText (TTS đọc tên ký hiệu hoặc bỏ qua):
+   → & % $ # + = * / \\ [ ] { } < > @
+   (Dấu ! và ? ở cuối câu thì ĐƯỢC PHÉP — tạo ngữ điệu tự nhiên)
+   Emoji: TUYỆT ĐỐI KHÔNG dùng.
+   URL: TUYỆT ĐỐI KHÔNG dùng (TTS đọc từng dấu chấm, dấu gạch).
+
+=== QUY TẮC VIẾT HOOK ===
+- Hook là cảnh đầu tiên, quyết định 3 giây đầu giữ người xem.
+- PHẢI chứa ít nhất một trong: con số cụ thể, thống kê, tuyên bố gây sốc, hoặc câu hỏi kích thích tò mò.
+- KHÔNG được mở đầu chung chung kiểu: "Hôm nay chúng ta sẽ nói về...", "Bạn có biết không..." (quá nhàm).
+- Ví dụ hook tốt: "Một mô hình AI vừa đạt tám mươi hai phẩy bảy phần trăm trên bài test khó nhất thế giới. Và nó chỉ mất ba giây để trả lời."
+
+=== VÍ DỤ ĐÚNG / SAI ===
+
+SAI (TTS đọc sai):
+{ "voiceText": "GPT 5.5 đạt 82.7% trên Terminal-Bench, vượt GPT 5.4 (75.1%)." }
+→ TTS sẽ đọc: "GPT năm rưỡi đạt tám mươi hai chấm bảy phần trăm..."
+
+ĐÚNG (TTS đọc chuẩn):
+{ "voiceText": "GPT năm chấm năm đạt tám mươi hai phẩy bảy phần trăm trên Terminal Bench, vượt phiên bản năm chấm bốn ở mức bảy mươi lăm phẩy một." }
+
+=== DỮ LIỆU BÀI BÁO ===
+Tiêu đề: ${article.title}
+Nội dung: ${article.contentSnippet}
+
+=== OUTPUT ===
+Trả về DUY NHẤT một JSON object hợp lệ, không giải thích gì thêm:
+{
+  "scenes": [
+    { "id": 1, "type": "hook", "voiceText": "...", "imageKeyword": "..." },
+    { "id": 2, "type": "body", "voiceText": "...", "imageKeyword": "..." },
+    { "id": N, "type": "outro", "voiceText": "...", "imageKeyword": "..." }
+  ],
+  "suggestedImages": ["...", "...", "..."]
+}
     `;
 
     const result = await model.generateContent(prompt);

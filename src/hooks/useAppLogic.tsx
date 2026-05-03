@@ -8,6 +8,14 @@ export const useAppLogic = () => {
   const [sources, setSources] = useState<Source[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [stats, setStats] = useState({ sources: 0, articles: 0, videos: 0, postedVideos: 0 });
+  
+  const [articlesPage, setArticlesPage] = useState(1);
+  const [articlesTotalPages, setArticlesTotalPages] = useState(1);
+  
+  const [videosPage, setVideosPage] = useState(1);
+  const [videosTotalPages, setVideosTotalPages] = useState(1);
+
   const [loading, setLoading] = useState(false);
   const [isTikTokConnected, setIsTikTokConnected] = useState(false);
   
@@ -32,21 +40,49 @@ export const useAppLogic = () => {
     }
   }, []);
 
-  const fetchData = useCallback(async () => {
+  const fetchStats = useCallback(async () => {
     if (!isAuthenticated) return;
     try {
-      const [sourcesRes, articlesRes, videosRes] = await Promise.all([
-        api.getSources(),
-        api.getArticles(),
-        api.getVideos()
-      ]);
-      setSources(sourcesRes);
-      setArticles(articlesRes);
-      setVideos(videosRes);
-    } catch (error) {
-      console.error('Failed to fetch data', error);
-    }
+      const data = await api.getStats();
+      setStats(data);
+    } catch (error) {}
   }, [isAuthenticated]);
+
+  const fetchSources = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const data = await api.getSources();
+      setSources(data);
+    } catch (error) {}
+  }, [isAuthenticated]);
+
+  const fetchArticles = useCallback(async (page: number = 1) => {
+    if (!isAuthenticated) return;
+    try {
+      const data = await api.getArticles(page, 10);
+      setArticles(data.items);
+      setArticlesPage(data.page);
+      setArticlesTotalPages(data.totalPages);
+    } catch (error) {}
+  }, [isAuthenticated]);
+
+  const fetchVideos = useCallback(async (page: number = 1) => {
+    if (!isAuthenticated) return;
+    try {
+      const data = await api.getVideos(page, 9);
+      setVideos(data.items);
+      setVideosPage(data.page);
+      setVideosTotalPages(data.totalPages);
+    } catch (error) {}
+  }, [isAuthenticated]);
+
+  const reloadCurrentView = useCallback(async () => {
+    if (!isAuthenticated) return;
+    await fetchStats();
+    if (activeTab === 'dashboard') await fetchArticles(articlesPage);
+    if (activeTab === 'videos') await fetchVideos(videosPage);
+    if (activeTab === 'sources') await fetchSources();
+  }, [isAuthenticated, activeTab, fetchStats, fetchArticles, articlesPage, fetchVideos, videosPage, fetchSources]);
 
   useEffect(() => {
     checkAuth();
@@ -54,9 +90,22 @@ export const useAppLogic = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchData();
+      fetchStats();
+      fetchSources(); // usually small enough to load once for dropdowns
     }
-  }, [fetchData, isAuthenticated]);
+  }, [isAuthenticated, fetchStats, fetchSources]);
+
+  useEffect(() => {
+    if (isAuthenticated && activeTab === 'dashboard') {
+      fetchArticles(articlesPage);
+    }
+  }, [isAuthenticated, activeTab, articlesPage, fetchArticles]);
+
+  useEffect(() => {
+    if (isAuthenticated && activeTab === 'videos') {
+      fetchVideos(videosPage);
+    }
+  }, [isAuthenticated, activeTab, videosPage, fetchVideos]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -86,7 +135,7 @@ export const useAppLogic = () => {
     setLoading(true);
     try {
       await api.scrape();
-      await fetchData();
+      await reloadCurrentView();
       toast.success('Sources checked! Articles updated.', { id: loadingToast });
     } catch (error: any) {
       toast.error('Scraping failed: ' + error.message, { id: loadingToast });
@@ -100,7 +149,7 @@ export const useAppLogic = () => {
     try {
       const language = localStorage.getItem('autoreels_language') || 'Vietnamese';
       await api.summarize(id, language);
-      await fetchData();
+      await reloadCurrentView();
       toast.success('Script generated successfully!', { id: loadingToast });
     } catch (error: any) {
       toast.error('Summarization failed: ' + error.message, { id: loadingToast });
@@ -118,6 +167,9 @@ export const useAppLogic = () => {
       
       if (!videoId) throw new Error('No videoId returned from server');
 
+      // Unblock the UI immediately after the job starts!
+      setLoading(false);
+
       // Start listening for progress via SSE
       const eventSource = new EventSource(api.getVideoProgressUrl(videoId));
       
@@ -129,7 +181,6 @@ export const useAppLogic = () => {
         if (progress === -1) {
           toast.error('Video generation failed.', { id: toastId });
           eventSource.close();
-          setLoading(false);
           return;
         }
 
@@ -143,19 +194,17 @@ export const useAppLogic = () => {
               Video Rendered! Click to view.
             </div>
           ), { id: toastId, duration: 5000 });
-          fetchData();
-          setLoading(false);
+          reloadCurrentView();
         }
       };
 
       eventSource.onerror = () => {
         eventSource.close();
-        setLoading(false);
       };
 
     } catch (error: any) {
       toast.error('Video generation failed: ' + error.message);
-      setLoading(false);
+      setLoading(false); // Only reset here if the initial API call failed
     }
   };
 
@@ -165,7 +214,7 @@ export const useAppLogic = () => {
     try {
       const data = await api.postToTikTok(videoId);
       if (data.error) throw new Error(data.error);
-      await fetchData();
+      await reloadCurrentView();
       toast.success('Video posted successfully to TikTok!', { id: loadingToast });
     } catch (error: any) {
       toast.error('Posting failed: ' + error.message, { id: loadingToast });
@@ -218,7 +267,7 @@ export const useAppLogic = () => {
     setLoading(true);
     try {
       await api.addSource(data);
-      await fetchData();
+      await reloadCurrentView();
       toast.success('Source added.');
     } catch (e: any) { 
       toast.error(e.message);
@@ -230,7 +279,7 @@ export const useAppLogic = () => {
     setLoading(true);
     try {
       await api.updateSource(id, data);
-      await fetchData();
+      await reloadCurrentView();
       toast.success('Source updated.');
     } catch (e: any) {
       toast.error(e.message);
@@ -243,7 +292,7 @@ export const useAppLogic = () => {
     setLoading(true);
     try {
       await api.deleteSource(id);
-      await fetchData();
+      await reloadCurrentView();
       toast.success('Source deleted.');
     } catch (e: any) {
       toast.error(e.message);
@@ -255,7 +304,7 @@ export const useAppLogic = () => {
     setLoading(true);
     try {
       await api.createManualArticle(data);
-      await fetchData();
+      await reloadCurrentView();
       toast.success('Manual article created!');
     } catch (e: any) {
       toast.error(e.message);
@@ -267,7 +316,7 @@ export const useAppLogic = () => {
     setLoading(true);
     try {
       await api.updateScript(id, script);
-      await fetchData();
+      await reloadCurrentView();
       toast.success('Script updated.');
     } catch (e: any) {
       toast.error(e.message);
@@ -280,7 +329,7 @@ export const useAppLogic = () => {
     setLoading(true);
     try {
       await api.deleteVideo(id);
-      await fetchData();
+      await reloadCurrentView();
       toast.success('Video deleted.');
     } catch (e: any) {
       toast.error(e.message);
@@ -329,7 +378,14 @@ export const useAppLogic = () => {
     handleUpdateScript,
     handleDeleteVideo,
     handleCreateManualArticle,
-    fetchData,
-    renderingVideos
+    reloadCurrentView,
+    renderingVideos,
+    stats,
+    articlesPage,
+    setArticlesPage,
+    articlesTotalPages,
+    videosPage,
+    setVideosPage,
+    videosTotalPages
   };
 };

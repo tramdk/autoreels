@@ -3,11 +3,21 @@ import path from 'path';
 import fs from 'fs';
 import prisma from '../lib/prisma';
 
+export interface SceneItem {
+  id: number;
+  type: 'hook' | 'body' | 'outro';
+  voiceText: string;
+  imageKeyword: string;
+}
+
 interface RenderOptions {
   videoId: string;
-  hook: string;
-  body: string;
-  cta: string;
+  /** New scene-based format */
+  scenes?: SceneItem[];
+  /** Legacy flat fields — used only when scenes is absent */
+  hook?: string;
+  body?: string;
+  cta?: string;
   audioBuffer: Buffer;
   audioExt: string;
   audioDuration: number;
@@ -51,7 +61,20 @@ function findFfmpegPath(): string {
 }
 
 export async function renderWithHyperFrames(options: RenderOptions): Promise<void> {
-  const { videoId, hook, body, cta, audioBuffer, audioExt, audioDuration, outputPath, onProgress } = options;
+  const { videoId, audioBuffer, audioExt, audioDuration, outputPath, onProgress } = options;
+
+  // Normalise to scenes array — backward compat with old flat format
+  const scenes: SceneItem[] = options.scenes && options.scenes.length > 0
+    ? options.scenes
+    : [
+        { id: 1, type: 'hook',  voiceText: options.hook || '', imageKeyword: 'news' },
+        { id: 2, type: 'body',  voiceText: options.body || '', imageKeyword: 'report' },
+        { id: 3, type: 'outro', voiceText: options.cta  || '', imageKeyword: 'cta' },
+      ].filter(s => s.voiceText.trim() !== '');
+
+  const hook = scenes[0]?.voiceText || '';
+  const body = scenes.slice(1, -1).map(s => s.voiceText).join(' ');
+  const cta  = scenes[scenes.length - 1]?.voiceText || '';
   
   const workDir = path.join(process.cwd(), 'temp_renders', videoId);
   if (!fs.existsSync(workDir)) fs.mkdirSync(workDir, { recursive: true });
@@ -77,6 +100,17 @@ export async function renderWithHyperFrames(options: RenderOptions): Promise<voi
 
   const now = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
 
+  // Sanitise scene voiceText for safe JSON/HTML embedding
+  const sanitisedScenes = scenes.map(s => ({
+    ...s,
+    voiceText: s.voiceText
+      .replace(/\\/g, '\\\\')
+      .replace(/'/g, '\\u0027')
+      .replace(/"/g, '\\u0022')
+      .replace(/</g, '\\u003c')
+      .replace(/>/g, '\\u003e'),
+  }));
+
   const replacements: Record<string, string> = {
     'DATETIME': now,
     'LOGO_TEXT': escapeHtml(tpl.logoText),
@@ -84,17 +118,11 @@ export async function renderWithHyperFrames(options: RenderOptions): Promise<voi
     'LOGO_SIZE': String(tpl.logoSize),
     'LOGO_TOP': String(tpl.logoTop),
     'LOGO_LEFT': String(tpl.logoLeft),
-    'LOGO_ANIM': tpl.logoAnim || DEFAULTS.logoAnim,
-    'HOOK_TEXT': escapeHtml(hook),
     'HOOK_COLOR': tpl.hookColor,
     'HOOK_SIZE': String(tpl.hookSize),
-    'HOOK_ANIM': tpl.hookAnim || DEFAULTS.hookAnim,
-    'BODY_TEXT': escapeHtml(body),
     'BODY_COLOR': tpl.bodyColor,
     'BODY_SIZE': String(tpl.bodySize),
-    'BODY_ANIM': tpl.bodyAnim || DEFAULTS.bodyAnim,
     'DIVIDER_COLOR': tpl.dividerColor,
-    'DIVIDER_WIDTH': String(tpl.dividerWidth),
     'MAIN_TOP': String(tpl.mainTop),
     'MAIN_LEFT': String(tpl.mainLeft),
     'CONTENT_GAP': String(tpl.contentGap),
@@ -104,11 +132,11 @@ export async function renderWithHyperFrames(options: RenderOptions): Promise<voi
     'TAG_SIZE': String(tpl.tagSize),
     'TAG_TOP': String(tpl.tagTop),
     'TAG_LEFT': String(tpl.tagLeft),
-    'TAG_ANIM': tpl.tagAnim || DEFAULTS.tagAnim,
     'DURATION': String(audioDuration + 1),
     'BG_IMAGE_URL': tpl.backgroundImage || '',
     'BG_IMAGE_DISPLAY': tpl.backgroundImage ? 'block' : 'none',
-    'BG_BRIGHTNESS': String(tpl.backgroundBrightness)
+    'BG_BRIGHTNESS': String(tpl.backgroundBrightness),
+    'SCENES_JSON': JSON.stringify(sanitisedScenes),
   };
 
   Object.entries(replacements).forEach(([key, val]) => {
