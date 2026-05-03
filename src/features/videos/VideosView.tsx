@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Video, Share2, Trash2, ExternalLink } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Video, Share2, Trash2, ExternalLink, RefreshCw, X } from 'lucide-react';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { VideoItem } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -41,13 +42,29 @@ export const VideosView: React.FC<VideosViewProps> = ({
   totalPages
 }) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const statusFilter = searchParams.get('status');
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold tracking-tight text-white mb-2">{t('videos.title')}</h1>
-          <p className="text-slate-400">{t('sidebar.videos')}</p>
+          <div className="flex items-center gap-3">
+            <p className="text-slate-400">{t('sidebar.videos')}</p>
+            {statusFilter && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
+                <span className="text-[10px] font-black uppercase text-primary tracking-widest">{statusFilter}</span>
+                <button 
+                  onClick={() => navigate('/videos')}
+                  className="p-0.5 hover:bg-primary/20 rounded-full text-primary transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
         {loading && videos.length > 0 && (
           <div className="flex items-center gap-2 text-primary animate-pulse text-xs font-bold uppercase tracking-widest">

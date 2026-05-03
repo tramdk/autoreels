@@ -2,9 +2,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
 import { Source, Article, VideoItem, TabType } from '../types';
 import toast from 'react-hot-toast';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 export const useAppLogic = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const videoStatusFilter = searchParams.get('status') || undefined;
+  
+  // Derive activeTab from URL path
+  const activeTab = (location.pathname.split('/')[1] || 'dashboard') as TabType;
+  const setActiveTab = (tab: TabType) => navigate(`/${tab}`);
+
   const [sources, setSources] = useState<Source[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [videos, setVideos] = useState<VideoItem[]>([]);
@@ -66,10 +75,10 @@ export const useAppLogic = () => {
     } catch (error) {}
   }, [isAuthenticated]);
 
-  const fetchVideos = useCallback(async (page: number = 1) => {
+  const fetchVideos = useCallback(async (page: number = 1, status?: string) => {
     if (!isAuthenticated) return;
     try {
-      const data = await api.getVideos(page, 9);
+      const data = await api.getVideos(page, 9, status);
       setVideos(data.items);
       setVideosPage(data.page);
       setVideosTotalPages(data.totalPages);
@@ -80,9 +89,9 @@ export const useAppLogic = () => {
     if (!isAuthenticated) return;
     await fetchStats();
     if (activeTab === 'dashboard') await fetchArticles(articlesPage);
-    if (activeTab === 'videos') await fetchVideos(videosPage);
+    if (activeTab === 'videos') await fetchVideos(videosPage, videoStatusFilter);
     if (activeTab === 'sources') await fetchSources();
-  }, [isAuthenticated, activeTab, fetchStats, fetchArticles, articlesPage, fetchVideos, videosPage, fetchSources]);
+  }, [isAuthenticated, activeTab, fetchStats, fetchArticles, articlesPage, fetchVideos, videosPage, fetchSources, videoStatusFilter]);
 
   useEffect(() => {
     checkAuth();
@@ -103,9 +112,9 @@ export const useAppLogic = () => {
 
   useEffect(() => {
     if (isAuthenticated && activeTab === 'videos') {
-      fetchVideos(videosPage);
+      fetchVideos(videosPage, videoStatusFilter);
     }
-  }, [isAuthenticated, activeTab, videosPage, fetchVideos]);
+  }, [isAuthenticated, activeTab, videosPage, fetchVideos, videoStatusFilter]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {

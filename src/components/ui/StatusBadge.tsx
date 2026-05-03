@@ -14,7 +14,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
       return <span className={`${baseClass} bg-blue-500/10 text-blue-400 border-blue-500/20`}><FileText className="w-3 h-3" /> Script Ready</span>;
     case 'video_generated':
     case 'ready':
-      return <span className={`${baseClass} bg-purple-500/10 text-purple-400 border-purple-500/20`}><Video className="w-3 h-3" /> Video Build</span>;
+      return <span className={`${baseClass} bg-purple-500/10 text-purple-400 border-purple-500/20`}><Video className="w-3 h-3" /> Video Generated</span>;
     case 'posted':
       return <span className={`${baseClass} bg-green-500/10 text-green-400 border-green-500/20`}><CheckCircle2 className="w-3 h-3" /> Published</span>;
     default:

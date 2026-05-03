@@ -7,8 +7,8 @@ import { SocialView } from './features/social/SocialView';
 import { SettingsView } from './features/settings/SettingsView';
 import { LoginView, ChangePasswordView } from './features/auth/AuthViews';
 import { useAppLogic } from './hooks/useAppLogic';
-
 import { Toaster } from 'react-hot-toast';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 export default function App() {
   const {
@@ -75,65 +75,6 @@ export default function App() {
     );
   }
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return (
-          <DashboardView 
-            sources={sources}
-            articles={articles}
-            videos={videos}
-            loading={loading}
-            onScrape={handleScrape}
-            onSummarize={handleSummarize}
-            onGenerateVideo={handleGenerateVideo}
-            onUpdateScript={handleUpdateScript}
-            onCreateManualArticle={handleCreateManualArticle}
-            renderingVideos={renderingVideos}
-            stats={stats}
-            page={articlesPage}
-            setPage={setArticlesPage}
-            totalPages={articlesTotalPages}
-          />
-        );
-      case 'sources':
-        return (
-          <SourcesView 
-            sources={sources} 
-            onAdd={handleAddSource}
-            onUpdate={handleUpdateSource}
-            onDelete={handleDeleteSource}
-          />
-        );
-      case 'videos':
-        return (
-          <VideosView 
-            videos={videos}
-            loading={loading}
-            onPost={handlePost}
-            onCheckStatus={handleCheckStatus}
-            onDelete={handleDeleteVideo}
-            onStartPipeline={() => setActiveTab('dashboard')}
-            page={videosPage}
-            setPage={setVideosPage}
-            totalPages={videosTotalPages}
-          />
-        );
-      case 'social':
-        return (
-          <SocialView 
-            isTikTokConnected={isTikTokConnected}
-            onConnectTikTok={handleConnectTikTok}
-            onDisconnectTikTok={() => setIsTikTokConnected(false)}
-          />
-        );
-      case 'settings':
-        return <SettingsView />;
-      default:
-        return <div>Coming soon</div>;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background flex font-sans selection:bg-primary/30 selection:text-white">
       <Toaster position="top-right" />
@@ -145,7 +86,57 @@ export default function App() {
 
       <main className="flex-1 min-w-0 bg-background overflow-x-hidden">
         <div className="max-w-7xl mx-auto px-6 py-12 md:px-12 md:py-20">
-          {renderContent()}
+          <Routes>
+            <Route path="/dashboard" element={
+              <DashboardView 
+                sources={sources}
+                articles={articles}
+                videos={videos}
+                loading={loading}
+                onScrape={handleScrape}
+                onSummarize={handleSummarize}
+                onGenerateVideo={handleGenerateVideo}
+                onUpdateScript={handleUpdateScript}
+                onCreateManualArticle={handleCreateManualArticle}
+                renderingVideos={renderingVideos}
+                stats={stats}
+                page={articlesPage}
+                setPage={setArticlesPage}
+                totalPages={articlesTotalPages}
+              />
+            } />
+            <Route path="/sources" element={
+              <SourcesView 
+                sources={sources} 
+                onAdd={handleAddSource}
+                onUpdate={handleUpdateSource}
+                onDelete={handleDeleteSource}
+              />
+            } />
+            <Route path="/videos" element={
+              <VideosView 
+                videos={videos}
+                loading={loading}
+                onPost={handlePost}
+                onCheckStatus={handleCheckStatus}
+                onDelete={handleDeleteVideo}
+                onStartPipeline={() => setActiveTab('dashboard')}
+                page={videosPage}
+                setPage={setVideosPage}
+                totalPages={videosTotalPages}
+              />
+            } />
+            <Route path="/social" element={
+              <SocialView 
+                isTikTokConnected={isTikTokConnected}
+                onConnectTikTok={handleConnectTikTok}
+                onDisconnectTikTok={() => setIsTikTokConnected(false)}
+              />
+            } />
+            <Route path="/settings" element={<SettingsView />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
         </div>
       </main>
     </div>

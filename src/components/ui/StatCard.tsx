@@ -13,13 +13,16 @@ interface StatCardProps {
   value: number | string;
   icon: React.ReactNode;
   color?: keyof typeof colorMap;
+  onClick?: () => void;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color = 'blue' }) => {
+export const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color = 'blue', onClick }) => {
   return (
     <motion.div 
-      whileHover={{ y: -5 }}
-      className={`glass-panel group p-8 flex flex-col items-center text-center`}
+      whileHover={{ y: -5, scale: 1.02 }}
+      whileTap={onClick ? { scale: 0.98 } : {}}
+      onClick={onClick}
+      className={`glass-panel group p-8 flex flex-col items-center text-center ${onClick ? 'cursor-pointer hover:border-primary/30' : ''}`}
     >
        <div className={`p-4 rounded-2xl bg-gradient-to-br ${colorMap[color]} mb-6 transition-transform group-hover:scale-110`}>
         {React.cloneElement(icon as React.ReactElement, { className: 'w-8 h-8' })}

@@ -13,11 +13,15 @@ export const videoProgress = new Map<string, number>();
 router.get('/', authenticate, async (req, res) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 20;
+  const status = req.query.status as string;
   const skip = (page - 1) * limit;
 
+  const where = status ? { status } : {};
+
   const [total, items] = await Promise.all([
-    prisma.video.count(),
+    prisma.video.count({ where }),
     prisma.video.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
       include: { articles: true },
       skip,

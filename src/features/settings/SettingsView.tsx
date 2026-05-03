@@ -390,7 +390,7 @@ export const SettingsView: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <div className="space-y-10">
                       <div className="space-y-6">
-                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Texts</h3>
+                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Texts & Content</h3>
                         <div className="space-y-4">
                           <input type="text" value={template.logoText} onChange={e => setTemplate({...template, logoText: e.target.value})} placeholder="LOGO TEXT" className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-green-500/50" />
                           <input type="text" value={template.tagText} onChange={e => setTemplate({...template, tagText: e.target.value})} placeholder="TAG TEXT" className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-green-500/50" />
@@ -398,7 +398,59 @@ export const SettingsView: React.FC = () => {
                       </div>
 
                       <div className="space-y-6">
-                         <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Typography & Spacing</h3>
+                         <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Precise Positioning (Pixels)</h3>
+                         <div className="grid grid-cols-1 gap-4 bg-slate-900/30 p-6 rounded-[32px] border border-white/5">
+                            {/* Logo Position */}
+                            <div className="flex items-center justify-between gap-4">
+                               <span className="text-[10px] font-black text-slate-400 uppercase w-12">Logo</span>
+                               <div className="flex gap-2">
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-[8px] text-slate-600 uppercase font-bold text-center">Top</span>
+                                    <input type="number" value={Math.round(template.logoTop)} onChange={e => setTemplate({...template, logoTop: parseInt(e.target.value)})} className="w-20 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white font-mono" />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-[8px] text-slate-600 uppercase font-bold text-center">Offset X</span>
+                                    <input type="number" value={Math.round(template.logoLeft)} onChange={e => setTemplate({...template, logoLeft: parseInt(e.target.value)})} className="w-20 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white font-mono" />
+                                  </div>
+                                  <button onClick={() => setTemplate({...template, logoLeft: 0})} className="mt-4 px-3 py-1 bg-blue-500/10 text-blue-400 text-[10px] font-bold rounded-lg hover:bg-blue-500/20 transition-all">Center</button>
+                               </div>
+                            </div>
+
+                            {/* Main Position */}
+                            <div className="flex items-center justify-between gap-4 border-t border-white/5 pt-4">
+                               <span className="text-[10px] font-black text-slate-400 uppercase w-12">Main</span>
+                               <div className="flex gap-2">
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-[8px] text-slate-600 uppercase font-bold text-center">Top</span>
+                                    <input type="number" value={Math.round(template.mainTop)} onChange={e => setTemplate({...template, mainTop: parseInt(e.target.value)})} className="w-20 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white font-mono" />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-[8px] text-slate-600 uppercase font-bold text-center">Left</span>
+                                    <input type="number" value={Math.round(template.mainLeft)} onChange={e => setTemplate({...template, mainLeft: parseInt(e.target.value)})} className="w-20 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white font-mono" />
+                                  </div>
+                               </div>
+                            </div>
+
+                            {/* Tag Position */}
+                            <div className="flex items-center justify-between gap-4 border-t border-white/5 pt-4">
+                               <span className="text-[10px] font-black text-slate-400 uppercase w-12">Tag</span>
+                               <div className="flex gap-2">
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-[8px] text-slate-600 uppercase font-bold text-center">Top</span>
+                                    <input type="number" value={Math.round(template.tagTop)} onChange={e => setTemplate({...template, tagTop: parseInt(e.target.value)})} className="w-20 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white font-mono" />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-[8px] text-slate-600 uppercase font-bold text-center">Offset X</span>
+                                    <input type="number" value={Math.round(template.tagLeft)} onChange={e => setTemplate({...template, tagLeft: parseInt(e.target.value)})} className="w-20 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white font-mono" />
+                                  </div>
+                                  <button onClick={() => setTemplate({...template, tagLeft: 0})} className="mt-4 px-3 py-1 bg-blue-500/10 text-blue-400 text-[10px] font-bold rounded-lg hover:bg-blue-500/20 transition-all">Center</button>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+
+                      <div className="space-y-6">
+                         <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Sizing & Layout</h3>
                          <div className="space-y-6 bg-slate-900/30 p-6 rounded-[32px] border border-white/5">
                             <SizeSlider label="Content Spacing" value={template.contentGap} min={0} max={200} onChange={v => setTemplate({...template, contentGap: v})} />
                             <SizeSlider label="Hook Size" value={template.hookSize} min={40} max={400} onChange={v => setTemplate({...template, hookSize: v})} />
@@ -488,6 +540,9 @@ export const SettingsView: React.FC = () => {
                     <div className="w-full h-full bg-slate-900 flex items-center justify-center text-white/5"><ImageIcon className="w-16 h-16" /></div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80"></div>
+                  
+                  {/* Center Guide Line */}
+                  <div className="absolute left-1/2 top-0 w-[1px] h-full bg-blue-500/20 z-0"></div>
                </div>
 
                {/* Draggable Elements */}
@@ -499,10 +554,15 @@ export const SettingsView: React.FC = () => {
                     dragSnapToOrigin={true}
                     onDragEnd={(e, info) => handleDragEnd(e, info, 'logo')}
                     className="absolute pointer-events-auto cursor-move group logo-el"
-                    style={{ top: (template.logoTop || 0) * SCALE, left: (template.logoLeft || 0) * SCALE }}
+                    style={{ 
+                      top: (template.logoTop || 0) * SCALE, 
+                      left: '50%',
+                      translateX: '-50%',
+                      x: (template.logoLeft || 0) * SCALE 
+                    }}
                   >
-                    <div className="border-2 border-transparent group-hover:border-blue-500/50 rounded-lg">
-                      <span className="font-black tracking-[6px] text-center uppercase" style={{ fontFamily: 'Anton', color: template.logoColor, fontSize: (template.logoSize || DEFAULTS.logoSize) * SCALE, textShadow: `0 0 20px ${template.logoColor}66` }}>{template.logoText || 'LOGO'}</span>
+                    <div className="border-2 border-transparent group-hover:border-blue-500/50 rounded-lg px-2">
+                      <span className="font-black tracking-[6px] text-center uppercase whitespace-nowrap" style={{ fontFamily: 'Anton', color: template.logoColor, fontSize: (template.logoSize || DEFAULTS.logoSize) * SCALE, textShadow: `0 0 20px ${template.logoColor}66` }}>{template.logoText || 'LOGO'}</span>
                     </div>
                   </motion.div>
 
@@ -513,7 +573,11 @@ export const SettingsView: React.FC = () => {
                     dragSnapToOrigin={true}
                     onDragEnd={(e, info) => handleDragEnd(e, info, 'main')}
                     className="absolute pointer-events-auto cursor-move group main-stack-el"
-                    style={{ top: (template.mainTop || DEFAULTS.mainTop) * SCALE, left: (template.mainLeft || DEFAULTS.mainLeft) * SCALE, width: 920 * SCALE }}
+                    style={{ 
+                      top: (template.mainTop || DEFAULTS.mainTop) * SCALE, 
+                      left: (template.mainLeft || DEFAULTS.mainLeft) * SCALE, 
+                      width: 920 * SCALE 
+                    }}
                   >
                     <div className="border-2 border-transparent group-hover:border-blue-500/50 rounded-lg flex flex-col" style={{ gap: (template.contentGap || DEFAULTS.contentGap) * SCALE }}>
                        <h3 className="font-black uppercase tracking-tight hook-el" style={{ fontFamily: 'Anton', color: template.hookColor, fontSize: (template.hookSize || DEFAULTS.hookSize) * SCALE, lineHeight: 1.15 }}>THE FUTURE OF VIDEO</h3>
@@ -531,10 +595,15 @@ export const SettingsView: React.FC = () => {
                     dragSnapToOrigin={true}
                     onDragEnd={(e, info) => handleDragEnd(e, info, 'tag')}
                     className="absolute pointer-events-auto cursor-move group tag-el"
-                    style={{ top: (template.tagTop || 0) * SCALE, left: (template.tagLeft || 0) * SCALE }}
+                    style={{ 
+                      top: (template.tagTop || 0) * SCALE, 
+                      left: '50%',
+                      translateX: '-50%',
+                      x: (template.tagLeft || 0) * SCALE 
+                    }}
                   >
-                    <div className="border-2 border-transparent group-hover:border-blue-500/50 rounded-lg">
-                       <div className="inline-block px-4 py-1 rounded-sm transform skew-x-[-15deg] font-black" style={{ backgroundColor: template.tagBg, color: template.tagColor, fontSize: (template.tagSize || DEFAULTS.tagSize) * SCALE }}>{template.tagText || 'HOT NEWS'}</div>
+                    <div className="border-2 border-transparent group-hover:border-blue-500/50 rounded-lg px-2">
+                       <div className="inline-block px-4 py-1 rounded-sm transform skew-x-[-15deg] font-black whitespace-nowrap" style={{ backgroundColor: template.tagBg, color: template.tagColor, fontSize: (template.tagSize || DEFAULTS.tagSize) * SCALE }}>{template.tagText || 'HOT NEWS'}</div>
                     </div>
                   </motion.div>
                </div>

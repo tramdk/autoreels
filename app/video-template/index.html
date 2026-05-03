@@ -55,8 +55,14 @@
     #brand-header {
       position: absolute;
       top: {{LOGO_TOP}}px;
-      left: {{LOGO_LEFT}}px;
+      left: 50%;
+      /* If LOGO_LEFT is 0, it's centered. Otherwise it's an offset from center. */
+      /* Note: We use a calculation so that if users use the old absolute value (like 0-1080), we might need to adjust. */
+      /* But for a clean start, let's treat LOGO_LEFT as offset from center. */
+      transform: translateX(-50%) translateX({{LOGO_LEFT}}px);
       z-index: 100;
+      text-align: center;
+      white-space: nowrap;
     }
     #brand-logo {
       font-family: 'Anton', sans-serif;
@@ -71,11 +77,13 @@
     #bottom-info {
       position: absolute;
       top: {{TAG_TOP}}px;
-      left: {{TAG_LEFT}}px;
+      left: 50%;
+      transform: translateX(-50%) translateX({{TAG_LEFT}}px);
       display: flex;
       align-items: center;
       gap: 20px;
       z-index: 100;
+      white-space: nowrap;
     }
     #tag-badge {
       padding: 12px 30px;

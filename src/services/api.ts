@@ -41,7 +41,8 @@ export const api = {
   getStats: () => fetchWithAuth('/api/stats').then(r => r.json() as Promise<{sources: number, articles: number, videos: number, postedVideos: number}>),
   getSources: () => fetchWithAuth('/api/sources').then(r => r.json() as Promise<Source[]>),
   getArticles: (page: number = 1, limit: number = 20) => fetchWithAuth(`/api/articles?page=${page}&limit=${limit}`).then(r => r.json() as Promise<{total: number, items: Article[], page: number, limit: number, totalPages: number}>),
-  getVideos: (page: number = 1, limit: number = 20) => fetchWithAuth(`/api/videos?page=${page}&limit=${limit}`).then(r => r.json() as Promise<{total: number, items: VideoItem[], page: number, limit: number, totalPages: number}>),
+  getVideos: (page: number = 1, limit: number = 20, status?: string) => 
+    fetchWithAuth(`/api/videos?page=${page}&limit=${limit}${status ? `&status=${status}` : ''}`).then(r => r.json() as Promise<{total: number, items: VideoItem[], page: number, limit: number, totalPages: number}>),
   
   deleteManyArticles: () => fetchWithAuth('/api/articles/clear', { method: 'POST' }).then(r => r.json()),
   createManualArticle: (data: { title: string, content: string, imageUrl?: string }) => 

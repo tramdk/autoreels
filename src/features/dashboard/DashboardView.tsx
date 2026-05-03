@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 import { 
   RefreshCw, 
   Rss, 
@@ -53,6 +54,9 @@ const ArticleSkeleton = () => (
   </div>
 );
 
+
+
+
 export const DashboardView: React.FC<DashboardViewProps> = ({
   sources,
   articles,
@@ -70,6 +74,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   totalPages
 }) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [tempScript, setTempScript] = useState<any>(null);
   const [isAddingManual, setIsAddingManual] = useState(false);
@@ -132,10 +137,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard title={t('dashboard.sources')} value={stats.sources} icon={<Rss className="w-5 h-5" />} color="rose" />
-        <StatCard title={t('dashboard.articles')} value={stats.articles} icon={<FileText className="w-5 h-5" />} color="blue" />
-        <StatCard title={t('dashboard.videos')} value={stats.videos} icon={<Video className="w-5 h-5" />} color="purple" />
-        <StatCard title={t('dashboard.posted')} value={stats.postedVideos} icon={<CheckCircle2 className="w-5 h-5" />} color="green" />
+        <StatCard title={t('dashboard.sources')} value={stats.sources} icon={<Rss className="w-5 h-5" />} color="rose" onClick={() => navigate('/sources')} />
+        <StatCard title={t('dashboard.articles')} value={stats.articles} icon={<FileText className="w-5 h-5" />} color="blue" onClick={() => navigate('/dashboard')} />
+        <StatCard title={t('dashboard.videos')} value={stats.videos} icon={<Video className="w-5 h-5" />} color="purple" onClick={() => navigate('/videos')} />
+        <StatCard title={t('dashboard.posted')} value={stats.postedVideos} icon={<CheckCircle2 className="w-5 h-5" />} color="green" onClick={() => navigate('/videos?status=posted')} />
       </div>
       
       <div className="glass rounded-3xl p-8 border border-white/5">
