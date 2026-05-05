@@ -96,7 +96,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const startEditing = (article: Article) => {
     setEditingArticle(article);
-    setTempScript(article.script ? JSON.parse(article.script as string) : null);
+    const script = article.script;
+    if (script) {
+      setTempScript(typeof script === 'string' ? JSON.parse(script) : script);
+    } else {
+      setTempScript(null);
+    }
   };
 
   const handleSaveScript = () => {
@@ -218,16 +223,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  className="group flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-2xl bg-slate-800/40 border border-white/5 hover:bg-slate-800/60 transition-all gap-4"
+                  className="group relative flex flex-col sm:flex-row sm:items-center justify-between p-6 rounded-[24px] bg-slate-800/20 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all gap-4 overflow-hidden"
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-900/50 px-2 py-0.5 rounded border border-white/5">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                  
+                  <div className="flex-1 min-w-0 relative z-10">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
                         {typeof article.source === 'string' ? article.source : (article.source?.name || 'Unknown')}
                       </span>
                       <StatusBadge status={article.status} />
                     </div>
-                    <h3 className="text-base font-semibold text-slate-200 truncate">{article.title}</h3>
+                    <h3 className="text-lg font-bold text-slate-100 tracking-tight group-hover:text-white transition-colors truncate">
+                      {article.title}
+                    </h3>
                   </div>
                   <div className="flex items-center gap-2">
                     {article.status === 'scraped' && (

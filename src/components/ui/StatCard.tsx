@@ -2,10 +2,10 @@ import React from 'react';
 import { motion } from 'motion/react';
 
 const colorMap = {
-  rose: 'from-rose-500/20 to-rose-500/5 text-rose-500',
-  blue: 'from-blue-500/20 to-blue-500/5 text-blue-500',
-  purple: 'from-purple-500/20 to-purple-500/5 text-purple-500',
-  green: 'from-green-500/20 to-green-500/5 text-green-500'
+  rose: { bg: 'bg-rose-500/10', border: 'border-rose-500/20', text: 'text-rose-500', glow: 'shadow-rose-500/20' },
+  blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-500', glow: 'shadow-blue-500/20' },
+  purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/20', text: 'text-purple-500', glow: 'shadow-purple-500/20' },
+  green: { bg: 'bg-green-500/10', border: 'border-green-500/20', text: 'text-green-500', glow: 'shadow-green-500/20' }
 };
 
 interface StatCardProps {
@@ -17,18 +17,34 @@ interface StatCardProps {
 }
 
 export const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color = 'blue', onClick }) => {
+  const styles = colorMap[color];
+  
   return (
     <motion.div 
-      whileHover={{ y: -5, scale: 1.02 }}
+      whileHover={{ y: -8, scale: 1.02 }}
       whileTap={onClick ? { scale: 0.98 } : {}}
       onClick={onClick}
-      className={`glass-panel group p-8 flex flex-col items-center text-center ${onClick ? 'cursor-pointer hover:border-primary/30' : ''}`}
+      className={`relative overflow-hidden glass p-8 flex flex-col items-center text-center rounded-[32px] border border-white/5 transition-all duration-300 ${
+        onClick ? 'cursor-pointer hover:border-white/10 hover:bg-white/5' : ''
+      }`}
     >
-       <div className={`p-4 rounded-2xl bg-gradient-to-br ${colorMap[color]} mb-6 transition-transform group-hover:scale-110`}>
-        {React.cloneElement(icon as React.ReactElement, { className: 'w-8 h-8' })}
+      {/* Dynamic Background Glow */}
+      <div className={`absolute -bottom-12 -right-12 w-32 h-32 blur-[60px] opacity-20 rounded-full ${styles.bg}`} />
+      
+      <div className={`p-5 rounded-2xl ${styles.bg} ${styles.text} mb-6 transition-all duration-500 group-hover:scale-110 shadow-lg ${styles.glow} border ${styles.border}`}>
+        {React.cloneElement(icon as React.ReactElement, { className: 'w-7 h-7' })}
       </div>
-      <p className="text-sm font-bold text-slate-500 uppercase tracking-[0.15em] mb-2">{title}</p>
-      <p className="text-5xl font-black text-white tracking-tighter">{value}</p>
+      
+      <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-3 leading-none">
+        {title}
+      </p>
+      
+      <div className="relative">
+        <p className="text-5xl font-black text-white tracking-tighter leading-none mb-1">
+          {value}
+        </p>
+        <div className={`h-1 w-8 mx-auto rounded-full ${styles.bg} opacity-50`} />
+      </div>
     </motion.div>
   );
 };

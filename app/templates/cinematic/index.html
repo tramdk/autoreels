@@ -7,7 +7,8 @@
   <title>AutoReels Template</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Be+Vietnam+Pro:wght@400;600;700;900&display=swap"
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Be+Vietnam+Pro:wght@400;600;700;900&display=swap"
     rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <style>
@@ -38,16 +39,21 @@
     /* Background */
     .bg-layer {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
       z-index: 0;
     }
+
     #bg-overlay {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: radial-gradient(circle at center, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.95) 100%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.95) 100%);
       z-index: 1;
     }
 
@@ -60,6 +66,7 @@
       z-index: 100;
       text-align: center;
     }
+
     #brand-logo {
       font-family: 'Playfair Display', serif;
       font-style: italic;
@@ -73,28 +80,65 @@
     /* Bottom bar */
     #bottom-info {
       position: absolute;
-      top: {{TAG_TOP}}px;
+
+      top: {
+          {
+          TAG_TOP
+        }
+      }
+
+      px;
       left: 50%;
-      transform: translateX(-50%) translateX({{TAG_LEFT}}px);
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      z-index: 100;
-      white-space: nowrap;
+
+      transform: translateX(-50%) translateX({
+          {
+          TAG_LEFT
+        }
+      }
+
+      px);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 100;
+    white-space: nowrap;
     }
+
     #tag-badge {
       padding: 12px 30px;
       font-family: 'Anton', sans-serif;
-      font-size: {{TAG_SIZE}}px;
+
+      font-size: {
+          {
+          TAG_SIZE
+        }
+      }
+
+      px;
       text-transform: uppercase;
-      background-color: {{TAG_BG}};
-      color: {{TAG_COLOR}};
+
+      background-color: {
+          {
+          TAG_BG
+        }
+      }
+
+      ;
+
+      color: {
+          {
+          TAG_COLOR
+        }
+      }
+
+      ;
       transform: skewX(-12deg);
       letter-spacing: 2px;
     }
+
     #datetime {
       font-size: 26px;
-      color: rgba(255,255,255,0.55);
+      color: rgba(255, 255, 255, 0.55);
       font-weight: 700;
       letter-spacing: 2px;
     }
@@ -104,33 +148,133 @@
     /* Scene cards */
     #scene-container {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       z-index: 50;
     }
+
     .scene-card {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      padding-top: {{MAIN_TOP}}px;
-      padding-left: {{MAIN_LEFT}}px;
-      padding-right: {{MAIN_LEFT}}px;
-      gap: {{CONTENT_GAP}}px;
+
+      padding-top: {
+          {
+          MAIN_TOP
+        }
+      }
+
+      px;
+
+      padding-left: {
+          {
+          MAIN_LEFT
+        }
+      }
+
+      px;
+
+      padding-right: {
+          {
+          MAIN_LEFT
+        }
+      }
+
+      px;
+
+      gap: {
+          {
+          CONTENT_GAP
+        }
+      }
+
+      px;
       opacity: 0;
       pointer-events: none;
       word-wrap: break-word;
+      /* Typing cursor effect support */
+      --cursor-color: rgba(255, 255, 255, 0.8);
       overflow-wrap: break-word;
 
       /* Dynamic styles */
-      background-color: {{CARD_BG_COLOR}};
-      border-top: {{CARD_BORDER_TOP}}px solid {{CARD_BORDER_COLOR}};
-      border-bottom: {{CARD_BORDER_BOTTOM}}px solid {{CARD_BORDER_COLOR}};
-      border-left: {{CARD_BORDER_LEFT}}px solid {{CARD_BORDER_COLOR}};
-      border-right: {{CARD_BORDER_RIGHT}}px solid {{CARD_BORDER_COLOR}};
-      border-radius: {{CARD_BORDER_RADIUS}}px;
+      background-color: {
+          {
+          CARD_BG_COLOR
+        }
+      }
+
+      ;
+
+      border-top: {
+          {
+          CARD_BORDER_TOP
+        }
+      }
+
+      px solid {
+          {
+          CARD_BORDER_COLOR
+        }
+      }
+
+      ;
+
+      border-bottom: {
+          {
+          CARD_BORDER_BOTTOM
+        }
+      }
+
+      px solid {
+          {
+          CARD_BORDER_COLOR
+        }
+      }
+
+      ;
+
+      border-left: {
+          {
+          CARD_BORDER_LEFT
+        }
+      }
+
+      px solid {
+          {
+          CARD_BORDER_COLOR
+        }
+      }
+
+      ;
+
+      border-right: {
+          {
+          CARD_BORDER_RIGHT
+        }
+      }
+
+      px solid {
+          {
+          CARD_BORDER_COLOR
+        }
+      }
+
+      ;
+
+      border-radius: {
+          {
+          CARD_BORDER_RADIUS
+        }
+      }
+
+      px;
     }
 
     /* Hook scene */
@@ -139,64 +283,117 @@
       font-weight: 400;
       font-size: 20px;
       letter-spacing: 12px;
-      color: rgba(255,255,255,0.4);
+      color: rgba(255, 255, 255, 0.4);
       text-transform: uppercase;
       margin-bottom: 20px;
     }
+
     .scene-card.type-hook .scene-text {
       font-family: 'Playfair Display', serif;
-      font-size: 140px;
-      line-height: 1.05;
+      font-size: 120px; /* Reduced from 140px to prevent overlap */
+      line-height: 1.2; /* Increased to prevent overlapping lines */
       color: #ffffff;
-      text-shadow: none;
+      text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      word-break: break-word;
     }
+
     .scene-card.type-hook .scene-accent {
       width: 0;
       height: 1px;
-      background: rgba(255,255,255,0.8);
+      background: rgba(255, 255, 255, 0.8);
       margin-top: 40px;
     }
 
 
     .scene-card.type-body .scene-text {
-      font-size: {{BODY_SIZE}}px;
+      font-size: {
+          {
+          BODY_SIZE
+        }
+      }
+
+      px;
       font-weight: 700;
       line-height: 1.35;
-      color: {{BODY_COLOR}};
-      text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+
+      color: {
+          {
+          BODY_COLOR
+        }
+      }
+
+      ;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
       position: relative;
       z-index: 2;
     }
+
+    .scene-text span {
+      /* opacity: 0; Removed to prevent hiding word-wrappers */
+      display: inline-block;
+      white-space: pre-wrap;
+    }
+
     .scene-card.type-body .scene-bar {
       width: 60px;
       height: 5px;
       border-radius: 3px;
-      background: {{DIVIDER_COLOR}};
+
+      background: {
+          {
+          DIVIDER_COLOR
+        }
+      }
+
+      ;
     }
 
     /* Outro scene */
     .scene-card.type-outro {
       justify-content: flex-start;
     }
+
     .scene-card.type-outro .scene-cta-label {
       font-family: 'Anton', sans-serif;
       font-size: 32px;
       letter-spacing: 6px;
-      color: {{TAG_BG}};
+
+      color: {
+          {
+          TAG_BG
+        }
+      }
+
+      ;
       text-transform: uppercase;
       margin-bottom: 24px;
     }
+
     .scene-card.type-outro .scene-text {
-      font-size: {{BODY_SIZE}}px;
+      font-size: {
+          {
+          BODY_SIZE
+        }
+      }
+
+      px;
       font-weight: 700;
       line-height: 1.35;
-      color: {{BODY_COLOR}};
+
+      color: {
+          {
+          BODY_COLOR
+        }
+      }
+
+      ;
     }
+
     .scene-card.type-outro .scene-follow {
       margin-top: 40px;
       font-size: 36px;
       font-weight: 600;
-      color: rgba(255,255,255,0.6);
+      color: rgba(255, 255, 255, 0.6);
       letter-spacing: 1px;
     }
   </style>
@@ -219,7 +416,9 @@
     <div id="scene-container"></div>
 
     <div id="bottom-info">
-      <div id="tag-badge" style="display: {{SHOW_TAG}}; background: {{TAG_BG}}; color: {{TAG_COLOR}}; font-size: {{TAG_SIZE}}px;">{{TAG_TEXT}}</div>
+      <div id="tag-badge"
+        style="display: {{SHOW_TAG}}; background: {{TAG_BG}}; color: {{TAG_COLOR}}; font-size: {{TAG_SIZE}}px;">
+        {{TAG_TEXT}}</div>
       <div id="datetime" style="display: {{SHOW_DATETIME}};">{{DATETIME}}</div>
     </div>
 
@@ -227,19 +426,19 @@
 
   <script>
     window.__hf = {
-      duration: {{DURATION}},
-      seek: function(t) {
-        if (window._tl && typeof window._tl.seek === 'function') {
-          window._tl.pause().seek(t);
-        }
+      duration: {{ DURATION }},
+    seek: function(t) {
+      if (window._tl && typeof window._tl.seek === 'function') {
+        window._tl.pause().seek(t);
       }
+    }
     };
   </script>
 
   <script>
-    var SCENES_DATA = {{SCENES_JSON}};
-    var SCENE_DURATIONS = {{SCENE_DURATIONS_JSON}};
-    var TOTAL_DURATION = {{DURATION}};
+    var SCENES_DATA = {{ SCENES_JSON }};
+    var SCENE_DURATIONS = {{ SCENE_DURATIONS_JSON }};
+    var TOTAL_DURATION = {{ DURATION }};
   </script>
 
   <script>
@@ -252,14 +451,14 @@
 
       var hasDurations = SCENE_DURATIONS && SCENE_DURATIONS.length === n;
       var leadIn = 0.5;
-      var animIn  = 0.4;
+      var animIn = 0.4;
       var animOut = 0.4;
 
       window._tl = gsap.timeline({ paused: true });
       window.__timelines = { 'main': window._tl };
 
       window._tl.from('#brand-header', { y: -60, opacity: 0, duration: 0.6 }, 0);
-      window._tl.from('#bottom-info',  { y:  60, opacity: 0, duration: 0.6 }, 0.2);
+      window._tl.from('#bottom-info', { y: 60, opacity: 0, duration: 0.6 }, 0.2);
 
       var defaultBg = '{{BG_IMAGE_URL}}';
       var currentBgIndex = 1;
@@ -269,49 +468,94 @@
         var s = scenes[i];
         var duration = hasDurations ? SCENE_DURATIONS[i] : (TOTAL_DURATION - leadIn) / n;
         var sceneStart = currentTime;
-        
+
         var card = document.createElement('div');
         card.className = 'scene-card type-' + s.type;
         card.style.display = '{{SHOW_CARD}}';
 
-        if (s.type === 'hook') {
-          card.innerHTML = '<div class="scene-label">CINEMATIC HOOK</div><div class="scene-text" style="color: {{HOOK_COLOR}}; font-size: {{HOOK_SIZE}}px;">' + s.voiceText + '</div>';
-        } else if (s.type === 'outro') {
-          card.innerHTML = '<div class="scene-cta-label">WATCH MORE</div><div class="scene-text" style="color: {{BODY_COLOR}}; font-size: {{BODY_SIZE}}px;">' + s.voiceText + '</div>';
-        } else {
-          card.innerHTML = '<div class="scene-text" style="color: {{BODY_COLOR}}; font-size: {{BODY_SIZE}}px;">' + s.voiceText + '</div>';
+        // Helper to split text into words and then spans to prevent line-break jumping
+        function buildTypingContent(containerEl, text) {
+          containerEl.innerHTML = '';
+          if (!text) return [];
+          var words = text.split(/(\s+)/);
+          var spans = [];
+          words.forEach(function(word) {
+            var wordSpan = document.createElement('span');
+            wordSpan.style.display = 'inline-block';
+            wordSpan.style.whiteSpace = 'pre';
+            
+            var chars = word.split('');
+            chars.forEach(function(char) {
+              var span = document.createElement('span');
+              span.textContent = char;
+              span.style.opacity = 0;
+              wordSpan.appendChild(span);
+              spans.push(span);
+            });
+            containerEl.appendChild(wordSpan);
+          });
+          return spans;
         }
 
+        var textEl = document.createElement('div');
+        textEl.className = 'scene-text';
+        
+        if (s.type === 'hook') {
+          card.innerHTML = '<div class="scene-label">CINEMATIC HOOK</div>';
+          textEl.style.color = '{{HOOK_COLOR}}';
+          textEl.style.fontSize = '{{HOOK_SIZE}}px';
+        } else if (s.type === 'outro') {
+          card.innerHTML = '<div class="scene-cta-label">WATCH MORE</div>';
+          textEl.style.color = '{{BODY_COLOR}}';
+          textEl.style.fontSize = '{{BODY_SIZE}}px';
+        } else {
+          textEl.style.color = '{{BODY_COLOR}}';
+          textEl.style.fontSize = '{{BODY_SIZE}}px';
+        }
+        
+        var spans = buildTypingContent(textEl, s.voiceText);
+        card.appendChild(textEl);
         container.appendChild(card);
 
+        // Animate Card In
         window._tl.to(card, { opacity: 1, duration: animIn }, sceneStart);
         
+        // Animate Characters (Typing Effect)
+        var staggerTime = Math.min(0.04, (duration * 0.7) / (spans.length || 1));
+        window._tl.to(spans, {
+          opacity: 1,
+          duration: 0.05,
+          stagger: staggerTime,
+          ease: 'none'
+        }, sceneStart + 0.2);
+
         // Background Cross-fade logic (on main timeline)
         if (i > 0) {
           var nextUrl = s.imageUrl || defaultBg;
           var targetLayerId = currentBgIndex === 1 ? 'bg-2' : 'bg-1';
           var prevLayerId = currentBgIndex === 1 ? 'bg-1' : 'bg-2';
-          
-          (function(lId, url) {
+
+          (function (lId, url) {
             window._tl.set('#' + lId, { attr: { src: url } }, sceneStart);
           })(targetLayerId, nextUrl);
 
-          window._tl.to('#' + targetLayerId, { opacity: {{BG_BRIGHTNESS}}, duration: 1.0, ease: 'none' }, sceneStart);
-          window._tl.to('#' + prevLayerId, { opacity: 0, duration: 1.0, ease: 'none' }, sceneStart);
-          
-          currentBgIndex = (currentBgIndex === 1 ? 2 : 1);
-        }
+          window._tl.to('#' + targetLayerId, { opacity: {{ BG_BRIGHTNESS }}, duration: 1.0, ease: 'none'
+      }, sceneStart);
+      window._tl.to('#' + prevLayerId, { opacity: 0, duration: 1.0, ease: 'none' }, sceneStart);
+
+      currentBgIndex = (currentBgIndex === 1 ? 2 : 1);
+    }
 
 
 
         if (i < n - 1) {
-          window._tl.to(card, { opacity: 0, duration: animOut }, sceneStart + duration - animOut);
-        }
-        currentTime += duration;
+      window._tl.to(card, { opacity: 0, duration: animOut }, sceneStart + duration - animOut);
+    }
+    currentTime += duration;
       }
-      window._tl.add(function() {}, TOTAL_DURATION);
+    window._tl.add(function () { }, TOTAL_DURATION);
 
-    } catch(e) {
+    } catch (e) {
       console.error('Scene Animation Init Error:', e);
     }
   </script>

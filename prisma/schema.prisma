@@ -44,7 +44,7 @@ model Article {
   contentSnippet String?
   pubDate        String?
   status         String   @default("scraped") // scraped, summarized, video_generated, posted
-  script         String?   // Native JSON for PostgreSQL ( if using PostgreSQL change to Json?)
+  script         Json?     // Native JSON support for better performance and flexibility
   imageUrl       String?
   videoId        String?
   sourceId       String?

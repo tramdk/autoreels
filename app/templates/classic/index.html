@@ -149,10 +149,11 @@
     .scene-card.type-hook .scene-text {
       font-family: 'Anton', sans-serif;
       font-size: {{HOOK_SIZE}}px;
-      line-height: 1.1;
+      line-height: 1.25; /* Increased to prevent overlap */
       text-transform: uppercase;
       color: {{HOOK_COLOR}};
       text-shadow: 0 4px 40px rgba(0,0,0,0.6);
+      word-break: break-word;
     }
     .scene-card.type-hook .scene-accent {
       width: 0;
@@ -172,6 +173,12 @@
       text-shadow: 0 2px 20px rgba(0,0,0,0.5);
       position: relative;
       z-index: 2;
+    }
+
+    .scene-text span {
+      /* opacity: 0; */
+      display: inline-block;
+      white-space: pre-wrap;
     }
     .scene-card.type-body .scene-bar {
       width: 60px;
@@ -280,17 +287,57 @@
         card.className = 'scene-card type-' + s.type;
         card.style.display = '{{SHOW_CARD}}';
 
-        if (s.type === 'hook') {
-          card.innerHTML = '<div class="scene-label">BREAKING</div><div class="scene-text" style="color: {{HOOK_COLOR}}; font-size: {{HOOK_SIZE}}px;">' + s.voiceText + '</div>';
-        } else if (s.type === 'outro') {
-          card.innerHTML = '<div class="scene-cta-label">COMMENT BELOW</div><div class="scene-text" style="color: {{BODY_COLOR}}; font-size: {{BODY_SIZE}}px;">' + s.voiceText + '</div>';
-        } else {
-          card.innerHTML = '<div class="scene-text" style="color: {{BODY_COLOR}}; font-size: {{BODY_SIZE}}px;">' + s.voiceText + '</div>';
+        function buildTypingContent(containerEl, text) {
+          containerEl.innerHTML = '';
+          var words = text.split(/(\s+)/);
+          var spans = [];
+          words.forEach(function(word) {
+            var wordSpan = document.createElement('span');
+            wordSpan.style.display = 'inline-block';
+            wordSpan.style.whiteSpace = 'pre';
+            
+            var chars = word.split('');
+            chars.forEach(function(char) {
+              var span = document.createElement('span');
+              span.textContent = char;
+              span.style.opacity = 0;
+              wordSpan.appendChild(span);
+              spans.push(span);
+            });
+            containerEl.appendChild(wordSpan);
+          });
+          return spans;
         }
 
+        var textEl = document.createElement('div');
+        textEl.className = 'scene-text';
+
+        if (s.type === 'hook') {
+          card.innerHTML = '<div class="scene-label">BREAKING</div>';
+          textEl.style.color = '{{HOOK_COLOR}}';
+          textEl.style.fontSize = '{{HOOK_SIZE}}px';
+        } else if (s.type === 'outro') {
+          card.innerHTML = '<div class="scene-cta-label">COMMENT BELOW</div>';
+          textEl.style.color = '{{BODY_COLOR}}';
+          textEl.style.fontSize = '{{BODY_SIZE}}px';
+        } else {
+          textEl.style.color = '{{BODY_COLOR}}';
+          textEl.style.fontSize = '{{BODY_SIZE}}px';
+        }
+
+        var spans = buildTypingContent(textEl, s.voiceText);
+        card.appendChild(textEl);
         container.appendChild(card);
 
         window._tl.to(card, { opacity: 1, duration: animIn }, sceneStart);
+
+        var staggerTime = Math.min(0.04, (duration * 0.7) / (spans.length || 1));
+        window._tl.to(spans, {
+          opacity: 1,
+          duration: 0.05,
+          stagger: staggerTime,
+          ease: 'none'
+        }, sceneStart + 0.2);
         
         // Background Cross-fade logic (on main timeline)
         if (i > 0) {
