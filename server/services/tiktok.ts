@@ -67,20 +67,28 @@ export async function publishToTikTok(videoId: string) {
 
     if (!uploadResponse.ok) throw new Error(`Failed to upload to TikTok: ${uploadResponse.statusText}`);
 
-    // SUCCESS! Now upload to Cloudinary for permanent storage and clean up local
-    console.log(`[TikTok] Publish success! Archiving to Cloudinary...`);
-    const cloudinaryUrl = await uploadVideo(localPath, 'autoreels_published', false);
-
-    await prisma.video.update({
-      where: { id: video.id },
-      data: { 
-        status: 'posted', 
-        publishId,
-        videoUrl: cloudinaryUrl // Update to Cloudinary URL
+    // SUCCESS! Archive to Cloudinary in the background to respond faster
+    console.log(`[TikTok] Publish success! Archiving to Cloudinary in background...`);
+    
+    // Background task
+    (async () => {
+      try {
+        const cloudinaryUrl = await uploadVideo(localPath, 'autoreels_published', false);
+        await prisma.video.update({
+          where: { id: video.id },
+          data: { 
+            status: 'posted', 
+            publishId,
+            videoUrl: cloudinaryUrl
+          }
+        });
+        console.log(`[TikTok] Archive success for video ${videoId}`);
+      } catch (err: any) {
+        console.error(`[TikTok Archive Background Error]`, err.message);
       }
-    });
+    })();
 
-    return { success: true, publishId, archiveUrl: cloudinaryUrl };
+    return { success: true, publishId };
   } catch (error: any) {
     console.error(`[TikTok Publish Error]`, error.message);
     throw error;

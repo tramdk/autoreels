@@ -34,6 +34,7 @@ const en: Translations = {
     sources: "Knowledge Base",
     videos: "Media Assets",
     social: "Distribution",
+    studio: "Video Studio",
     config: "CONFIG",
     settings: "Preferences",
     logout: "Logout",
@@ -73,7 +74,13 @@ const en: Translations = {
     articleTitle: "Title",
     articleContent: "Content (Plain text)",
     placeholderTitle: "Enter article title...",
-    placeholderContent: "Paste the full content here. AI will summarize this later."
+    placeholderContent: "Paste the full content here. AI will summarize this later.",
+    manualDesignTab: "Design Script",
+    summarizeTab: "Summarize from content",
+    addScene: "Add Scene",
+    removeScene: "Remove Scene",
+    bgImageUrl: "Background Image URL",
+    imageKeyword: "Image Keyword"
   },
   sources: {
     title: "Knowledge Base",
@@ -123,6 +130,7 @@ const vi: Translations = {
     sources: "Nguồn Dữ Liệu",
     videos: "Kho Media",
     social: "Phân Phối",
+    studio: "Video Studio",
     config: "CẤU HÌNH",
     settings: "Tùy Chọn",
     logout: "Đăng Xuất",
@@ -162,7 +170,13 @@ const vi: Translations = {
     articleTitle: "Tiêu đề",
     articleContent: "Nội dung (Văn bản thô)",
     placeholderTitle: "Nhập tiêu đề bài viết...",
-    placeholderContent: "Dán toàn bộ nội dung vào đây. AI sẽ tóm tắt sau."
+    placeholderContent: "Dán toàn bộ nội dung vào đây. AI sẽ tóm tắt sau.",
+    manualDesignTab: "Thiết kế kịch bản",
+    summarizeTab: "Tóm tắt từ nội dung",
+    addScene: "Thêm cảnh",
+    removeScene: "Xóa cảnh",
+    bgImageUrl: "URL hình nền",
+    imageKeyword: "Từ khóa ảnh"
   },
   sources: {
     title: "Nguồn Dữ Liệu",

@@ -9,7 +9,9 @@ import {
   Play, 
   ChevronRight,
   LogOut,
-  Globe
+  Globe,
+  Clapperboard,
+  Mic
 } from 'lucide-react';
 import { TabType } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -68,9 +70,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLog
       
       <nav className="flex-1 px-6 space-y-2">
         <NavItem icon={<LayoutDashboard />} label={t('sidebar.dashboard')} active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
+        <NavItem icon={<Clapperboard />} label={t('sidebar.studio')} active={activeTab === 'studio'} onClick={() => setActiveTab('studio')} />
         <NavItem icon={<Rss />} label={t('sidebar.sources')} active={activeTab === 'sources'} onClick={() => setActiveTab('sources')} />
         <NavItem icon={<Video />} label={t('sidebar.videos')} active={activeTab === 'videos'} onClick={() => setActiveTab('videos')} />
         <NavItem icon={<Share2 />} label={t('sidebar.social')} active={activeTab === 'social'} onClick={() => setActiveTab('social')} />
+        <NavItem icon={<Mic />} label="Voices" active={activeTab === 'voices'} onClick={() => setActiveTab('voices')} />
         <div className="mt-10 mb-4 px-4 flex justify-between items-center">
            <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">{t('sidebar.config')}</p>
         </div>

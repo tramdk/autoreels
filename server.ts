@@ -14,6 +14,8 @@ import videoRoutes from './server/routes/videos';
 import sourceRoutes from './server/routes/sources';
 import settingRoutes from './server/routes/settings';
 import statsRoutes from './server/routes/stats';
+import assetRoutes from './server/routes/assets';
+import voiceRoutes from './server/routes/voices';
 
 // Import Services
 import { startCleanupJob } from './server/services/cleanup';
@@ -25,6 +27,7 @@ const isProd = process.env.NODE_ENV === 'production';
 
 async function startServer() {
   const app = express();
+  app.set('trust proxy', true);
   
   // Middleware
   app.use(cors());
@@ -38,6 +41,8 @@ async function startServer() {
   app.use('/api/sources', sourceRoutes);
   app.use('/api/settings', settingRoutes);
   app.use('/api/stats', statsRoutes);
+  app.use('/api/assets', assetRoutes);
+  app.use('/api/voices', voiceRoutes);
 
   // Serve temp_renders as static files for reliable video streaming
   app.use('/temp_renders', express.static(path.join(process.cwd(), 'temp_renders')));

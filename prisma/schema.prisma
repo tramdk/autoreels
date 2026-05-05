@@ -72,3 +72,21 @@ model Setting {
   value     String   // Store as string or JSON string
   updatedAt DateTime @updatedAt
 }
+
+model Asset {
+  id        String   @id @default(uuid())
+  name      String
+  size      Int
+  hash      String   @unique // CRC32 or SHA-256
+  url       String
+  type      String   // "image", "video", "audio"
+  createdAt DateTime @default(now())
+}
+
+model Voice {
+  id        String   @id @default(uuid())
+  voiceId   String   // Provider's voice ID (e.g., "1402")
+  name      String   // Display name (e.g., "Thế Hào")
+  provider  String   // "ohfree", "edge", "elevenlabs", etc.
+  createdAt DateTime @default(now())
+}

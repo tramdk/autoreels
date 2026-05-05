@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useMotionValue } from 'motion/react';
-import { Settings, Volume2, Palette, ArrowUp, ArrowDown, Save, Image as ImageIcon, Trash2, Sliders, Type, GripVertical, Move, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Settings, Volume2, Palette, ArrowUp, ArrowDown, Save, Image as ImageIcon, Sliders, Type, Move, Sparkles } from 'lucide-react';
 import { api } from '../../services/api';
 import { toast } from 'react-hot-toast';
+import { AssetPicker } from '../../components/ui/AssetPicker';
 
 interface TemplateSettings {
   logoText: string;
   logoColor: string;
   logoTop: number;
   logoLeft: number;
+  logoAlign?: string;
   logoAnim: string;
   logoSize: number;
   hookColor: string;
@@ -21,16 +23,31 @@ interface TemplateSettings {
   dividerWidth: number;
   mainTop: number;
   mainLeft: number;
+  mainAlign?: string;
   contentGap: number;
   tagText: string;
   tagBg: string;
   tagColor: string;
   tagTop: number;
   tagLeft: number;
+  tagAlign?: string;
   tagAnim: string;
   tagSize: number;
   backgroundBrightness: number;
   backgroundImage: string;
+  cardBgColor: string;
+  cardBorderColor: string;
+  cardBorderTop: number;
+  cardBorderBottom: number;
+  cardBorderLeft: number;
+  cardBorderRight: number;
+  cardBorderRadius: number;
+  showLogo: boolean;
+  showTag: boolean;
+  showDatetime: boolean;
+  showCard: boolean;
+  ttsPriority?: string[];
+  ttsVoices?: Record<string, string>;
 }
 
 const ANIMATIONS = [
@@ -56,75 +73,118 @@ const DEFAULTS = {
   contentGap: 40
 };
 
-const TabBtn: React.FC<{ active: boolean, onClick: () => void, icon: any, label: string }> = ({ active, onClick, icon, label }) => (
-  <button onClick={onClick} className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${active ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}>
-    {icon} <span>{label}</span>
-  </button>
+const ALIGN_PRESETS = [
+  { value: 'top-left', label: 'Top Left', top: 100, left: -400 },
+  { value: 'top-center', label: 'Top Center', top: 100, left: 0 },
+  { value: 'top-right', label: 'Top Right', top: 100, left: 400 },
+  { value: 'center-left', label: 'Center Left', top: 960, left: -400 },
+  { value: 'center', label: 'Center', top: 960, left: 0 },
+  { value: 'center-right', label: 'Center Right', top: 960, left: 400 },
+  { value: 'bottom-left', label: 'Bottom Left', top: 1700, left: -400 },
+  { value: 'bottom-center', label: 'Bottom Center', top: 1700, left: 0 },
+  { value: 'bottom-right', label: 'Bottom Right', top: 1700, left: 400 },
+];
+
+const AlignmentPresets: React.FC<{ onSelect: (top: number, left: number, align: string) => void }> = ({ onSelect }) => (
+  <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-xl w-24 h-24 shrink-0 border border-white/5">
+    {ALIGN_PRESETS.map(opt => (
+      <button 
+        key={opt.value} 
+        onClick={() => onSelect(opt.top, opt.left, opt.value)}
+        title={opt.label}
+        className="w-full h-full rounded-md border bg-slate-800/40 border-white/5 hover:bg-pink-600/40 hover:border-pink-500/50 transition-all"
+      />
+    ))}
+  </div>
 );
 
 const SizeSlider: React.FC<{ label: string, value: number, min: number, max: number, onChange: (v: number) => void }> = ({ label, value, min, max, onChange }) => (
   <div className="space-y-2">
     <div className="flex justify-between items-center px-1">
-      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{label}</span>
-      <span className="text-[10px] font-mono text-blue-400">{Math.round(value)}px</span>
+      <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{label}</span>
+      <span className="text-[9px] font-mono text-pink-400">{Math.round(value)}px</span>
     </div>
-    <input type="range" min={min} max={max} value={value || min} onChange={e => onChange(parseInt(e.target.value))} className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500" />
+    <input type="range" min={min} max={max} value={value || min} onChange={e => onChange(parseInt(e.target.value))} className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-pink-500" />
   </div>
 );
 
 const AnimGroup: React.FC<{ label: string, value: string, onChange: (v: string) => void }> = ({ label, value, onChange }) => (
-  <div className="space-y-3">
-    <label className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">{label} Animation</label>
-    <select value={value} onChange={e => onChange(e.target.value)} className="w-full bg-slate-900 border border-white/5 rounded-2xl px-5 py-4 text-white font-bold outline-none focus:border-blue-500/50 appearance-none cursor-pointer">
+  <div className="space-y-2">
+    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest px-1">{label} Animation</label>
+    <select value={value} onChange={e => onChange(e.target.value)} className="w-full bg-[#0f172a] border border-white/5 rounded-xl px-4 py-3 text-xs text-white font-bold outline-none focus:border-pink-500/50 appearance-none cursor-pointer">
       {ANIMATIONS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
     </select>
   </div>
 );
 
-const ColorInput: React.FC<{ label: string, value: string, onChange: (val: string) => void }> = ({ label, value, onChange }) => (
-  <div className="bg-slate-900/50 p-4 rounded-2xl border border-white/5 flex items-center gap-4 hover:border-white/20 transition-all">
-    <div className="relative w-10 h-10 shrink-0">
-      <input type="color" value={value} onChange={e => onChange(e.target.value)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-      <div className="w-full h-full rounded-lg border border-white/20 shadow-inner" style={{ backgroundColor: value }}></div>
+const ColorInput: React.FC<{ label: string, value: string, onChange: (val: string) => void }> = ({ label, value, onChange }) => {
+  let hex = '#ffffff';
+  let alpha = 1;
+
+  if (value.startsWith('rgba')) {
+    const match = value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+    if (match) {
+      const r = parseInt(match[1]);
+      const g = parseInt(match[2]);
+      const b = parseInt(match[3]);
+      alpha = match[4] !== undefined ? parseFloat(match[4]) : 1;
+      hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+  } else if (value.startsWith('#')) {
+    hex = value.substring(0, 7);
+  }
+
+  const handleHexChange = (newHex: string) => {
+    if (alpha === 1) onChange(newHex);
+    else {
+      const r = parseInt(newHex.slice(1, 3), 16);
+      const g = parseInt(newHex.slice(3, 5), 16);
+      const b = parseInt(newHex.slice(5, 7), 16);
+      onChange(`rgba(${r}, ${g}, ${b}, ${alpha})`);
+    }
+  };
+
+  const handleAlphaChange = (newAlpha: number) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    if (newAlpha === 1) onChange(hex);
+    else onChange(`rgba(${r}, ${g}, ${b}, ${newAlpha})`);
+  };
+
+  return (
+    <div className="bg-[#0f172a] p-3 rounded-xl border border-white/5 flex flex-col gap-2 hover:border-white/10 transition-all">
+      <div className="flex items-center gap-3">
+        <div className="relative w-8 h-8 shrink-0">
+          <input type="color" value={hex} onChange={e => handleHexChange(e.target.value)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+          <div className="w-full h-full rounded-md border border-white/10 shadow-inner" style={{ backgroundColor: value }}></div>
+        </div>
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="text-[8px] font-black text-slate-500 uppercase tracking-tighter">{label}</span>
+          <input type="text" value={value} onChange={e => onChange(e.target.value)} className="bg-transparent text-[10px] font-mono text-white/40 outline-none w-full" />
+        </div>
+      </div>
+      <div className="flex items-center gap-2 px-1">
+         <input type="range" min="0" max="1" step="0.05" value={alpha} onChange={e => handleAlphaChange(parseFloat(e.target.value))} className="flex-1 h-0.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-pink-500" />
+         <span className="text-[8px] font-mono text-pink-500 w-5 text-right">{Math.round(alpha * 100)}</span>
+      </div>
     </div>
-    <div className="flex flex-col min-w-0">
-      <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter mb-0.5">{label}</span>
-      <input type="text" value={value} onChange={e => onChange(e.target.value)} className="bg-transparent text-xs font-mono text-white/70 outline-none w-full" />
-    </div>
-  </div>
-);
+  );
+};
 
 export const SettingsView: React.FC = () => {
-  useEffect(() => {
-    const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700;900&display=swap';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
-    
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js';
-    script.async = true;
-    document.head.appendChild(script);
-
-    return () => { 
-      document.head.removeChild(link); 
-      if (script.parentNode) document.head.removeChild(script);
-    };
-  }, []);
-
-  const [ttsPriority, setTtsPriority] = useState<string[]>(['elevenlabs', 'edge', 'gemini']);
   const [template, setTemplate] = useState<TemplateSettings>({
-    logoText: 'AUTOREELS',
-    logoColor: '#00f2ff',
-    logoTop: 100,
+    logoText: 'TDK NEWS',
+    logoColor: '#ffffff',
+    logoTop: 200,
     logoLeft: 0,
-    logoAnim: 'slide-down',
+    logoAnim: 'fade',
     logoSize: DEFAULTS.logoSize,
     hookColor: '#ffffff',
-    hookAnim: 'rotate-in',
+    hookAnim: 'slide-up',
     hookSize: DEFAULTS.hookSize,
-    bodyColor: 'rgba(255, 255, 255, 0.9)',
-    bodyAnim: 'slide-up',
+    bodyColor: '#ffffff',
+    bodyAnim: 'fade',
     bodySize: DEFAULTS.bodySize,
     dividerColor: '#00f2ff',
     dividerWidth: DEFAULTS.dividerWidth,
@@ -135,487 +195,464 @@ export const SettingsView: React.FC = () => {
     tagBg: '#fff000',
     tagColor: '#000000',
     tagTop: 1600,
-    tagLeft: 80,
+    tagLeft: 0,
     tagAnim: 'slide-right',
     tagSize: DEFAULTS.tagSize,
     backgroundBrightness: 0.4,
-    backgroundImage: ''
+    backgroundImage: '',
+    cardBgColor: 'rgba(0,0,0,0)',
+    cardBorderColor: 'rgba(255,255,255,0.1)',
+    cardBorderTop: 0,
+    cardBorderBottom: 0,
+    cardBorderLeft: 0,
+    cardBorderRight: 0,
+    cardBorderRadius: 0,
+    showLogo: true,
+    showTag: true,
+    showDatetime: true,
+    showCard: true,
+    ttsPriority: ['lucylab', 'ohfree', 'elevenlabs', 'edge', 'gemini'],
+    ttsVoices: {}
   });
+
+  const [showAssetPicker, setShowAssetPicker] = useState<{ active: boolean; type: 'background' | 'scene'; index?: number }>({ active: false, type: 'background' });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'layout' | 'style' | 'audio' | 'background'>('layout');
-  
+  const [editingTemplateId, setEditingTemplateId] = useState('classic');
+  const [ttsPriority, setTtsPriority] = useState<string[]>(['lucylab', 'ohfree', 'elevenlabs', 'edge', 'gemini']);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  const templates = [
+    { id: 'classic', name: 'Classic' },
+    { id: 'modern', name: 'Modern' },
+    { id: 'cinematic', name: 'Cinematic' },
+    { id: 'bold', name: 'Bold' }
+  ];
 
   useEffect(() => {
     loadSettings();
-  }, []);
+  }, [editingTemplateId]);
 
   const loadSettings = async () => {
+    setLoading(true);
     try {
-      const data = await api.getSettings();
-      if (data.tts_priority) setTtsPriority(data.tts_priority.split(','));
-      if (data.video_template) {
-        const dbTpl = JSON.parse(data.video_template);
-        setTemplate(prev => ({ ...prev, ...dbTpl }));
+      const tplKey = `video_template_${editingTemplateId}`;
+      const res = await api.getSettings() as any;
+      
+      const tplVal = res[tplKey];
+      const globalTtsVal = res['tts_priority'];
+      const defaultPriority = ['lucylab', 'ohfree', 'elevenlabs', 'edge', 'gemini'];
+
+      let currentPriority = defaultPriority;
+
+      if (tplVal) {
+        const val = typeof tplVal === 'string' ? JSON.parse(tplVal) : tplVal;
+        setTemplate(prev => ({ ...prev, ...val }));
+        
+        if (val.ttsPriority && Array.isArray(val.ttsPriority) && val.ttsPriority.length > 0) {
+          currentPriority = val.ttsPriority;
+        } else if (globalTtsVal) {
+          currentPriority = globalTtsVal.split(',').map((p: string) => p.trim());
+        }
+      } else if (globalTtsVal) {
+        currentPriority = globalTtsVal.split(',').map((p: string) => p.trim());
       }
-    } catch (error: any) {
+
+      // Ensure all available providers are in the list
+      const merged = [...currentPriority];
+      defaultPriority.forEach(p => {
+        if (!merged.includes(p)) merged.push(p);
+      });
+      
+      setTtsPriority(merged);
+    } catch (err) {
+      console.error(err);
       toast.error('Failed to load settings');
     } finally {
       setLoading(false);
     }
   };
 
-  const saveSetting = async (key: string, value: any) => {
+  const saveCurrentTemplate = async () => {
+    const tplKey = `video_template_${editingTemplateId}`;
     try {
-      await api.updateSetting(key, value);
-      toast.success('Settings updated');
-    } catch (error: any) {
-      toast.error('Failed to save');
+      await api.updateSetting(tplKey, { ...template, ttsPriority });
+      toast.success(`${editingTemplateId} saved!`);
+    } catch (err) {
+      toast.error('Save failed');
+    }
+  };
+
+  const handleDragEnd = (event: any, info: any, type: string) => {
+    const { x, y } = info.offset;
+    const dx = x / SCALE;
+    const dy = y / SCALE;
+
+    if (type === 'logo') {
+      setTemplate(prev => ({
+        ...prev,
+        logoTop: (prev.logoTop || 0) + dy,
+        logoLeft: (prev.logoLeft || 0) + dx
+      }));
+    } else if (type === 'tag') {
+      setTemplate(prev => ({
+        ...prev,
+        tagTop: (prev.tagTop || 0) + dy,
+        tagLeft: (prev.tagLeft || 0) + dx
+      }));
+    } else if (type === 'main') {
+      setTemplate(prev => ({
+        ...prev,
+        mainTop: (prev.mainTop || 0) + dy,
+        mainLeft: (prev.mainLeft || 0) + dx
+      }));
     }
   };
 
   const movePriority = (index: number, direction: 'up' | 'down') => {
     const newPriority = [...ttsPriority];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= newPriority.length) return;
-    [newPriority[index], newPriority[targetIndex]] = [newPriority[targetIndex], newPriority[index]];
+    if (direction === 'up' && index > 0) {
+      [newPriority[index], newPriority[index - 1]] = [newPriority[index - 1], newPriority[index]];
+    } else if (direction === 'down' && index < newPriority.length - 1) {
+      [newPriority[index], newPriority[index + 1]] = [newPriority[index + 1], newPriority[index]];
+    }
     setTtsPriority(newPriority);
   };
 
-  const handleDragEnd = (e: any, info: any, element: string) => {
-    const deltaY = info.offset.y / SCALE;
-    const deltaX = info.offset.x / SCALE;
-
-    setTemplate(prev => {
-      const updated = { ...prev };
-      if (element === 'logo') { updated.logoTop += deltaY; updated.logoLeft += deltaX; }
-      if (element === 'main') { updated.mainTop += deltaY; updated.mainLeft += deltaX; }
-      if (element === 'tag') { updated.tagTop += deltaY; updated.tagLeft += deltaX; }
-      return updated;
+  const playPreview = () => {
+    const items = ['.logo-el', '.hook-el', '.body-el', '.tag-el', '.divider-el-inner'];
+    items.forEach(selector => {
+      const el = previewRef.current?.querySelector(selector);
+      if (el) {
+        el.animate([{ opacity: 0, transform: 'translateY(20px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 600, easing: 'ease-out' });
+      }
     });
   };
 
-  const playPreview = () => {
-    if (!previewRef.current) return;
-    // @ts-ignore
-    const gsap = window.gsap;
-    if (!gsap) {
-      toast.error('GSAP is loading, please wait...');
-      return;
-    }
-
-    const tl = gsap.timeline();
-
-    const applyAnim = (selector: string, type: string, delay: number) => {
-      const el = previewRef.current?.querySelector(selector);
-      if (!el) return;
-      gsap.set(el, { opacity: 1, x: 0, y: 0, scale: 1, rotate: 0 }); // Reset
-
-      switch(type) {
-        case 'fade': tl.from(el, { opacity: 0, duration: 1 }, delay); break;
-        case 'slide-up': tl.from(el, { y: 50, opacity: 0, duration: 1 }, delay); break;
-        case 'slide-down': tl.from(el, { y: -50, opacity: 0, duration: 1 }, delay); break;
-        case 'slide-left': tl.from(el, { x: 50, opacity: 0, duration: 1 }, delay); break;
-        case 'slide-right': tl.from(el, { x: -50, opacity: 0, duration: 1 }, delay); break;
-        case 'zoom-in': tl.from(el, { scale: 0, opacity: 0, duration: 1 }, delay); break;
-        case 'rotate-in': tl.from(el, { rotate: -15, scale: 0.8, opacity: 0, duration: 1.2, ease: 'back.out(1.7)' }, delay); break;
-      }
-    };
-
-    tl.from('.main-stack-el', { opacity: 0, y: 30, duration: 1 }, 0.2);
-    applyAnim('.logo-el', template.logoAnim, 0.4);
-    applyAnim('.hook-el', template.hookAnim, 0.6);
-    
-    const divEl = previewRef.current.querySelector('.divider-el-inner');
-    if (divEl) {
-      tl.fromTo(divEl, { opacity: 0, width: 0 }, { opacity: 1, width: (template.dividerWidth || DEFAULTS.dividerWidth) * SCALE, duration: 0.8 }, 1.0);
-    }
-
-    applyAnim('.body-el', template.bodyAnim, 1.4);
-    applyAnim('.tag-el', template.tagAnim, 1.6);
-  };
-
   if (loading) return (
-    <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-      <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
-      <p className="text-slate-400 font-medium">Syncing studio...</p>
+    <div className="w-full h-full flex items-center justify-center bg-[#020617]">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-10 h-10 border-4 border-pink-600 border-t-transparent rounded-full animate-spin"></div>
+        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Initialising Studio...</span>
+      </div>
     </div>
   );
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-10 max-w-7xl mx-auto pb-24 px-4">
-      <header className="flex items-center justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-5xl font-black tracking-tighter text-white">STUDIO <span className="text-blue-500">ENGINE</span></h1>
-          <p className="text-slate-400 font-medium">Design, Animate and Automate your video production</p>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col w-full h-full bg-[#020617] text-slate-300 overflow-hidden">
+      {/* Header Bar */}
+      <header className="h-14 border-b border-white/5 flex items-center justify-between px-6 bg-[#0f172a]/60 backdrop-blur-xl z-50 shrink-0">
+        <div className="flex items-center gap-5">
+          <div className="flex flex-col">
+            <h1 className="text-lg font-black tracking-tighter text-white leading-none">STUDIO <span className="text-pink-500">ENGINE</span></h1>
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Creative Suite</span>
+          </div>
+          <div className="h-6 w-[1px] bg-white/10 hidden md:block"></div>
+          <div className="hidden lg:flex items-center gap-1 bg-white/5 p-1 rounded-lg">
+             {templates.map(tpl => (
+               <button key={tpl.id} onClick={() => setEditingTemplateId(tpl.id)} className={`px-3 py-1 rounded-md text-[9px] font-black uppercase transition-all ${editingTemplateId === tpl.id ? 'bg-pink-600 text-white shadow-lg shadow-pink-500/20' : 'text-slate-500 hover:text-slate-300'}`}>{tpl.name}</button>
+             ))}
+          </div>
         </div>
-        <div className="flex items-center gap-4 bg-white/5 p-1.5 rounded-2xl border border-white/5">
-           <TabBtn active={activeTab === 'layout'} onClick={() => setActiveTab('layout')} icon={<Move className="w-4 h-4"/>} label="Layout"/>
-           <TabBtn active={activeTab === 'style'} onClick={() => setActiveTab('style')} icon={<Palette className="w-4 h-4"/>} label="Style"/>
-           <TabBtn active={activeTab === 'background'} onClick={() => setActiveTab('background')} icon={<ImageIcon className="w-4 h-4"/>} label="Background"/>
-           <TabBtn active={activeTab === 'audio'} onClick={() => setActiveTab('audio')} icon={<Volume2 className="w-4 h-4"/>} label="Voice"/>
+
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 bg-white/5 p-1 rounded-lg">
+             {[
+               { id: 'layout', label: 'Layout', icon: <Move className="w-3 h-3"/> },
+               { id: 'style', label: 'Style', icon: <Palette className="w-3 h-3"/> },
+               { id: 'background', label: 'BG', icon: <ImageIcon className="w-3 h-3"/> },
+               { id: 'audio', label: 'Audio', icon: <Volume2 className="w-3 h-3"/> }
+             ].map(tab => (
+               <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`flex items-center gap-2 px-3 py-1 rounded-md text-[9px] font-black uppercase transition-all ${activeTab === tab.id ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-slate-300'}`}>{tab.icon} <span className="hidden sm:inline">{tab.label}</span></button>
+             ))}
+          </div>
+          <button onClick={saveCurrentTemplate} className="bg-pink-600 hover:bg-pink-500 text-white text-[9px] font-black uppercase px-5 py-2 rounded-lg transition-all flex items-center gap-2 shadow-lg shadow-pink-500/10"><Save className="w-3 h-3" /> <span className="hidden sm:inline">Save Changes</span></button>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-        
-        {/* Editor Controls */}
-        <div className="xl:col-span-8">
-          <AnimatePresence mode="wait">
-            {activeTab === 'background' && (
-              <motion.div key="background" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-8">
-                <div className="glass rounded-[48px] border border-white/5 p-10">
-                  <div className="flex items-center justify-between mb-10">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-blue-500/10 text-blue-400 rounded-2xl border border-blue-500/20">
-                        <ImageIcon className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-black text-white tracking-tight">Background Studio</h2>
-                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Atmosphere and Visual Depth</p>
-                      </div>
-                    </div>
-                    <button onClick={() => saveSetting('video_template', template)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-black px-8 py-4 rounded-3xl transition-all shadow-lg shadow-blue-500/20 active:scale-95">
-                      <Save className="w-5 h-5" /> SAVE BACKGROUND
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <div className="space-y-8">
+      <main className="flex-1 flex flex-col xl:flex-row overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 border-r border-white/5 bg-[#020617] custom-scrollbar">
+          <div className="w-full pb-20">
+            <AnimatePresence mode="wait">
+              {activeTab === 'style' && (
+                <motion.div key="style" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-[#1e293b]/10 border border-white/5 rounded-2xl p-6 space-y-6">
+                       <div className="flex items-center gap-2 mb-2"><Type className="w-3.5 h-3.5 text-pink-500"/><h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Brand Identity</h3></div>
                        <div className="space-y-4">
-                          <label className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Brightness Control</label>
-                          <div className="bg-slate-900/50 p-8 rounded-[32px] border border-white/5">
-                             <div className="flex justify-between mb-4">
-                               <span className="text-sm font-bold text-white">Overlay Opacity</span>
-                               <span className="text-sm font-mono text-blue-400">{Math.round(template.backgroundBrightness * 100)}%</span>
-                             </div>
-                             <input 
-                               type="range" 
-                               min="0" max="1" step="0.05" 
-                               value={template.backgroundBrightness} 
-                               onChange={e => setTemplate({...template, backgroundBrightness: parseFloat(e.target.value)})}
-                               className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                             />
+                          <div className="grid grid-cols-2 gap-4">
+                             <div className="space-y-1"><span className="text-[8px] font-bold text-slate-600 uppercase ml-1">Logo Text</span><input type="text" value={template.logoText} onChange={e => setTemplate({...template, logoText: e.target.value})} className="w-full bg-[#0f172a] border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white font-bold outline-none focus:border-pink-500/50" /></div>
+                             <div className="space-y-1"><span className="text-[8px] font-bold text-slate-600 uppercase ml-1">Badge Text</span><input type="text" value={template.tagText} onChange={e => setTemplate({...template, tagText: e.target.value})} className="w-full bg-[#0f172a] border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white font-bold outline-none focus:border-pink-500/50" /></div>
                           </div>
+                          <div className="grid grid-cols-2 gap-4"><ColorInput label="Logo" value={template.logoColor} onChange={val => setTemplate({...template, logoColor: val})} /><ColorInput label="Accent" value={template.dividerColor} onChange={val => setTemplate({...template, dividerColor: val})} /></div>
+                          <div className="grid grid-cols-2 gap-4"><ColorInput label="Badge BG" value={template.tagBg} onChange={val => setTemplate({...template, tagBg: val})} /><ColorInput label="Badge Text" value={template.tagColor} onChange={val => setTemplate({...template, tagColor: val})} /></div>
                        </div>
                     </div>
 
-                    <div className="space-y-6">
-                      <label className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Upload Wallpaper</label>
-                      <div className="relative group cursor-pointer">
-                        <input 
-                          type="file" 
-                          accept="image/*"
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              toast.loading('Uploading to cloud...', { id: 'upload' });
-                              try {
-                                const res = await api.uploadBackground(file);
-                                setTemplate({ ...template, backgroundImage: res.url });
-                                toast.success('Wallpaper updated!', { id: 'upload' });
-                              } catch (err) {
-                                toast.error('Upload failed', { id: 'upload' });
-                              }
-                            }
-                          }}
-                          className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
-                        />
-                        <div className="aspect-video rounded-[32px] border-2 border-dashed border-white/10 group-hover:border-blue-500/50 bg-slate-900/50 flex flex-col items-center justify-center gap-4 transition-all overflow-hidden">
-                           {template.backgroundImage ? (
-                             <img src={template.backgroundImage} className="w-full h-full object-cover" alt="Preview" />
-                           ) : (
-                             <>
-                               <div className="p-4 bg-white/5 rounded-2xl text-slate-400"><ImageIcon className="w-8 h-8" /></div>
-                               <span className="text-sm font-bold text-slate-500">Drop your 4K image here</span>
-                             </>
-                           )}
+                    <div className="bg-[#1e293b]/10 border border-white/5 rounded-2xl p-6 space-y-6">
+                       <div className="flex items-center gap-2 mb-2"><Sparkles className="w-3.5 h-3.5 text-pink-500"/><h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Typography</h3></div>
+                       <div className="space-y-6">
+                          <div className="grid grid-cols-2 gap-4"><ColorInput label="Hook Color" value={template.hookColor} onChange={val => setTemplate({...template, hookColor: val})} /><ColorInput label="Body Color" value={template.bodyColor} onChange={val => setTemplate({...template, bodyColor: val})} /></div>
+                          <div className="space-y-5"><SizeSlider label="Hook Size" value={template.hookSize} min={40} max={400} onChange={v => setTemplate({...template, hookSize: v})} /><SizeSlider label="Body Size" value={template.bodySize} min={20} max={200} onChange={v => setTemplate({...template, bodySize: v})} /><SizeSlider label="Logo Size" value={template.logoSize} min={20} max={300} onChange={v => setTemplate({...template, logoSize: v})} /></div>
+                       </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#1e293b]/10 border border-white/5 rounded-2xl p-6 space-y-6">
+                    <div className="flex items-center gap-2 mb-2"><Sliders className="w-3.5 h-3.5 text-pink-500"/><h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Container & Frame</h3></div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                       <div className="space-y-4"><ColorInput label="Card BG" value={template.cardBgColor} onChange={val => setTemplate({...template, cardBgColor: val})} /><ColorInput label="Border" value={template.cardBorderColor} onChange={val => setTemplate({...template, cardBorderColor: val})} /></div>
+                       <div className="space-y-6 lg:col-span-2"><SizeSlider label="Corner Radius" value={template.cardBorderRadius} min={0} max={200} onChange={v => setTemplate({...template, cardBorderRadius: v})} /><SizeSlider label="Content Gap" value={template.contentGap} min={0} max={200} onChange={v => setTemplate({...template, contentGap: v})} /></div>
+                       <div className="grid grid-cols-2 gap-3">
+                          {[{ id: 'cardBorderTop', label: 'Top' }, { id: 'cardBorderBottom', label: 'Bot' }, { id: 'cardBorderLeft', label: 'Left' }, { id: 'cardBorderRight', label: 'Right' }].map(b => (
+                            <div key={b.id} className="bg-[#0f172a] p-3 rounded-xl border border-white/5 flex flex-col items-center justify-center">
+                               <span className="text-[8px] font-black text-slate-500 uppercase mb-1">{b.label}</span>
+                               <input type="number" value={(template as any)[b.id]} onChange={e => setTemplate({...template, [b.id]: parseInt(e.target.value)})} className="w-full bg-transparent text-xs text-white font-mono text-center outline-none" />
+                            </div>
+                          ))}
+                       </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'layout' && (
+                <motion.div key="layout" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+                  <div className="bg-[#1e293b]/10 border border-white/5 rounded-2xl p-8 space-y-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <AnimGroup label="Brand Logo" value={template.logoAnim} onChange={v => setTemplate({...template, logoAnim: v})} />
+                      <AnimGroup label="Viral Hook" value={template.hookAnim} onChange={v => setTemplate({...template, hookAnim: v})} />
+                      <AnimGroup label="Body Text" value={template.bodyAnim} onChange={v => setTemplate({...template, bodyAnim: v})} />
+                      <AnimGroup label="Breaking Tag" value={template.tagAnim} onChange={v => setTemplate({...template, tagAnim: v})} />
+                    </div>
+
+                    <div className="pt-10 border-t border-white/5 space-y-12">
+                      <div className="flex flex-col md:flex-row gap-8 items-start">
+                        <div className="space-y-2 shrink-0">
+                          <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Logo Snap Presets</h3>
+                          <AlignmentPresets onSelect={(top, left, align) => setTemplate({...template, logoTop: top, logoLeft: left, logoAlign: align})} />
+                        </div>
+                        <div className="flex-1 w-full space-y-8">
+                           <SizeSlider label="Top Position" value={template.logoTop} min={0} max={1920} onChange={v => setTemplate({...template, logoTop: v})} />
+                           <SizeSlider label="Horizontal Offset" value={template.logoLeft} min={-540} max={540} onChange={v => setTemplate({...template, logoLeft: v})} />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col md:flex-row gap-8 items-start pt-10 border-t border-white/5">
+                        <div className="space-y-2 shrink-0">
+                          <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Content Snap Presets</h3>
+                          <AlignmentPresets onSelect={(top, left, align) => setTemplate({...template, mainTop: top, mainLeft: 80, mainAlign: align})} />
+                        </div>
+                        <div className="flex-1 w-full space-y-8">
+                           <SizeSlider label="Top Position" value={template.mainTop} min={0} max={1920} onChange={v => setTemplate({...template, mainTop: v})} />
+                           <SizeSlider label="Side Padding" value={template.mainLeft} min={0} max={400} onChange={v => setTemplate({...template, mainLeft: v})} />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col md:flex-row gap-8 items-start pt-10 border-t border-white/5">
+                        <div className="space-y-2 shrink-0">
+                          <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Badge Snap Presets</h3>
+                          <AlignmentPresets onSelect={(top, left, align) => setTemplate({...template, tagTop: top, tagLeft: left, tagAlign: align})} />
+                        </div>
+                        <div className="flex-1 w-full space-y-8">
+                           <SizeSlider label="Top Position" value={template.tagTop} min={0} max={1920} onChange={v => setTemplate({...template, tagTop: v})} />
+                           <SizeSlider label="Horizontal Offset" value={template.tagLeft} min={-540} max={540} onChange={v => setTemplate({...template, tagLeft: v})} />
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
 
-            {activeTab === 'layout' && (
-              <motion.div key="layout" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-8">
-                <div className="glass rounded-[48px] border border-white/5 p-10">
-                  <div className="flex items-center justify-between mb-10">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-blue-500/10 text-blue-400 rounded-2xl border border-blue-500/20">
-                        <Move className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-black text-white tracking-tight">Stack Architecture</h2>
-                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Drag the main block to position elements</p>
+                    <div className="pt-10 border-t border-white/5">
+                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Visibility Controls</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                         {[{ id: 'showLogo', label: 'Logo', icon: <Type className="w-3.5 h-3.5"/> }, { id: 'showTag', label: 'Badge', icon: <Sparkles className="w-3.5 h-3.5"/> }, { id: 'showDatetime', label: 'Datetime', icon: <Save className="w-3.5 h-3.5"/> }, { id: 'showCard', label: 'Content', icon: <Sliders className="w-3.5 h-3.5"/> }].map(item => (
+                           <button key={item.id} onClick={() => setTemplate({ ...template, [item.id]: !((template as any)[item.id]) })} className={`flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${((template as any)[item.id]) ? 'bg-pink-600/10 border-pink-500 text-white' : 'bg-white/5 border-white/5 text-slate-500'}`}><div className="flex items-center gap-2">{item.icon}<span className="text-[10px] font-bold uppercase">{item.label}</span></div><div className={`w-6 h-3 rounded-full relative transition-all ${((template as any)[item.id]) ? 'bg-pink-500' : 'bg-slate-700'}`}><div className={`absolute top-0.5 w-2 h-2 bg-white rounded-full transition-all ${((template as any)[item.id]) ? 'right-0.5' : 'left-0.5'}`}></div></div></button>
+                         ))}
                       </div>
                     </div>
-                    <button
-                      onClick={() => saveSetting('video_template', template)}
-                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-black px-8 py-4 rounded-3xl transition-all active:scale-95"
-                    >
-                      <Save className="w-5 h-5" /> APPLY CHANGES
-                    </button>
                   </div>
+                </motion.div>
+              )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <AnimGroup label="Brand Logo" value={template.logoAnim} onChange={v => setTemplate({...template, logoAnim: v})} />
-                    <AnimGroup label="Viral Hook" value={template.hookAnim} onChange={v => setTemplate({...template, hookAnim: v})} />
-                    <AnimGroup label="Body Text" value={template.bodyAnim} onChange={v => setTemplate({...template, bodyAnim: v})} />
-                    <AnimGroup label="Breaking Tag" value={template.tagAnim} onChange={v => setTemplate({...template, tagAnim: v})} />
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === 'style' && (
-              <motion.div key="style" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-8">
-                <div className="glass rounded-[48px] border border-white/5 p-10">
-                  <div className="flex items-center justify-between mb-10">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-green-500/10 text-green-400 rounded-2xl border border-green-500/20">
-                        <Palette className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-black text-white tracking-tight">Visual Identity</h2>
-                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Colors, Sizes and Spacing</p>
-                      </div>
-                    </div>
-                    <button onClick={() => saveSetting('video_template', template)} className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white font-black px-8 py-4 rounded-3xl transition-all active:scale-95">
-                      <Save className="w-5 h-5" /> SAVE STYLES
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <div className="space-y-10">
-                      <div className="space-y-6">
-                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Texts & Content</h3>
+              {activeTab === 'background' && (
+                <motion.div key="background" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+                   <div className="bg-[#1e293b]/10 border border-white/5 rounded-2xl p-8 space-y-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                         <div className="space-y-4">
-                          <input type="text" value={template.logoText} onChange={e => setTemplate({...template, logoText: e.target.value})} placeholder="LOGO TEXT" className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-green-500/50" />
-                          <input type="text" value={template.tagText} onChange={e => setTemplate({...template, tagText: e.target.value})} placeholder="TAG TEXT" className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-green-500/50" />
+                           <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Overlay Opacity</label>
+                           <div className="bg-[#0f172a] p-6 rounded-2xl border border-white/5">
+                              <div className="flex justify-between mb-4"><span className="text-[10px] font-bold text-white">Brightness</span><span className="text-xs font-mono text-pink-400">{Math.round(template.backgroundBrightness * 100)}%</span></div>
+                              <input type="range" min="0" max="1" step="0.05" value={template.backgroundBrightness} onChange={e => setTemplate({...template, backgroundBrightness: parseFloat(e.target.value)})} className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-pink-500" />
+                           </div>
+                        </div>
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Wallpaper Asset</label>
+                          <button 
+                            onClick={() => setShowAssetPicker({ active: true, type: 'background' })}
+                            className="w-full h-32 rounded-2xl border border-dashed border-white/10 hover:border-pink-500/50 bg-[#0f172a] flex flex-col items-center justify-center gap-3 transition-all overflow-hidden relative group"
+                          >
+                             {template.backgroundImage ? (
+                               <>
+                                 <img src={template.backgroundImage} className="w-full h-full object-cover" alt="Preview" />
+                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                                   <span className="text-[10px] font-black text-white uppercase bg-pink-600 px-4 py-2 rounded-xl">Change Image</span>
+                                 </div>
+                               </>
+                             ) : (
+                               <>
+                                 <ImageIcon className="w-6 h-6 text-slate-600" />
+                                 <span className="text-[10px] font-bold text-slate-600 uppercase">Select Asset</span>
+                               </>
+                             )}
+                          </button>
                         </div>
                       </div>
+                   </div>
+                </motion.div>
+              )}
 
-                      <div className="space-y-6">
-                         <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Precise Positioning (Pixels)</h3>
-                         <div className="grid grid-cols-1 gap-4 bg-slate-900/30 p-6 rounded-[32px] border border-white/5">
-                            {/* Logo Position */}
-                            <div className="flex items-center justify-between gap-4">
-                               <span className="text-[10px] font-black text-slate-400 uppercase w-12">Logo</span>
-                               <div className="flex gap-2">
-                                  <div className="flex flex-col gap-1">
-                                    <span className="text-[8px] text-slate-600 uppercase font-bold text-center">Top</span>
-                                    <input type="number" value={Math.round(template.logoTop)} onChange={e => setTemplate({...template, logoTop: parseInt(e.target.value)})} className="w-20 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white font-mono" />
-                                  </div>
-                                  <div className="flex flex-col gap-1">
-                                    <span className="text-[8px] text-slate-600 uppercase font-bold text-center">Offset X</span>
-                                    <input type="number" value={Math.round(template.logoLeft)} onChange={e => setTemplate({...template, logoLeft: parseInt(e.target.value)})} className="w-20 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white font-mono" />
-                                  </div>
-                                  <button onClick={() => setTemplate({...template, logoLeft: 0})} className="mt-4 px-3 py-1 bg-blue-500/10 text-blue-400 text-[10px] font-bold rounded-lg hover:bg-blue-500/20 transition-all">Center</button>
-                               </div>
-                            </div>
-
-                            {/* Main Position */}
-                            <div className="flex items-center justify-between gap-4 border-t border-white/5 pt-4">
-                               <span className="text-[10px] font-black text-slate-400 uppercase w-12">Main</span>
-                               <div className="flex gap-2">
-                                  <div className="flex flex-col gap-1">
-                                    <span className="text-[8px] text-slate-600 uppercase font-bold text-center">Top</span>
-                                    <input type="number" value={Math.round(template.mainTop)} onChange={e => setTemplate({...template, mainTop: parseInt(e.target.value)})} className="w-20 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white font-mono" />
-                                  </div>
-                                  <div className="flex flex-col gap-1">
-                                    <span className="text-[8px] text-slate-600 uppercase font-bold text-center">Left</span>
-                                    <input type="number" value={Math.round(template.mainLeft)} onChange={e => setTemplate({...template, mainLeft: parseInt(e.target.value)})} className="w-20 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white font-mono" />
-                                  </div>
-                               </div>
-                            </div>
-
-                            {/* Tag Position */}
-                            <div className="flex items-center justify-between gap-4 border-t border-white/5 pt-4">
-                               <span className="text-[10px] font-black text-slate-400 uppercase w-12">Tag</span>
-                               <div className="flex gap-2">
-                                  <div className="flex flex-col gap-1">
-                                    <span className="text-[8px] text-slate-600 uppercase font-bold text-center">Top</span>
-                                    <input type="number" value={Math.round(template.tagTop)} onChange={e => setTemplate({...template, tagTop: parseInt(e.target.value)})} className="w-20 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white font-mono" />
-                                  </div>
-                                  <div className="flex flex-col gap-1">
-                                    <span className="text-[8px] text-slate-600 uppercase font-bold text-center">Offset X</span>
-                                    <input type="number" value={Math.round(template.tagLeft)} onChange={e => setTemplate({...template, tagLeft: parseInt(e.target.value)})} className="w-20 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white font-mono" />
-                                  </div>
-                                  <button onClick={() => setTemplate({...template, tagLeft: 0})} className="mt-4 px-3 py-1 bg-blue-500/10 text-blue-400 text-[10px] font-bold rounded-lg hover:bg-blue-500/20 transition-all">Center</button>
-                               </div>
-                            </div>
-                         </div>
-                      </div>
-
-                      <div className="space-y-6">
-                         <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Sizing & Layout</h3>
-                         <div className="space-y-6 bg-slate-900/30 p-6 rounded-[32px] border border-white/5">
-                            <SizeSlider label="Content Spacing" value={template.contentGap} min={0} max={200} onChange={v => setTemplate({...template, contentGap: v})} />
-                            <SizeSlider label="Hook Size" value={template.hookSize} min={40} max={400} onChange={v => setTemplate({...template, hookSize: v})} />
-                            <SizeSlider label="Body Size" value={template.bodySize} min={20} max={200} onChange={v => setTemplate({...template, bodySize: v})} />
-                            <SizeSlider label="Divider Width" value={template.dividerWidth} min={50} max={1000} onChange={v => setTemplate({...template, dividerWidth: v})} />
-                            <SizeSlider label="Logo Size" value={template.logoSize} min={20} max={300} onChange={v => setTemplate({...template, logoSize: v})} />
-                         </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 h-fit">
-                       <ColorInput label="LOGO" value={template.logoColor} onChange={val => setTemplate({...template, logoColor: val})} />
-                       <ColorInput label="ACCENT" value={template.dividerColor} onChange={val => setTemplate({...template, dividerColor: val})} />
-                       <ColorInput label="TAG BG" value={template.tagBg} onChange={val => setTemplate({...template, tagBg: val})} />
-                       <ColorInput label="TAG TEXT" value={template.tagColor} onChange={val => setTemplate({...template, tagColor: val})} />
-                       <ColorInput label="HOOK" value={template.hookColor} onChange={val => setTemplate({...template, hookColor: val})} />
-                       <ColorInput label="BODY" value={template.bodyColor} onChange={val => setTemplate({...template, bodyColor: val})} />
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === 'audio' && (
-              <motion.div key="audio" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-8">
-                 <div className="glass rounded-[48px] border border-white/5 p-10">
-                    <div className="flex items-center justify-between mb-10">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 bg-purple-500/10 text-purple-400 rounded-2xl border border-purple-500/20">
-                          <Volume2 className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <h2 className="text-2xl font-black text-white tracking-tight">Voice Over Engine</h2>
-                          <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Configure TTS Priority</p>
-                        </div>
-                      </div>
-                      <button onClick={() => saveSetting('tts_priority', ttsPriority.join(','))} className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white font-black px-8 py-4 rounded-3xl transition-all active:scale-95">
-                        <Save className="w-5 h-5" /> SAVE PRIORITY
-                      </button>
-                    </div>
-
-                    <div className="space-y-4">
-                      {ttsPriority.map((provider, index) => (
-                        <div key={provider} className="flex items-center justify-between p-6 bg-slate-900/50 border border-white/5 rounded-[32px] group">
-                          <div className="flex items-center gap-5">
-                            <span className="text-2xl font-black text-white/10">{index + 1}</span>
-                            <span className="text-lg font-bold text-white capitalize">{provider}</span>
+              {activeTab === 'audio' && (
+                <motion.div key="audio" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+                   <div className="bg-[#1e293b]/10 border border-white/5 rounded-2xl p-6">
+                      <div className="flex items-center gap-2 mb-6"><Volume2 className="w-3.5 h-3.5 text-pink-500"/><h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">TTS Provider Priority</h3></div>
+                      <p className="text-[10px] text-slate-500 mb-6 px-1 italic">Drag or use arrows to set the order of Text-to-Speech providers. The system will try the top provider first.</p>
+                      <div className="space-y-3">
+                        {ttsPriority.map((provider, index) => (
+                          <div key={provider} className="flex items-center justify-between p-4 bg-[#0f172a] border border-white/5 rounded-2xl group">
+                            <div className="flex items-center gap-4"><span className="text-lg font-black text-white/5 italic">{index + 1}</span><span className="text-sm font-bold text-slate-300 capitalize tracking-tight">{provider}</span></div>
+                            <div className="flex gap-2"><button onClick={() => movePriority(index, 'up')} disabled={index === 0} className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-white disabled:opacity-0 transition-all"><ArrowUp className="w-4 h-4"/></button><button onClick={() => movePriority(index, 'down')} disabled={index === ttsPriority.length - 1} className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-white disabled:opacity-0 transition-all"><ArrowDown className="w-4 h-4"/></button></div>
                           </div>
-                          <div className="flex gap-2">
-                             <button onClick={() => movePriority(index, 'up')} disabled={index === 0} className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-white disabled:opacity-0 transition-all"><ArrowUp className="w-5 h-5"/></button>
-                             <button onClick={() => movePriority(index, 'down')} disabled={index === ttsPriority.length - 1} className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-white disabled:opacity-0 transition-all"><ArrowDown className="w-5 h-5"/></button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-[#1e293b]/10 border border-white/5 rounded-2xl p-6">
+                      <div className="flex items-center gap-2 mb-6"><Type className="w-3.5 h-3.5 text-pink-500"/><h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Voice ID Overrides</h3></div>
+                      <p className="text-[10px] text-slate-500 mb-6 px-1 italic">Leave blank to use default values from system configuration (.env).</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {ttsPriority.map(provider => (
+                          <div key={provider} className="space-y-1">
+                            <span className="text-[8px] font-bold text-slate-600 uppercase ml-1">{provider} Voice ID</span>
+                            <input 
+                              type="text" 
+                              placeholder="System Default"
+                              value={template.ttsVoices?.[provider] || ''} 
+                              onChange={e => setTemplate({
+                                ...template, 
+                                ttsVoices: { ...(template.ttsVoices || {}), [provider]: e.target.value }
+                              })} 
+                              className="w-full bg-[#0f172a] border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white font-bold outline-none focus:border-pink-500/50 placeholder:text-slate-700" 
+                            />
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Right Column: Visual Preview & Editor */}
-        <div className="xl:col-span-4 sticky top-8">
-          <div className="flex flex-col items-center">
-            <div className="w-full flex items-center justify-between mb-6 px-6 py-3 bg-white/5 rounded-full border border-white/5">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-                <span className="text-[10px] font-black uppercase tracking-tighter text-slate-400">Production Studio Preview</span>
-              </div>
-              <button 
-                onClick={playPreview}
-                className="flex items-center gap-2 px-3 py-1 bg-blue-500/20 hover:bg-blue-500 text-blue-400 hover:text-white rounded-full transition-all text-[10px] font-black uppercase"
-              >
-                <Sparkles className="w-3 h-3" /> Play
-              </button>
-            </div>
-            
-            <div 
-              ref={previewRef}
-              className="relative w-[320px] aspect-[9/16] rounded-[3.5rem] border-[10px] border-slate-900 shadow-2xl shadow-black overflow-hidden bg-black select-none"
-            >
-               {/* BG Layer */}
-               <div className="absolute inset-0">
-                  {template.backgroundImage ? (
-                    <img src={template.backgroundImage} className="w-full h-full object-cover" style={{ filter: `brightness(${template.backgroundBrightness})` }} alt="" />
-                  ) : (
-                    <div className="w-full h-full bg-slate-900 flex items-center justify-center text-white/5"><ImageIcon className="w-16 h-16" /></div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80"></div>
-                  
-                  {/* Center Guide Line */}
-                  <div className="absolute left-1/2 top-0 w-[1px] h-full bg-blue-500/20 z-0"></div>
-               </div>
-
-               {/* Draggable Elements */}
-               <div className="absolute inset-0 z-10 pointer-events-none">
-                  {/* Logo */}
-                  <motion.div 
-                    drag 
-                    dragMomentum={false} 
-                    dragSnapToOrigin={true}
-                    onDragEnd={(e, info) => handleDragEnd(e, info, 'logo')}
-                    className="absolute pointer-events-auto cursor-move group logo-el"
-                    style={{ 
-                      top: (template.logoTop || 0) * SCALE, 
-                      left: '50%',
-                      translateX: '-50%',
-                      x: (template.logoLeft || 0) * SCALE 
-                    }}
-                  >
-                    <div className="border-2 border-transparent group-hover:border-blue-500/50 rounded-lg px-2">
-                      <span className="font-black tracking-[6px] text-center uppercase whitespace-nowrap" style={{ fontFamily: 'Anton', color: template.logoColor, fontSize: (template.logoSize || DEFAULTS.logoSize) * SCALE, textShadow: `0 0 20px ${template.logoColor}66` }}>{template.logoText || 'LOGO'}</span>
-                    </div>
-                  </motion.div>
-
-                  {/* MAIN STACK GROUP */}
-                  <motion.div 
-                    drag 
-                    dragMomentum={false} 
-                    dragSnapToOrigin={true}
-                    onDragEnd={(e, info) => handleDragEnd(e, info, 'main')}
-                    className="absolute pointer-events-auto cursor-move group main-stack-el"
-                    style={{ 
-                      top: (template.mainTop || DEFAULTS.mainTop) * SCALE, 
-                      left: (template.mainLeft || DEFAULTS.mainLeft) * SCALE, 
-                      width: 920 * SCALE 
-                    }}
-                  >
-                    <div className="border-2 border-transparent group-hover:border-blue-500/50 rounded-lg flex flex-col" style={{ gap: (template.contentGap || DEFAULTS.contentGap) * SCALE }}>
-                       <h3 className="font-black uppercase tracking-tight hook-el" style={{ fontFamily: 'Anton', color: template.hookColor, fontSize: (template.hookSize || DEFAULTS.hookSize) * SCALE, lineHeight: 1.15 }}>THE FUTURE OF VIDEO</h3>
-                       
-                       <div className="h-1.5 rounded-full divider-el-inner" style={{ width: (template.dividerWidth || DEFAULTS.dividerWidth) * SCALE, backgroundColor: template.dividerColor }}></div>
-
-                       <p className="font-medium body-el" style={{ color: template.bodyColor, fontSize: (template.bodySize || DEFAULTS.bodySize) * SCALE, lineHeight: 1.5 }}>Your automated content starts here. Drag me around!</p>
-                    </div>
-                  </motion.div>
-
-                  {/* Tag */}
-                  <motion.div 
-                    drag 
-                    dragMomentum={false} 
-                    dragSnapToOrigin={true}
-                    onDragEnd={(e, info) => handleDragEnd(e, info, 'tag')}
-                    className="absolute pointer-events-auto cursor-move group tag-el"
-                    style={{ 
-                      top: (template.tagTop || 0) * SCALE, 
-                      left: '50%',
-                      translateX: '-50%',
-                      x: (template.tagLeft || 0) * SCALE 
-                    }}
-                  >
-                    <div className="border-2 border-transparent group-hover:border-blue-500/50 rounded-lg px-2">
-                       <div className="inline-block px-4 py-1 rounded-sm transform skew-x-[-15deg] font-black whitespace-nowrap" style={{ backgroundColor: template.tagBg, color: template.tagColor, fontSize: (template.tagSize || DEFAULTS.tagSize) * SCALE }}>{template.tagText || 'HOT NEWS'}</div>
-                    </div>
-                  </motion.div>
-               </div>
-
-               {/* Overlay Guide */}
-               <div className="absolute inset-0 pointer-events-none border border-white/5 rounded-[3rem]"></div>
-            </div>
-
-            <p className="mt-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center px-8">Tip: Grab elements directly on the phone to move them. Changes are synced instantly to the template.</p>
+                 </motion.div>
+               )}
+            </AnimatePresence>
           </div>
         </div>
-      </div>
+
+        {/* Right Sidebar: Mobile Preview */}
+        <div className="w-full xl:w-[480px] border-l border-white/5 bg-[#0f172a]/20 flex flex-col items-center justify-center p-8 shrink-0 z-40 overflow-hidden">
+          <div className="w-full max-w-[320px] flex items-center justify-between mb-6 px-5 py-3 bg-white/5 rounded-2xl border border-white/5">
+            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse"></div><span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Live Preview</span></div>
+            <button onClick={playPreview} className="text-[10px] font-black uppercase text-pink-400 hover:text-white transition-all flex items-center gap-2"><Sparkles className="w-4 h-4" /> Play Anim</button>
+          </div>
+          
+          <div className="relative group shrink-0">
+            <div className="absolute -inset-1 bg-gradient-to-b from-pink-600/10 to-rose-600/10 rounded-[3rem] blur-2xl opacity-20"></div>
+            <div ref={previewRef} className="relative w-[300px] aspect-[9/16] rounded-[3rem] border-[8px] border-[#1e293b] shadow-2xl overflow-hidden bg-black select-none">
+               <div className="absolute inset-0">
+                  <AnimatePresence mode="popLayout">
+                    {template.backgroundImage ? (
+                      <motion.img 
+                        key={template.backgroundImage}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.8, ease: "easeInOut" }}
+                        src={template.backgroundImage} 
+                        className="absolute inset-0 w-full h-full object-cover" 
+                        style={{ filter: `brightness(${template.backgroundBrightness})` }} 
+                        alt="" 
+                      />
+                    ) : (
+                      <motion.div 
+                        key="default-bg"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 w-full h-full bg-slate-900 flex items-center justify-center text-white/5"
+                      >
+                        <ImageIcon className="w-12 h-12" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80 z-0"></div>
+               </div>
+
+                <div className="absolute inset-0 z-10 pointer-events-none">
+                   {template.showLogo !== false && (
+                     <div className="absolute pointer-events-none flex justify-center" style={{ top: template.logoTop * SCALE, left: 0, right: 0, marginLeft: template.logoLeft * SCALE }}>
+                       <motion.div 
+                         drag dragMomentum={false} dragSnapToOrigin={true} onDragEnd={(e, info) => handleDragEnd(e, info, 'logo')} 
+                         className="pointer-events-auto cursor-move group logo-el" 
+                       >
+                         <div className="border border-transparent group-hover:border-pink-500/50 rounded-lg px-2 text-center">
+                           <span className="font-black text-center uppercase whitespace-nowrap block" style={{ fontFamily: 'Anton', color: template.logoColor, fontSize: (template.logoSize || DEFAULTS.logoSize) * SCALE, textShadow: `0 0 20px ${template.logoColor}66`, letterSpacing: 4 * SCALE }}>{template.logoText || 'LOGO'}</span>
+                         </div>
+                       </motion.div>
+                     </div>
+                   )}
+                   {template.showCard !== false && (
+                     <div className="absolute pointer-events-none" style={{ top: template.mainTop * SCALE, left: 0, width: '100%', padding: `0 ${Math.max(0, template.mainLeft * SCALE)}px` }}>
+                       <motion.div 
+                         drag="y" dragMomentum={false} dragSnapToOrigin={true} onDragEnd={(e, info) => handleDragEnd(e, info, 'main')} 
+                         className="pointer-events-auto cursor-move group main-stack-el w-full" 
+                       >
+                         <div className="border border-transparent group-hover:border-pink-500/50 flex flex-col p-4 transition-all" style={{ gap: (template.contentGap || DEFAULTS.contentGap) * SCALE, backgroundColor: template.cardBgColor, borderTop: `${template.cardBorderTop * SCALE}px solid ${template.cardBorderColor}`, borderBottom: `${template.cardBorderBottom * SCALE}px solid ${template.cardBorderColor}`, borderLeft: `${template.cardBorderLeft * SCALE}px solid ${template.cardBorderColor}`, borderRight: `${template.cardBorderRight * SCALE}px solid ${template.cardBorderColor}`, borderRadius: (template.cardBorderRadius || 0) * SCALE }}>
+                           <h3 className="font-black uppercase tracking-tight hook-el" style={{ fontFamily: 'Anton', color: template.hookColor, fontSize: (template.hookSize || DEFAULTS.hookSize) * SCALE, lineHeight: 1.15 }}>THE FUTURE OF VIDEO</h3>
+                           <div className="h-1 rounded-full divider-el-inner" style={{ width: (template.dividerWidth || DEFAULTS.dividerWidth) * SCALE, backgroundColor: template.dividerColor }}></div>
+                           <p className="font-medium body-el" style={{ color: template.bodyColor, fontSize: (template.bodySize || DEFAULTS.bodySize) * SCALE, lineHeight: 1.5 }}>Your automated content starts here. Drag me around!</p>
+                         </div>
+                       </motion.div>
+                     </div>
+                   )}
+                   <div className="absolute inset-0 pointer-events-none">
+                      {template.showTag !== false && (
+                        <div className="absolute pointer-events-none flex justify-center" style={{ top: template.tagTop * SCALE, left: 0, right: 0, marginLeft: template.tagLeft * SCALE }}>
+                          <motion.div 
+                            drag dragMomentum={false} dragSnapToOrigin={true} onDragEnd={(e, info) => handleDragEnd(e, info, 'tag')} 
+                            className="pointer-events-auto cursor-move group tag-el" 
+                          >
+                            <div className="border border-transparent group-hover:border-pink-500/50 rounded-lg px-2">
+                              <div className="inline-block px-3 py-1 rounded-sm transform skew-x-[-15deg] font-black whitespace-nowrap" style={{ backgroundColor: template.tagBg, color: template.tagColor, fontSize: (template.tagSize || DEFAULTS.tagSize) * SCALE }}>{template.tagText || 'HOT NEWS'}</div>
+                            </div>
+                          </motion.div>
+                        </div>
+                      )}
+                      {template.showDatetime !== false && (
+                        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[9px] font-bold text-white/30 uppercase tracking-widest whitespace-nowrap">MAY 05, 2026</div>
+                      )}
+                   </div>
+                </div>
+            </div>
+          </div>
+          <p className="mt-6 text-[9px] font-bold text-slate-700 uppercase tracking-[0.2em] text-center px-12 opacity-40 italic">Precision Studio Engine</p>
+        </div>
+      </main>
+
+      <AnimatePresence>
+        {showAssetPicker.active && (
+          <AssetPicker 
+            onSelect={(url) => {
+              setTemplate({ ...template, backgroundImage: url });
+              setShowAssetPicker({ active: false, type: 'background' });
+            }}
+            onClose={() => setShowAssetPicker({ active: false, type: 'background' })}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

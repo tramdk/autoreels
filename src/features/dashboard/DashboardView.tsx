@@ -1,24 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { 
   RefreshCw, 
   Rss, 
   FileText, 
-  Video, 
+  Video as VideoIcon, 
   CheckCircle2, 
   Zap, 
   Wand2, 
-  ExternalLink,
-  Edit,
+  Plus, 
+  Edit, 
+  Trash2, 
+  ChevronRight, 
+  ArrowUpRight,
   X,
   Save,
-  Plus
+  Image as ImageIcon,
+  History as HistoryIcon
 } from 'lucide-react';
 import { StatCard } from '../../components/ui/StatCard';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { Source, Article, VideoItem } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { AssetPicker } from '../../components/ui/AssetPicker';
+import { GenerateVideoAction } from '../../components/ui/GenerateVideoAction';
+import { api } from '../../services/api';
+import { toast } from 'react-hot-toast';
 
 interface DashboardViewProps {
   sources: Source[];
@@ -27,9 +35,10 @@ interface DashboardViewProps {
   loading: boolean;
   onScrape: () => void;
   onSummarize: (id: string) => void;
-  onGenerateVideo: (id: string) => void;
+  onGenerateVideo: (id: string, templateId?: string, options?: { ttsProvider?: string, ttsVoiceId?: string }) => void;
   onUpdateScript: (id: string, script: any) => void;
   onCreateManualArticle: (data: { title: string, content: string }) => void;
+  onCreateManualScript: (data: { title: string, script: any }) => void;
   renderingVideos: Record<string, number>;
   stats: { sources: number, articles: number, videos: number, postedVideos: number };
   page: number;
@@ -67,6 +76,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onGenerateVideo,
   onUpdateScript,
   onCreateManualArticle,
+  onCreateManualScript,
   renderingVideos,
   stats,
   page,
@@ -75,10 +85,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
-  const [tempScript, setTempScript] = useState<any>(null);
-  const [isAddingManual, setIsAddingManual] = useState(false);
-  const [manualData, setManualData] = useState({ title: '', content: '', imageUrl: '' });
+  const [editingArticle, setEditingArticle] = React.useState<Article | null>(null);
+  const [tempScript, setTempScript] = React.useState<any>(null);
+  const [templateId, setTemplateId] = React.useState('classic');
+  const [isAddingManual, setIsAddingManual] = React.useState(false);
+  const [manualData, setManualData] = React.useState<any>({ title: '', content: '' });
+  const [showAssetPicker, setShowAssetPicker] = React.useState<{ active: boolean; index: number | null }>({ active: false, index: null });
+
+  const SCALE = 240 / 1080; // Smaller scale for popup
 
   const startEditing = (article: Article) => {
     setEditingArticle(article);
@@ -99,6 +113,41 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     setManualData({ title: '', content: '', imageUrl: '' });
   };
 
+  const addScene = (isTemp: boolean = true) => {
+    const target = isTemp ? tempScript : null;
+    const setTarget = isTemp ? setTempScript : null;
+    
+    if (!target || !target.scenes || !setTarget) return;
+    
+    const newId = target.scenes.length + 1;
+    const newScene = { id: newId, type: 'body', voiceText: '', imageKeyword: 'report', imageUrl: '' };
+    
+    // Insert before outro if possible
+    const scenes = [...target.scenes];
+    const outroIdx = scenes.findIndex((s: any) => s.type === 'outro');
+    if (outroIdx !== -1) {
+      scenes.splice(outroIdx, 0, newScene);
+    } else {
+      scenes.push(newScene);
+    }
+    
+    // Re-id
+    const reIded = scenes.map((s, i) => ({ ...s, id: i + 1 }));
+    setTarget({ ...target, scenes: reIded });
+  };
+
+  const removeScene = (idx: number, isTemp: boolean = true) => {
+    const target = isTemp ? tempScript : null;
+    const setTarget = isTemp ? setTempScript : null;
+    
+    if (!target || !target.scenes || !setTarget) return;
+    if (target.scenes.length <= 1) return;
+    
+    const scenes = target.scenes.filter((_: any, i: number) => i !== idx);
+    const reIded = scenes.map((s: any, i: number) => ({ ...s, id: i + 1 }));
+    setTarget({ ...target, scenes: reIded });
+  };
+
   const getArticleProgress = (articleId: string) => {
     const key = Object.keys(renderingVideos).find(k => k.startsWith(`v_${articleId}_`));
     return key ? renderingVideos[key] : null;
@@ -106,7 +155,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-      {/* Header Stat Cards as before... */}
+      {/* Header Stat Cards */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-bold tracking-tight text-white mb-2">{t('dashboard.title')}</h1>
@@ -139,7 +188,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard title={t('dashboard.sources')} value={stats.sources} icon={<Rss className="w-5 h-5" />} color="rose" onClick={() => navigate('/sources')} />
         <StatCard title={t('dashboard.articles')} value={stats.articles} icon={<FileText className="w-5 h-5" />} color="blue" onClick={() => navigate('/dashboard')} />
-        <StatCard title={t('dashboard.videos')} value={stats.videos} icon={<Video className="w-5 h-5" />} color="purple" onClick={() => navigate('/videos')} />
+        <StatCard title={t('dashboard.videos')} value={stats.videos} icon={<VideoIcon className="w-5 h-5" />} color="purple" onClick={() => navigate('/videos')} />
         <StatCard title={t('dashboard.posted')} value={stats.postedVideos} icon={<CheckCircle2 className="w-5 h-5" />} color="green" onClick={() => navigate('/videos?status=posted')} />
       </div>
       
@@ -191,9 +240,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         <button onClick={() => startEditing(article)} className="p-2.5 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl transition-all border border-white/5">
                            <Edit className="w-4 h-4" />
                         </button>
-                        <button onClick={() => onGenerateVideo(article.id)} disabled={loading} className="bg-purple-600/10 text-purple-400 hover:bg-purple-600/20 px-4 py-2 rounded-xl text-sm font-bold border border-purple-500/20 transition-all flex items-center gap-2 font-mono">
-                           <Video className="w-4 h-4" /> {t('dashboard.generate')}
-                        </button>
+                        <GenerateVideoAction 
+                          articleId={article.id}
+                          loading={loading}
+                          onGenerate={onGenerateVideo}
+                          t={t}
+                        />
                       </>
                     )}
                     {(() => {
@@ -218,7 +270,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       return null;
                     })()}
                     <a href={article.link} target="_blank" rel="noopener noreferrer" className="p-2 text-slate-600 hover:text-white transition-colors">
-                      <ExternalLink className="w-4 h-4" />
+                      <ArrowUpRight className="w-4 h-4" />
                     </a>
                   </div>
                 </motion.div>
@@ -268,6 +320,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <button onClick={() => setEditingArticle(null)} className="p-2 text-slate-400 hover:text-white"><X className="w-6 h-6" /></button>
               </div>
 
+              {editingArticle.imageUrl && (
+                <div className="mb-6 p-4 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-black border border-white/10 flex-shrink-0">
+                    <img src={editingArticle.imageUrl} alt="Source" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Source Image URL</p>
+                    <p className="text-xs text-slate-400 truncate font-mono">{editingArticle.imageUrl}</p>
+                  </div>
+                </div>
+              )}
+
               {/* Scene-based editor */}
               {tempScript.scenes && Array.isArray(tempScript.scenes) ? (
                 <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
@@ -279,21 +343,52 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     };
                     const color = typeColors[scene.type] || 'text-slate-400 bg-white/5 border-white/10';
                     return (
-                      <div key={idx} className="p-4 rounded-2xl bg-slate-800/40 border border-white/5 space-y-3">
+                      <div key={idx} className="p-4 rounded-2xl bg-slate-800/40 border border-white/5 space-y-3 relative group/scene">
                         <div className="flex items-center gap-3">
                           <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border ${color}`}>
                             {scene.type} #{scene.id}
                           </span>
-                          <input
-                            value={scene.imageKeyword || ''}
-                            onChange={e => {
-                              const updated = [...tempScript.scenes];
-                              updated[idx] = { ...updated[idx], imageKeyword: e.target.value };
-                              setTempScript({ ...tempScript, scenes: updated });
-                            }}
-                            placeholder="image keyword"
-                            className="flex-1 bg-white/5 border border-white/5 rounded-xl px-3 py-1.5 text-xs text-slate-400 placeholder:text-slate-600 focus:border-primary/50 focus:outline-none font-mono"
-                          />
+                          <div className="flex-1 flex gap-2">
+                            <div className="flex-1 relative flex items-center gap-1.5">
+                              <div className="relative flex-1">
+                                <ImageIcon className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                                <input
+                                  value={scene.imageUrl || scene.image_url || ''}
+                                  onChange={e => {
+                                    const updated = [...tempScript.scenes];
+                                    updated[idx] = { ...updated[idx], imageUrl: e.target.value };
+                                    setTempScript({ ...tempScript, scenes: updated });
+                                  }}
+                                  placeholder="Image URL (optional)"
+                                  className="w-full bg-white/5 border border-white/5 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-300 placeholder:text-slate-600 focus:border-primary/50 focus:outline-none"
+                                />
+                              </div>
+                              <button 
+                                onClick={() => setShowAssetPicker({ active: true, index: idx })}
+                                className="p-1.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg text-slate-400 hover:text-white transition-all"
+                              >
+                                <HistoryIcon className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                            <input
+                              value={scene.imageKeyword || ''}
+                              onChange={e => {
+                                const updated = [...tempScript.scenes];
+                                updated[idx] = { ...updated[idx], imageKeyword: e.target.value };
+                                setTempScript({ ...tempScript, scenes: updated });
+                              }}
+                              placeholder="keyword"
+                              className="w-24 bg-white/5 border border-white/5 rounded-xl px-3 py-1.5 text-xs text-slate-500 placeholder:text-slate-600 focus:border-primary/50 focus:outline-none font-mono"
+                            />
+                          </div>
+                          {tempScript.scenes.length > 1 && (
+                            <button 
+                              onClick={() => removeScene(idx, true)}
+                              className="p-1.5 text-slate-600 hover:text-rose-500 transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                         <textarea
                           value={scene.voiceText || ''}
@@ -308,6 +403,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       </div>
                     );
                   })}
+                  <button 
+                    onClick={() => addScene(true)}
+                    className="w-full py-4 rounded-2xl border-2 border-dashed border-white/5 text-slate-500 hover:text-white hover:border-white/10 hover:bg-white/5 transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                  >
+                    <Plus className="w-4 h-4" /> Add Scene
+                  </button>
                 </div>
               ) : (
                 /* Fallback: old flat format */
@@ -340,6 +441,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </div>
               )}
 
+
               <div className="flex gap-4 mt-8 pt-6 border-t border-white/5">
                 <button onClick={() => setEditingArticle(null)} className="flex-1 py-4 text-slate-400 font-bold hover:text-white transition-all">{t('common.discard')}</button>
                 <button 
@@ -361,7 +463,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsAddingManual(false)} className="absolute inset-0 bg-black/90 backdrop-blur-md" />
             <motion.div 
               initial={{ scale: 0.9, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 30 }}
-              className="glass w-full max-w-xl p-8 rounded-[40px] border border-white/10 shadow-3xl relative z-10 overflow-hidden"
+              className="glass w-full max-xl p-8 rounded-[40px] border border-white/10 shadow-3xl relative z-10 overflow-hidden"
             >
               <div className="flex items-center justify-between mb-8">
                 <div>
@@ -405,6 +507,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showAssetPicker.active && (
+          <AssetPicker 
+            onSelect={(url) => {
+              const idx = showAssetPicker.index;
+              if (idx !== null) {
+                const updated = [...tempScript.scenes];
+                updated[idx] = { ...updated[idx], imageUrl: url };
+                setTempScript({ ...tempScript, scenes: updated });
+              }
+              setShowAssetPicker({ active: false, index: null });
+            }}
+            onClose={() => setShowAssetPicker({ active: false, index: null })}
+          />
         )}
       </AnimatePresence>
     </motion.div>

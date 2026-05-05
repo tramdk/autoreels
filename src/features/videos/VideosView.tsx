@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Video, Share2, Trash2, ExternalLink, RefreshCw, X } from 'lucide-react';
+import { Video as VideoIcon, Share2, Trash2, ArrowUpRight, RefreshCw, X } from 'lucide-react';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { VideoItem } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -86,7 +86,7 @@ export const VideosView: React.FC<VideosViewProps> = ({
               >
                 <div className="aspect-[9/16] bg-slate-950 relative overflow-hidden">
                   <video 
-                    src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/videos/play/${video.id}`} 
+                    src={`/api/videos/play/${video.id}`} 
                     className="w-full h-full object-cover" 
                     controls 
                   />
@@ -115,7 +115,7 @@ export const VideosView: React.FC<VideosViewProps> = ({
                             {t('videos.status')}
                           </button>
                           <button className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all">
-                            <ExternalLink className="w-5 h-5" />
+                            <ArrowUpRight className="w-5 h-5" />
                           </button>
                         </div>
                      )}
@@ -137,7 +137,7 @@ export const VideosView: React.FC<VideosViewProps> = ({
         )}
         {!loading && videos.length === 0 && (
           <div className="col-span-full text-center py-40 bg-slate-900/10 border-2 border-slate-800 border-dashed rounded-[44px]">
-            <Video className="w-16 h-16 text-slate-800 mx-auto mb-6" />
+            <VideoIcon className="w-16 h-16 text-slate-800 mx-auto mb-6" />
             <p className="text-xl text-slate-500 font-medium">{t('common.noData')}</p>
             <button onClick={onStartPipeline} className="mt-4 text-primary font-bold hover:underline">{t('articles.emptyState')}</button>
           </div>

@@ -11,59 +11,24 @@
     rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body,
-    html {
-      width: 1080px;
-      height: 1920px;
-      overflow: hidden;
-      background-color: #000;
-      font-family: 'Be Vietnam Pro', sans-serif;
-    }
-
-    #root {
-      position: relative;
-      width: 1080px;
-      height: 1920px;
-      background-color: #111;
-      color: white;
-      overflow: hidden;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { width: 1080px; height: 1920px; overflow: hidden; background-color: #000; font-family: 'Be Vietnam Pro', sans-serif; }
+    #root { position: relative; width: 1080px; height: 1920px; background-color: #111; color: white; overflow: hidden; }
 
     /* Background */
-    #bg-image {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      z-index: 0;
-    }
-    #bg-overlay {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.92) 100%);
-      z-index: 1;
-    }
+    .bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+    #bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.85) 100%); z-index: 1; }
 
+    /* Positioning Utility */
+    .pos-el { position: absolute; z-index: 100; }
+    
     /* Brand */
     #brand-header {
-      position: absolute;
       top: {{LOGO_TOP}}px;
       left: 50%;
-      /* If LOGO_LEFT is 0, it's centered. Otherwise it's an offset from center. */
-      /* Note: We use a calculation so that if users use the old absolute value (like 0-1080), we might need to adjust. */
-      /* But for a clean start, let's treat LOGO_LEFT as offset from center. */
-      transform: translateX(-50%) translateX({{LOGO_LEFT}}px);
-      z-index: 100;
-      text-align: center;
-      white-space: nowrap;
+      display: {{SHOW_LOGO}};
     }
+    
     #brand-logo {
       font-family: 'Anton', sans-serif;
       font-size: {{LOGO_SIZE}}px;
@@ -71,20 +36,20 @@
       text-transform: uppercase;
       color: {{LOGO_COLOR}};
       text-shadow: 0 0 30px {{LOGO_COLOR}}88;
+      white-space: nowrap;
+      transform: translateX(-50%) translateX({{LOGO_LEFT}}px);
     }
 
-    /* Bottom bar */
+    /* Bottom info / Tag */
     #bottom-info {
-      position: absolute;
       top: {{TAG_TOP}}px;
       left: 50%;
-      transform: translateX(-50%) translateX({{TAG_LEFT}}px);
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 20px;
-      z-index: 100;
-      white-space: nowrap;
+      transform: translateX(-50%) translateX({{TAG_LEFT}}px);
     }
+
     #tag-badge {
       padding: 12px 30px;
       font-family: 'Anton', sans-serif;
@@ -94,283 +59,181 @@
       color: {{TAG_COLOR}};
       transform: skewX(-12deg);
       letter-spacing: 2px;
-    }
-    #datetime {
-      font-size: 26px;
-      color: rgba(255,255,255,0.55);
-      font-weight: 700;
-      letter-spacing: 2px;
+      display: {{SHOW_TAG}};
+      white-space: nowrap;
     }
 
-    /* Progress dots */
-    #scene-dots {
-      position: absolute;
-      top: 60px;
-      right: 60px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 100;
-    }
-    .scene-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.3);
-      transition: background 0.3s;
-    }
-    .scene-dot.active {
-      background: {{LOGO_COLOR}};
-      box-shadow: 0 0 8px {{LOGO_COLOR}};
-    }
+    #datetime { font-size: 26px; color: rgba(255,255,255,0.4); font-weight: 700; letter-spacing: 2px; margin-top: 15px; display: {{SHOW_DATETIME}}; }
 
     /* Scene cards */
-    #scene-container {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 50;
-    }
+    #scene-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; }
+    
     .scene-card {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      display: flex;
+      top: {{MAIN_TOP}}px;
+      left: 0;
+      width: 100%;
+      padding: 60px {{MAIN_LEFT}}px;
+      display: none; 
       flex-direction: column;
-      justify-content: flex-start;
-      padding-top: {{MAIN_TOP}}px;
-      padding-left: {{MAIN_LEFT}}px;
-      padding-right: {{MAIN_LEFT}}px;
       gap: {{CONTENT_GAP}}px;
       opacity: 0;
-      pointer-events: none;
+      background-color: {{CARD_BG_COLOR}};
+      border-top: {{CARD_BORDER_TOP}}px solid {{CARD_BORDER_COLOR}};
+      border-bottom: {{CARD_BORDER_BOTTOM}}px solid {{CARD_BORDER_COLOR}};
+      border-left: {{CARD_BORDER_LEFT}}px solid {{CARD_BORDER_COLOR}};
+      border-right: {{CARD_BORDER_RIGHT}}px solid {{CARD_BORDER_COLOR}};
+      border-radius: {{CARD_BORDER_RADIUS}}px;
     }
 
-    /* Hook scene */
-    .scene-card.type-hook .scene-label {
-      font-family: 'Anton', sans-serif;
-      font-size: 28px;
-      letter-spacing: 8px;
-      color: {{DIVIDER_COLOR}};
-      text-transform: uppercase;
-      opacity: 0.9;
-    }
-    .scene-card.type-hook .scene-text {
-      font-family: 'Anton', sans-serif;
-      font-size: {{HOOK_SIZE}}px;
-      line-height: 1.1;
-      text-transform: uppercase;
-      color: {{HOOK_COLOR}};
-      text-shadow: 0 4px 40px rgba(0,0,0,0.6);
-    }
-    .scene-card.type-hook .scene-accent {
-      width: 0;
-      height: 6px;
-      border-radius: 4px;
-      background: {{DIVIDER_COLOR}};
-      box-shadow: 0 0 20px {{DIVIDER_COLOR}}88;
-    }
+    /* Scene text styles */
+    .scene-card.type-hook .scene-label { font-family: 'Anton', sans-serif; font-size: 28px; letter-spacing: 8px; color: {{DIVIDER_COLOR}}; text-transform: uppercase; margin-bottom: 10px; }
+    .scene-card.type-hook .scene-text { font-family: 'Anton', sans-serif; font-size: {{HOOK_SIZE}}px; line-height: 1.1; text-transform: uppercase; color: {{HOOK_COLOR}}; text-shadow: 0 4px 40px rgba(0,0,0,0.6); }
+    .scene-card.type-hook .scene-accent { width: 120px; height: 6px; border-radius: 4px; background: {{DIVIDER_COLOR}}; margin-top: 20px; }
 
-    /* Body scene */
-    .scene-card.type-body .scene-number {
-      font-family: 'Anton', sans-serif;
-      font-size: 200px;
-      line-height: 1;
-      color: {{DIVIDER_COLOR}}18;
-      position: absolute;
-      right: 60px;
-      top: 50%;
-      transform: translateY(-50%);
-      user-select: none;
-    }
-    .scene-card.type-body .scene-text {
-      font-size: {{BODY_SIZE}}px;
-      font-weight: 700;
-      line-height: 1.35;
-      color: {{BODY_COLOR}};
-      text-shadow: 0 2px 20px rgba(0,0,0,0.5);
-      position: relative;
-      z-index: 2;
-    }
-    .scene-card.type-body .scene-bar {
-      width: 60px;
-      height: 5px;
-      border-radius: 3px;
-      background: {{DIVIDER_COLOR}};
-    }
+    .scene-card.type-body .scene-text { font-size: {{BODY_SIZE}}px; font-weight: 700; line-height: 1.35; color: {{BODY_COLOR}}; text-shadow: 0 2px 20px rgba(0,0,0,0.5); }
+    .scene-card.type-body .scene-bar { width: 60px; height: 5px; border-radius: 3px; background: {{DIVIDER_COLOR}}; margin-bottom: 15px; }
 
-    /* Outro scene */
-    .scene-card.type-outro {
-      justify-content: flex-start;
-    }
-    .scene-card.type-outro .scene-cta-label {
-      font-family: 'Anton', sans-serif;
-      font-size: 32px;
-      letter-spacing: 6px;
-      color: {{TAG_BG}};
-      text-transform: uppercase;
-      margin-bottom: 24px;
-    }
-    .scene-card.type-outro .scene-text {
-      font-size: {{BODY_SIZE}}px;
-      font-weight: 700;
-      line-height: 1.35;
-      color: {{BODY_COLOR}};
-    }
-    .scene-card.type-outro .scene-follow {
-      margin-top: 40px;
-      font-size: 36px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.6);
-      letter-spacing: 1px;
-    }
+    .scene-card.type-outro .scene-cta-label { font-family: 'Anton', sans-serif; font-size: 32px; letter-spacing: 6px; color: {{TAG_BG}}; text-transform: uppercase; margin-bottom: 24px; }
+    .scene-card.type-outro .scene-text { font-size: {{BODY_SIZE}}px; font-weight: 700; line-height: 1.35; color: {{BODY_COLOR}}; }
+
+    .main-align-center { align-items: center; text-align: center; }
+    .main-align-right { align-items: flex-end; text-align: right; }
+    .main-align-left { align-items: flex-start; text-align: left; }
+
+
+    
+    #preloader { position: absolute; width: 0; height: 0; overflow: hidden; opacity: 0; }
   </style>
 </head>
 
 <body>
-  <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-start="0">
-
-    <img id="bg-image" src="{{BG_IMAGE_URL}}"
-      style="opacity: {{BG_BRIGHTNESS}}; display: {{BG_IMAGE_DISPLAY}};" alt="">
+  <div id="root">
+    <div id="preloader"></div>
+    <div id="bg-layers">
+      <img id="bg-1" class="bg-layer" src="{{BG_IMAGE_URL}}" style="opacity: {{BG_BRIGHTNESS}};" alt="">
+      <img id="bg-2" class="bg-layer" style="opacity: 0;" alt="">
+    </div>
     <div id="bg-overlay"></div>
 
-    <div id="brand-header">
+    <div id="brand-header" class="pos-el">
       <h1 id="brand-logo">{{LOGO_TEXT}}</h1>
     </div>
 
-    <div id="scene-dots"></div>
+
     <div id="scene-container"></div>
 
-    <div id="bottom-info">
+    <div id="bottom-info" class="pos-el">
       <div id="tag-badge">{{TAG_TEXT}}</div>
       <div id="datetime">{{DATETIME}}</div>
     </div>
-
   </div>
 
   <script>
-    // 1. MUST EXPOSE API IMMEDIATELY
-    window.__hf = {
-      duration: {{DURATION}},
-      seek: function(t) {
-        if (window._tl && typeof window._tl.seek === 'function') {
-          window._tl.pause().seek(t);
-        }
-      }
-    };
-  </script>
-
-  <script>
-    // 2. SCENE DATA (injected by renderer)
     var SCENES_DATA = {{SCENES_JSON}};
+    var SCENE_DURATIONS = {{SCENE_DURATIONS_JSON}};
     var TOTAL_DURATION = {{DURATION}};
-    var LOGO_COLOR = '{{LOGO_COLOR}}';
-    var TAG_BG = '{{TAG_BG}}';
+    var MAIN_ALIGN = '{{MAIN_ALIGN}}';
+    var DEFAULT_BG = '{{BG_IMAGE_URL}}';
+    var BG_BRIGHTNESS = {{BG_BRIGHTNESS}};
+    var SHOW_CARD = '{{SHOW_CARD}}';
+
+    // Preload images to avoid flickering during scene transitions
+    (function preloadImages() {
+      var urls = [DEFAULT_BG];
+      SCENES_DATA.forEach(function(s) { if (s.imageUrl) urls.push(s.imageUrl); });
+      var uniqueUrls = Array.from(new Set(urls.filter(Boolean)));
+      var preloader = document.getElementById('preloader');
+      uniqueUrls.forEach(function(url) {
+        var img = new Image();
+        img.src = url;
+        preloader.appendChild(img);
+      });
+    })();
+
+    window.__hf = { duration: TOTAL_DURATION, seek: function(t) { if (window._tl) window._tl.pause().seek(t); } };
   </script>
 
   <script>
-    // 3. BUILD SCENE CARDS + ANIMATE
     try {
-      if (typeof gsap === 'undefined') throw new Error('GSAP not loaded');
-
       var scenes = SCENES_DATA;
       var n = scenes.length;
       var container = document.getElementById('scene-container');
-      var dotsContainer = document.getElementById('scene-dots');
-
-      // Timing: reserve 0.5s lead-in, divide rest evenly
-      var leadIn = 0.5;
-      var usable = TOTAL_DURATION - leadIn;
-      var sceneDuration = usable / n;    // time each scene owns
-      var animIn  = Math.min(0.7, sceneDuration * 0.25);
-      var animOut = Math.min(0.5, sceneDuration * 0.2);
-      var holdStart = animIn;
-      var holdEnd   = sceneDuration - animOut;
-
-      // Build dots
-      var dots = [];
-      for (var d = 0; d < n; d++) {
-        var dot = document.createElement('div');
-        dot.className = 'scene-dot' + (d === 0 ? ' active' : '');
-        dotsContainer.appendChild(dot);
-        dots.push(dot);
-      }
+      var hasDurations = SCENE_DURATIONS && SCENE_DURATIONS.length === n;
 
       window._tl = gsap.timeline({ paused: true });
-      window.__timelines = window.__timelines || {};
-      window.__timelines['main'] = window._tl;
+      window.__timelines = { 'main': window._tl };
 
-      // Animate brand + bottom in once at start
-      window._tl.from('#brand-header', { y: -60, opacity: 0, duration: 0.6, ease: 'power2.out' }, 0);
-      window._tl.from('#bottom-info',  { y:  60, opacity: 0, duration: 0.6, ease: 'power2.out' }, 0.2);
+      window._tl.from('#brand-header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' }, 0);
+      window._tl.from('#bottom-info', { y: 40, opacity: 0, duration: 0.6, ease: 'power3.out' }, 0.1);
 
-      // Build each scene card
+      var currentBgIndex = 1;
+      var currentTime = 0;
+      // Text appears slightly before voice for natural feel
+      var TEXT_LEAD = 0.3;
+
       for (var i = 0; i < n; i++) {
         var s = scenes[i];
-        var sceneStart = leadIn + i * sceneDuration;
+        var duration = hasDurations ? SCENE_DURATIONS[i] : TOTAL_DURATION / n;
+        var sceneStart = Math.max(0, currentTime - (i > 0 ? TEXT_LEAD : 0));
+
         var card = document.createElement('div');
         card.className = 'scene-card type-' + s.type;
-        card.id = 'scene-' + i;
-
+        
+        if (MAIN_ALIGN.indexOf('center') !== -1) card.classList.add('main-align-center');
+        else if (MAIN_ALIGN.indexOf('right') !== -1) card.classList.add('main-align-right');
+        else card.classList.add('main-align-left');
+        
+        var safeText = s.voiceText || '';
         if (s.type === 'hook') {
-          card.innerHTML =
-            '<div class="scene-label">&#9679; BREAKING</div>' +
-            '<div class="scene-text">' + s.voiceText + '</div>' +
-            '<div class="scene-accent" id="scene-accent-' + i + '"></div>';
+          card.innerHTML = '<div class="scene-label">BREAKING NEWS</div><div class="scene-text">' + safeText + '</div><div class="scene-accent"></div>';
         } else if (s.type === 'outro') {
-          card.innerHTML =
-            '<div class="scene-cta-label">&#128172; Bình luận ngay</div>' +
-            '<div class="scene-text">' + s.voiceText + '</div>' +
-            '<div class="scene-follow">Theo dõi để không bỏ lỡ.</div>';
+          card.innerHTML = '<div class="scene-cta-label">JOIN THE COMMUNITY</div><div class="scene-text">' + safeText + '</div>';
         } else {
-          // body — scene index shown as ghost number
-          var bodyIdx = i; // ghost number in bg
-          card.innerHTML =
-            '<div class="scene-number">' + bodyIdx + '</div>' +
-            '<div class="scene-bar"></div>' +
-            '<div class="scene-text">' + s.voiceText + '</div>';
+          card.innerHTML = '<div class="scene-bar"></div><div class="scene-text">' + safeText + '</div>';
         }
 
         container.appendChild(card);
 
-        // Animate IN
-        window._tl.to(card, { opacity: 1, duration: animIn, ease: 'power2.out' }, sceneStart);
-        if (s.type === 'hook') {
-          window._tl.from(card.querySelector('.scene-text'), { y: 80, duration: animIn * 1.2, ease: 'back.out(1.5)' }, sceneStart);
-          var accentEl = card.querySelector('.scene-accent');
-          if (accentEl) {
-            window._tl.to(accentEl, { width: 180, duration: 0.6, ease: 'power2.inOut' }, sceneStart + animIn);
-          }
-        } else if (s.type === 'body') {
-          window._tl.from(card.querySelector('.scene-text'), { x: -60, duration: animIn, ease: 'power2.out' }, sceneStart);
-          window._tl.from(card.querySelector('.scene-bar'), { scaleX: 0, transformOrigin: 'left', duration: 0.4 }, sceneStart);
-        } else {
-          window._tl.from(card.querySelector('.scene-text'), { y: 50, duration: animIn, ease: 'power2.out' }, sceneStart);
+        if (SHOW_CARD !== 'none') {
+          window._tl.set(card, { display: 'flex', zIndex: 50 + i }, sceneStart);
+          window._tl.fromTo(card, 
+            { opacity: 0, y: 30 }, 
+            { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 
+            sceneStart
+          );
+        }
+        
+        // Handle background transition for EVERY scene if an image is provided
+        var imgUrl = s.imageUrl || (i === 0 ? DEFAULT_BG : null);
+        if (imgUrl) {
+          var targetLayerId = currentBgIndex === 1 ? 'bg-2' : 'bg-1';
+          var prevLayerId = currentBgIndex === 1 ? 'bg-1' : 'bg-2';
+          
+          (function(lId, url, pId, start) {
+             window._tl.set('#' + lId, { attr: { src: url } }, start);
+             window._tl.to('#' + lId, { opacity: BG_BRIGHTNESS, duration: 1.0, ease: 'none' }, start);
+             window._tl.to('#' + pId, { opacity: 0, duration: 1.0, ease: 'none' }, start);
+          })(targetLayerId, imgUrl, prevLayerId, sceneStart);
+          
+          currentBgIndex = (currentBgIndex === 1 ? 2 : 1);
         }
 
-        // Animate OUT (only if not last scene)
+
+
         if (i < n - 1) {
-          var outStart = sceneStart + holdEnd;
-          window._tl.to(card, { opacity: 0, y: -30, duration: animOut, ease: 'power2.in' }, outStart);
+          window._tl.to(card, { opacity: 0, y: -20, duration: 0.4, ease: 'power2.in' }, sceneStart + duration - 0.4);
+          window._tl.set(card, { display: 'none' }, sceneStart + duration);
         }
 
-        // Dot activation
-        (function(idx, t) {
-          window._tl.call(function() {
-            dots.forEach(function(d, di) {
-              d.classList.toggle('active', di === idx);
-            });
-          }, [], t + 0.05);
-        })(i, sceneStart);
+        currentTime += duration;
       }
-
-      // Hold last scene to end
-      window._tl.add(function() {}, TOTAL_DURATION);
-
-    } catch(e) {
-      console.error('Scene Animation Init Error:', e);
+      
+      window._tl.add('end', TOTAL_DURATION);
+      
+    } catch (e) { 
+      console.error('Template Script Error:', e);
     }
   </script>
 </body>
-
 </html>

@@ -25,4 +25,11 @@ export type VideoItem = {
   publishId?: string;
 };
 
-export type TabType = 'dashboard' | 'sources' | 'videos' | 'social' | 'settings';
+export type Voice = {
+  id: string;
+  voiceId: string;
+  name: string;
+  provider: string;
+};
+
+export type TabType = 'dashboard' | 'sources' | 'videos' | 'social' | 'settings' | 'studio' | 'voices';

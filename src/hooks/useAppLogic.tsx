@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
-import { Source, Article, VideoItem, TabType } from '../types';
+import { Source, Article, VideoItem, TabType, Voice } from '../types';
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -17,6 +17,7 @@ export const useAppLogic = () => {
   const [sources, setSources] = useState<Source[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [voices, setVoices] = useState<Voice[]>([]);
   const [stats, setStats] = useState({ sources: 0, articles: 0, videos: 0, postedVideos: 0 });
   
   const [articlesPage, setArticlesPage] = useState(1);
@@ -85,13 +86,22 @@ export const useAppLogic = () => {
     } catch (error) {}
   }, [isAuthenticated]);
 
+  const fetchVoices = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const data = await api.getVoices();
+      setVoices(data);
+    } catch (error) {}
+  }, [isAuthenticated]);
+
   const reloadCurrentView = useCallback(async () => {
     if (!isAuthenticated) return;
     await fetchStats();
     if (activeTab === 'dashboard') await fetchArticles(articlesPage);
     if (activeTab === 'videos') await fetchVideos(videosPage, videoStatusFilter);
     if (activeTab === 'sources') await fetchSources();
-  }, [isAuthenticated, activeTab, fetchStats, fetchArticles, articlesPage, fetchVideos, videosPage, fetchSources, videoStatusFilter]);
+    if (activeTab === 'voices') await fetchVoices();
+  }, [isAuthenticated, activeTab, fetchStats, fetchArticles, articlesPage, fetchVideos, videosPage, fetchSources, fetchVoices, videoStatusFilter]);
 
   useEffect(() => {
     checkAuth();
@@ -115,6 +125,12 @@ export const useAppLogic = () => {
       fetchVideos(videosPage, videoStatusFilter);
     }
   }, [isAuthenticated, activeTab, videosPage, fetchVideos, videoStatusFilter]);
+
+  useEffect(() => {
+    if (isAuthenticated && activeTab === 'voices') {
+      fetchVoices();
+    }
+  }, [isAuthenticated, activeTab, fetchVoices]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -168,10 +184,10 @@ export const useAppLogic = () => {
 
   const [renderingVideos, setRenderingVideos] = useState<Record<string, number>>({});
 
-  const handleGenerateVideo = async (id: string) => {
+  const handleGenerateVideo = async (id: string, templateId?: string, options?: { ttsProvider?: string, ttsVoiceId?: string }) => {
     setLoading(true);
     try {
-      const data = await api.generateVideo(id);
+      const data = await api.generateVideo(id, templateId, options);
       const { videoId } = data;
       
       if (!videoId) throw new Error('No videoId returned from server');
@@ -321,6 +337,21 @@ export const useAppLogic = () => {
     setLoading(false);
   };
 
+  const handleCreateManualScript = async (data: { title: string, script: any }) => {
+    setLoading(true);
+    try {
+      const result = await api.createManualScript(data);
+      await reloadCurrentView();
+      toast.success('Manual script designed!');
+      return result;
+    } catch (e: any) {
+      toast.error(e.message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleUpdateScript = async (id: string, script: any) => {
     setLoading(true);
     try {
@@ -359,6 +390,43 @@ export const useAppLogic = () => {
     }
   };
 
+  const handleAddVoice = async (data: { voiceId: string, name: string, provider: string }) => {
+    setLoading(true);
+    try {
+      await api.addVoice(data);
+      await reloadCurrentView();
+      toast.success('Voice added.');
+    } catch (e: any) { 
+      toast.error(e.message);
+    }
+    setLoading(false);
+  };
+
+  const handleUpdateVoice = async (id: string, data: { voiceId: string, name: string, provider: string }) => {
+    setLoading(true);
+    try {
+      await api.updateVoice(id, data);
+      await reloadCurrentView();
+      toast.success('Voice updated.');
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+    setLoading(false);
+  };
+
+  const handleDeleteVoice = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this voice?')) return;
+    setLoading(true);
+    try {
+      await api.deleteVoice(id);
+      await reloadCurrentView();
+      toast.success('Voice deleted.');
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+    setLoading(false);
+  };
+
   return {
     activeTab,
     setActiveTab,
@@ -387,6 +455,7 @@ export const useAppLogic = () => {
     handleUpdateScript,
     handleDeleteVideo,
     handleCreateManualArticle,
+    handleCreateManualScript,
     reloadCurrentView,
     renderingVideos,
     stats,
@@ -395,6 +464,10 @@ export const useAppLogic = () => {
     articlesTotalPages,
     videosPage,
     setVideosPage,
-    videosTotalPages
+    videosTotalPages,
+    voices,
+    handleAddVoice,
+    handleUpdateVoice,
+    handleDeleteVoice
   };
 };

@@ -1,16 +1,19 @@
 import React from 'react';
 import { Sidebar } from './components/layout/Sidebar';
 import { DashboardView } from './features/dashboard/DashboardView';
+import { StudioView } from './features/studio/StudioView';
 import { SourcesView } from './features/sources/SourcesView';
 import { VideosView } from './features/videos/VideosView';
 import { SocialView } from './features/social/SocialView';
 import { SettingsView } from './features/settings/SettingsView';
 import { LoginView, ChangePasswordView } from './features/auth/AuthViews';
+import { VoicesView } from './features/voices/VoicesView';
 import { useAppLogic } from './hooks/useAppLogic';
 import { Toaster } from 'react-hot-toast';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 export default function App() {
+  const location = useLocation();
   const {
     activeTab,
     setActiveTab,
@@ -38,6 +41,7 @@ export default function App() {
     handleUpdateScript,
     handleDeleteVideo,
     handleCreateManualArticle,
+    handleCreateManualScript,
     reloadCurrentView,
     renderingVideos,
     stats,
@@ -46,7 +50,11 @@ export default function App() {
     articlesTotalPages,
     videosPage,
     setVideosPage,
-    videosTotalPages
+    videosTotalPages,
+    voices,
+    handleAddVoice,
+    handleUpdateVoice,
+    handleDeleteVoice
   } = useAppLogic();
 
   if (authChecking) {
@@ -84,8 +92,8 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 min-w-0 bg-background overflow-x-hidden">
-        <div className="max-w-7xl mx-auto px-6 py-12 md:px-12 md:py-20">
+      <main className="flex-1 min-w-0 bg-background overflow-hidden flex flex-col">
+        <div className={location.pathname === '/settings' ? "flex-1 w-full h-full" : "flex-1 w-full max-w-7xl mx-auto px-6 py-12 md:px-12 md:py-20 overflow-y-auto custom-scrollbar"}>
           <Routes>
             <Route path="/dashboard" element={
               <DashboardView 
@@ -98,11 +106,19 @@ export default function App() {
                 onGenerateVideo={handleGenerateVideo}
                 onUpdateScript={handleUpdateScript}
                 onCreateManualArticle={handleCreateManualArticle}
+                onCreateManualScript={handleCreateManualScript}
                 renderingVideos={renderingVideos}
                 stats={stats}
                 page={articlesPage}
                 setPage={setArticlesPage}
                 totalPages={articlesTotalPages}
+              />
+            } />
+            <Route path="/studio" element={
+              <StudioView 
+                onCreateManualScript={handleCreateManualScript}
+                onGenerateVideo={handleGenerateVideo}
+                loading={loading}
               />
             } />
             <Route path="/sources" element={
@@ -131,6 +147,14 @@ export default function App() {
                 isTikTokConnected={isTikTokConnected}
                 onConnectTikTok={handleConnectTikTok}
                 onDisconnectTikTok={() => setIsTikTokConnected(false)}
+              />
+            } />
+            <Route path="/voices" element={
+              <VoicesView 
+                voices={voices}
+                onAdd={handleAddVoice}
+                onUpdate={handleUpdateVoice}
+                onDelete={handleDeleteVoice}
               />
             } />
             <Route path="/settings" element={<SettingsView />} />

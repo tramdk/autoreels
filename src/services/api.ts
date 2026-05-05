@@ -47,6 +47,8 @@ export const api = {
   deleteManyArticles: () => fetchWithAuth('/api/articles/clear', { method: 'POST' }).then(r => r.json()),
   createManualArticle: (data: { title: string, content: string, imageUrl?: string }) => 
     fetchWithAuth('/api/articles/manual', { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()),
+  createManualScript: (data: { title: string, script: any }) => 
+    fetchWithAuth('/api/articles/manual-script', { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()),
 
   // Sources
   addSource: (data: { name: string, url: string, type: string }) => 
@@ -61,7 +63,8 @@ export const api = {
   updateScript: (id: string, script: any) => 
     fetchWithAuth(`/api/articles/${id}/script`, { method: 'PUT', body: JSON.stringify({ script }) }).then(r => r.json()),
   
-  generateVideo: (id: string) => fetchWithAuth(`/api/videos/generate/${id}`, { method: 'POST' }).then(r => r.json()),
+  generateVideo: (id: string, templateId?: string, options: any = {}) => 
+    fetchWithAuth(`/api/videos/generate/${id}`, { method: 'POST', body: JSON.stringify({ templateId, ...options }) }).then(r => r.json()),
   getVideoProgressUrl: (id: string) => `/api/videos/progress/${id}`, // For EventSource
   
   deleteVideo: (id: string) => fetchWithAuth(`/api/videos/${id}`, { method: 'DELETE' }).then(r => r.json()),
@@ -71,6 +74,7 @@ export const api = {
 
   // Settings
   getSettings: () => fetchWithAuth('/api/settings').then(r => r.json() as Promise<Record<string, string>>),
+  getSetting: (key: string) => fetchWithAuth(`/api/settings/${key}`).then(r => r.json() as Promise<{ key: string, value: any }>),
   updateSetting: (key: string, value: any) => 
     fetchWithAuth('/api/settings', { method: 'POST', body: JSON.stringify({ key, value }) }).then(r => r.json()),
   uploadBackground: (file: File) => {
@@ -80,5 +84,25 @@ export const api = {
       method: 'POST', 
       body: formData
     }).then(r => r.json() as Promise<{ url: string }>);
-  }
+  },
+
+  // Assets
+  getAssets: () => fetchWithAuth('/api/assets').then(r => r.json() as Promise<any[]>),
+  uploadAsset: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return fetchWithAuth('/api/assets/upload', { 
+      method: 'POST', 
+      body: formData
+    }).then(r => r.json() as Promise<{ id: string, url: string, name: string, hash: string, size: number }>);
+  },
+
+  // Voices
+  getVoices: () => fetchWithAuth('/api/voices').then(r => r.json() as Promise<any[]>),
+  addVoice: (data: { voiceId: string, name: string, provider: string }) => 
+    fetchWithAuth('/api/voices', { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()),
+  updateVoice: (id: string, data: { voiceId: string, name: string, provider: string }) => 
+    fetchWithAuth(`/api/voices/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then(r => r.json()),
+  deleteVoice: (id: string) => 
+    fetchWithAuth(`/api/voices/${id}`, { method: 'DELETE' }).then(r => r.json()),
 };
