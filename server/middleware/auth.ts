@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'autoreels-super-secret-key';
+import { config } from '../config';
+
+const JWT_SECRET = config.jwtSecret;
 
 export function authenticate(req: Request, res: Response, next: NextFunction) {
   const token = req.cookies.token;

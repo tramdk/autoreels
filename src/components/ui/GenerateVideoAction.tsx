@@ -1,12 +1,13 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Video as VideoIcon, RefreshCw, X, Check } from 'lucide-react';
+import { Video as VideoIcon, RefreshCw, X, Check, Music, Upload, Volume2, VolumeX, Play, Pause } from 'lucide-react';
 import { api } from '../../services/api';
 
 interface GenerateVideoActionProps {
   articleId: string;
   loading: boolean;
-  onGenerate: (articleId: string, templateId: string, options?: { ttsProvider?: string, ttsVoiceId?: string }) => void;
+  onGenerate: (articleId: string, templateId: string, options?: { ttsProvider?: string, ttsVoiceId?: string, bgmAssetId?: string, bgmVolume?: number }) => void;
   t: (key: string) => string;
 }
 
@@ -24,6 +25,13 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
   const [customVoices, setCustomVoices] = React.useState<any[]>([]);
   const [selectedProvider, setSelectedProvider] = React.useState<string>('all');
   const [selectedVoiceId, setSelectedVoiceId] = React.useState<string>('default');
+
+  // BGM State
+  const [bgmPresets, setBgmPresets] = React.useState<any[]>([]);
+  const [selectedBgmId, setSelectedBgmId] = React.useState<string>('none');
+  const [bgmVolume, setBgmVolume] = React.useState(0.15);
+  const [previewAudio, setPreviewAudio] = React.useState<HTMLAudioElement | null>(null);
+  const [isPreviewPlaying, setIsPreviewPlaying] = React.useState(false);
 
   React.useEffect(() => {
     if (showPicker) {
@@ -43,14 +51,16 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
     }
   }, [selectedTemplate, showPicker]);
 
-  // 2. Fetch Voices and Priority (Specific to Template)
+  // 2. Fetch Voices, Priority, and BGM Presets
   React.useEffect(() => {
     if (showPicker) {
       Promise.all([
         api.getVoices(),
-        api.getSetting(`tts_priority_${selectedTemplate}`).then(res => res.value ? res : api.getSetting('tts_priority'))
-      ]).then(([voices, priorityRes]) => {
+        api.getSetting(`tts_priority_${selectedTemplate}`).then(res => res.value ? res : api.getSetting('tts_priority')),
+        api.getBgmPresets().catch(() => [])
+      ]).then(([voices, priorityRes, bgmList]) => {
         setCustomVoices(voices);
+        setBgmPresets(bgmList || []);
 
         let topProvider = 'ohfree';
         if (priorityRes && priorityRes.value) {
@@ -86,6 +96,15 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
         }
       }).catch(err => console.error('[DEBUG] Priority fetch failed:', err));
     }
+
+    // Cleanup audio preview when picker closes
+    return () => {
+      if (previewAudio) {
+        previewAudio.pause();
+        setPreviewAudio(null);
+        setIsPreviewPlaying(false);
+      }
+    };
   }, [showPicker, selectedTemplate]);
 
   const SCALE = 240 / 1080;
@@ -94,13 +113,49 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
     selectedProvider === 'all' || v.provider === selectedProvider
   );
 
+  const handlePreviewBgm = (url: string) => {
+    if (previewAudio) {
+      previewAudio.pause();
+      setPreviewAudio(null);
+      setIsPreviewPlaying(false);
+    }
+    const audio = new Audio(url);
+    audio.volume = bgmVolume;
+    audio.loop = true;
+    audio.play();
+    setPreviewAudio(audio);
+    setIsPreviewPlaying(true);
+    audio.onended = () => setIsPreviewPlaying(false);
+  };
+
+  const stopPreview = () => {
+    if (previewAudio) {
+      previewAudio.pause();
+      setPreviewAudio(null);
+      setIsPreviewPlaying(false);
+    }
+  };
+
+  // Update preview volume when slider changes
+  React.useEffect(() => {
+    if (previewAudio) {
+      previewAudio.volume = Math.min(1, bgmVolume * 3); // Scale up for preview (since actual mix is quieter)
+    }
+  }, [bgmVolume, previewAudio]);
+
   const handleConfirm = () => {
-    let options = {};
+    stopPreview();
+    let options: any = {};
     if (selectedVoiceId !== 'default') {
       const v = customVoices.find(v => v.id === selectedVoiceId);
       if (v) {
         options = { ttsProvider: v.provider, ttsVoiceId: v.voiceId };
       }
+    }
+    // Add BGM options
+    if (selectedBgmId !== 'none') {
+      options.bgmAssetId = selectedBgmId;
+      options.bgmVolume = bgmVolume;
     }
     onGenerate(articleId, selectedTemplate, options);
     setShowPicker(false);
@@ -116,9 +171,10 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
         <VideoIcon className="w-4 h-4" /> {t('dashboard.generate')}
       </button>
 
-      <AnimatePresence>
-        {showPicker && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6">
+      {createPortal(
+        <AnimatePresence>
+          {showPicker && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4 md:p-6">
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowPicker(false)}
@@ -126,10 +182,10 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
             />
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="glass w-full max-w-5xl bg-slate-900/50 rounded-[40px] border border-white/10 shadow-3xl relative z-10 overflow-hidden flex flex-col h-[80vh] max-h-[800px]"
+              className="glass w-full max-w-5xl bg-slate-900/50 rounded-3xl md:rounded-[40px] border border-white/10 shadow-3xl relative z-10 overflow-hidden flex flex-col h-[95vh] md:h-[80vh] max-h-[900px]"
             >
               {/* Header */}
-              <div className="px-10 py-8 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
+              <div className="px-6 md:px-10 py-6 md:py-8 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
                 <div className="space-y-1">
                   <h2 className="text-2xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
                     <div className="w-2 h-8 bg-primary rounded-full shadow-[0_0_15px_rgba(0,242,255,0.5)]"></div>
@@ -146,9 +202,9 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
               </div>
 
               {/* Main Content */}
-              <div className="flex-1 flex overflow-hidden">
+              <div className="flex-1 flex flex-col-reverse lg:flex-row overflow-y-auto lg:overflow-hidden">
                 {/* Left Sidebar - Settings */}
-                <div className="w-80 border-r border-white/5 p-10 space-y-10 overflow-y-auto custom-scrollbar bg-black/20">
+                <div className="w-full lg:w-80 lg:border-r border-white/5 p-6 lg:p-10 space-y-8 lg:space-y-10 lg:overflow-y-auto custom-scrollbar bg-black/20 shrink-0">
                   {/* Template Section */}
                   <div className="space-y-5">
                     <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">
@@ -230,10 +286,95 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
                       </p>
                     </div>
                   </div>
+
+                  {/* BGM Section */}
+                  <div className="space-y-5">
+                    <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">
+                      <div className="w-1 h-1 rounded-full bg-purple-400"></div>
+                      <Music className="w-3 h-3" /> Nhạc nền (BGM)
+                    </label>
+                    
+                    {/* BGM Selector */}
+                    <div className="space-y-3">
+                      <select
+                        value={selectedBgmId}
+                        onChange={e => {
+                          setSelectedBgmId(e.target.value);
+                          stopPreview();
+                        }}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-xs text-white focus:outline-none focus:border-purple-400/50 transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="none" className="bg-slate-900">🔇 Không dùng nhạc nền</option>
+                        {bgmPresets.filter(b => b.type === 'preset').length > 0 && (
+                          <optgroup label="🎵 Nhạc có sẵn" className="bg-slate-900">
+                            {bgmPresets.filter(b => b.type === 'preset').map(b => (
+                              <option key={b.id} value={b.id} className="bg-slate-900">
+                                {b.name} — {b.description}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                        {bgmPresets.filter(b => b.type === 'uploaded').length > 0 && (
+                          <optgroup label="📁 Đã tải lên" className="bg-slate-900">
+                            {bgmPresets.filter(b => b.type === 'uploaded').map(b => (
+                              <option key={b.id} value={b.id} className="bg-slate-900">
+                                {b.name}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                      </select>
+
+                      {/* Preview Controls */}
+                      {selectedBgmId !== 'none' && (
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => {
+                              if (isPreviewPlaying) {
+                                stopPreview();
+                              } else {
+                                const bgm = bgmPresets.find(b => b.id === selectedBgmId);
+                                if (bgm) handlePreviewBgm(bgm.url);
+                              }
+                            }}
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border ${
+                              isPreviewPlaying 
+                                ? 'bg-purple-500/20 border-purple-500/30 text-purple-400' 
+                                : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10'
+                            }`}
+                          >
+                            {isPreviewPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                          </button>
+                          <div className="flex-1 flex items-center gap-3">
+                            <VolumeX className="w-3 h-3 text-slate-600 shrink-0" />
+                            <input
+                              type="range"
+                              min="0.02"
+                              max="0.5"
+                              step="0.01"
+                              value={bgmVolume}
+                              onChange={e => setBgmVolume(parseFloat(e.target.value))}
+                              className="w-full h-1.5 rounded-full appearance-none bg-white/10 cursor-pointer accent-purple-400"
+                            />
+                            <Volume2 className="w-3 h-3 text-slate-600 shrink-0" />
+                          </div>
+                          <span className="text-[10px] font-black text-purple-400 tabular-nums w-10 text-right">
+                            {Math.round(bgmVolume * 100)}%
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-purple-400/5 border border-purple-400/10">
+                      <p className="text-[9px] text-purple-400/70 leading-relaxed font-medium">
+                        Nhạc nền sẽ được loop tự động và mix ở volume thấp để không lấn giọng đọc. Bạn có thể upload nhạc riêng qua mục Assets.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Right Panel - Live Preview */}
-                <div className="flex-1 bg-black/40 flex flex-col items-center justify-center p-12 relative overflow-hidden">
+                <div className="w-full lg:flex-1 bg-black/40 flex flex-col items-center justify-center p-8 lg:p-12 relative overflow-hidden shrink-0 min-h-[400px] lg:min-h-0">
                   {/* Decorative Elements */}
                   <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full"></div>
@@ -317,16 +458,26 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
               </div>
 
               {/* Footer */}
-              <div className="px-10 py-8 border-t border-white/5 bg-black/40 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-4 text-slate-500">
-                  <div className="flex -space-x-2">
-                    {['ohfree', 'edge', 'gemini'].map(p => (
-                      <div key={p} className="w-6 h-6 rounded-full border border-slate-900 bg-slate-800 flex items-center justify-center text-[8px] font-black uppercase">{p[0]}</div>
-                    ))}
+              <div className="px-6 md:px-10 py-6 md:py-8 border-t border-white/5 bg-black/40 flex flex-col md:flex-row items-center justify-between shrink-0 gap-6 md:gap-0">
+                <div className="flex items-center gap-6 text-slate-500">
+                  <div className="flex items-center gap-4">
+                    <div className="flex -space-x-2">
+                      {['ohfree', 'edge', 'gemini'].map(p => (
+                        <div key={p} className="w-6 h-6 rounded-full border border-slate-900 bg-slate-800 flex items-center justify-center text-[8px] font-black uppercase">{p[0]}</div>
+                      ))}
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Multi-Model</span>
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Multi-Model Engine Active</span>
+                  {selectedBgmId !== 'none' && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                      <Music className="w-3 h-3 text-purple-400" />
+                      <span className="text-[10px] font-black text-purple-400 uppercase tracking-wider">
+                        BGM {Math.round(bgmVolume * 100)}%
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div className="flex gap-4">
+                <div className="flex gap-4 w-full md:w-auto justify-end">
                   <button
                     onClick={() => setShowPicker(false)}
                     className="px-8 py-4 text-slate-500 hover:text-white font-black uppercase text-[10px] tracking-widest transition-all"
@@ -343,8 +494,10 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
               </div>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 };

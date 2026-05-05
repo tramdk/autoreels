@@ -44,7 +44,7 @@ model Article {
   contentSnippet String?
   pubDate        String?
   status         String   @default("scraped") // scraped, summarized, video_generated, posted
-  script         String?  // Stored as JSON string
+  script         String?   // Native JSON for PostgreSQL ( if using PostgreSQL change to Json?)
   imageUrl       String?
   videoId        String?
   sourceId       String?
@@ -89,4 +89,6 @@ model Voice {
   name      String   // Display name (e.g., "Thế Hào")
   provider  String   // "ohfree", "edge", "elevenlabs", etc.
   createdAt DateTime @default(now())
+
+  @@unique([voiceId, provider])
 }

@@ -24,6 +24,8 @@ interface RenderOptions {
   outputPath: string;
   templateId?: string;
   onProgress?: (percent: number) => void;
+  bgmPath?: string;      // Path to background music file
+  bgmVolume?: number;    // 0.0 - 1.0, default 0.15
 }
 
 const DEFAULTS = {
@@ -172,7 +174,16 @@ export async function renderWithHyperFrames(options: RenderOptions): Promise<voi
     child.on('close', (code) => {
       if (code !== 0) return reject(new Error(`HyperFrames failed with code ${code}`));
       try {
-        const mergeCmd = `"${actualFfmpegPath}" -y -i "${tempVideoPath}" -i "${audioPath}" -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 -shortest "${outputPath}"`;
+        let mergeCmd: string;
+        if (options.bgmPath && fs.existsSync(options.bgmPath)) {
+          // 3-input merge: video + voice + background music
+          const bgmVol = Math.max(0, Math.min(1, options.bgmVolume ?? 0.15));
+          console.log(`[Renderer] Mixing BGM at volume ${bgmVol}: ${options.bgmPath}`);
+          mergeCmd = `"${actualFfmpegPath}" -y -i "${tempVideoPath}" -i "${audioPath}" -stream_loop -1 -i "${options.bgmPath}" -filter_complex "[1:a]volume=1.0[voice];[2:a]volume=${bgmVol}[bgm];[voice][bgm]amix=inputs=2:duration=first:dropout_transition=2[aout]" -map 0:v:0 -map "[aout]" -c:v copy -c:a aac -shortest "${outputPath}"`;
+        } else {
+          // 2-input merge: video + voice only (original behavior)
+          mergeCmd = `"${actualFfmpegPath}" -y -i "${tempVideoPath}" -i "${audioPath}" -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 -shortest "${outputPath}"`;
+        }
         execSync(mergeCmd, { stdio: 'inherit', env });
         try { fs.rmSync(workDir, { recursive: true, force: true }); } catch (_) {}
         resolve();

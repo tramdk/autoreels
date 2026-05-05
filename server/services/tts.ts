@@ -173,8 +173,19 @@ const handlers: Record<string, TTSHandler> = {
     const voiceId = customVoiceId || process.env.OHFREE_VOICE_ID || '1402';
     console.log(`[TTS] Requesting OhFree | voiceId: ${voiceId} | text length: ${text.length}`);
 
-    const res = await globalThis.fetch('https://tts.ohfree.me/api/tts', {
+    // Tùy chỉnh HTTPS Agent để thay đổi TLS Fingerprint, cố gắng bypass Cloudflare
+    const https = await import('https');
+    const crypto = await import('crypto');
+    const agent = new https.Agent({
+      ciphers: 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384',
+      secureOptions: crypto.constants.SSL_OP_NO_TICKET | crypto.constants.SSL_OP_NO_RENEGOTIATION,
+      minVersion: 'TLSv1.2',
+      maxVersion: 'TLSv1.3'
+    });
+
+    const res = await fetch('https://tts.ohfree.me/api/tts', {
       method: 'POST',
+      agent,
       headers: {
         'authority': 'tts.ohfree.me',
         'accept': '*/*',
@@ -189,6 +200,7 @@ const handlers: Record<string, TTSHandler> = {
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
+        ...(process.env.OHFREE_COOKIE ? { 'Cookie': process.env.OHFREE_COOKIE } : {}),
       },
       body: JSON.stringify({
         text,
@@ -198,82 +210,128 @@ const handlers: Record<string, TTSHandler> = {
       }),
     });
 
-    console.log(`[TTS] OhFree response: ${res.status} ${res.statusText} | content-type: ${res.headers.get('content-type')}`);
+    // Fetch one single segment from OhFree
+    const fetchSegment = async (segmentText: string): Promise<Buffer> => {
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const res = await fetch('https://tts.ohfree.me/api/tts', {
+          method: 'POST',
+          agent,
+          headers: {
+            'authority': 'tts.ohfree.me',
+            'accept': '*/*',
+            'accept-language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
+            'content-type': 'application/json',
+            'origin': 'https://tts.ohfree.me',
+            'referer': 'https://tts.ohfree.me/',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+            'sec-ch-ua': '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            ...(process.env.OHFREE_COOKIE ? { 'Cookie': process.env.OHFREE_COOKIE } : {}),
+          },
+          body: JSON.stringify({ text: segmentText, id: parseInt(voiceId), rate: 1, pitch: 1 }),
+        });
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`OhFree failed: ${res.status} ${errorText.substring(0, 200)}`);
-    }
+        if (!res.ok) throw new Error(`OhFree failed: ${res.status}`);
+        if (!res.body) throw new Error('No response body');
 
-    if (!res.body) throw new Error('No response body from OhFree');
-
-    const reader = res.body.getReader();
-    let audioChunks: Buffer[] = [];
-    let bufferStr = '';
-    const decoder = new TextDecoder();
-    let parsedCount = 0;
-    let statusTypes: string[] = [];
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      bufferStr += decoder.decode(value, { stream: true });
-
-      // Manual JSON streaming parser
-      let startIdx;
-      while ((startIdx = bufferStr.indexOf('{')) !== -1) {
-        let endIdx = -1;
-        let depth = 0;
-
-        for (let i = startIdx; i < bufferStr.length; i++) {
-          if (bufferStr[i] === '{') depth++;
-          else if (bufferStr[i] === '}') {
-            depth--;
-            if (depth === 0) {
-              endIdx = i;
-              break;
-            }
-          }
-        }
-
-        if (endIdx === -1) break;
-
-        const jsonStr = bufferStr.substring(startIdx, endIdx + 1);
-        bufferStr = bufferStr.substring(endIdx + 1);
+        const reader = res.body;
+        let audioChunks: Buffer[] = [];
+        let bufferStr = '';
+        const decoder = new TextDecoder();
 
         try {
-          const data = JSON.parse(jsonStr);
-          parsedCount++;
-          statusTypes.push(data.status || 'unknown');
-
-          if (data.status === 'audio_chunk' && data.chunk) {
-            audioChunks.push(Buffer.from(data.chunk, 'base64'));
-          } else if (data.status === 'error') {
-            throw new Error(`OhFree API Error: ${data.message || 'Unknown'}`);
+          await new Promise<void>((resolve, reject) => {
+            reader.on('data', (chunk: Buffer) => {
+              bufferStr += decoder.decode(chunk, { stream: true });
+              let startIdx;
+              while ((startIdx = bufferStr.indexOf('{')) !== -1) {
+                let endIdx = -1;
+                let depth = 0;
+                for (let i = startIdx; i < bufferStr.length; i++) {
+                  if (bufferStr[i] === '{') depth++;
+                  else if (bufferStr[i] === '}') {
+                    depth--;
+                    if (depth === 0) { endIdx = i; break; }
+                  }
+                }
+                if (endIdx === -1) break;
+                const jsonStr = bufferStr.substring(startIdx, endIdx + 1);
+                bufferStr = bufferStr.substring(endIdx + 1);
+                try {
+                  const data = JSON.parse(jsonStr);
+                  if (data.status === 'audio_chunk' && data.chunk) {
+                    audioChunks.push(Buffer.from(data.chunk, 'base64'));
+                  } else if (data.status === 'error') {
+                    return reject(new Error(data.message || 'Unknown'));
+                  }
+                } catch (e: any) { }
+              }
+            });
+            reader.on('end', () => resolve());
+            reader.on('error', reject);
+          });
+          
+          if (audioChunks.length === 0) throw new Error('No audio chunks returned');
+          return Buffer.concat(audioChunks);
+          
+        } catch (err: any) {
+          const msg = err.message || '';
+          if (msg.includes('Too many requests') || msg.includes('10 seconds') || msg.includes('5 minutes')) {
+            console.log(`[TTS] OhFree rate limit hit, waiting 11 seconds before retry (Attempt ${attempt}/3)...`);
+            await new Promise(r => setTimeout(r, 11000));
+            continue;
           }
-        } catch (e: any) {
-          if (e.message.includes('OhFree API Error')) throw e;
+          throw err;
         }
       }
+      throw new Error('OhFree rate limit timeout after 3 retries');
+    };
+
+    // 1. Chunking text to bypass `req_login` (Guest limit is strictly ~200 chars)
+    const MAX_CHUNK_LENGTH = 180;
+    const segments: string[] = [];
+    let remainingText = text;
+    
+    while (remainingText.length > MAX_CHUNK_LENGTH) {
+      let splitIdx = remainingText.lastIndexOf('.', MAX_CHUNK_LENGTH);
+      if (splitIdx === -1 || splitIdx < MAX_CHUNK_LENGTH * 0.5) {
+        splitIdx = remainingText.lastIndexOf(' ', MAX_CHUNK_LENGTH);
+        if (splitIdx === -1) splitIdx = MAX_CHUNK_LENGTH;
+      } else {
+        splitIdx += 1;
+      }
+      segments.push(remainingText.substring(0, splitIdx).trim());
+      remainingText = remainingText.substring(splitIdx).trim();
+    }
+    if (remainingText) segments.push(remainingText);
+
+    console.log(`[TTS] OhFree -> Split ${text.length} chars into ${segments.length} segments to bypass guest limits.`);
+
+    // 2. Fetch sequentially to avoid rate limits
+    const allBuffers: Buffer[] = [];
+    for (let i = 0; i < segments.length; i++) {
+      if (i > 0) {
+        // Mandatory delay between segments to respect OhFree's 10s rate limit for guests
+        console.log(`[TTS] OhFree -> Waiting 10s before segment ${i+1}/${segments.length}...`);
+        await new Promise(r => setTimeout(r, 10500));
+      }
+      console.log(`[TTS] OhFree -> Fetching segment ${i+1}/${segments.length}...`);
+      const segmentBuf = await fetchSegment(segments[i]);
+      allBuffers.push(segmentBuf);
     }
 
-    console.log(`[TTS] OhFree parsed ${parsedCount} JSON objects | statuses: [${statusTypes.join(', ')}] | audio chunks: ${audioChunks.length}`);
-
-    if (audioChunks.length === 0) {
-      // Log remaining buffer for diagnosis
-      console.error(`[TTS] OhFree NO CHUNKS! Remaining buffer (first 500 chars): ${bufferStr.substring(0, 500)}`);
-      throw new Error('OhFree returned no audio chunks');
-    }
-
-    const buffer = Buffer.concat(audioChunks);
-    console.log(`[TTS] OhFree success: ${buffer.length} bytes audio`);
+    const finalBuffer = Buffer.concat(allBuffers);
+    console.log(`[TTS] OhFree success: ${finalBuffer.length} bytes audio across ${segments.length} segments`);
 
     return {
-      buffer,
+      buffer: finalBuffer,
       ext: 'mp3',
       mimeType: 'audio/mpeg',
-      durationSeconds: Math.max(buffer.length / 16000, 3.1),
+      durationSeconds: Math.max(finalBuffer.length / 16000, 3.1),
       provider: 'ohfree'
     };
   }

@@ -70,20 +70,24 @@ export const useAppLogic = () => {
     if (!isAuthenticated) return;
     try {
       const data = await api.getArticles(page, 10);
-      setArticles(data.items);
-      setArticlesPage(data.page);
-      setArticlesTotalPages(data.totalPages);
-    } catch (error) {}
+      setArticles(data.items || []);
+      setArticlesPage(data.page || 1);
+      setArticlesTotalPages(data.totalPages || 1);
+    } catch (error) {
+      console.error('[AppLogic] fetchArticles error:', error);
+    }
   }, [isAuthenticated]);
 
   const fetchVideos = useCallback(async (page: number = 1, status?: string) => {
     if (!isAuthenticated) return;
     try {
       const data = await api.getVideos(page, 9, status);
-      setVideos(data.items);
-      setVideosPage(data.page);
-      setVideosTotalPages(data.totalPages);
-    } catch (error) {}
+      setVideos(data.items || []);
+      setVideosPage(data.page || 1);
+      setVideosTotalPages(data.totalPages || 1);
+    } catch (error) {
+      console.error('[AppLogic] fetchVideos error:', error);
+    }
   }, [isAuthenticated]);
 
   const fetchVoices = useCallback(async () => {
@@ -194,11 +198,13 @@ export const useAppLogic = () => {
 
       // Unblock the UI immediately after the job starts!
       setLoading(false);
+      setRenderingVideos(prev => ({ ...prev, [videoId]: 5 }));
+      reloadCurrentView();
 
       // Start listening for progress via SSE
       const eventSource = new EventSource(api.getVideoProgressUrl(videoId));
       
-      const toastId = toast.loading(`Rendering video: 0%`, { duration: Infinity });
+      const toastId = toast.loading(`Rendering video: 5%`, { duration: Infinity });
 
       eventSource.onmessage = (event) => {
         const { progress } = JSON.parse(event.data);

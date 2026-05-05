@@ -46,6 +46,8 @@ export const VideosView: React.FC<VideosViewProps> = ({
   const [searchParams] = useSearchParams();
   const statusFilter = searchParams.get('status');
 
+  console.log('[VideosView] Render | videos:', videos);
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
       <div className="flex items-center justify-between">
@@ -66,7 +68,7 @@ export const VideosView: React.FC<VideosViewProps> = ({
             )}
           </div>
         </div>
-        {loading && videos.length > 0 && (
+        {loading && (videos?.length ?? 0) > 0 && (
           <div className="flex items-center gap-2 text-primary animate-pulse text-xs font-bold uppercase tracking-widest">
             <RefreshCw className="w-3 h-3 animate-spin" /> Fetching...
           </div>
@@ -74,11 +76,11 @@ export const VideosView: React.FC<VideosViewProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[600px]">
-        {loading && videos.length === 0 ? (
+        {loading && (videos?.length ?? 0) === 0 ? (
           Array(9).fill(0).map((_, i) => <VideoSkeleton key={i} />)
         ) : (
           <>
-            {videos.map(video => (
+            {videos?.map(video => (
               <motion.div 
                 key={video.id} 
                 layout
@@ -86,7 +88,7 @@ export const VideosView: React.FC<VideosViewProps> = ({
               >
                 <div className="aspect-[9/16] bg-slate-950 relative overflow-hidden">
                   <video 
-                    src={`/api/videos/play/${video.id}`} 
+                    src={video.videoUrl.startsWith('http') ? video.videoUrl : `/api/videos/play/${video.id}`} 
                     className="w-full h-full object-cover" 
                     controls 
                   />
@@ -135,7 +137,7 @@ export const VideosView: React.FC<VideosViewProps> = ({
             ))}
           </>
         )}
-        {!loading && videos.length === 0 && (
+        {!loading && (videos?.length ?? 0) === 0 && (
           <div className="col-span-full text-center py-40 bg-slate-900/10 border-2 border-slate-800 border-dashed rounded-[44px]">
             <VideoIcon className="w-16 h-16 text-slate-800 mx-auto mb-6" />
             <p className="text-xl text-slate-500 font-medium">{t('common.noData')}</p>

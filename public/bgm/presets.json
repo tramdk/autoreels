@@ -1,0 +1,14 @@
+[
+  {
+    "filename": "kich-tinh.mp3",
+    "label": "Kịch tính",
+    "category": "hard",
+    "description": "Kịch tính"
+  },
+  {
+    "filename": "nhe-nhang.mp3",
+    "label": "Nhẹ nhàng",
+    "category": "soft",
+    "description": "Nhẹ nhàng"
+  }
+]

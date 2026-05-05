@@ -64,13 +64,16 @@ export const api = {
     fetchWithAuth(`/api/articles/${id}/script`, { method: 'PUT', body: JSON.stringify({ script }) }).then(r => r.json()),
   
   generateVideo: (id: string, templateId?: string, options: any = {}) => 
-    fetchWithAuth(`/api/videos/generate/${id}`, { method: 'POST', body: JSON.stringify({ templateId, ...options }) }).then(r => r.json()),
+    fetchWithAuth(`/api/videos/generate`, { method: 'POST', body: JSON.stringify({ articleId: id, templateId, ...options }) }).then(r => r.json()),
   getVideoProgressUrl: (id: string) => `/api/videos/progress/${id}`, // For EventSource
   
   deleteVideo: (id: string) => fetchWithAuth(`/api/videos/${id}`, { method: 'DELETE' }).then(r => r.json()),
   postToTikTok: (videoId: string) => fetchWithAuth(`/api/videos/post/${videoId}`, { method: 'POST' }).then(r => r.json()),
   getTikTokStatus: (videoId: string) => fetchWithAuth(`/api/videos/post/status/${videoId}`).then(r => r.json()),
   getTikTokAuthUrl: () => fetchWithAuth('/api/auth/tiktok/url').then(r => r.json() as Promise<{ url: string }>),
+
+  // BGM
+  getBgmPresets: () => fetchWithAuth('/api/videos/bgm-presets').then(r => r.json() as Promise<{ id: string, name: string, description: string, category: string, type: string, url: string }[]>),
 
   // Settings
   getSettings: () => fetchWithAuth('/api/settings').then(r => r.json() as Promise<Record<string, string>>),

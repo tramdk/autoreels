@@ -50,7 +50,9 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
         size: size,
         hash: hash,
         url: result.secure_url,
-        type: req.file.mimetype.startsWith('image') ? 'image' : 'video'
+        type: req.file.mimetype.startsWith('image') ? 'image' 
+              : req.file.mimetype.startsWith('audio') ? 'audio' 
+              : 'video'
       }
     });
 

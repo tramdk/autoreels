@@ -1,10 +1,45 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding default voices...');
+  console.log('Seeding initial data...');
 
+  // 1. Default Admin User
+  const adminPassword = await bcrypt.hash('Admin!23', 10);
+  await prisma.user.upsert({
+    where: { username: 'admin' },
+    update: {},
+    create: {
+      username: 'admin',
+      password: adminPassword,
+      mustChangePassword: false
+    }
+  });
+  console.log('✔ Admin user created (admin / Admin!23)');
+
+  // 2. Default RSS Sources
+  const sources = [
+    { name: 'VNExpress - Tin mới nhất', url: 'https://vnexpress.net/rss/tin-moi-nhat.rss', type: 'rss' },
+    { name: 'Tuổi Trẻ - Tin mới nhất', url: 'https://tuoitre.vn/rss/tin-moi-nhat.rss', type: 'rss' },
+    { name: 'Thanh Niên - Tin mới nhất', url: 'https://thanhnien.vn/rss/home.rss', type: 'rss' },
+    { name: 'Zing News - Tin mới', url: 'https://zingnews.vn/rss/index.rss', type: 'rss' }
+  ];
+
+  for (const s of sources) {
+    await prisma.source.upsert({
+      where: { id: s.name }, // This is placeholder, using findFirst/create instead
+      update: {},
+      create: s
+    }).catch(async () => {
+      const exists = await prisma.source.findFirst({ where: { url: s.url } });
+      if (!exists) await prisma.source.create({ data: s });
+    });
+  }
+  console.log('✔ RSS Sources seeded');
+
+  // 3. Voices
   const voices = [
     // OhFree Voices
     { voiceId: '1402', name: 'Thế Hào (Nam - OhFree)', provider: 'ohfree' },
@@ -18,31 +53,38 @@ async function main() {
     { voiceId: 'vi-VN-NamMinhNeural', name: 'Nam Minh (Nam - Edge)', provider: 'edge' },
 
     // LucyLab (ViVibe)
-    { voiceId: 'vuthao', name: 'Vũ Thảo (LucyLab)', provider: 'lucylab' },
-    { voiceId: 'thanhha', name: 'Thanh Hà (LucyLab)', provider: 'lucylab' },
-    { voiceId: 'ngocha', name: 'Ngọc Hà (LucyLab)', provider: 'lucylab' },
+    { voiceId: 'mhsL3CPLxmLYdSTKp3GANj', name: 'Nam Đỹ (LucyLab)', provider: 'lucylab' },
 
-    // ElevenLabs (Example)
-    { voiceId: 'Th3H4oV1et', name: 'Thế Hào Pro (ElevenLabs)', provider: 'elevenlabs' }
+
+    // ElevenLabs
+    { voiceId: 'f966mdF5njWREvreUG07', name: 'Thế Hào Pro (ElevenLabs)', provider: 'elevenlabs' }
   ];
 
-  for (const voice of voices) {
+  for (const v of voices) {
     await prisma.voice.upsert({
-      where: { id: voice.voiceId }, // This won't work as id is UUID, using findFirst instead
-      update: {},
-      create: voice,
-    }).catch(async () => {
-      // Fallback for simple unique check
-      const exists = await prisma.voice.findFirst({
-        where: { voiceId: voice.voiceId, provider: voice.provider }
-      });
-      if (!exists) {
-        await prisma.voice.create({ data: voice });
-      }
+      where: { voiceId_provider: { voiceId: v.voiceId, provider: v.provider } },
+      update: { name: v.name },
+      create: v
     });
   }
+  console.log('✔ TTS Voices seeded');
 
-  // Default Settings
+  // 4. BGM Assets (Metadata for public/bgm files)
+  const bgmPresets = [
+    { name: 'Nhe-nhang.mp3', url: '/bgm/nhe-nhang.mp3', type: 'audio', size: 0, hash: 'preset_1' },
+    { name: 'Kich-tinh.mp3', url: '/bgm/kich-tinh.mp3', type: 'audio', size: 0, hash: 'preset_2' },
+  ];
+
+  for (const b of bgmPresets) {
+    await prisma.asset.upsert({
+      where: { hash: b.hash },
+      update: { name: b.name, url: b.url },
+      create: b
+    });
+  }
+  console.log('✔ BGM Presets seeded');
+
+  // 5. Default Settings
   const defaultSettings = [
     { key: 'tts_priority', value: JSON.stringify(['ohfree', 'edge', 'gemini']) },
     { key: 'ohfree_voice_id', value: '1402' },
@@ -66,8 +108,9 @@ async function main() {
       create: s
     });
   }
+  console.log('✔ Default Settings seeded');
 
-  console.log('Seed completed successfully.');
+  console.log('\n🚀 Seeding completed successfully!');
 }
 
 main()

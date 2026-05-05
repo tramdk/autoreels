@@ -1,0 +1,297 @@
+import { Request, Response, NextFunction } from 'express';
+import path from 'path';
+import fs from 'fs';
+import prisma from '../lib/prisma';
+import { generateAudio } from '../services/tts';
+import { renderWithHyperFrames, findFfmpegPath, getAudioDuration } from '../services/renderer';
+import { publishToTikTok } from '../services/tiktok';
+import https from 'https';
+import http from 'http';
+
+export const videoProgress = new Map<string, number>();
+
+export const getVideos = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const status = req.query.status as string;
+    const skip = (page - 1) * limit;
+
+    const where = status ? { status } : {};
+
+    const [videos, total] = await Promise.all([
+      prisma.video.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        include: { articles: true }
+      }),
+      prisma.video.count({ where })
+    ]);
+
+    res.json({
+      items: videos,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const generateVideo = async (req: Request, res: Response, next: NextFunction) => {
+  const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume } = req.body;
+  const videoId = `v_${articleId}_${Date.now()}`;
+  
+  // Set initial progress
+  videoProgress.set(videoId, 5);
+
+  try {
+    const article = await prisma.article.findUnique({ where: { id: articleId } });
+    if (!article) return res.status(404).json({ error: 'Article not found' });
+
+    await prisma.article.update({
+      where: { id: articleId },
+      data: { status: 'generating' }
+    });
+
+    res.json({ videoId, status: 'generating' });
+
+    // Process video generation asynchronously
+    (async () => {
+      let bgmTempPath: string | undefined;
+      try {
+
+    const script = article.script as any;
+    const scenes: any[] = script.scenes || [];
+    const localTmpDir = path.join(process.cwd(), 'temp_renders');
+    if (!fs.existsSync(localTmpDir)) fs.mkdirSync(localTmpDir);
+
+    // === BGM DOWNLOAD (if selected) ===
+    if (bgmAssetId && bgmAssetId !== 'none') {
+      try {
+        // Check if it's a preset BGM (starts with 'preset:')
+        if (bgmAssetId.startsWith('preset:')) {
+          const presetName = bgmAssetId.replace('preset:', '');
+          const presetPath = path.join(process.cwd(), 'public', 'bgm', presetName);
+          if (fs.existsSync(presetPath)) {
+            bgmTempPath = presetPath;
+            console.log(`[RENDER] Using preset BGM: ${presetName}`);
+          }
+        } else {
+          // It's an asset ID — look up from DB
+          const bgmAsset = await prisma.asset.findUnique({ where: { id: bgmAssetId } });
+          if (bgmAsset && bgmAsset.url) {
+            bgmTempPath = path.join(localTmpDir, `${videoId}_bgm.mp3`);
+            console.log(`[RENDER] Downloading BGM from: ${bgmAsset.url}`);
+            await downloadFile(bgmAsset.url, bgmTempPath);
+          }
+        }
+      } catch (bgmErr) {
+        console.error('[RENDER] BGM download failed, continuing without BGM:', bgmErr);
+        bgmTempPath = undefined;
+      }
+    }
+
+    // === AUDIO GENERATION ===
+    const SEPARATOR = '... ';
+    const fullText = scenes.map(s => s.voiceText).join(SEPARATOR);
+    
+    console.log(`[RENDER] Generating single audio for entire script (${fullText.length} chars)...`);
+    
+    const ttsRes = await generateAudio(fullText, templateId, {
+      provider: ttsProvider,
+      voiceId: ttsVoiceId,
+    });
+
+    const audioPath = path.join(localTmpDir, `${videoId}_total.${ttsRes.ext}`);
+    fs.writeFileSync(audioPath, ttsRes.buffer);
+
+    let totalDuration = getAudioDuration(audioPath);
+    if (!totalDuration || totalDuration <= 0) {
+      totalDuration = ttsRes.durationSeconds;
+    }
+    
+    videoProgress.set(videoId, 20);
+
+    // Distribute durations
+    const pausePerScene = 0.3;
+    const totalPauseTime = pausePerScene * (scenes.length - 1);
+    const speechOnlyDuration = totalDuration - totalPauseTime;
+    const totalChars = scenes.reduce((sum, s) => sum + s.voiceText.length, 0);
+    
+    const sceneDurations = scenes.map((s, i) => {
+      const speechTime = totalChars > 0 
+        ? (s.voiceText.length / totalChars) * speechOnlyDuration 
+        : speechOnlyDuration / scenes.length;
+      return i < scenes.length - 1 ? speechTime + pausePerScene : speechTime;
+    });
+
+    // === VIDEO RENDERING ===
+    const outputPath = path.join(localTmpDir, `${videoId}.mp4`);
+    
+    await renderWithHyperFrames({
+      videoId,
+      scenes,
+      sceneDurations,
+      templateId,
+      outputPath,
+      audioBuffer: ttsRes.buffer,
+      audioExt: ttsRes.ext,
+      audioDuration: totalDuration,
+      bgmPath: bgmTempPath,
+      bgmVolume: typeof bgmVolume === 'number' ? bgmVolume : 0.15,
+      onProgress: (p) => {
+        const scaledProgress = 20 + (p * 0.75); // 20% to 95%
+        videoProgress.set(videoId, Math.round(scaledProgress));
+      }
+    });
+
+    // Save to DB
+    const video = await prisma.video.create({
+      data: {
+        id: videoId,
+        title: article.title,
+        videoUrl: `/temp_renders/${videoId}.mp4`,
+        audioUrl: `/temp_renders/${videoId}_total.${ttsRes.ext}`,
+        status: 'ready',
+        articles: { connect: { id: articleId } }
+      }
+    });
+
+    await prisma.article.update({
+      where: { id: articleId },
+      data: { status: 'video_generated', videoId: video.id }
+    });
+
+    videoProgress.set(videoId, 100);
+
+        // Cleanup temp BGM file (but not preset files)
+        if (bgmTempPath && bgmAssetId && !bgmAssetId.startsWith('preset:')) {
+          try { fs.unlinkSync(bgmTempPath); } catch (_) {}
+        }
+      } catch (err: any) {
+        console.error('[VIDEO GEN ERROR]', err);
+        videoProgress.set(videoId, -1);
+        if (bgmTempPath && bgmAssetId && !bgmAssetId.startsWith('preset:')) {
+          try { fs.unlinkSync(bgmTempPath); } catch (_) {}
+        }
+        await prisma.article.update({
+          where: { id: articleId },
+          data: { status: 'summarized' }
+        }).catch(console.error);
+      }
+    })();
+  } catch (err: any) {
+    next(err);
+  }
+};
+
+// Helper: download a file from URL to local path
+function downloadFile(url: string, dest: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(dest);
+    const protocol = url.startsWith('https') ? https : http;
+    protocol.get(url, (response) => {
+      // Handle redirects
+      if (response.statusCode === 301 || response.statusCode === 302) {
+        const redirectUrl = response.headers.location;
+        if (redirectUrl) {
+          file.close();
+          return downloadFile(redirectUrl, dest).then(resolve).catch(reject);
+        }
+      }
+      response.pipe(file);
+      file.on('finish', () => { file.close(); resolve(); });
+    }).on('error', (err) => {
+      fs.unlinkSync(dest);
+      reject(err);
+    });
+  });
+}
+
+export const getProgress = (req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  const videoId = req.params.id;
+
+  const sendProgress = () => {
+    const progress = videoProgress.get(videoId) || 0;
+    res.write(`data: ${JSON.stringify({ progress })}\n\n`);
+
+    if (progress === 100 || progress === -1) {
+      clearInterval(interval);
+      res.end();
+    }
+  };
+
+  // Send immediately, then poll
+  sendProgress();
+  const interval = setInterval(sendProgress, 1000);
+
+  req.on('close', () => {
+    clearInterval(interval);
+  });
+};
+
+export const deleteVideo = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const video = await prisma.video.findUnique({ where: { id: req.params.id } });
+    if (!video) throw new Error('Video not found');
+
+    const videoPath = path.join(process.cwd(), 'temp_renders', `${req.params.id}.mp4`);
+    if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath);
+    
+    await prisma.video.delete({ where: { id: req.params.id } });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const postToTikTok = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await publishToTikTok(req.params.videoId);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const playVideo = async (req: Request, res: Response) => {
+  const videoId = req.params.id;
+  const videoPath = path.join(process.cwd(), 'temp_renders', videoId.endsWith('.mp4') ? videoId : `${videoId}.mp4`);
+  
+  if (fs.existsSync(videoPath)) {
+    return res.sendFile(videoPath);
+  }
+
+  // If local file is missing (published and archived), check DB for Cloudinary URL
+  try {
+    const video = await prisma.video.findUnique({ where: { id: videoId } });
+    if (video && video.videoUrl && video.videoUrl.startsWith('http')) {
+      return res.redirect(video.videoUrl);
+    }
+    return res.status(404).json({ error: 'Video file not found' });
+  } catch (err) {
+    return res.status(404).json({ error: 'Video file not found' });
+  }
+};
+
+
+export const getTikTokStatus = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const video = await prisma.video.findUnique({ where: { id: req.params.videoId } });
+    if (!video) return res.status(404).json({ error: 'Video not found' });
+    res.json({ status: video.status, publishId: video.publishId });
+  } catch (err) {
+    next(err);
+  }
+};
+
+

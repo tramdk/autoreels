@@ -58,7 +58,7 @@ router.post('/manual-script', authenticate, async (req, res) => {
       data: {
         title,
         contentSnippet: 'Manual Script',
-        script: JSON.stringify(script),
+        script: script as any,
         link: 'manual-script://' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
         status: 'summarized'
       }
@@ -146,7 +146,7 @@ Trả về DUY NHẤT một JSON object hợp lệ, không giải thích gì th�
 
     await prisma.article.update({
       where: { id: article.id },
-      data: { script: cleanJson, status: 'summarized' }
+      data: { script: JSON.parse(cleanJson), status: 'summarized' }
     });
 
     res.json(JSON.parse(cleanJson));
@@ -161,7 +161,7 @@ router.put('/:id/script', authenticate, async (req, res) => {
   try {
     await prisma.article.update({
       where: { id: req.params.id },
-      data: { script: JSON.stringify(script) }
+      data: { script: script as any }
     });
     res.json({ success: true });
   } catch (error: any) {
