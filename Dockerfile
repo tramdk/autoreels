@@ -40,5 +40,5 @@ USER 1000
 ENV PORT=7860
 ENV NODE_ENV=production
 
-# Chạy server
-CMD ["node", "dist/server.js"]
+# Chạy server trực tiếp bằng tsx (vì có 16GB RAM nên không cần biên dịch trước)
+CMD ["npx", "tsx", "server.ts"]
