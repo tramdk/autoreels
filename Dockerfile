@@ -24,7 +24,8 @@ COPY . .
 RUN mkdir -p public/bgm app/templates/bold && \
     wget -O public/bgm/kich-tinh.mp3 https://raw.githubusercontent.com/tramdk/autoreels/main/public/bgm/kich-tinh.mp3 && \
     wget -O public/bgm/nhe-nhang.mp3 https://raw.githubusercontent.com/tramdk/autoreels/main/public/bgm/nhe-nhang.mp3 && \
-    wget -O app/templates/bold/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/main/app/templates/bold/bg.jpg
+    wget -O app/templates/bold/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/main/app/templates/bold/bg.jpg && \
+    wget -O app/templates/cinematic/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/main/app/templates/cinematic/bg.jpg
 
 # Build dự án (Vite cho frontend + TSC cho backend)
 RUN npm run build
