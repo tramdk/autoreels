@@ -17,15 +17,35 @@ export async function publishToTikTok(videoId: string) {
   const localPath = path.join(tempDir, `${video.id}.mp4`);
   let isTempDownload = false;
 
-  // If local file doesn't exist (e.g., after redeploy), download from cloud
+  // 1. Ensure we have the video file locally
   if (!fs.existsSync(localPath)) {
     if (video.videoUrl && video.videoUrl.startsWith('http')) {
       console.log(`[TikTok] Local file missing, downloading from cloud: ${video.videoUrl}`);
-      await downloadFile(video.videoUrl, localPath);
-      isTempDownload = true;
+      try {
+        await downloadFile(video.videoUrl, localPath);
+        
+        // Verify download success
+        if (!fs.existsSync(localPath) || fs.statSync(localPath).size === 0) {
+          throw new Error('Downloaded file is empty or missing');
+        }
+        
+        isTempDownload = true;
+        console.log(`[TikTok] Download successful (${fs.statSync(localPath).size} bytes)`);
+      } catch (dlErr: any) {
+        throw new Error(`Cloud download failed: ${dlErr.message}`);
+      }
     } else {
-      throw new Error(`Video file not found and no cloud URL available for: ${videoId}`);
+      throw new Error(`Video file not found locally and no cloud URL available for: ${videoId}`);
     }
+  } else {
+    // File exists locally, verify it's not empty
+    const stats = fs.statSync(localPath);
+    if (stats.size === 0) {
+      console.log(`[TikTok] Local file is empty, attempting re-download...`);
+      fs.unlinkSync(localPath);
+      return publishToTikTok(videoId); // Recursive call to trigger download logic
+    }
+    console.log(`[TikTok] Using existing local file (${stats.size} bytes)`);
   }
 
   try {

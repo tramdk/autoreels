@@ -93,9 +93,18 @@ export function downloadFile(url: string, dest: string): Promise<void> {
       }
 
       response.pipe(file);
+      
       file.on('finish', () => {
+        file.close((err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
+      file.on('error', (err) => {
         file.close();
-        resolve();
+        if (fs.existsSync(dest)) fs.unlinkSync(dest);
+        reject(err);
       });
     }).on('error', (err) => {
       file.close();
