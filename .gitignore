@@ -22,8 +22,8 @@ temp_renders_test/
 work-*/
 uploads/
 # Binary files to be downloaded via Dockerfile instead
-app/templates/bold/bg.jpg
-app/templates/cinematic/bg.jpg
+app/templates/**/*.jpg
+app/templates/**/*.png
 public/bgm/*.mp3
 
 # Development Scratchpad
