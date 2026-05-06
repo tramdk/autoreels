@@ -94,9 +94,9 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 min-w-0 bg-background overflow-hidden flex flex-col pb-24 lg:pb-0">
+      <main className="flex-1 min-w-0 bg-background overflow-y-auto h-screen custom-scrollbar pb-24 lg:pb-0 relative">
         <MobileHeader onLogout={handleLogout} />
-        <div className={location.pathname === '/settings' ? "flex-1 w-full h-full" : "flex-1 w-full max-w-7xl mx-auto px-6 py-12 md:px-12 md:py-20 overflow-y-auto custom-scrollbar"}>
+        <div className="flex-1 w-full h-full min-h-0">
           <Routes>
             <Route path="/dashboard" element={
               <DashboardView 

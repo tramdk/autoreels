@@ -24,23 +24,23 @@ export const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color = 
       whileHover={{ y: -8, scale: 1.02 }}
       whileTap={onClick ? { scale: 0.98 } : {}}
       onClick={onClick}
-      className={`relative overflow-hidden glass p-8 flex flex-col items-center text-center rounded-[32px] border border-white/5 transition-all duration-300 ${
+      className={`relative overflow-hidden glass p-5 sm:p-8 flex flex-col items-center text-center rounded-[24px] sm:rounded-[32px] border border-white/5 transition-all duration-300 ${
         onClick ? 'cursor-pointer hover:border-white/10 hover:bg-white/5' : ''
       }`}
     >
       {/* Dynamic Background Glow */}
       <div className={`absolute -bottom-12 -right-12 w-32 h-32 blur-[60px] opacity-20 rounded-full ${styles.bg}`} />
       
-      <div className={`p-5 rounded-2xl ${styles.bg} ${styles.text} mb-6 transition-all duration-500 group-hover:scale-110 shadow-lg ${styles.glow} border ${styles.border}`}>
-        {React.cloneElement(icon as React.ReactElement, { className: 'w-7 h-7' })}
+      <div className={`p-4 sm:p-5 rounded-2xl ${styles.bg} ${styles.text} mb-4 sm:mb-6 transition-all duration-500 group-hover:scale-110 shadow-lg ${styles.glow} border ${styles.border}`}>
+        {React.cloneElement(icon as React.ReactElement, { className: 'w-6 h-6 sm:w-7 h-7' })}
       </div>
       
-      <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-3 leading-none">
+      <p className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2 sm:mb-3 leading-none">
         {title}
       </p>
       
       <div className="relative">
-        <p className="text-5xl font-black text-white tracking-tighter leading-none mb-1">
+        <p className="text-3xl sm:text-5xl font-black text-white tracking-tighter leading-none mb-1">
           {value}
         </p>
         <div className={`h-1 w-8 mx-auto rounded-full ${styles.bg} opacity-50`} />

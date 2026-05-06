@@ -1,6 +1,8 @@
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 import path from 'path';
+import https from 'https';
+import http from 'http';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -57,5 +59,80 @@ export function cleanupFile(filePath: string) {
     }
   } catch (e) {
     console.error(`[Storage] Cleanup error for ${filePath}:`, e);
+  }
+}
+
+/**
+ * Downloads a file from a URL to a local path
+ */
+export function downloadFile(url: string, dest: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    // Ensure directory exists
+    const dir = path.dirname(dest);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    const file = fs.createWriteStream(dest);
+    const protocol = url.startsWith('https') ? https : http;
+    
+    protocol.get(url, (response) => {
+      // Handle redirects
+      if (response.statusCode === 301 || response.statusCode === 302) {
+        const redirectUrl = response.headers.location;
+        if (redirectUrl) {
+          file.close();
+          return downloadFile(redirectUrl, dest).then(resolve).catch(reject);
+        }
+      }
+
+      if (response.statusCode !== 200) {
+        file.close();
+        fs.unlinkSync(dest);
+        return reject(new Error(`Failed to download file: ${response.statusCode} ${response.statusMessage}`));
+      }
+
+      response.pipe(file);
+      file.on('finish', () => {
+        file.close();
+        resolve();
+      });
+    }).on('error', (err) => {
+      file.close();
+      if (fs.existsSync(dest)) fs.unlinkSync(dest);
+      reject(err);
+    });
+  });
+}
+
+/**
+ * Deletes a video/file from Cloudinary
+ * @param fileUrl The full Cloudinary URL
+ */
+export async function deleteRemoteFile(fileUrl: string): Promise<boolean> {
+  if (!fileUrl || !fileUrl.includes('cloudinary.com')) return false;
+
+  try {
+    // Extract public_id from URL
+    // Format: .../upload/v12345678/folder/public_id.mp4
+    const parts = fileUrl.split('/');
+    const uploadIndex = parts.indexOf('upload');
+    if (uploadIndex === -1) return false;
+
+    // Get everything after the version (e.g., v12345678)
+    const publicIdWithExt = parts.slice(uploadIndex + 2).join('/');
+    // Remove extension
+    const publicId = publicIdWithExt.split('.').slice(0, -1).join('.');
+
+    console.log(`[Storage] Deleting remote file from Cloudinary: ${publicId}`);
+    
+    const result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: fileUrl.includes('/video/') ? 'video' : 'image'
+    });
+
+    return result.result === 'ok';
+  } catch (error: any) {
+    console.error('[Storage] Cloudinary Delete Error:', error.message);
+    return false;
   }
 }

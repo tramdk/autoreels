@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { 
-  LayoutDashboard, 
-  Clapperboard, 
-  Video, 
+import {
+  LayoutDashboard,
+  Clapperboard,
+  Video,
   Settings,
   Mic
 } from 'lucide-react';
@@ -19,12 +19,12 @@ export const MobileNav: React.FC<MobileNavProps> = ({ activeTab, setActiveTab })
     { id: 'dashboard' as TabType, icon: <LayoutDashboard />, label: 'Home' },
     { id: 'studio' as TabType, icon: <Clapperboard />, label: 'Studio' },
     { id: 'videos' as TabType, icon: <Video />, label: 'Videos' },
-    { id: 'voices' as TabType, icon: <Mic />, label: 'TTS' },
-    { id: 'settings' as TabType, icon: <Settings />, label: 'Config' }
+    { id: 'voices' as TabType, icon: <Mic />, label: 'Voices' },
+    { id: 'settings' as TabType, icon: <Settings />, label: 'Settings' }
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-6 pt-2">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-2 pt-2">
       <div className="glass-morphism rounded-3xl border border-white/10 flex justify-around items-center px-2 py-3 shadow-2xl backdrop-blur-2xl bg-black/40">
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
@@ -41,7 +41,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ activeTab, setActiveTab })
                 {item.label}
               </span>
               {isActive && (
-                <motion.div 
+                <motion.div
                   layoutId="active-dot"
                   className="absolute -top-1 w-1 h-1 bg-primary rounded-full shadow-[0_0_8px_rgba(255,59,48,0.8)]"
                 />

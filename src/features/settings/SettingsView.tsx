@@ -258,7 +258,6 @@ export const SettingsView: React.FC = () => {
         currentPriority = globalTtsVal.split(',').map((p: string) => p.trim());
       }
 
-      // Ensure all available providers are in the list
       const merged = [...currentPriority];
       defaultPriority.forEach(p => {
         if (!merged.includes(p)) merged.push(p);
@@ -330,7 +329,7 @@ export const SettingsView: React.FC = () => {
   };
 
   if (loading) return (
-    <div className="w-full h-full flex items-center justify-center bg-[#020617]">
+    <div className="w-full py-40 flex items-center justify-center bg-[#020617]">
       <div className="flex flex-col items-center gap-4">
         <div className="w-10 h-10 border-4 border-pink-600 border-t-transparent rounded-full animate-spin"></div>
         <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Initialising Studio...</span>
@@ -339,13 +338,13 @@ export const SettingsView: React.FC = () => {
   );
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col w-full h-full bg-[#020617] text-slate-300 overflow-hidden">
+    <div className="flex flex-col w-full bg-[#020617] text-slate-300">
       {/* Header Bar */}
-      <header className="h-14 border-b border-white/5 flex items-center justify-between px-6 bg-[#0f172a]/60 backdrop-blur-xl z-50 shrink-0">
-        <div className="flex items-center gap-5">
+      <header className="h-[76px] sm:h-14 border-b border-white/5 flex items-center justify-between px-4 sm:px-6 bg-[#0f172a]/80 backdrop-blur-xl z-50 shrink-0 sticky top-[76px] lg:top-0">
+        <div className="flex items-center gap-3 sm:gap-5">
           <div className="flex flex-col">
-            <h1 className="text-lg font-black tracking-tighter text-white leading-none">STUDIO <span className="text-pink-500">ENGINE</span></h1>
-            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Creative Suite</span>
+            <h1 className="text-base sm:text-lg font-black tracking-tighter text-white leading-none">STUDIO <span className="text-pink-500">ENGINE</span></h1>
+            <span className="text-[8px] sm:text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Creative Suite</span>
           </div>
           <div className="h-6 w-[1px] bg-white/10 hidden md:block"></div>
           <div className="hidden lg:flex items-center gap-1 bg-white/5 p-1 rounded-lg">
@@ -355,7 +354,7 @@ export const SettingsView: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-1 bg-white/5 p-1 rounded-lg">
              {[
                { id: 'layout', label: 'Layout', icon: <Move className="w-3 h-3"/> },
@@ -363,15 +362,15 @@ export const SettingsView: React.FC = () => {
                { id: 'background', label: 'BG', icon: <ImageIcon className="w-3 h-3"/> },
                { id: 'audio', label: 'Audio', icon: <Volume2 className="w-3 h-3"/> }
              ].map(tab => (
-               <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`flex items-center gap-2 px-3 py-1 rounded-md text-[9px] font-black uppercase transition-all ${activeTab === tab.id ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-slate-300'}`}>{tab.icon} <span className="hidden sm:inline">{tab.label}</span></button>
+               <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`flex items-center gap-2 px-2.5 sm:px-3 py-1.5 sm:py-1 rounded-md text-[9px] font-black uppercase transition-all ${activeTab === tab.id ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-slate-300'}`}>{tab.icon} <span className="hidden sm:inline">{tab.label}</span></button>
              ))}
           </div>
-          <button onClick={saveCurrentTemplate} className="bg-pink-600 hover:bg-pink-500 text-white text-[9px] font-black uppercase px-5 py-2 rounded-lg transition-all flex items-center gap-2 shadow-lg shadow-pink-500/10"><Save className="w-3 h-3" /> <span className="hidden sm:inline">Save Changes</span></button>
+          <button onClick={saveCurrentTemplate} className="bg-pink-600 hover:bg-pink-500 text-white text-[9px] font-black uppercase px-4 sm:px-5 py-2 rounded-lg transition-all flex items-center gap-2 shadow-lg shadow-pink-500/10"><Save className="w-3 h-3" /> <span className="hidden sm:inline">Save</span></button>
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col xl:flex-row overflow-hidden">
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 border-r border-white/5 bg-[#020617] custom-scrollbar">
+      <div className="flex flex-col xl:flex-row">
+        <div className="flex-1 p-4 md:p-8 border-r border-white/5 bg-[#020617]">
           <div className="w-full pb-20">
             <AnimatePresence mode="wait">
               {activeTab === 'style' && (
@@ -553,94 +552,96 @@ export const SettingsView: React.FC = () => {
         </div>
 
         {/* Right Sidebar: Mobile Preview */}
-        <div className="w-full xl:w-[480px] border-l border-white/5 bg-[#0f172a]/20 flex flex-col items-center justify-center p-8 shrink-0 z-40 overflow-hidden">
-          <div className="w-full max-w-[320px] flex items-center justify-between mb-6 px-5 py-3 bg-white/5 rounded-2xl border border-white/5">
-            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse"></div><span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Live Preview</span></div>
-            <button onClick={playPreview} className="text-[10px] font-black uppercase text-pink-400 hover:text-white transition-all flex items-center gap-2"><Sparkles className="w-4 h-4" /> Play Anim</button>
-          </div>
-          
-          <div className="relative group shrink-0">
-            <div className="absolute -inset-1 bg-gradient-to-b from-pink-600/10 to-rose-600/10 rounded-[3rem] blur-2xl opacity-20"></div>
-            <div ref={previewRef} className="relative w-[300px] aspect-[9/16] rounded-[3rem] border-[8px] border-[#1e293b] shadow-2xl overflow-hidden bg-black select-none">
-               <div className="absolute inset-0">
-                  <AnimatePresence mode="popLayout">
-                    {template.backgroundImage ? (
-                      <motion.img 
-                        key={template.backgroundImage}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.8, ease: "easeInOut" }}
-                        src={template.backgroundImage} 
-                        className="absolute inset-0 w-full h-full object-cover" 
-                        style={{ filter: `brightness(${template.backgroundBrightness})` }} 
-                        alt="" 
-                      />
-                    ) : (
-                      <motion.div 
-                        key="default-bg"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 w-full h-full bg-slate-900 flex items-center justify-center text-white/5"
-                      >
-                        <ImageIcon className="w-12 h-12" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80 z-0"></div>
-               </div>
-
-                <div className="absolute inset-0 z-10 pointer-events-none">
-                   {template.showLogo !== false && (
-                     <div className="absolute pointer-events-none flex justify-center" style={{ top: template.logoTop * SCALE, left: 0, right: 0, marginLeft: template.logoLeft * SCALE }}>
-                       <motion.div 
-                         drag dragMomentum={false} dragSnapToOrigin={true} onDragEnd={(e, info) => handleDragEnd(e, info, 'logo')} 
-                         className="pointer-events-auto cursor-move group logo-el" 
-                       >
-                         <div className="border border-transparent group-hover:border-pink-500/50 rounded-lg px-2 text-center">
-                           <span className="font-black text-center uppercase whitespace-nowrap block" style={{ fontFamily: 'Anton', color: template.logoColor, fontSize: (template.logoSize || DEFAULTS.logoSize) * SCALE, textShadow: `0 0 20px ${template.logoColor}66`, letterSpacing: 4 * SCALE }}>{template.logoText || 'LOGO'}</span>
-                         </div>
-                       </motion.div>
-                     </div>
-                   )}
-                   {template.showCard !== false && (
-                     <div className="absolute pointer-events-none" style={{ top: template.mainTop * SCALE, left: 0, width: '100%', padding: `0 ${Math.max(0, template.mainLeft * SCALE)}px` }}>
-                       <motion.div 
-                         drag="y" dragMomentum={false} dragSnapToOrigin={true} onDragEnd={(e, info) => handleDragEnd(e, info, 'main')} 
-                         className="pointer-events-auto cursor-move group main-stack-el w-full" 
-                       >
-                         <div className="border border-transparent group-hover:border-pink-500/50 flex flex-col p-4 transition-all" style={{ gap: (template.contentGap || DEFAULTS.contentGap) * SCALE, backgroundColor: template.cardBgColor, borderTop: `${template.cardBorderTop * SCALE}px solid ${template.cardBorderColor}`, borderBottom: `${template.cardBorderBottom * SCALE}px solid ${template.cardBorderColor}`, borderLeft: `${template.cardBorderLeft * SCALE}px solid ${template.cardBorderColor}`, borderRight: `${template.cardBorderRight * SCALE}px solid ${template.cardBorderColor}`, borderRadius: (template.cardBorderRadius || 0) * SCALE }}>
-                           <h3 className="font-black uppercase tracking-tight hook-el" style={{ fontFamily: 'Anton', color: template.hookColor, fontSize: (template.hookSize || DEFAULTS.hookSize) * SCALE, lineHeight: 1.15 }}>THE FUTURE OF VIDEO</h3>
-                           <div className="h-1 rounded-full divider-el-inner" style={{ width: (template.dividerWidth || DEFAULTS.dividerWidth) * SCALE, backgroundColor: template.dividerColor }}></div>
-                           <p className="font-medium body-el" style={{ color: template.bodyColor, fontSize: (template.bodySize || DEFAULTS.bodySize) * SCALE, lineHeight: 1.5 }}>Your automated content starts here. Drag me around!</p>
-                         </div>
-                       </motion.div>
-                     </div>
-                   )}
-                   <div className="absolute inset-0 pointer-events-none">
-                      {template.showTag !== false && (
-                        <div className="absolute pointer-events-none flex justify-center" style={{ top: template.tagTop * SCALE, left: 0, right: 0, marginLeft: template.tagLeft * SCALE }}>
-                          <motion.div 
-                            drag dragMomentum={false} dragSnapToOrigin={true} onDragEnd={(e, info) => handleDragEnd(e, info, 'tag')} 
-                            className="pointer-events-auto cursor-move group tag-el" 
-                          >
-                            <div className="border border-transparent group-hover:border-pink-500/50 rounded-lg px-2">
-                              <div className="inline-block px-3 py-1 rounded-sm transform skew-x-[-15deg] font-black whitespace-nowrap" style={{ backgroundColor: template.tagBg, color: template.tagColor, fontSize: (template.tagSize || DEFAULTS.tagSize) * SCALE }}>{template.tagText || 'HOT NEWS'}</div>
-                            </div>
-                          </motion.div>
-                        </div>
-                      )}
-                      {template.showDatetime !== false && (
-                        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[9px] font-bold text-white/30 uppercase tracking-widest whitespace-nowrap">MAY 05, 2026</div>
-                      )}
-                   </div>
-                </div>
+        <div className="w-full xl:w-[480px] border-l border-white/5 bg-[#0f172a]/20 flex flex-col items-center p-8 shrink-0 relative">
+          <div className="sticky top-[152px] lg:top-[76px] flex flex-col items-center w-full">
+            <div className="w-full max-w-[320px] flex items-center justify-between mb-6 px-5 py-3 bg-white/5 rounded-2xl border border-white/5">
+              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse"></div><span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Live Preview</span></div>
+              <button onClick={playPreview} className="text-[10px] font-black uppercase text-pink-400 hover:text-white transition-all flex items-center gap-2"><Sparkles className="w-4 h-4" /> Play Anim</button>
             </div>
+            
+            <div className="relative group shrink-0">
+              <div className="absolute -inset-1 bg-gradient-to-b from-pink-600/10 to-rose-600/10 rounded-[3rem] blur-2xl opacity-20"></div>
+              <div ref={previewRef} className="relative w-[300px] aspect-[9/16] rounded-[3rem] border-[8px] border-[#1e293b] shadow-2xl overflow-hidden bg-black select-none">
+                 <div className="absolute inset-0">
+                    <AnimatePresence mode="popLayout">
+                      {template.backgroundImage ? (
+                        <motion.img 
+                          key={template.backgroundImage}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.8, ease: "easeInOut" }}
+                          src={template.backgroundImage} 
+                          className="absolute inset-0 w-full h-full object-cover" 
+                          style={{ filter: `brightness(${template.backgroundBrightness})` }} 
+                          alt="" 
+                        />
+                      ) : (
+                        <motion.div 
+                          key="default-bg"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="absolute inset-0 w-full h-full bg-slate-900 flex items-center justify-center text-white/5"
+                        >
+                          <ImageIcon className="w-12 h-12" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80 z-0"></div>
+                 </div>
+
+                  <div className="absolute inset-0 z-10 pointer-events-none">
+                     {template.showLogo !== false && (
+                       <div className="absolute pointer-events-none flex justify-center" style={{ top: template.logoTop * SCALE, left: 0, right: 0, marginLeft: template.logoLeft * SCALE }}>
+                         <motion.div 
+                           drag dragMomentum={false} dragSnapToOrigin={true} onDragEnd={(e, info) => handleDragEnd(e, info, 'logo')} 
+                           className="pointer-events-auto cursor-move group logo-el" 
+                         >
+                           <div className="border border-transparent group-hover:border-pink-500/50 rounded-lg px-2 text-center">
+                             <span className="font-black text-center uppercase whitespace-nowrap block" style={{ fontFamily: 'Anton', color: template.logoColor, fontSize: (template.logoSize || DEFAULTS.logoSize) * SCALE, textShadow: `0 0 20px ${template.logoColor}66`, letterSpacing: 4 * SCALE }}>{template.logoText || 'LOGO'}</span>
+                           </div>
+                         </motion.div>
+                       </div>
+                     )}
+                     {template.showCard !== false && (
+                       <div className="absolute pointer-events-none" style={{ top: template.mainTop * SCALE, left: 0, width: '100%', padding: `0 ${Math.max(0, template.mainLeft * SCALE)}px` }}>
+                         <motion.div 
+                           drag="y" dragMomentum={false} dragSnapToOrigin={true} onDragEnd={(e, info) => handleDragEnd(e, info, 'main')} 
+                           className="pointer-events-auto cursor-move group main-stack-el w-full" 
+                         >
+                           <div className="border border-transparent group-hover:border-pink-500/50 flex flex-col p-4 transition-all" style={{ gap: (template.contentGap || DEFAULTS.contentGap) * SCALE, backgroundColor: template.cardBgColor, borderTop: `${template.cardBorderTop * SCALE}px solid ${template.cardBorderColor}`, borderBottom: `${template.cardBorderBottom * SCALE}px solid ${template.cardBorderColor}`, borderLeft: `${template.cardBorderLeft * SCALE}px solid ${template.cardBorderColor}`, borderRight: `${template.cardBorderRight * SCALE}px solid ${template.cardBorderColor}`, borderRadius: (template.cardBorderRadius || 0) * SCALE }}>
+                             <h3 className="font-black uppercase tracking-tight hook-el" style={{ fontFamily: 'Anton', color: template.hookColor, fontSize: (template.hookSize || DEFAULTS.hookSize) * SCALE, lineHeight: 1.15 }}>THE FUTURE OF VIDEO</h3>
+                             <div className="h-1 rounded-full divider-el-inner" style={{ width: (template.dividerWidth || DEFAULTS.dividerWidth) * SCALE, backgroundColor: template.dividerColor }}></div>
+                             <p className="font-medium body-el" style={{ color: template.bodyColor, fontSize: (template.bodySize || DEFAULTS.bodySize) * SCALE, lineHeight: 1.5 }}>Your automated content starts here. Drag me around!</p>
+                           </div>
+                         </motion.div>
+                       </div>
+                     )}
+                     <div className="absolute inset-0 pointer-events-none">
+                        {template.showTag !== false && (
+                          <div className="absolute pointer-events-none flex justify-center" style={{ top: template.tagTop * SCALE, left: 0, right: 0, marginLeft: template.tagLeft * SCALE }}>
+                            <motion.div 
+                              drag dragMomentum={false} dragSnapToOrigin={true} onDragEnd={(e, info) => handleDragEnd(e, info, 'tag')} 
+                              className="pointer-events-auto cursor-move group tag-el" 
+                            >
+                              <div className="border border-transparent group-hover:border-pink-500/50 rounded-lg px-2">
+                                <div className="inline-block px-3 py-1 rounded-sm transform skew-x-[-15deg] font-black whitespace-nowrap" style={{ backgroundColor: template.tagBg, color: template.tagColor, fontSize: (template.tagSize || DEFAULTS.tagSize) * SCALE }}>{template.tagText || 'HOT NEWS'}</div>
+                              </div>
+                            </motion.div>
+                          </div>
+                        )}
+                        {template.showDatetime !== false && (
+                          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[9px] font-bold text-white/30 uppercase tracking-widest whitespace-nowrap">MAY 05, 2026</div>
+                        )}
+                     </div>
+                  </div>
+              </div>
+            </div>
+            <p className="mt-6 text-[9px] font-bold text-slate-700 uppercase tracking-[0.2em] text-center px-12 opacity-40 italic">Precision Studio Engine</p>
           </div>
-          <p className="mt-6 text-[9px] font-bold text-slate-700 uppercase tracking-[0.2em] text-center px-12 opacity-40 italic">Precision Studio Engine</p>
         </div>
-      </main>
+      </div>
 
       <AnimatePresence>
         {showAssetPicker.active && (
@@ -653,6 +654,6 @@ export const SettingsView: React.FC = () => {
           />
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 };

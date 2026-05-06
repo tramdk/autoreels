@@ -162,29 +162,29 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
               animate={{ scale: 1, opacity: 1, y: 0 }} 
               exit={{ scale: 0.95, opacity: 0, y: 30 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="w-full max-w-6xl bg-slate-900/40 rounded-[40px] border border-white/10 shadow-2xl relative z-10 overflow-hidden flex flex-col h-[95vh] md:h-[85vh] max-h-[900px] backdrop-blur-3xl"
+              className="w-full max-w-6xl bg-slate-900/60 rounded-[24px] sm:rounded-[40px] border border-white/10 shadow-2xl relative z-10 overflow-hidden flex flex-col h-[98vh] sm:h-[95vh] md:h-[85vh] max-h-[900px] backdrop-blur-3xl"
             >
               {/* Header */}
-              <div className="px-8 md:px-12 py-8 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
+              <div className="px-6 sm:px-8 md:px-12 py-6 sm:py-8 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
                 <div className="space-y-1">
-                  <h2 className="text-2xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
-                    <div className="w-2 h-8 bg-primary rounded-full shadow-[0_0_20px_rgba(236,72,153,0.5)]"></div>
+                  <h2 className="text-xl sm:text-2xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
+                    <div className="w-1.5 sm:w-2 h-6 sm:h-8 bg-primary rounded-full shadow-[0_0_20px_rgba(236,72,153,0.5)]"></div>
                     Cấu hình <span className="text-primary">Studio</span>
                   </h2>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.4em] ml-5">Professional Rendering Suite</p>
+                  <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-[0.4em] ml-4 sm:ml-5 whitespace-nowrap">Professional Rendering Suite</p>
                 </div>
                 <button
                   onClick={() => { stopPreview(); setShowPicker(false); }}
-                  className="w-12 h-12 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all border border-white/5 group"
+                  className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-xl sm:rounded-2xl text-slate-400 hover:text-white transition-all border border-white/5 group"
                 >
-                  <X className="w-6 h-6 group-hover:rotate-90 transition-transform" />
+                  <X className="w-5 h-5 sm:w-6 h-6 group-hover:rotate-90 transition-transform" />
                 </button>
               </div>
 
               {/* Main Body */}
               <div className="flex-1 flex flex-col-reverse lg:flex-row overflow-y-auto lg:overflow-hidden">
                 {/* Left Sidebar */}
-                <div className="w-full lg:w-96 lg:border-r border-white/5 p-8 lg:p-12 space-y-10 lg:overflow-y-auto custom-scrollbar bg-black/30 shrink-0">
+                <div className="w-full lg:w-96 lg:border-r border-white/5 p-6 sm:p-8 lg:p-12 space-y-10 lg:overflow-y-auto custom-scrollbar bg-black/30 shrink-0">
                   <TemplateGrid selected={selectedTemplate} onSelect={setSelectedTemplate} />
                   
                   <div className="h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
@@ -225,7 +225,7 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
               </div>
 
               {/* Footer */}
-              <div className="px-8 md:px-12 py-8 border-t border-white/5 bg-black/60 flex flex-col md:flex-row items-center justify-between shrink-0 gap-6 md:gap-0">
+              <div className="px-6 sm:px-8 md:px-12 py-6 sm:py-8 border-t border-white/5 bg-black/60 flex flex-col md:flex-row items-center justify-between shrink-0 gap-6 md:gap-0">
                 <div className="flex items-center gap-8">
                    <div className="hidden sm:flex items-center gap-3">
                       <div className="flex -space-x-2">
@@ -243,19 +243,19 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
                    )}
                 </div>
 
-                <div className="flex gap-6 w-full md:w-auto">
+                <div className="flex gap-4 sm:gap-6 w-full md:w-auto">
                    <button
                     onClick={() => { stopPreview(); setShowPicker(false); }}
-                    className="flex-1 md:flex-none px-8 py-4 text-slate-500 hover:text-white font-black uppercase text-[11px] tracking-[0.2em] transition-all"
+                    className="flex-1 md:flex-none px-4 sm:px-8 py-4 text-slate-500 hover:text-white font-black uppercase text-[10px] sm:text-[11px] tracking-[0.2em] transition-all"
                   >
                     Hủy bỏ
                   </button>
                   <button
                     onClick={handleConfirm}
                     disabled={loading || loadingData}
-                    className="flex-1 md:flex-none bg-primary text-white px-16 py-4 rounded-[24px] font-black uppercase text-sm tracking-[0.2em] shadow-[0_15px_40px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_50px_rgba(236,72,153,0.5)] hover:-translate-y-1 active:translate-y-0 transition-all flex items-center justify-center gap-4 disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none"
+                    className="flex-1 md:flex-none bg-primary text-white px-8 sm:px-16 py-4 rounded-[16px] sm:rounded-[24px] font-black uppercase text-xs sm:text-sm tracking-[0.2em] shadow-[0_15px_40px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_50px_rgba(236,72,153,0.5)] hover:-translate-y-1 active:translate-y-0 transition-all flex items-center justify-center gap-3 sm:gap-4 disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none"
                   >
-                    Bắt đầu Render <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                    <span className="whitespace-nowrap">Bắt đầu Render</span> <RefreshCw className={`w-4 h-4 sm:w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
                   </button>
                 </div>
               </div>

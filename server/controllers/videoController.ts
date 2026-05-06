@@ -5,8 +5,7 @@ import prisma from '../lib/prisma';
 import { generateAudio } from '../services/tts';
 import { renderWithHyperFrames, findFfmpegPath, getAudioDuration } from '../services/renderer';
 import { publishToTikTok } from '../services/tiktok';
-import https from 'https';
-import http from 'http';
+import { uploadVideo, downloadFile, deleteRemoteFile } from '../services/storage';
 
 export const videoProgress = new Map<string, number>();
 
@@ -187,13 +186,23 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
       }
     });
 
-    // Save to DB
+    // === CLOUD UPLOAD ===
+    console.log(`[RENDER] Uploading results to Cloudinary for persistence...`);
+    videoProgress.set(videoId, 96);
+    
+    // Upload video and audio to Cloudinary
+    const [videoCloudUrl, audioCloudUrl] = await Promise.all([
+      uploadVideo(outputPath, 'autoreels_videos', true), // Keep local for a bit
+      uploadVideo(audioPath, 'autoreels_audio', true)
+    ]);
+
+    // Save to DB with Cloud URLs
     const video = await prisma.video.create({
       data: {
         id: videoId,
         title: article.title,
-        videoUrl: `/temp_renders/${videoId}.mp4`,
-        audioUrl: `/temp_renders/${videoId}_total.${ttsRes.ext}`,
+        videoUrl: videoCloudUrl,
+        audioUrl: audioCloudUrl,
         status: 'ready',
         articles: { connect: { id: articleId } }
       }
@@ -228,28 +237,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
   }
 };
 
-// Helper: download a file from URL to local path
-function downloadFile(url: string, dest: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const file = fs.createWriteStream(dest);
-    const protocol = url.startsWith('https') ? https : http;
-    protocol.get(url, (response) => {
-      // Handle redirects
-      if (response.statusCode === 301 || response.statusCode === 302) {
-        const redirectUrl = response.headers.location;
-        if (redirectUrl) {
-          file.close();
-          return downloadFile(redirectUrl, dest).then(resolve).catch(reject);
-        }
-      }
-      response.pipe(file);
-      file.on('finish', () => { file.close(); resolve(); });
-    }).on('error', (err) => {
-      fs.unlinkSync(dest);
-      reject(err);
-    });
-  });
-}
+// Local download helper removed in favor of storage service downloadFile
 
 export const getProgress = (req: Request, res: Response) => {
   res.setHeader('Content-Type', 'text/event-stream');
@@ -282,9 +270,22 @@ export const deleteVideo = async (req: Request, res: Response, next: NextFunctio
     const video = await prisma.video.findUnique({ where: { id: req.params.id } });
     if (!video) throw new Error('Video not found');
 
+    // 1. Delete from Cloudinary (if it's a cloud URL)
+    if (video.videoUrl && video.videoUrl.startsWith('http')) {
+      console.log(`[Video] Deleting remote video: ${video.videoUrl}`);
+      await deleteRemoteFile(video.videoUrl).catch(err => console.error('[Video] Cloudinary delete failed:', err));
+    }
+    
+    if (video.audioUrl && video.audioUrl.startsWith('http')) {
+      console.log(`[Video] Deleting remote audio: ${video.audioUrl}`);
+      await deleteRemoteFile(video.audioUrl).catch(err => console.error('[Video] Cloudinary audio delete failed:', err));
+    }
+
+    // 2. Delete local file (if exists)
     const videoPath = path.join(process.cwd(), 'temp_renders', `${req.params.id}.mp4`);
     if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath);
     
+    // 3. Delete from DB
     await prisma.video.delete({ where: { id: req.params.id } });
     res.json({ success: true });
   } catch (err) {

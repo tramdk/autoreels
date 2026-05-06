@@ -13,8 +13,8 @@
   --color-background: #0F172A;
   --color-surface: rgba(30, 41, 59, 0.6); /* Slate-800 translucent for glass */
   --color-foreground: #FFFFFF;
-  --color-muted: #201A32;
-  --color-border: rgba(255, 255, 255, 0.08);
+  --color-muted: #64748B; /* Slate-500 for better visibility */
+  --color-border: rgba(255, 255, 255, 0.1);
   --color-destructive: #DC2626;
   --color-ring: #EC4899;
 }

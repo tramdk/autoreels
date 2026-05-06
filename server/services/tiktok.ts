@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import fs from 'fs';
 import path from 'path';
 import prisma from '../lib/prisma';
-import { uploadVideo } from './storage';
+import { downloadFile, cleanupFile } from './storage';
 
 export async function publishToTikTok(videoId: string) {
   const video = await prisma.video.findUnique({ where: { id: videoId } });
@@ -11,17 +11,28 @@ export async function publishToTikTok(videoId: string) {
   const account = await prisma.account.findUnique({ where: { platform: 'tiktok' } });
   if (!account) throw new Error('TikTok account not connected');
 
-  const localPath = path.join(process.cwd(), 'temp_renders', `${video.id}.mp4`);
+  const tempDir = path.join(process.cwd(), 'temp_renders');
+  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
   
+  const localPath = path.join(tempDir, `${video.id}.mp4`);
+  let isTempDownload = false;
+
+  // If local file doesn't exist (e.g., after redeploy), download from cloud
   if (!fs.existsSync(localPath)) {
-    throw new Error(`Local video file not found for publishing: ${localPath}`);
+    if (video.videoUrl && video.videoUrl.startsWith('http')) {
+      console.log(`[TikTok] Local file missing, downloading from cloud: ${video.videoUrl}`);
+      await downloadFile(video.videoUrl, localPath);
+      isTempDownload = true;
+    } else {
+      throw new Error(`Video file not found and no cloud URL available for: ${videoId}`);
+    }
   }
 
   try {
     const videoBuffer = fs.readFileSync(localPath);
     const videoSize = videoBuffer.length;
 
-    // 1. Initialize Upload using FILE_UPLOAD
+    // 1. Initialize Upload
     console.log(`[TikTok] Initializing upload for video: ${videoId} (${videoSize} bytes)`);
     const initResponse = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
       method: 'POST',
@@ -32,7 +43,7 @@ export async function publishToTikTok(videoId: string) {
       body: JSON.stringify({
         post_info: {
           title: video.title || "AutoReels Video",
-          privacy_level: "SELF_ONLY",
+          privacy_level: "PUBLIC_TO_EVERYONE",
           disable_duet: false,
           disable_comment: false,
           disable_stitch: false
@@ -67,26 +78,21 @@ export async function publishToTikTok(videoId: string) {
 
     if (!uploadResponse.ok) throw new Error(`Failed to upload to TikTok: ${uploadResponse.statusText}`);
 
-    // SUCCESS! Archive to Cloudinary in the background to respond faster
-    console.log(`[TikTok] Publish success! Archiving to Cloudinary in background...`);
+    // SUCCESS! Update status
+    console.log(`[TikTok] Publish success! Video ID: ${videoId}`);
     
-    // Background task
-    (async () => {
-      try {
-        const cloudinaryUrl = await uploadVideo(localPath, 'autoreels_published', false);
-        await prisma.video.update({
-          where: { id: video.id },
-          data: { 
-            status: 'posted', 
-            publishId,
-            videoUrl: cloudinaryUrl
-          }
-        });
-        console.log(`[TikTok] Archive success for video ${videoId}`);
-      } catch (err: any) {
-        console.error(`[TikTok Archive Background Error]`, err.message);
+    await prisma.video.update({
+      where: { id: video.id },
+      data: { 
+        status: 'posted', 
+        publishId
       }
-    })();
+    });
+
+    // Cleanup local file if it was a temp download
+    if (isTempDownload) {
+      cleanupFile(localPath);
+    }
 
     return { success: true, publishId };
   } catch (error: any) {
