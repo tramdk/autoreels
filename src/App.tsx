@@ -8,6 +8,8 @@ import { SocialView } from './features/social/SocialView';
 import { SettingsView } from './features/settings/SettingsView';
 import { LoginView, ChangePasswordView } from './features/auth/AuthViews';
 import { VoicesView } from './features/voices/VoicesView';
+import { MobileNav } from './components/layout/MobileNav';
+import { MobileHeader } from './components/layout/MobileHeader';
 import { useAppLogic } from './hooks/useAppLogic';
 import { Toaster } from 'react-hot-toast';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
@@ -92,7 +94,8 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 min-w-0 bg-background overflow-hidden flex flex-col">
+      <main className="flex-1 min-w-0 bg-background overflow-hidden flex flex-col pb-24 lg:pb-0">
+        <MobileHeader onLogout={handleLogout} />
         <div className={location.pathname === '/settings' ? "flex-1 w-full h-full" : "flex-1 w-full max-w-7xl mx-auto px-6 py-12 md:px-12 md:py-20 overflow-y-auto custom-scrollbar"}>
           <Routes>
             <Route path="/dashboard" element={
@@ -163,6 +166,7 @@ export default function App() {
           </Routes>
         </div>
       </main>
+      <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );
 }
