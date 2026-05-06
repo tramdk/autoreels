@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     chromium \
     wget \
+    ca-certificates \
     fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
@@ -22,12 +23,12 @@ COPY . .
 
 # Tải các file binary từ GitHub vì Hugging Face cấm đẩy trực tiếp
 RUN mkdir -p public/bgm app/templates/bold app/templates/cinematic app/templates/classic app/video-template && \
-    wget -O public/bgm/kich-tinh.mp3 https://raw.githubusercontent.com/tramdk/autoreels/assets/public/bgm/kich-tinh.mp3 && \
-    wget -O public/bgm/nhe-nhang.mp3 https://raw.githubusercontent.com/tramdk/autoreels/assets/public/bgm/nhe-nhang.mp3 && \
-    wget -O app/templates/bold/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/assets/app/templates/bold/bg.jpg && \
-    wget -O app/templates/cinematic/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/assets/app/templates/cinematic/bg.jpg && \
-    wget -O app/templates/classic/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/assets/app/templates/classic/bg.jpg && \
-    wget -O app/video-template/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/assets/app/video-template/bg.jpg
+    wget --no-check-certificate -O public/bgm/kich-tinh.mp3 https://raw.githubusercontent.com/tramdk/autoreels/assets/public/bgm/kich-tinh.mp3 && \
+    wget --no-check-certificate -O public/bgm/nhe-nhang.mp3 https://raw.githubusercontent.com/tramdk/autoreels/assets/public/bgm/nhe-nhang.mp3 && \
+    wget --no-check-certificate -O app/templates/bold/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/assets/app/templates/bold/bg.jpg && \
+    wget --no-check-certificate -O app/templates/cinematic/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/assets/app/templates/cinematic/bg.jpg && \
+    wget --no-check-certificate -O app/templates/classic/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/assets/app/templates/classic/bg.jpg && \
+    wget --no-check-certificate -O app/video-template/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/assets/app/video-template/bg.jpg
 
 # Build dự án (Vite cho frontend + TSC cho backend)
 RUN npm run build
