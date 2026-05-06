@@ -16,6 +16,7 @@ WORKDIR /app
 # Copy package files và cài đặt dependencies
 COPY package*.json ./
 RUN npm install
+COPY prisma ./prisma/
 RUN npx prisma generate
 
 # Copy toàn bộ mã nguồn
