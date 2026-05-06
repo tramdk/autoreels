@@ -21,7 +21,9 @@ temp_renders/
 temp_renders_test/
 work-*/
 uploads/
-test_output.mp4
+# Binary files to be downloaded via Dockerfile instead
+app/templates/bold/bg.jpg
+public/bgm/*.mp3
 
 # Development Scratchpad
 scratch/
