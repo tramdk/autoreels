@@ -26,7 +26,8 @@ RUN mkdir -p public/bgm app/templates/bold app/templates/cinematic app/templates
     wget -O public/bgm/nhe-nhang.mp3 https://raw.githubusercontent.com/tramdk/autoreels/main/public/bgm/nhe-nhang.mp3 && \
     wget -O app/templates/bold/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/main/app/templates/bold/bg.jpg && \
     wget -O app/templates/cinematic/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/main/app/templates/cinematic/bg.jpg && \
-    wget -O app/templates/classic/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/main/app/templates/classic/bg.jpg
+    wget -O app/templates/classic/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/main/app/templates/classic/bg.jpg && \
+    wget -O app/video-template/bg.jpg https://raw.githubusercontent.com/tramdk/autoreels/main/app/video-template/bg.jpg
 
 # Build dự án (Vite cho frontend + TSC cho backend)
 RUN npm run build

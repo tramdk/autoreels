@@ -21,10 +21,13 @@ temp_renders/
 temp_renders_test/
 work-*/
 uploads/
-# Binary files to be downloaded via Dockerfile instead
-app/templates/**/*.jpg
-app/templates/**/*.png
-public/bgm/*.mp3
+# Binary files to be downloaded via Dockerfile or kept external
+**/*.jpg
+**/*.png
+**/*.mp3
+**/*.wav
+**/*.db
+**/*.db-journal
 
 # Development Scratchpad
 scratch/
