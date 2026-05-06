@@ -1,13 +1,12 @@
-# Sử dụng Node.js bản stable
-FROM node:20-slim
+# Sử dụng Node.js bản đầy đủ để có sẵn các thư viện hệ thống
+FROM node:20
 
-# Cài đặt các thư viện hệ thống cần thiết cho FFmpeg và Chromium (Puppeteer)
+# Cài đặt FFmpeg và Chromium
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     chromium \
     wget \
-    ca-certificates \
-    fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+    fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
