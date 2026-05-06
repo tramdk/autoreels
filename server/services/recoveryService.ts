@@ -1,5 +1,4 @@
 import prisma from '../lib/prisma';
-import { apiRequestInternal } from '../utils/internalApi';
 
 /**
  * Recovery Service: Tự động tìm và chạy lại các tác vụ dựng video bị dở dang khi server restart.
