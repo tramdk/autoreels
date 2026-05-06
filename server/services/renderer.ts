@@ -71,7 +71,29 @@ export function getAudioDuration(filePath: string): number {
   }
 }
 
+// Simple sequential queue to prevent OOM on memory-constrained environments (like Render.com 512MB)
+let renderLock: Promise<void> = Promise.resolve();
+
 export async function renderWithHyperFrames(options: RenderOptions): Promise<void> {
+  // Wrap in a queue: only one render at a time
+  return new Promise((resolve, reject) => {
+    renderLock = renderLock
+      .then(async () => {
+        try {
+          await _internalRender(options);
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      })
+      .catch((err) => {
+        console.error('[Renderer Queue] Error in render task:', err);
+        reject(err); // Still reject the original promise
+      });
+  });
+}
+
+async function _internalRender(options: RenderOptions): Promise<void> {
   const { videoId, audioBuffer, audioExt, audioDuration, outputPath, onProgress } = options;
 
   const scenes: SceneItem[] = options.scenes && options.scenes.length > 0
@@ -166,24 +188,29 @@ export async function renderWithHyperFrames(options: RenderOptions): Promise<voi
 
   return new Promise((resolve, reject) => {
     const tempVideoPath = path.join(workDir, 'no_audio.mp4');
+    // Optimization: Limiting concurrency to 1 and disabling high-memory overhead features if possible
     const child = spawn(hyperframesBin, ['render', workDir, '-o', tempVideoPath, '-f', '30', '-q', 'standard'], { env, cwd: workDir, shell: true });
+    
     child.stdout.on('data', (data) => {
       const match = data.toString().match(/Rendered frame (\d+)\/(\d+)/i);
       if (match && onProgress) onProgress(Math.round((parseInt(match[1]) / parseInt(match[2])) * 100));
     });
+
     child.on('close', (code) => {
       if (code !== 0) return reject(new Error(`HyperFrames failed with code ${code}`));
       try {
         let mergeCmd: string;
+        // Optimization: Use '-threads 1' to keep memory spikes low on shared containers
+        const threadOpt = '-threads 1';
+        
         if (options.bgmPath && fs.existsSync(options.bgmPath)) {
-          // 3-input merge: video + voice + background music
           const bgmVol = Math.max(0, Math.min(1, options.bgmVolume ?? 0.15));
           console.log(`[Renderer] Mixing BGM at volume ${bgmVol}: ${options.bgmPath}`);
-          mergeCmd = `"${actualFfmpegPath}" -y -i "${tempVideoPath}" -i "${audioPath}" -stream_loop -1 -i "${options.bgmPath}" -filter_complex "[1:a]volume=1.0[voice];[2:a]volume=${bgmVol}[bgm];[voice][bgm]amix=inputs=2:duration=first:dropout_transition=2[aout]" -map 0:v:0 -map "[aout]" -c:v copy -c:a aac -shortest "${outputPath}"`;
+          mergeCmd = `"${actualFfmpegPath}" -y ${threadOpt} -i "${tempVideoPath}" -i "${audioPath}" -stream_loop -1 -i "${options.bgmPath}" -filter_complex "[1:a]volume=1.0[voice];[2:a]volume=${bgmVol}[bgm];[voice][bgm]amix=inputs=2:duration=first:dropout_transition=2[aout]" -map 0:v:0 -map "[aout]" -c:v copy -c:a aac -shortest "${outputPath}"`;
         } else {
-          // 2-input merge: video + voice only (original behavior)
-          mergeCmd = `"${actualFfmpegPath}" -y -i "${tempVideoPath}" -i "${audioPath}" -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 -shortest "${outputPath}"`;
+          mergeCmd = `"${actualFfmpegPath}" -y ${threadOpt} -i "${tempVideoPath}" -i "${audioPath}" -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 -shortest "${outputPath}"`;
         }
+        
         execSync(mergeCmd, { stdio: 'inherit', env });
         try { fs.rmSync(workDir, { recursive: true, force: true }); } catch (_) {}
         resolve();
@@ -191,3 +218,4 @@ export async function renderWithHyperFrames(options: RenderOptions): Promise<voi
     });
   });
 }
+

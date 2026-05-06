@@ -29,12 +29,9 @@ async function main() {
 
   for (const s of sources) {
     await prisma.source.upsert({
-      where: { id: s.name }, // This is placeholder, using findFirst/create instead
-      update: {},
+      where: { url: s.url },
+      update: { name: s.name },
       create: s
-    }).catch(async () => {
-      const exists = await prisma.source.findFirst({ where: { url: s.url } });
-      if (!exists) await prisma.source.create({ data: s });
     });
   }
   console.log('✔ RSS Sources seeded');
@@ -86,7 +83,7 @@ async function main() {
 
   // 5. Default Settings
   const defaultSettings = [
-    { key: 'tts_priority', value: JSON.stringify(['ohfree', 'edge', 'gemini']) },
+    { key: 'tts_priority', value: JSON.stringify(['ohfree', 'edge', 'lucylab', 'elevenlabs', 'gemini']) },
     { key: 'ohfree_voice_id', value: '1402' },
     { key: 'edge_tts_voice', value: 'vi-VN-HoaiMyNeural' },
     {
