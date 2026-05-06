@@ -159,6 +159,17 @@ export const useAppLogic = () => {
     }
   };
 
+  const handleDisconnectTikTok = async () => {
+    if (!confirm('Are you sure you want to disconnect TikTok? You will need to re-authorize.')) return;
+    try {
+      await api.disconnectTikTok();
+      setIsTikTokConnected(false);
+      toast.success('TikTok disconnected.');
+    } catch (error: any) {
+      toast.error('Disconnect failed: ' + error.message);
+    }
+  };
+
   const handleScrape = async () => {
     const loadingToast = toast.loading('Searching for new articles...');
     setLoading(true);
@@ -447,6 +458,7 @@ export const useAppLogic = () => {
     user,
     authChecking,
     handleConnectTikTok,
+    handleDisconnectTikTok,
     handleScrape,
     handleSummarize,
     handleGenerateVideo,

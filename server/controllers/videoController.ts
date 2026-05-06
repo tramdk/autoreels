@@ -215,10 +215,14 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
 
     videoProgress.set(videoId, 100);
 
-        // Cleanup temp BGM file (but not preset files)
-        if (bgmTempPath && bgmAssetId && !bgmAssetId.startsWith('preset:')) {
-          try { fs.unlinkSync(bgmTempPath); } catch (_) {}
-        }
+    // === CLEANUP ===
+    // Cleanup temp audio file (TTS)
+    try { if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath); } catch (_) {}
+    
+    // Cleanup temp BGM file (but not preset files)
+    if (bgmTempPath && bgmAssetId && !bgmAssetId.startsWith('preset:')) {
+      try { if (fs.existsSync(bgmTempPath)) fs.unlinkSync(bgmTempPath); } catch (_) {}
+    }
     } catch (err: any) {
       console.error('[VIDEO GEN ERROR]', err);
       videoProgress.set(videoId, -1);

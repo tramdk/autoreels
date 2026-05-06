@@ -71,6 +71,7 @@ export const api = {
   postToTikTok: (videoId: string) => fetchWithAuth(`/api/videos/post/${videoId}`, { method: 'POST' }).then(r => r.json()),
   getTikTokStatus: (videoId: string) => fetchWithAuth(`/api/videos/post/status/${videoId}`).then(r => r.json()),
   getTikTokAuthUrl: () => fetchWithAuth('/api/auth/tiktok/url').then(r => r.json() as Promise<{ url: string }>),
+  disconnectTikTok: () => fetchWithAuth('/api/auth/tiktok/disconnect', { method: 'POST' }).then(r => r.json()),
 
   // BGM
   getBgmPresets: () => fetchWithAuth('/api/videos/bgm-presets').then(r => r.json() as Promise<{ id: string, name: string, description: string, category: string, type: string, url: string }[]>),

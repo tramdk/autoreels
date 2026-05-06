@@ -49,10 +49,11 @@ export async function publishToTikTok(videoId: string) {
   }
 
   try {
-    const videoBuffer = fs.readFileSync(localPath);
-    const videoSize = videoBuffer.length;
+    // 2. Prepare the video for upload
+    const stats = fs.statSync(localPath);
+    const videoSize = stats.size;
 
-    // 1. Initialize Upload
+    // 2. Initialize Upload
     console.log(`[TikTok] Initializing upload for video: ${videoId} (${videoSize} bytes)`);
     const initResponse = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
       method: 'POST',
@@ -62,8 +63,8 @@ export async function publishToTikTok(videoId: string) {
       },
       body: JSON.stringify({
         post_info: {
-          title: video.title || "AutoReels Video",
-          privacy_level: "PUBLIC_TO_EVERYONE",
+          title: (video.title || "AutoReels Video").slice(0, 150).replace(/[^\w\s\u00C0-\u1EF9]/gi, ''),
+          privacy_level: "SELF_ONLY",
           disable_duet: false,
           disable_comment: false,
           disable_stitch: false
@@ -79,6 +80,7 @@ export async function publishToTikTok(videoId: string) {
 
     const initData = await initResponse.json() as any;
     if (initData.error && initData.error.code !== 'ok' && initData.error.code !== 0) {
+      console.error(`[TikTok Init Error]`, JSON.stringify(initData.error, null, 2));
       throw new Error(initData.error.message || 'Failed to initialize TikTok upload');
     }
 
@@ -86,14 +88,15 @@ export async function publishToTikTok(videoId: string) {
     const publishId = initData.data?.publish_id;
     if (!uploadUrl) throw new Error('TikTok did not provide an upload URL');
 
-    // 2. Upload the file
+    // 3. Upload the file using Stream
+    console.log(`[TikTok] Streaming file to TikTok...`);
     const uploadResponse = await fetch(uploadUrl, {
       method: 'PUT',
       headers: {
         'Content-Type': 'video/mp4',
         'Content-Range': `bytes 0-${videoSize - 1}/${videoSize}`
       },
-      body: videoBuffer
+      body: fs.createReadStream(localPath)
     });
 
     if (!uploadResponse.ok) throw new Error(`Failed to upload to TikTok: ${uploadResponse.statusText}`);
@@ -109,10 +112,9 @@ export async function publishToTikTok(videoId: string) {
       }
     });
 
-    // Cleanup local file if it was a temp download
-    if (isTempDownload) {
-      cleanupFile(localPath);
-    }
+    // Always cleanup local file after successful publish to save space
+    // The UI can still play the video via the Cloudinary URL redirect
+    cleanupFile(localPath);
 
     return { success: true, publishId };
   } catch (error: any) {

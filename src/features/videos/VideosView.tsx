@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Video as VideoIcon, Share2, Trash2, ArrowUpRight, RefreshCw, X } from 'lucide-react';
+import { Video as VideoIcon, Share2, Trash2, ArrowUpRight, RefreshCw, X, CheckCircle2 } from 'lucide-react';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { VideoItem } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -86,18 +86,28 @@ export const VideosView: React.FC<VideosViewProps> = ({
                     </div>
                     <div className="p-6 flex-1 flex flex-col">
                       <h3 className="font-bold text-white text-lg line-clamp-2 mb-6 group-hover:text-primary transition-colors">{video.title}</h3>
-                      <div className="mt-auto space-y-3">
-                         {video.status === 'posted' && (
+                        <div className="mt-auto space-y-3">
+                          {video.status === 'posted' ? (
                             <div className="flex gap-2">
-                              <button onClick={() => onCheckStatus(video.id)} className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-white px-4 py-3.5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-slate-700 transition-all border border-white/5">{t('videos.status')}</button>
-                              <button className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all border border-white/5"><ArrowUpRight className="w-5 h-5" /></button>
+                              <button 
+                                onClick={() => onCheckStatus(video.id)} 
+                                className="flex-1 flex items-center justify-center gap-2 bg-emerald-500/10 text-emerald-500 px-4 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] border border-emerald-500/20 hover:bg-emerald-500/20 transition-all min-w-0"
+                              >
+                                <CheckCircle2 className="w-5 h-5 shrink-0" />
+                                <span className="truncate">ĐÃ ĐĂNG</span>
+                              </button>
+                              <button className="p-4 bg-white/5 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all border border-white/5"><ArrowUpRight className="w-5 h-5" /></button>
                             </div>
-                         )}
-                          <button onClick={() => onPost(video.id)} className="w-full flex items-center justify-center gap-2 bg-primary text-white px-4 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-lg glow-primary transition-all min-w-0">
-                            <Share2 className="w-5 h-5 shrink-0" /> 
-                            <span className="truncate">{t('videos.postTikTok')}</span>
-                          </button>
-                      </div>
+                          ) : (
+                            <button 
+                              onClick={() => onPost(video.id)} 
+                              className="w-full flex items-center justify-center gap-2 bg-primary text-white px-4 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-lg glow-primary transition-all min-w-0"
+                            >
+                              <Share2 className="w-5 h-5 shrink-0" /> 
+                              <span className="truncate">{t('videos.postTikTok')}</span>
+                            </button>
+                          )}
+                        </div>
                     </div>
                   </motion.div>
                 ))}

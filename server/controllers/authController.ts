@@ -73,7 +73,7 @@ export const getTikTokAuthUrl = (req: Request, res: Response) => {
   const url = `https://www.tiktok.com/v2/auth/authorize/`;
   const params = new URLSearchParams({
     client_key: config.tiktok.clientKey || 'test_client_key',
-    scope: 'user.info.basic,video.publish',
+    scope: 'user.info.basic,video.upload,video.info',
     response_type: 'code',
     redirect_uri,
     state: Math.random().toString(36).substring(7),
@@ -146,5 +146,14 @@ export const tiktokCallback = async (req: Request, res: Response, next: NextFunc
   } catch (err: any) {
     console.error('[TikTok OAuth Callback Error]', err);
     res.send(`<script>alert("TikTok OAuth failed: ${err.message}"); window.close();</script>`);
+  }
+};
+
+export const disconnectTikTok = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await prisma.account.deleteMany({ where: { platform: 'tiktok' } });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
   }
 };

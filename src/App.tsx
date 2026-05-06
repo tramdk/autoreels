@@ -29,6 +29,7 @@ export default function App() {
     mustChangePassword,
     authChecking,
     handleConnectTikTok,
+    handleDisconnectTikTok,
     handleScrape,
     handleSummarize,
     handleGenerateVideo,
@@ -149,7 +150,7 @@ export default function App() {
               <SocialView 
                 isTikTokConnected={isTikTokConnected}
                 onConnectTikTok={handleConnectTikTok}
-                onDisconnectTikTok={() => setIsTikTokConnected(false)}
+                onDisconnectTikTok={handleDisconnectTikTok}
               />
             } />
             <Route path="/voices" element={

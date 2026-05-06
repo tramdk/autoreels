@@ -9,5 +9,6 @@ router.post('/logout', authController.logout);
 router.get('/me', authController.getMe);
 router.get('/tiktok/url', authController.getTikTokAuthUrl);
 router.get('/tiktok/callback', authController.tiktokCallback);
+router.post('/tiktok/disconnect', authController.disconnectTikTok);
 
 export default router;
