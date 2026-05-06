@@ -13,6 +13,8 @@ coverage/
 dev.db
 prisma/dev.db
 *.db-journal
+prisma/*.db
+prisma/*.db-journal
 
 # Video Rendering & Media
 temp_renders/
