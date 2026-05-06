@@ -55,15 +55,52 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
 
     await prisma.article.update({
       where: { id: articleId },
-      data: { status: 'generating' }
+      data: { 
+        status: 'generating',
+        script: {
+          ...(article.script as any),
+          renderSettings: { templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume }
+        }
+      }
     });
 
     res.json({ videoId, status: 'generating' });
+    
+    const settings = { templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume };
+    runVideoGenerationPipeline(articleId, settings, videoId);
+  } catch (err: any) {
+    next(err);
+  }
+};
+
+export const runVideoGenerationPipeline = async (articleId: string, settings: any, existingVideoId?: string) => {
+  const { templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume } = settings;
+  const videoId = existingVideoId || `v_${articleId}_${Date.now()}`;
+  
+  // Set initial progress
+  videoProgress.set(videoId, 5);
+
+  try {
+    const article = await prisma.article.findUnique({ where: { id: articleId } });
+    if (!article) throw new Error('Article not found');
+
+    // Nếu chưa ở trạng thái generating (ví dụ gọi từ recovery), cập nhật lại
+    if (article.status !== 'generating') {
+      await prisma.article.update({
+        where: { id: articleId },
+        data: { 
+          status: 'generating',
+          script: {
+            ...(article.script as any),
+            renderSettings: settings
+          }
+        }
+      });
+    }
 
     // Process video generation asynchronously
-    (async () => {
-      let bgmTempPath: string | undefined;
-      try {
+    let bgmTempPath: string | undefined;
+    try {
 
     const script = article.script as any;
     const scenes: any[] = script.scenes || [];
@@ -173,20 +210,21 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
         if (bgmTempPath && bgmAssetId && !bgmAssetId.startsWith('preset:')) {
           try { fs.unlinkSync(bgmTempPath); } catch (_) {}
         }
-      } catch (err: any) {
-        console.error('[VIDEO GEN ERROR]', err);
-        videoProgress.set(videoId, -1);
-        if (bgmTempPath && bgmAssetId && !bgmAssetId.startsWith('preset:')) {
-          try { fs.unlinkSync(bgmTempPath); } catch (_) {}
-        }
-        await prisma.article.update({
-          where: { id: articleId },
-          data: { status: 'summarized' }
-        }).catch(console.error);
+    } catch (err: any) {
+      console.error('[VIDEO GEN ERROR]', err);
+      videoProgress.set(videoId, -1);
+      
+      if (bgmTempPath && settings.bgmAssetId && !settings.bgmAssetId.startsWith('preset:')) {
+        try { fs.unlinkSync(bgmTempPath); } catch (_) {}
       }
-    })();
+
+      await prisma.article.update({
+        where: { id: articleId },
+        data: { status: 'summarized' }
+      }).catch(console.error);
+    }
   } catch (err: any) {
-    next(err);
+    console.error('[PIPELINE FATAL ERROR]', err);
   }
 };
 
