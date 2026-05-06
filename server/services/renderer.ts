@@ -98,11 +98,11 @@ async function _internalRender(options: RenderOptions): Promise<void> {
 
   const scenes: SceneItem[] = options.scenes && options.scenes.length > 0
     ? options.scenes
-    : [
+    : ([
         { id: 1, type: 'hook',  voiceText: options.hook || '', imageKeyword: 'news' },
         { id: 2, type: 'body',  voiceText: options.body || '', imageKeyword: 'report' },
         { id: 3, type: 'outro', voiceText: options.cta  || '', imageKeyword: 'cta' },
-      ].filter(s => s.voiceText.trim() !== '');
+      ] as SceneItem[]).filter(s => s.voiceText.trim() !== '');
 
   const workDir = path.join(process.cwd(), 'temp_renders', videoId);
   if (!fs.existsSync(workDir)) fs.mkdirSync(workDir, { recursive: true });
