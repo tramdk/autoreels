@@ -59,7 +59,6 @@ export const getVideoById = async (req: Request, res: Response, next: NextFuncti
 };
 
 export const generateVideo = async (req: Request, res: Response, next: NextFunction) => {
-  console.log('[AUTOREELS-API] Received generateVideo request:', JSON.stringify(req.body, null, 2));
   const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume } = req.body;
   const videoId = `v_${articleId}_${Date.now()}`;
   

@@ -52,7 +52,6 @@ router.post('/manual', authenticate, async (req, res) => {
 });
 
 router.post('/manual-script', authenticate, async (req, res) => {
-  console.log('[AUTOREELS-API] POST /manual-script received script data:', JSON.stringify(req.body, null, 2));
   const { title, script } = req.body;
   try {
     const article = await prisma.article.create({
