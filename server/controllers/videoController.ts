@@ -41,6 +41,23 @@ export const getVideos = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+export const getVideoById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const video = await prisma.video.findUnique({ where: { id: req.params.id } });
+    if (!video) {
+      // Check if it is still in the active generation map
+      const progress = videoProgress.get(req.params.id);
+      if (progress !== undefined) {
+        return res.json({ id: req.params.id, status: 'processing', progress });
+      }
+      return res.status(404).json({ error: 'Video not found or expired' });
+    }
+    res.json(video);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const generateVideo = async (req: Request, res: Response, next: NextFunction) => {
   const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume } = req.body;
   const videoId = `v_${articleId}_${Date.now()}`;

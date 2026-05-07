@@ -50,6 +50,7 @@ router.get('/bgm-presets', authenticate, async (req, res) => {
 router.get('/', authenticate, videoController.getVideos);
 router.post('/generate', authenticate, videoController.generateVideo);
 router.get('/progress/:id', videoController.getProgress);
+router.get('/:id', authenticate, videoController.getVideoById);
 router.delete('/:id', authenticate, videoController.deleteVideo);
 router.post('/post/:videoId', authenticate, videoController.postToTikTok);
 router.get('/post/status/:videoId', authenticate, videoController.getTikTokStatus);
