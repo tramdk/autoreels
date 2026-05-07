@@ -4,6 +4,19 @@ import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
+// Get unique providers
+router.get('/providers', authenticate, async (req, res) => {
+  try {
+    const providers = await (prisma as any).voice.findMany({
+      select: { provider: true },
+      distinct: ['provider']
+    });
+    res.json(providers.map((p: any) => p.provider));
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get all voices
 router.get('/', authenticate, async (req, res) => {
   try {
