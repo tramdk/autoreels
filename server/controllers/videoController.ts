@@ -62,6 +62,7 @@ export const generateBulk = async (req: Request, res: Response) => {
           ttsProvider: ttsProvider || 'edge',
           ttsVoiceId: ttsVoiceId || 'vi-VN-HoaiMyNeural',
           bgmAssetId: bgmAssetId || null,
+          bgmVolume: typeof bgmVolume === 'number' ? bgmVolume : 0.15,
           status: 'pending'
         }
       });

@@ -43,6 +43,7 @@ export async function startVideoWorker() {
             ttsProvider: task.ttsProvider,
             ttsVoiceId: task.ttsVoiceId,
             bgmAssetId: task.bgmAssetId || undefined,
+            bgmVolume: task.bgmVolume || 0.15,
             // Pass content/imageUrl if they exist (for workflow-generated posts)
             customContent: task.content || undefined,
             customImageUrl: task.imageUrl || undefined

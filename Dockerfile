@@ -42,5 +42,5 @@ USER 1000
 ENV PORT=7860
 ENV NODE_ENV=production
 
-# Chạy server trực tiếp bằng tsx (vì có 16GB RAM nên không cần biên dịch trước)
-CMD ["npx", "tsx", "server.ts"]
+# Chạy server (Đồng bộ DB trước khi start để đảm bảo có bảng VideoTask)
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && npx tsx server.ts"]

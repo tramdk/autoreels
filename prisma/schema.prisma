@@ -102,6 +102,7 @@ model VideoTask {
   ttsProvider String   @default("edge")
   ttsVoiceId  String   @default("vi-VN-HoaiMyNeural")
   bgmAssetId  String?
+  bgmVolume   Float?   @default(0.15)
   status      String   @default("pending") // pending, processing, completed, error
   error       String?  @db.Text
   createdAt   DateTime @default(now())
