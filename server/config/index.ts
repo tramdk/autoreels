@@ -30,5 +30,6 @@ export const config = {
     lucyLabKey: process.env.LUCYLAB_API_KEY,
     lucyLabVoice: process.env.LUCYLAB_VOICE_ID,
     ohFreeVoice: process.env.OHFREE_VOICE_ID,
-  }
+  },
+  apiToken: process.env.API_TOKEN || 'autoreels-default-token'
 };
