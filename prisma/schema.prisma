@@ -92,3 +92,20 @@ model Voice {
 
   @@unique([voiceId, provider])
 }
+
+model VideoTask {
+  id          String   @id @default(uuid())
+  articleId   String?
+  templateId  String   @default("modern")
+  content     String?  @db.Text
+  imageUrl    String?
+  ttsProvider String   @default("edge")
+  ttsVoiceId  String   @default("vi-VN-HoaiMyNeural")
+  bgmAssetId  String?
+  status      String   @default("pending") // pending, processing, completed, error
+  error       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([status])
+}

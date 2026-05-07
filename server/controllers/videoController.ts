@@ -41,6 +41,40 @@ export const getVideos = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+export const generateBulk = async (req: Request, res: Response) => {
+  try {
+    const { items } = req.body;
+    if (!items || !Array.isArray(items)) {
+      return res.status(400).json({ error: 'Items array is required' });
+    }
+
+    const results = [];
+    for (const item of items) {
+      const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, content, imageUrl } = item;
+      
+      // Create a persistent task in the database
+      const task = await prisma.videoTask.create({
+        data: {
+          articleId: articleId || null,
+          templateId: templateId || 'modern',
+          content: content || null,
+          imageUrl: imageUrl || null,
+          ttsProvider: ttsProvider || 'edge',
+          ttsVoiceId: ttsVoiceId || 'vi-VN-HoaiMyNeural',
+          bgmAssetId: bgmAssetId || null,
+          status: 'pending'
+        }
+      });
+
+      results.push({ videoId: task.id, status: 'pending' });
+    }
+
+    res.status(201).json({ success: true, videos: results });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const getVideoById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const video = await prisma.video.findUnique({ where: { id: req.params.id } });
@@ -64,13 +98,22 @@ export const getBulkStatus = async (req: Request, res: Response, next: NextFunct
     if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'IDs array required' });
 
     const results = await Promise.all(ids.map(async (id) => {
+      // 1. Check if finished
       const video = await prisma.video.findUnique({ where: { id } });
-      if (video) return video;
+      if (video) return { ...video, status: 'ready' };
       
+      // 2. Check if in progress (memory)
       const progress = videoProgress.get(id);
       if (progress !== undefined) {
         return { id, status: 'processing', progress };
       }
+
+      // 3. Check Task table for queue status
+      const task = await prisma.videoTask.findUnique({ where: { id } });
+      if (task) {
+        return { id, status: task.status, error: task.error, progress: task.status === 'pending' ? 0 : 10 };
+      }
+
       return { id, status: 'not_found' };
     }));
 
@@ -112,35 +155,48 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
 };
 
 export const runVideoGenerationPipeline = async (articleId: string, settings: any, existingVideoId?: string) => {
-  const { templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume } = settings;
+  const { templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, customContent, customImageUrl } = settings;
   const videoId = existingVideoId || `v_${articleId}_${Date.now()}`;
   
   // Set initial progress
   videoProgress.set(videoId, 5);
 
   try {
-    const article = await prisma.article.findUnique({ where: { id: articleId } });
-    if (!article) throw new Error('Article not found');
+    let script: any = { scenes: [] };
+    let title = 'Untitled Video';
 
-    // Nếu chưa ở trạng thái generating (ví dụ gọi từ recovery), cập nhật lại
-    if (article.status !== 'generating') {
-      await prisma.article.update({
-        where: { id: articleId },
-        data: { 
-          status: 'generating',
-          script: {
-            ...(article.script as any),
-            renderSettings: settings
-          }
+    if (articleId && articleId !== '') {
+      const article = await prisma.article.findUnique({ where: { id: articleId } });
+      if (article) {
+        script = article.script as any;
+        title = article.title;
+        // Update status if needed
+        if (article.status !== 'generating') {
+          await prisma.article.update({
+            where: { id: articleId },
+            data: { status: 'generating' }
+          });
         }
-      });
+      }
+    } else if (customContent) {
+      // Create a virtual script from custom content
+      title = customContent.substring(0, 50) + '...';
+      script = {
+        scenes: [
+          {
+            voiceText: customContent,
+            imageUrl: customImageUrl || null
+          }
+        ]
+      };
+    } else {
+      throw new Error('No articleId or customContent provided');
     }
 
     // Process video generation asynchronously
     let bgmTempPath: string | undefined;
     try {
 
-    const script = article.script as any;
     const scenes: any[] = script.scenes || [];
     const localTmpDir = path.join(process.cwd(), 'temp_renders');
     if (!fs.existsSync(localTmpDir)) fs.mkdirSync(localTmpDir);
@@ -240,18 +296,20 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
     const video = await prisma.video.create({
       data: {
         id: videoId,
-        title: article.title,
+        title: title,
         videoUrl: videoCloudUrl,
         audioUrl: audioCloudUrl,
         status: 'ready',
-        articles: { connect: { id: articleId } }
+        articles: articleId ? { connect: { id: articleId } } : undefined
       }
     });
 
-    await prisma.article.update({
-      where: { id: articleId },
-      data: { status: 'video_generated', videoId: video.id }
-    });
+    if (articleId) {
+      await prisma.article.update({
+        where: { id: articleId },
+        data: { status: 'video_generated', videoId: video.id }
+      }).catch(e => console.log('[RENDER] Article update skipped/failed', e.message));
+    }
 
     videoProgress.set(videoId, 100);
 
@@ -271,10 +329,12 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
         try { fs.unlinkSync(bgmTempPath); } catch (_) {}
       }
 
-      await prisma.article.update({
-        where: { id: articleId },
-        data: { status: 'summarized' }
-      }).catch(console.error);
+      if (articleId) {
+        await prisma.article.update({
+          where: { id: articleId },
+          data: { status: 'summarized' }
+        }).catch(console.error);
+      }
     }
   } catch (err: any) {
     console.error('[PIPELINE FATAL ERROR]', err);

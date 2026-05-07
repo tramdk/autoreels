@@ -3,6 +3,7 @@ import { config } from './server/config';
 import { startCleanupJob } from './server/services/cleanup';
 
 import { recoverInterruptedTasks } from './server/services/recoveryService';
+import { startVideoWorker } from './server/services/videoWorker';
 
 async function start() {
   try {
@@ -11,6 +12,7 @@ async function start() {
     // Start background jobs
     startCleanupJob();
     recoverInterruptedTasks();
+    startVideoWorker();
 
     app.listen(config.port, "0.0.0.0", () => {
       console.log(`[Server] Running at http://localhost:${config.port}`);
