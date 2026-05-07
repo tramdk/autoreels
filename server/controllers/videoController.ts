@@ -151,7 +151,8 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
 
     // === AUDIO GENERATION ===
     const SEPARATOR = '... ';
-    const fullText = scenes.map(s => s.voiceText).join(SEPARATOR);
+    const validScenes = scenes.map(s => ({ ...s, voiceText: s.voiceText || '' }));
+    const fullText = validScenes.map(s => s.voiceText).join(SEPARATOR);
     
     console.log(`[RENDER] Generating single audio for entire script (${fullText.length} chars)...`);
     
@@ -172,15 +173,15 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
 
     // Distribute durations
     const pausePerScene = 0.3;
-    const totalPauseTime = pausePerScene * (scenes.length - 1);
+    const totalPauseTime = pausePerScene * (validScenes.length - 1);
     const speechOnlyDuration = totalDuration - totalPauseTime;
-    const totalChars = scenes.reduce((sum, s) => sum + s.voiceText.length, 0);
+    const totalChars = validScenes.reduce((sum, s) => sum + (s.voiceText?.length || 0), 0);
     
-    const sceneDurations = scenes.map((s, i) => {
+    const sceneDurations = validScenes.map((s, i) => {
       const speechTime = totalChars > 0 
-        ? (s.voiceText.length / totalChars) * speechOnlyDuration 
-        : speechOnlyDuration / scenes.length;
-      return i < scenes.length - 1 ? speechTime + pausePerScene : speechTime;
+        ? ((s.voiceText?.length || 0) / totalChars) * speechOnlyDuration 
+        : speechOnlyDuration / validScenes.length;
+      return i < validScenes.length - 1 ? speechTime + pausePerScene : speechTime;
     });
 
     // === VIDEO RENDERING ===
