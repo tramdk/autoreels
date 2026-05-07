@@ -476,6 +476,11 @@
         var textEl = document.createElement('div');
         textEl.className = 'scene-text';
 
+        // Limit height and prepare for scrolling
+        var maxH = 1200; // Bold is centered, so we use a safe absolute limit
+        card.style.maxHeight = maxH + 'px';
+        card.style.overflow = 'hidden';
+
         if (s.type === 'hook') {
           card.innerHTML =
             '<div class="scene-label">&#9679; BREAKING</div>' +
@@ -495,6 +500,17 @@
 
         // Animate IN
         window._tl.to(card, { opacity: 1, duration: animIn, ease: 'power2.out' }, sceneStart);
+
+        // Calculate scroll if content overflows
+        var realH = textEl.offsetHeight + (s.type === 'body' ? 100 : 250);
+        if (realH > maxH) {
+          var over = realH - maxH + 100;
+          window._tl.to(textEl, { 
+            y: -over, 
+            duration: sceneDuration * 0.7, 
+            ease: 'none' 
+          }, sceneStart + (sceneDuration * 0.15));
+        }
         if (s.type === 'hook') {
           window._tl.from(textEl, { y: 80, duration: animIn * 1.2, ease: 'back.out(1.5)' }, sceneStart);
           var accentEl = card.querySelector('.scene-accent');

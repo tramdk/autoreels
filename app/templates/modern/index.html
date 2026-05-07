@@ -306,6 +306,11 @@
         var textEl = document.createElement('div');
         textEl.className = 'scene-text';
 
+        // Limit height and prepare for scrolling
+        var maxH = Math.max(400, {{TAG_TOP}} - {{MAIN_TOP}} - 80);
+        card.style.maxHeight = maxH + 'px';
+        card.style.overflow = 'hidden';
+
         if (s.type === 'hook') {
           card.innerHTML = '<div class="scene-label">TRENDING</div>';
           textEl.style.color = '{{HOOK_COLOR}}';
@@ -324,6 +329,17 @@
         container.appendChild(card);
 
         window._tl.to(card, { opacity: 1, duration: animIn }, sceneStart);
+
+        // Calculate scroll if content overflows
+        var realH = textEl.offsetHeight + (s.type !== 'body' ? 120 : 40);
+        if (realH > maxH) {
+          var over = realH - maxH + 60;
+          window._tl.to(textEl, { 
+            y: -over, 
+            duration: duration * 0.7, 
+            ease: 'none' 
+          }, sceneStart + (duration * 0.15));
+        }
 
         var staggerTime = Math.min(0.04, (duration * 0.7) / (spans.length || 1));
         window._tl.to(spans, {
