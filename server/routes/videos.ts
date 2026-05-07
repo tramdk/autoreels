@@ -48,6 +48,7 @@ router.get('/bgm-presets', authenticate, async (req, res) => {
 });
 
 router.get('/', authenticate, videoController.getVideos);
+router.post('/bulk-status', authenticate, videoController.getBulkStatus);
 router.post('/generate', authenticate, videoController.generateVideo);
 router.get('/progress/:id', videoController.getProgress);
 router.get('/:id', authenticate, videoController.getVideoById);

@@ -58,6 +58,28 @@ export const getVideoById = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
+export const getBulkStatus = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'IDs array required' });
+
+    const results = await Promise.all(ids.map(async (id) => {
+      const video = await prisma.video.findUnique({ where: { id } });
+      if (video) return video;
+      
+      const progress = videoProgress.get(id);
+      if (progress !== undefined) {
+        return { id, status: 'processing', progress };
+      }
+      return { id, status: 'not_found' };
+    }));
+
+    res.json(results);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const generateVideo = async (req: Request, res: Response, next: NextFunction) => {
   const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume } = req.body;
   const videoId = `v_${articleId}_${Date.now()}`;
