@@ -113,7 +113,9 @@ router.get('/', authenticate, async (req, res) => {
     }
 
     settings.forEach(s => {
-      result[s.key] = s.value;
+      let val = s.value;
+      try { val = JSON.parse(val); } catch (e) { }
+      result[s.key] = val;
     });
 
     res.json(result);

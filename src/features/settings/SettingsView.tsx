@@ -252,16 +252,32 @@ export const SettingsView: React.FC = () => {
         if (val.ttsPriority && Array.isArray(val.ttsPriority) && val.ttsPriority.length > 0) {
           currentPriority = val.ttsPriority;
         } else if (globalTtsVal) {
-          currentPriority = globalTtsVal.split(',').map((p: string) => p.trim());
+          if (Array.isArray(globalTtsVal)) {
+            currentPriority = globalTtsVal;
+          } else {
+            // Check if it's a JSON string of an array
+            try {
+              const parsed = JSON.parse(globalTtsVal);
+              currentPriority = Array.isArray(parsed) ? parsed : globalTtsVal.split(',').map((p: any) => p.trim());
+            } catch (e) {
+              currentPriority = globalTtsVal.split(',').map((p: string) => p.trim());
+            }
+          }
         }
       } else if (globalTtsVal) {
-        currentPriority = globalTtsVal.split(',').map((p: string) => p.trim());
+        if (Array.isArray(globalTtsVal)) {
+          currentPriority = globalTtsVal;
+        } else {
+          try {
+            const parsed = JSON.parse(globalTtsVal);
+            currentPriority = Array.isArray(parsed) ? parsed : globalTtsVal.split(',').map((p: any) => p.trim());
+          } catch (e) {
+            currentPriority = globalTtsVal.split(',').map((p: string) => p.trim());
+          }
+        }
       }
 
-      const merged = [...currentPriority];
-      defaultPriority.forEach(p => {
-        if (!merged.includes(p)) merged.push(p);
-      });
+      const merged = Array.from(new Set([...currentPriority, ...defaultPriority]));
       
       setTtsPriority(merged);
     } catch (err) {
