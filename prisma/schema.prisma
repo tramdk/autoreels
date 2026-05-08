@@ -59,6 +59,7 @@ model Video {
   videoUrl    String
   audioUrl    String
   status      String    @default("ready") // ready, posted
+  source      String    @default("internal") // internal, manager
   publishId   String?
   platforms   String?   // comma-separated
   createdAt   DateTime  @default(now())
@@ -104,6 +105,7 @@ model VideoTask {
   bgmAssetId  String?
   bgmVolume   Float?   @default(0.15)
   status      String   @default("pending") // pending, processing, completed, error
+  source      String   @default("internal") // internal, manager
   error       String?  @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

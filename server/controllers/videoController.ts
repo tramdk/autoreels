@@ -50,7 +50,7 @@ export const generateBulk = async (req: Request, res: Response) => {
 
     const results = [];
     for (const item of items) {
-      const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, content, imageUrl } = item;
+      const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, content, imageUrl, source } = item;
       
       // Create a persistent task in the database
       const task = await prisma.videoTask.create({
@@ -63,7 +63,8 @@ export const generateBulk = async (req: Request, res: Response) => {
           ttsVoiceId: ttsVoiceId || 'vi-VN-HoaiMyNeural',
           bgmAssetId: bgmAssetId || null,
           bgmVolume: typeof bgmVolume === 'number' ? bgmVolume : 0.15,
-          status: 'pending'
+          status: 'pending',
+          source: source || 'internal'
         }
       });
 
@@ -156,7 +157,7 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
 };
 
 export const runVideoGenerationPipeline = async (articleId: string, settings: any, existingVideoId?: string) => {
-  const { templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, customContent, customImageUrl } = settings;
+  const { templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, customContent, customImageUrl, source } = settings;
   const videoId = existingVideoId || `v_${articleId}_${Date.now()}`;
   
   // Set initial progress
@@ -332,7 +333,8 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
         videoUrl: videoCloudUrl,
         audioUrl: audioCloudUrl,
         status: 'ready',
-        articles: articleId ? { connect: { id: articleId } } : undefined
+        source: source || 'internal',
+        articles: articleExists ? { connect: { id: articleId } } : undefined
       }
     });
 

@@ -46,7 +46,8 @@ export async function startVideoWorker() {
             bgmVolume: task.bgmVolume || 0.15,
             // Pass content/imageUrl if they exist (for workflow-generated posts)
             customContent: task.content || undefined,
-            customImageUrl: task.imageUrl || undefined
+            customImageUrl: task.imageUrl || undefined,
+            source: task.source
           }, task.id);
 
           // Update task to completed
