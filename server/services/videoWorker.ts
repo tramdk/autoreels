@@ -40,14 +40,10 @@ async function processNextTask() {
 
       // Also update the related article status to 'generating' if it exists
       if (task.articleId) {
-        try {
-          await prisma.article.update({
-            where: { id: task.articleId },
-            data: { status: 'generating' }
-          });
-        } catch (articleErr) {
-          console.warn(`[VIDEO WORKER] Could not update article ${task.articleId} status:`, articleErr);
-        }
+        await prisma.article.updateMany({
+          where: { id: task.articleId },
+          data: { status: 'generating' }
+        });
       }
 
       try {

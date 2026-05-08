@@ -212,10 +212,10 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
         title = article.title;
         // Update status if needed
         if (article.status !== 'generating') {
-          await prisma.article.update({
+          await prisma.article.updateMany({
             where: { id: articleId },
             data: { status: 'generating' }
-          }).catch(e => console.error('[RENDER] Failed to update article status to generating:', e.message));
+          });
         }
       } else {
         console.warn(`⚠️ [RENDER] Article ${articleId} not found in database.`);
@@ -375,10 +375,10 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
     });
 
     if (articleExists) {
-      await prisma.article.update({
+      await prisma.article.updateMany({
         where: { id: articleId },
         data: { status: 'video_generated', videoId: video.id }
-      }).catch(e => console.error('[RENDER] Article status update failed (video_generated):', e.message));
+      });
     }
 
     videoProgress.set(videoId, 100);
@@ -400,10 +400,10 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
       }
 
       if (articleExists) {
-        await prisma.article.update({
+        await prisma.article.updateMany({
           where: { id: articleId },
           data: { status: 'summarized' }
-        }).catch(e => console.error('[RENDER] Article status update failed (summarized):', e.message));
+        });
       }
     }
   } catch (err: any) {
