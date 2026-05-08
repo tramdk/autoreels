@@ -97,8 +97,10 @@ model Voice {
 model VideoTask {
   id          String   @id @default(uuid())
   articleId   String?
-  templateId  String   @default("modern")
+  templateId  String   @default("classic")
+  title       String?
   content     String?  @db.Text
+  script      String?  @db.Text
   imageUrl    String?
   ttsProvider String   @default("edge")
   ttsVoiceId  String   @default("vi-VN-HoaiMyNeural")

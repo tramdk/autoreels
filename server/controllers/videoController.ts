@@ -87,14 +87,16 @@ export const generateBulk = async (req: Request, res: Response) => {
     
     const results = [];
     for (const item of items) {
-      const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, content, imageUrl, source } = item;
+      const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, content, script, title, imageUrl, source } = item;
       
       // Create a persistent task in the database
       const task = await prisma.videoTask.create({
         data: {
           articleId: articleId || null,
           templateId: templateId || 'modern',
+          title: title || (content ? content.substring(0, 50) : null),
           content: content || null,
+          script: script ? (typeof script === 'string' ? script : JSON.stringify(script)) : null,
           imageUrl: imageUrl || null,
           ttsProvider: ttsProvider || 'edge',
           ttsVoiceId: ttsVoiceId || 'vi-VN-HoaiMyNeural',
@@ -206,8 +208,11 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
       data: {
         articleId: articleId,
         templateId: templateId || 'modern',
-        // Snapshot the script into content field so worker doesn't need to query Article table
-        content: article.script ? JSON.stringify(article.script) : null,
+        title: article.title,
+        // Snapshot the script into script field so worker doesn't need to query Article table
+        script: article.script ? JSON.stringify(article.script) : null,
+        // Also keep content for backward compatibility if needed, but title is better
+        content: article.title,
         ttsProvider: ttsProvider || 'edge',
         ttsVoiceId: ttsVoiceId || 'vi-VN-HoaiMyNeural',
         bgmAssetId: bgmAssetId || null,
@@ -250,26 +255,31 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
 
   try {
     let script: any = { scenes: [] };
-    let title = 'Untitled Video';
+    let title = settings.title || 'Untitled Video';
 
-    // 1. Load script from customContent (Snapshot)
-    if (customContent && customContent.trim() !== '') {
+    // 1. Load script from customScript or customContent (Snapshot)
+    const scriptSource = settings.customScript || settings.customContent;
+    if (scriptSource && scriptSource.trim() !== '') {
       try {
-        if (customContent.startsWith('{') || customContent.startsWith('[')) {
-          const parsed = JSON.parse(customContent);
+        if (scriptSource.startsWith('{') || scriptSource.startsWith('[')) {
+          const parsed = JSON.parse(scriptSource);
           if (parsed && parsed.scenes) {
             script = parsed;
             console.log(`📦 [RENDER] Using script snapshot from VideoTask.`);
           } else {
-            script = generateScriptFromText(customContent, customImageUrl);
+            script = generateScriptFromText(scriptSource, customImageUrl);
           }
         } else {
-          script = generateScriptFromText(customContent, customImageUrl);
+          script = generateScriptFromText(scriptSource, customImageUrl);
         }
       } catch (e) {
-        script = generateScriptFromText(customContent, customImageUrl);
+        script = generateScriptFromText(scriptSource, customImageUrl);
       }
-      title = customContent.substring(0, 50) + '...';
+      
+      // If title is still default and we have content that isn't JSON, use it as title
+      if (title === 'Untitled Video' && scriptSource && !scriptSource.startsWith('{')) {
+        title = scriptSource.substring(0, 50) + (scriptSource.length > 50 ? '...' : '');
+      }
     } 
     
     // 2. Fallback only if snapshot is missing (Legacy)
@@ -278,7 +288,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
       const article = await prisma.article.findUnique({ where: { id: articleId } });
       if (article) {
         script = article.script as any;
-        title = article.title;
+        if (title === 'Untitled Video') title = article.title;
       }
     }
 

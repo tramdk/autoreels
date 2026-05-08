@@ -53,7 +53,9 @@ async function processNextTask() {
           ttsVoiceId: task.ttsVoiceId,
           bgmAssetId: task.bgmAssetId || undefined,
           bgmVolume: task.bgmVolume || 0.15,
+          title: task.title || undefined,
           customContent: task.content || undefined,
+          customScript: task.script || undefined,
           customImageUrl: task.imageUrl || undefined,
           source: task.source
         }, task.id);
@@ -104,6 +106,25 @@ async function recoverStuckTasks() {
 }
 
 /**
+ * Periodically deletes completed tasks from source 'internal' to keep the DB clean.
+ */
+async function cleanupCompletedTasks() {
+  try {
+    const result = await prisma.videoTask.deleteMany({
+      where: { 
+        status: 'completed',
+        source: 'internal'
+      }
+    });
+    if (result.count > 0) {
+      console.log(`[VIDEO WORKER] Cleaned up ${result.count} completed internal tasks.`);
+    }
+  } catch (err) {
+    console.error('[VIDEO WORKER] Cleanup error:', err);
+  }
+}
+
+/**
  * Background worker that processes video generation tasks sequentially.
  */
 export async function startVideoWorker() {
@@ -111,6 +132,9 @@ export async function startVideoWorker() {
 
   // Recover stuck tasks from previous session (e.g. server crash)
   await recoverStuckTasks();
+  
+  // Initial cleanup
+  await cleanupCompletedTasks();
 
   // Initial check
   processNextTask();
@@ -124,6 +148,11 @@ export async function startVideoWorker() {
 
     if (!isWorking) {
       processNextTask();
+    }
+    
+    // Cleanup every 5 minutes (approx)
+    if (Date.now() % 300000 < 10000) {
+       cleanupCompletedTasks();
     }
   }, 10000);
 }
