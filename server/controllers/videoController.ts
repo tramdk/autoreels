@@ -244,43 +244,55 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
 
 
 export const runVideoGenerationPipeline = async (articleId: string, settings: any, existingVideoId?: string) => {
-  const { templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, customContent, customImageUrl, source } = settings;
+  const { 
+    templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, 
+    customContent, customScript, customImageUrl, source, title: settingsTitle 
+  } = settings;
+  
   const videoId = existingVideoId || `v_${articleId}_${Date.now()}`;
   
   console.log(`🎬 [RENDER START] Beginning pipeline for Video ID: ${videoId}`);
   console.log(`🔍 [RENDER INFO] ArticleID: ${articleId || 'None'}, Source: ${source || 'internal'}`);
+  console.log(`📝 [RENDER DATA] hasContent: ${!!customContent}, hasScript: ${!!customScript}`);
 
   // Set initial progress
   videoProgress.set(videoId, 5);
 
   try {
     let script: any = { scenes: [] };
-    let title = settings.title || 'Untitled Video';
+    let title = settingsTitle || 'Untitled Video';
 
     // 1. Load script from customScript or customContent (Snapshot)
-    const scriptSource = settings.customScript || settings.customContent;
-    if (scriptSource && scriptSource.trim() !== '') {
+    const scriptSource = customScript || customContent;
+    
+    if (scriptSource && typeof scriptSource === 'string' && scriptSource.trim() !== '' && scriptSource !== 'null' && scriptSource !== 'undefined') {
       try {
-        if (scriptSource.startsWith('{') || scriptSource.startsWith('[')) {
+        if (scriptSource.trim().startsWith('{') || scriptSource.trim().startsWith('[')) {
           const parsed = JSON.parse(scriptSource);
-          if (parsed && parsed.scenes) {
-            script = parsed;
-            console.log(`📦 [RENDER] Using script snapshot from VideoTask.`);
+          if (parsed && (parsed.scenes || Array.isArray(parsed))) {
+            script = Array.isArray(parsed) ? { scenes: parsed } : parsed;
+            console.log(`📦 [RENDER] Using script snapshot from VideoTask (${script.scenes?.length || 0} scenes).`);
           } else {
+            console.log(`📦 [RENDER] JSON detected but no scenes found. Generating from text...`);
             script = generateScriptFromText(scriptSource, customImageUrl);
           }
         } else {
           script = generateScriptFromText(scriptSource, customImageUrl);
         }
       } catch (e) {
+        console.warn(`⚠️ [RENDER] Failed to parse script as JSON, falling back to text generation.`);
         script = generateScriptFromText(scriptSource, customImageUrl);
       }
       
       // If title is still default and we have content that isn't JSON, use it as title
-      if (title === 'Untitled Video' && scriptSource && !scriptSource.startsWith('{')) {
+      if (title === 'Untitled Video' && scriptSource && !scriptSource.trim().startsWith('{')) {
         title = scriptSource.substring(0, 50) + (scriptSource.length > 50 ? '...' : '');
       }
-    } 
+    } else if (scriptSource && typeof scriptSource === 'object') {
+       // If it's already an object
+       script = (scriptSource as any).scenes ? scriptSource : { scenes: scriptSource };
+       console.log(`📦 [RENDER] Using script object from settings (${script.scenes?.length || 0} scenes).`);
+    }
     
     // 2. Fallback only if snapshot is missing (Legacy)
     if ((!script.scenes || script.scenes.length === 0) && articleId) {

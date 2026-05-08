@@ -1,7 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import { runVideoGenerationPipeline } from '../controllers/videoController';
+import { EventBusClient } from './EventBusClient';
 
 const prisma = new PrismaClient();
+const eb = new EventBusClient();
 let isWorking = false;
 
 /**
@@ -38,6 +40,14 @@ async function processNextTask() {
         data: { status: 'processing' }
       });
 
+      // Publish processing event if from manager
+      if (task.source === 'manager') {
+        await eb.publish('REEL_PROCESSING', {
+          reelId: task.id,
+          status: 'started'
+        });
+      }
+
       // Also update the related article status to 'generating' if it exists
       if (task.articleId) {
         await prisma.article.updateMany({
@@ -65,6 +75,20 @@ async function processNextTask() {
           where: { id: task.id },
           data: { status: 'completed' }
         });
+
+        // Publish completion event
+        if (task.source === 'manager') {
+          const video = await prisma.video.findUnique({ where: { id: task.id } });
+          if (video) {
+            await eb.publish('REEL_COMPLETED', {
+              reelId: task.id,
+              videoUrl: video.videoUrl,
+              thumbnailUrl: video.videoUrl.replace('.mp4', '.jpg'), // Basic heuristic
+              duration: 0 // Could be extracted if needed
+            });
+          }
+        }
+
         console.log(`✅ [VIDEO WORKER] Task ${task.id} finished successfully.`);
       } catch (err: any) {
         console.error(`❌ [VIDEO WORKER] Task ${task.id} failed:`, err);
@@ -72,6 +96,13 @@ async function processNextTask() {
           where: { id: task.id },
           data: { status: 'error', error: err.message || 'Unknown error' }
         });
+
+        if (task.source === 'manager') {
+          await eb.publish('REEL_FAILED', {
+            reelId: task.id,
+            error: err.message || 'Unknown error'
+          });
+        }
       } finally {
         isWorking = false;
         lastTaskStartTime = null;
