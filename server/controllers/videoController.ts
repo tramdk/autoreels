@@ -9,6 +9,41 @@ import { uploadVideo, downloadFile, deleteRemoteFile } from '../services/storage
 
 export const videoProgress = new Map<string, number>();
 
+/**
+ * Helper to split plain text into structured scenes for the rendering pipeline.
+ */
+function generateScriptFromText(text: string, imageUrl?: string | null) {
+  const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
+  const cleanContent = text.replace(emojiRegex, '').replace(/[*_~`|>\\\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+  
+  const lines = cleanContent
+    .split(/\. |\n|\.|\!|\?/)
+    .map(line => line.trim())
+    .filter(line => line.length > 10); // Minimum length for a scene
+
+  if (lines.length > 1) {
+    return {
+      scenes: lines.map((line, idx) => ({
+        id: idx + 1,
+        type: idx === 0 ? 'hook' : (idx === lines.length - 1 ? 'outro' : 'body'),
+        voiceText: line,
+        imageUrl: imageUrl || null
+      }))
+    };
+  }
+  
+  return {
+    scenes: [
+      {
+        id: 1,
+        type: 'body',
+        voiceText: text,
+        imageUrl: imageUrl || null
+      }
+    ]
+  };
+}
+
 export const getVideos = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -152,11 +187,13 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
     const article = await prisma.article.findUnique({ where: { id: articleId } });
     if (!article) return res.status(404).json({ error: 'Article not found' });
 
-    // Create a persistent task instead of running directly
+    // Create a persistent task with the script ALREADY SNAPSHOTTED into 'content'
     const task = await prisma.videoTask.create({
       data: {
         articleId: articleId,
         templateId: templateId || 'modern',
+        // Snapshot the script into content field so worker doesn't need to query Article table
+        content: article.script ? JSON.stringify(article.script) : null,
         ttsProvider: ttsProvider || 'edge',
         ttsVoiceId: ttsVoiceId || 'vi-VN-HoaiMyNeural',
         bgmAssetId: bgmAssetId || null,
@@ -165,8 +202,8 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
       }
     });
 
-    // Save render settings to article script without changing status to 'generating' yet
-    await prisma.article.update({
+    // Save render settings to article script (optional metadata)
+    await prisma.article.updateMany({
       where: { id: articleId },
       data: { 
         script: {
@@ -201,65 +238,38 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
     let script: any = { scenes: [] };
     let title = 'Untitled Video';
 
-    let articleExists = false;
-    if (articleId && articleId !== '') {
-      console.log(`📂 [RENDER] Fetching article metadata for ID: ${articleId}...`);
+    // 1. Load script from customContent (Snapshot)
+    if (customContent && customContent.trim() !== '') {
+      try {
+        if (customContent.startsWith('{') || customContent.startsWith('[')) {
+          const parsed = JSON.parse(customContent);
+          if (parsed && parsed.scenes) {
+            script = parsed;
+            console.log(`📦 [RENDER] Using script snapshot from VideoTask.`);
+          } else {
+            script = generateScriptFromText(customContent, customImageUrl);
+          }
+        } else {
+          script = generateScriptFromText(customContent, customImageUrl);
+        }
+      } catch (e) {
+        script = generateScriptFromText(customContent, customImageUrl);
+      }
+      title = customContent.substring(0, 50) + '...';
+    } 
+    
+    // 2. Fallback only if snapshot is missing (Legacy)
+    if ((!script.scenes || script.scenes.length === 0) && articleId) {
+      console.log(`📂 [RENDER] Falling back to Article query for ID: ${articleId}...`);
       const article = await prisma.article.findUnique({ where: { id: articleId } });
       if (article) {
-        console.log(`✅ [RENDER] Article found: "${article.title}"`);
-        articleExists = true;
         script = article.script as any;
         title = article.title;
-        // Update status if needed
-        if (article.status !== 'generating') {
-          await prisma.article.updateMany({
-            where: { id: articleId },
-            data: { status: 'generating' }
-          });
-        }
-      } else {
-        console.warn(`⚠️ [RENDER] Article ${articleId} not found in database.`);
       }
     }
 
-    if (!articleExists) {
-      if (customContent) {
-        // Create a virtual script from custom content, splitting into multiple scenes for better variety
-        title = customContent.substring(0, 50) + '...';
-        
-        // Split text into sentences for multiple scenes
-        const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
-        const cleanContent = customContent.replace(emojiRegex, '').replace(/[*_~`|>\\\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
-        
-        const lines = cleanContent
-          .split(/\. |\n|\.|\!|\?/)
-          .map(line => line.trim())
-          .filter(line => line.length > 10); // Minimum length for a scene
-
-        if (lines.length > 1) {
-          script = {
-            scenes: lines.map((line, idx) => ({
-              id: idx + 1,
-              type: idx === 0 ? 'hook' : (idx === lines.length - 1 ? 'outro' : 'body'),
-              voiceText: line,
-              imageUrl: customImageUrl || null
-            }))
-          };
-        } else {
-          script = {
-            scenes: [
-              {
-                id: 1,
-                type: 'body',
-                voiceText: customContent,
-                imageUrl: customImageUrl || null
-              }
-            ]
-          };
-        }
-      } else {
-        throw new Error('No valid article found and no customContent provided');
-      }
+    if (!script || !script.scenes || script.scenes.length === 0) {
+      throw new Error('No valid script found for rendering');
     }
 
     // Process video generation asynchronously
@@ -369,15 +379,18 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
         videoUrl: videoCloudUrl,
         audioUrl: audioCloudUrl,
         status: 'ready',
-        source: source || 'internal',
-        articles: articleExists ? { connect: { id: articleId } } : undefined
+        source: source || 'internal'
       }
     });
 
-    if (articleExists) {
+    // Try to link to article and update its status
+    if (articleId) {
       await prisma.article.updateMany({
         where: { id: articleId },
-        data: { status: 'video_generated', videoId: video.id }
+        data: { 
+          status: 'video_generated', 
+          videoId: video.id 
+        }
       });
     }
 
@@ -399,7 +412,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
         try { fs.unlinkSync(bgmTempPath); } catch (_) {}
       }
 
-      if (articleExists) {
+      if (articleId) {
         await prisma.article.updateMany({
           where: { id: articleId },
           data: { status: 'summarized' }
