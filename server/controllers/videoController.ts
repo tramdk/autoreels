@@ -48,6 +48,8 @@ export const generateBulk = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Items array is required' });
     }
 
+    console.log(`🚀 [API] Received bulk-generate request for ${items.length} items from source: ${items[0]?.source || 'unknown'}`);
+    
     const results = [];
     for (const item of items) {
       const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, content, imageUrl, source } = item;
@@ -68,15 +70,18 @@ export const generateBulk = async (req: Request, res: Response) => {
         }
       });
 
+      console.log(`📝 [API] Task created: ${task.id} (Status: pending)`);
       results.push({ videoId: task.id, status: 'pending' });
     }
 
     res.status(201).json({ success: true, videos: results });
     
     // Poke the worker
+    console.log('🔔 [API] Triggering background worker...');
     const { triggerWorker } = await import('../services/videoWorker');
     triggerWorker();
   } catch (error: any) {
+    console.error('❌ [API] Bulk generate error:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -187,6 +192,9 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
   const { templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, customContent, customImageUrl, source } = settings;
   const videoId = existingVideoId || `v_${articleId}_${Date.now()}`;
   
+  console.log(`🎬 [RENDER START] Beginning pipeline for Video ID: ${videoId}`);
+  console.log(`🔍 [RENDER INFO] ArticleID: ${articleId || 'None'}, Source: ${source || 'internal'}`);
+
   // Set initial progress
   videoProgress.set(videoId, 5);
 
@@ -196,8 +204,10 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
 
     let articleExists = false;
     if (articleId && articleId !== '') {
+      console.log(`📂 [RENDER] Fetching article metadata for ID: ${articleId}...`);
       const article = await prisma.article.findUnique({ where: { id: articleId } });
       if (article) {
+        console.log(`✅ [RENDER] Article found: "${article.title}"`);
         articleExists = true;
         script = article.script as any;
         title = article.title;
@@ -209,7 +219,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
           }).catch(e => console.error('[RENDER] Failed to update article status to generating:', e.message));
         }
       } else {
-        console.warn(`[RENDER] Article ${articleId} not found. Checking for custom content fallback...`);
+        console.warn(`⚠️ [RENDER] Article ${articleId} not found in database.`);
       }
     }
 
