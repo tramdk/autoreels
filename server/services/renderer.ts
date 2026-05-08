@@ -206,16 +206,35 @@ async function _internalRender(options: RenderOptions): Promise<void> {
         if (options.bgmPath && fs.existsSync(options.bgmPath)) {
           const bgmVol = Math.max(0, Math.min(1, options.bgmVolume ?? 0.15));
           console.log(`[Renderer] Mixing BGM at volume ${bgmVol}: ${options.bgmPath}`);
-          mergeCmd = `"${actualFfmpegPath}" -y ${threadOpt} -i "${tempVideoPath}" -i "${audioPath}" -stream_loop -1 -i "${options.bgmPath}" -filter_complex "[1:a]volume=1.0[voice];[2:a]volume=${bgmVol}[bgm];[voice][bgm]amix=inputs=2:duration=first:dropout_transition=2[aout]" -map 0:v:0 -map "[aout]" -c:v copy -c:a aac -shortest "${outputPath}"`;
+          // Added aresample to ensure sampling rates match before amix
+          mergeCmd = `"${actualFfmpegPath}" -y ${threadOpt} -i "${tempVideoPath}" -i "${audioPath}" -stream_loop -1 -i "${options.bgmPath}" -filter_complex "[1:a]aresample=async=1[v_rs];[2:a]aresample=async=1,volume=${bgmVol}[bgm_rs];[v_rs][bgm_rs]amix=inputs=2:duration=first:dropout_transition=2[aout]" -map 0:v:0 -map "[aout]" -c:v copy -c:a aac -b:a 192k -shortest "${outputPath}"`;
         } else {
-          mergeCmd = `"${actualFfmpegPath}" -y ${threadOpt} -i "${tempVideoPath}" -i "${audioPath}" -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 -shortest "${outputPath}"`;
+          mergeCmd = `"${actualFfmpegPath}" -y ${threadOpt} -i "${tempVideoPath}" -i "${audioPath}" -c:v copy -c:a aac -b:a 192k -map 0:v:0 -map 1:a:0 -shortest "${outputPath}"`;
         }
         
-        execSync(mergeCmd, { stdio: 'inherit', env });
+        console.log(`[Renderer] Executing merge: ${mergeCmd}`);
+        
+        // Verify input files exist
+        if (!fs.existsSync(tempVideoPath)) throw new Error(`Input video missing: ${tempVideoPath}`);
+        if (!fs.existsSync(audioPath)) throw new Error(`Input audio missing: ${audioPath}`);
+
+        try {
+          // Capture stderr for better error reporting
+          const stderr = execSync(mergeCmd, { env, stdio: ['ignore', 'ignore', 'pipe'] });
+        } catch (execErr: any) {
+          const stderr = execErr.stderr?.toString() || execErr.message;
+          console.error('[Renderer] FFMPEG Merge Error Stderr:', stderr);
+          throw new Error(`FFMPEG merge failed: ${stderr}`);
+        }
+
         try { fs.rmSync(workDir, { recursive: true, force: true }); } catch (_) {}
         resolve();
-      } catch (err: any) { reject(new Error(`FFMPEG merge failed: ${err.message}`)); }
+      } catch (err: any) { 
+        console.error('[Renderer] Final Merge Error:', err.message);
+        reject(err); 
+      }
     });
+
   });
 }
 

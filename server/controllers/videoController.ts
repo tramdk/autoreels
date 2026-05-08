@@ -166,9 +166,11 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
     let script: any = { scenes: [] };
     let title = 'Untitled Video';
 
+    let articleExists = false;
     if (articleId && articleId !== '') {
       const article = await prisma.article.findUnique({ where: { id: articleId } });
       if (article) {
+        articleExists = true;
         script = article.script as any;
         title = article.title;
         // Update status if needed
@@ -176,22 +178,51 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
           await prisma.article.update({
             where: { id: articleId },
             data: { status: 'generating' }
-          });
+          }).catch(e => console.error('[RENDER] Failed to update article status to generating:', e.message));
         }
+      } else {
+        console.warn(`[RENDER] Article ${articleId} not found. Checking for custom content fallback...`);
       }
-    } else if (customContent) {
-      // Create a virtual script from custom content
-      title = customContent.substring(0, 50) + '...';
-      script = {
-        scenes: [
-          {
-            voiceText: customContent,
-            imageUrl: customImageUrl || null
-          }
-        ]
-      };
-    } else {
-      throw new Error('No articleId or customContent provided');
+    }
+
+    if (!articleExists) {
+      if (customContent) {
+        // Create a virtual script from custom content, splitting into multiple scenes for better variety
+        title = customContent.substring(0, 50) + '...';
+        
+        // Split text into sentences for multiple scenes
+        const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
+        const cleanContent = customContent.replace(emojiRegex, '').replace(/[*_~`|>\\\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+        
+        const lines = cleanContent
+          .split(/\. |\n|\.|\!|\?/)
+          .map(line => line.trim())
+          .filter(line => line.length > 10); // Minimum length for a scene
+
+        if (lines.length > 1) {
+          script = {
+            scenes: lines.map((line, idx) => ({
+              id: idx + 1,
+              type: idx === 0 ? 'hook' : (idx === lines.length - 1 ? 'outro' : 'body'),
+              voiceText: line,
+              imageUrl: customImageUrl || null
+            }))
+          };
+        } else {
+          script = {
+            scenes: [
+              {
+                id: 1,
+                type: 'body',
+                voiceText: customContent,
+                imageUrl: customImageUrl || null
+              }
+            ]
+          };
+        }
+      } else {
+        throw new Error('No valid article found and no customContent provided');
+      }
     }
 
     // Process video generation asynchronously
@@ -305,11 +336,11 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
       }
     });
 
-    if (articleId) {
+    if (articleExists) {
       await prisma.article.update({
         where: { id: articleId },
         data: { status: 'video_generated', videoId: video.id }
-      }).catch(e => console.log('[RENDER] Article update skipped/failed', e.message));
+      }).catch(e => console.error('[RENDER] Article status update failed (video_generated):', e.message));
     }
 
     videoProgress.set(videoId, 100);
@@ -330,11 +361,11 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
         try { fs.unlinkSync(bgmTempPath); } catch (_) {}
       }
 
-      if (articleId) {
+      if (articleExists) {
         await prisma.article.update({
           where: { id: articleId },
           data: { status: 'summarized' }
-        }).catch(console.error);
+        }).catch(e => console.error('[RENDER] Article status update failed (summarized):', e.message));
       }
     }
   } catch (err: any) {
