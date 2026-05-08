@@ -39,9 +39,9 @@ export async function startEventBusWorker() {
         'STREAMS', STREAM_NAME, '>'
       );
 
-      if (!results || results.length === 0) continue;
+      if (!results || (results as any).length === 0) continue;
 
-      const [stream, messages] = results[0];
+      const [stream, messages] = (results as any)[0] as [string, any[]];
       for (const [messageId, [_, data]] of messages) {
         const eventData = JSON.parse(data as string);
         
