@@ -144,30 +144,44 @@ export const getBulkStatus = async (req: Request, res: Response, next: NextFunct
     if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'IDs array required' });
 
     const results = await Promise.all(ids.map(async (id) => {
-      // 1. Check if finished
-      const video = await prisma.video.findUnique({ where: { id } });
-      if (video) return { ...video, status: 'ready' };
-      
-      // 2. Check if in progress (memory)
+      // 1. Check if in progress (memory) - Most active state
       const progress = videoProgress.get(id);
       if (progress !== undefined) {
         return { id, status: 'processing', progress };
       }
 
-      // 3. Check Task table for queue status
+      // 2. Check Task table for queue status
       const task = await prisma.videoTask.findUnique({ where: { id } });
       if (task) {
+        const status = task.status;
         let videoUrl = undefined;
-        if (task.status === 'completed') {
-           const finishedVideo = await prisma.video.findUnique({ where: { id } });
-           videoUrl = finishedVideo?.videoUrl;
+        
+        if (status === 'completed') {
+           // Get the final URL from Video table before deleting the task
+           const video = await prisma.video.findUnique({ where: { id } });
+           videoUrl = video?.videoUrl;
+           
+           // Cleanup: Delete the task now that it's completed and status is being returned
+           await prisma.videoTask.delete({ where: { id } }).catch(() => {});
         }
+
         return { 
           id, 
-          status: task.status, 
+          status: status, 
           error: task.error, 
-          videoUrl, // Include the URL if it's completed
-          progress: task.status === 'pending' ? 0 : (task.status === 'completed' ? 100 : 10) 
+          videoUrl,
+          progress: status === 'pending' ? 0 : (status === 'completed' ? 100 : 10) 
+        };
+      }
+
+      // 3. Fallback: If not in Task table, check if it already finished and was deleted
+      const finishedVideo = await prisma.video.findUnique({ where: { id } });
+      if (finishedVideo) {
+        return { 
+          id, 
+          status: 'completed', 
+          videoUrl: finishedVideo.videoUrl, 
+          progress: 100 
         };
       }
 
