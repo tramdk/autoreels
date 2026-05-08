@@ -10,7 +10,7 @@ let isWorking = false;
  * run at the same time.
  */
 let lastTaskStartTime: number | null = null;
-const MAX_TASK_DURATION = 15 * 60 * 1000; // 15 minutes safety timeout
+const MAX_TASK_DURATION = 20 * 60 * 1000; // 20 minutes safety limit for monitoring
 
 export async function triggerWorker() {
   if (isWorking) return;
@@ -20,7 +20,7 @@ export async function triggerWorker() {
 async function processNextTask() {
   if (isWorking) return;
   isWorking = true; // Set immediately to prevent race conditions
-  
+
   try {
     // Find the next pending task
     const task = await prisma.videoTask.findFirst({
@@ -83,16 +83,15 @@ async function processNextTask() {
  */
 export async function startVideoWorker() {
   console.log('🚀 [VIDEO WORKER] Started background render worker.');
-  
+
   // Initial check
   processNextTask();
 
   // Periodic check (every 10 seconds)
   setInterval(async () => {
-    // Safety check: if worker is "stuck" for too long, reset it
+    // Monitoring check: log if a task is taking unusually long, but don't reset the lock for safety
     if (isWorking && lastTaskStartTime && (Date.now() - lastTaskStartTime > MAX_TASK_DURATION)) {
-      console.warn('⚠️ [VIDEO WORKER] Task seems stuck. Resetting worker lock...');
-      isWorking = false;
+      console.warn('⚠️ [VIDEO WORKER] Task has been running for over 20 minutes. Please check server resources.');
     }
 
     if (!isWorking) {

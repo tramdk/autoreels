@@ -507,9 +507,9 @@
           var over = realH - maxH + 100;
           window._tl.to(textEl, { 
             y: -over, 
-            duration: sceneDuration * 0.7, 
+            duration: sceneDuration * 0.9, 
             ease: 'none' 
-          }, sceneStart + (sceneDuration * 0.15));
+          }, sceneStart + (sceneDuration * 0.05));
         }
         if (s.type === 'hook') {
           window._tl.from(textEl, { y: 80, duration: animIn * 1.2, ease: 'back.out(1.5)' }, sceneStart);

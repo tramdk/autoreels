@@ -342,9 +342,9 @@
           var over = realH - maxH + 60;
           window._tl.to(textEl, { 
             y: -over, 
-            duration: duration * 0.7, 
+            duration: duration * 0.9, 
             ease: 'none' 
-          }, sceneStart + (duration * 0.15));
+          }, sceneStart + (duration * 0.05));
         }
 
         var staggerTime = Math.min(0.04, (duration * 0.7) / (spans.length || 1));

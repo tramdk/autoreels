@@ -117,7 +117,18 @@ export const getBulkStatus = async (req: Request, res: Response, next: NextFunct
       // 3. Check Task table for queue status
       const task = await prisma.videoTask.findUnique({ where: { id } });
       if (task) {
-        return { id, status: task.status, error: task.error, progress: task.status === 'pending' ? 0 : 10 };
+        let videoUrl = undefined;
+        if (task.status === 'completed') {
+           const finishedVideo = await prisma.video.findUnique({ where: { id } });
+           videoUrl = finishedVideo?.videoUrl;
+        }
+        return { 
+          id, 
+          status: task.status, 
+          error: task.error, 
+          videoUrl, // Include the URL if it's completed
+          progress: task.status === 'pending' ? 0 : (task.status === 'completed' ? 100 : 10) 
+        };
       }
 
       return { id, status: 'not_found' };
