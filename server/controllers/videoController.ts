@@ -72,6 +72,10 @@ export const generateBulk = async (req: Request, res: Response) => {
     }
 
     res.status(201).json({ success: true, videos: results });
+    
+    // Poke the worker
+    const { triggerWorker } = await import('../services/videoWorker');
+    triggerWorker();
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -127,15 +131,25 @@ export const getBulkStatus = async (req: Request, res: Response, next: NextFunct
 
 export const generateVideo = async (req: Request, res: Response, next: NextFunction) => {
   const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume } = req.body;
-  const videoId = `v_${articleId}_${Date.now()}`;
   
-  // Set initial progress
-  videoProgress.set(videoId, 5);
-
   try {
     const article = await prisma.article.findUnique({ where: { id: articleId } });
     if (!article) return res.status(404).json({ error: 'Article not found' });
 
+    // Create a persistent task instead of running directly
+    const task = await prisma.videoTask.create({
+      data: {
+        articleId: articleId,
+        templateId: templateId || 'modern',
+        ttsProvider: ttsProvider || 'edge',
+        ttsVoiceId: ttsVoiceId || 'vi-VN-HoaiMyNeural',
+        bgmAssetId: bgmAssetId || null,
+        bgmVolume: typeof bgmVolume === 'number' ? bgmVolume : 0.15,
+        status: 'pending'
+      }
+    });
+
+    // Update article status
     await prisma.article.update({
       where: { id: articleId },
       data: { 
@@ -147,14 +161,16 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
       }
     });
 
-    res.json({ videoId, status: 'generating' });
+    res.json({ videoId: task.id, status: 'pending' });
     
-    const settings = { templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume };
-    runVideoGenerationPipeline(articleId, settings, videoId);
+    // Poke the worker to start immediately if idle
+    const { triggerWorker } = await import('../services/videoWorker');
+    triggerWorker();
   } catch (err: any) {
     next(err);
   }
 };
+
 
 export const runVideoGenerationPipeline = async (articleId: string, settings: any, existingVideoId?: string) => {
   const { templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, customContent, customImageUrl, source } = settings;
