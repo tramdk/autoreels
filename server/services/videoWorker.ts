@@ -38,6 +38,18 @@ async function processNextTask() {
         data: { status: 'processing' }
       });
 
+      // Also update the related article status to 'generating' if it exists
+      if (task.articleId) {
+        try {
+          await prisma.article.update({
+            where: { id: task.articleId },
+            data: { status: 'generating' }
+          });
+        } catch (articleErr) {
+          console.warn(`[VIDEO WORKER] Could not update article ${task.articleId} status:`, articleErr);
+        }
+      }
+
       try {
         await runVideoGenerationPipeline(task.articleId || '', {
           templateId: task.templateId,
@@ -79,10 +91,30 @@ async function processNextTask() {
 }
 
 /**
+ * Recovers tasks that were stuck in 'processing' state (e.g., due to server crash).
+ */
+async function recoverStuckTasks() {
+  try {
+    const result = await prisma.videoTask.updateMany({
+      where: { status: 'processing' },
+      data: { status: 'pending' }
+    });
+    if (result.count > 0) {
+      console.log(`[VIDEO WORKER] Recovered ${result.count} stuck tasks.`);
+    }
+  } catch (err) {
+    console.error('[VIDEO WORKER] Recovery error:', err);
+  }
+}
+
+/**
  * Background worker that processes video generation tasks sequentially.
  */
 export async function startVideoWorker() {
   console.log('🚀 [VIDEO WORKER] Started background render worker.');
+
+  // Recover stuck tasks from previous session (e.g. server crash)
+  await recoverStuckTasks();
 
   // Initial check
   processNextTask();

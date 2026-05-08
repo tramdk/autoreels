@@ -165,11 +165,10 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
       }
     });
 
-    // Update article status
+    // Save render settings to article script without changing status to 'generating' yet
     await prisma.article.update({
       where: { id: articleId },
       data: { 
-        status: 'generating',
         script: {
           ...(article.script as any),
           renderSettings: { templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume }
