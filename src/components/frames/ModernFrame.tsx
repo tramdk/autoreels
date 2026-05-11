@@ -4,11 +4,11 @@ import { cn } from "../../utils/cn";
 import { getTopPercent, getLeftPercent, getTransform } from "../../utils/pos";
 
 export function ModernFrame(props: FrameProps) {
-  const { ratio, title, content, type, showDatetime, dividerColor, bodyText, textColor } = props;
+  const { ratio, title, content, type } = props;
   const s = props.settings || props;
   const {
     logoText, logoColor, logoTop, logoLeft, logoSize, logoAlign, logoPlacement,
-    hookColor, hookSize, bodyColor, bodySize, textColor,
+    hookColor, hookSize, bodyColor, bodySize, textColor, bodyText, dividerColor, showDatetime,
     showLogo, showTag, tagText, tagBg, tagColor,
     tagTop, tagLeft, tagSize, tagAlign, tagPlacement,
     mainTop, mainLeft, mainAlign, mainPlacement
