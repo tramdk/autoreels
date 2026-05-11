@@ -199,7 +199,7 @@ export const useAppLogic = () => {
 
   const [renderingVideos, setRenderingVideos] = useState<Record<string, number>>({});
 
-  const handleGenerateVideo = async (id: string, templateId?: string, options?: { ttsProvider?: string, ttsVoiceId?: string }) => {
+  const handleGenerateVideo = async (id: string, templateId?: string, options: any = {}) => {
     setLoading(true);
     try {
       const data = await api.generateVideo(id, templateId, options);
@@ -208,8 +208,10 @@ export const useAppLogic = () => {
       if (!videoId) throw new Error('No videoId returned from server');
 
       // Unblock the UI immediately after the job starts!
+      // Unblock the UI immediately after the job starts!
       setLoading(false);
-      setRenderingVideos(prev => ({ ...prev, [videoId]: 5 }));
+      const progressKey = `v_${id}_${videoId}`;
+      setRenderingVideos(prev => ({ ...prev, [progressKey]: 5 }));
       reloadCurrentView();
 
       // Start listening for progress via SSE
@@ -223,10 +225,15 @@ export const useAppLogic = () => {
         if (progress === -1) {
           toast.error('Video generation failed.', { id: toastId });
           eventSource.close();
+          setRenderingVideos(prev => {
+            const next = { ...prev };
+            delete next[progressKey];
+            return next;
+          });
           return;
         }
 
-        setRenderingVideos(prev => ({ ...prev, [videoId]: progress }));
+        setRenderingVideos(prev => ({ ...prev, [progressKey]: progress }));
         toast.loading(`Rendering video: ${progress}%`, { id: toastId });
 
         if (progress >= 100) {
@@ -237,6 +244,14 @@ export const useAppLogic = () => {
             </div>
           ), { id: toastId, duration: 5000 });
           reloadCurrentView();
+          
+          setTimeout(() => {
+            setRenderingVideos(prev => {
+              const next = { ...prev };
+              delete next[progressKey];
+              return next;
+            });
+          }, 3000);
         }
       };
 

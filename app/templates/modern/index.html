@@ -1,383 +1,375 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi"
+  style="--v-width: {{ WIDTH }}; --v-height: {{ HEIGHT }}; --v-logo-size: {{ LOGO_SIZE }}; --v-logo-color: {{ LOGO_COLOR }}; --v-logo-top: {{ LOGO_CSS_TOP }}; --v-logo-left: {{ LOGO_CSS_LEFT }}; --v-logo-transform: {{ LOGO_CSS_TRANSFORM }}; --v-logo-show: {{ SHOW_LOGO }}; --v-tag-size: {{ TAG_SIZE }}; --v-tag-color: {{ TAG_COLOR }}; --v-tag-bg: {{ TAG_BG }}; --v-tag-show: {{ SHOW_TAG }}; --v-body-size: {{ BODY_SIZE }}; --v-body-color: {{ BODY_COLOR }}; --v-hook-size: {{ HOOK_SIZE }}; --v-hook-color: {{ HOOK_COLOR }}; --v-main-top: {{ MAIN_CSS_TOP }}; --v-main-left: {{ MAIN_CSS_LEFT }}; --v-main-transform: {{ MAIN_CSS_TRANSFORM }}; --v-main-align: {{ MAIN_CSS_ALIGN }}; --v-divider-color: {{ DIVIDER_COLOR }}; --v-content-gap: {{ CONTENT_GAP }}; --v-bg-start: {{ BG_GRADIENT_START }}; --v-bg-end: {{ BG_GRADIENT_END }}; --v-bg-brightness: {{ BG_BRIGHTNESS }};">
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1080, user-scalable=no">
-  <title>AutoReels Template - Modern</title>
+  <meta name="viewport" content="width={{ WIDTH }}, user-scalable=no">
+  <title>Ultra Modern Template</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Be+Vietnam+Pro:wght@400;600;700;900&display=swap"
-    rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <script src="/assets/js/gsap.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --cqmin: min(calc(var(--v-width) * 1px), calc(var(--v-height) * 1px));
+      --accent: var(--v-divider-color);
     }
 
-    body,
-    html {
-      width: 1080px;
-      height: 1920px;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body, html {
+      width: calc(var(--v-width) * 1px);
+      height: calc(var(--v-height) * 1px);
       overflow: hidden;
       background-color: #000;
-      font-family: 'Be Vietnam Pro', sans-serif;
+      font-family: {{ FONT_FAMILY }};
     }
 
     #root {
       position: relative;
-      width: 1080px;
-      height: 1920px;
-      background-color: #111;
+      width: 100%;
+      height: 100%;
+      background: #000;
       color: white;
       overflow: hidden;
     }
 
-    /* Background */
-    .bg-layer {
+    #scenes-container {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
+      inset: 0;
+      z-index: 10;
+    }
+
+    .scene-unit {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .scene-bg-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       z-index: 0;
+      overflow: hidden;
     }
-    #bg-overlay {
+
+    .scene-bg {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: radial-gradient(circle at 20% 30%, rgba(168, 85, 247, 0.15) 0%, rgba(0,0,0,0.85) 70%);
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .scene-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%);
       z-index: 1;
+      opacity: var(--v-bg-brightness);
     }
 
-    /* Brand */
-    #brand-header {
+    .scene-content {
       position: absolute;
-      top: {{LOGO_TOP}}px;
-      left: 80px;
-      z-index: 100;
-      text-align: left;
-    }
-    #brand-logo {
-      font-family: 'Anton', sans-serif;
-      font-size: {{LOGO_SIZE}}px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: #a855f7;
-      text-shadow: 0 0 40px rgba(168, 85, 247, 0.5);
-    }
-
-    /* Bottom bar */
-    #bottom-info {
-      position: absolute;
-      top: {{TAG_TOP}}px;
-      left: 50%;
-      transform: translateX(-50%) translateX({{TAG_LEFT}}px);
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      z-index: 100;
-      white-space: nowrap;
-    }
-    #tag-badge {
-      padding: 12px 30px;
-      font-family: 'Anton', sans-serif;
-      font-size: {{TAG_SIZE}}px;
-      text-transform: uppercase;
-      background-color: {{TAG_BG}};
-      color: {{TAG_COLOR}};
-      transform: skewX(-12deg);
-      letter-spacing: 2px;
-    }
-    #datetime {
-      font-size: 26px;
-      color: rgba(255,255,255,0.55);
-      font-weight: 700;
-      letter-spacing: 2px;
-    }
-
-
-
-    /* Scene cards */
-    #scene-container {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: var(--v-main-top);
+      left: var(--v-main-left);
+      transform: var(--v-main-transform);
+      width: 88%;
       z-index: 50;
-    }
-    .scene-card {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
-      padding-top: {{MAIN_TOP}}px;
-      padding-left: {{MAIN_LEFT}}px;
-      padding-right: {{MAIN_LEFT}}px;
-      gap: {{CONTENT_GAP}}px;
-      opacity: 0;
-      pointer-events: none;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-
-      /* Dynamic styles */
-      background-color: {{CARD_BG_COLOR}};
-      border-top: {{CARD_BORDER_TOP}}px solid {{CARD_BORDER_COLOR}};
-      border-bottom: {{CARD_BORDER_BOTTOM}}px solid {{CARD_BORDER_COLOR}};
-      border-left: {{CARD_BORDER_LEFT}}px solid {{CARD_BORDER_COLOR}};
-      border-right: {{CARD_BORDER_RIGHT}}px solid {{CARD_BORDER_COLOR}};
-      border-radius: {{CARD_BORDER_RADIUS}}px;
+      align-items: var(--v-main-align);
+      gap: 20px;
     }
 
-    /* Hook scene */
-    .scene-card.type-hook .scene-label {
-      font-family: 'Anton', sans-serif;
-      font-size: 28px;
-      letter-spacing: 8px;
-      color: #a855f7;
+    .modern-label-box {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 10px;
+    }
+
+    .trending-tag {
+      background: var(--accent);
+      color: #000;
+      padding: 6px 20px;
+      font-size: calc(var(--cqmin) * 18 / 720);
+      font-weight: 800;
       text-transform: uppercase;
-      opacity: 0.9;
+      letter-spacing: 0.1em;
+      border-radius: 4px;
     }
-    .scene-card.type-hook .scene-text {
-      font-family: 'Anton', sans-serif;
-      font-size: {{HOOK_SIZE}}px;
-      line-height: 1.25;
+
+    .label-line {
+      width: 40px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .scene-title {
+      font-family: {{ FONT_FAMILY }};
+      font-weight: 800;
+      line-height: {{ LINE_HEIGHT }};
+      letter-spacing: -0.04em;
       text-transform: uppercase;
       color: #ffffff;
-      text-shadow: 0 4px 60px rgba(168, 85, 247, 0.4);
-      word-break: break-word;
-    }
-    .scene-card.type-hook .scene-accent {
-      width: 0;
-      height: 6px;
-      border-radius: 4px;
-      background: #a855f7;
-      box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+      width: 100%;
+      text-align: inherit;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
     }
 
-    /* Body scene */
-
-    .scene-card.type-body .scene-text {
-      font-size: {{BODY_SIZE}}px;
-      font-weight: 700;
-      line-height: 1.35;
-      color: {{BODY_COLOR}};
-      text-shadow: 0 2px 20px rgba(0,0,0,0.5);
-      position: relative;
-      z-index: 2;
+    .type-hook .scene-title {
+      font-size: calc(var(--cqmin) * var(--v-hook-size) / 720);
+      color: var(--v-hook-color);
     }
 
-    .scene-text span {
-      /* opacity: 0; */
-      display: inline-block;
-      white-space: pre-wrap;
-    }
-    .scene-card.type-body .scene-bar {
-      width: 60px;
-      height: 5px;
-      border-radius: 3px;
-      background: #a855f7;
+    .type-body .scene-title {
+      font-size: calc(var(--cqmin) * var(--v-body-size) / 720);
+      color: var(--v-body-color);
     }
 
-    /* Outro scene */
-    .scene-card.type-outro {
-      justify-content: flex-start;
+    .scene-progress-container {
+      width: 100px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      margin-top: 30px;
+      border-radius: 100px;
+      overflow: hidden;
+      display: {{ SHOW_PROGRESS_BAR }};
     }
-    .scene-card.type-outro .scene-cta-label {
-      font-family: 'Anton', sans-serif;
-      font-size: 32px;
-      letter-spacing: 6px;
-      color: {{TAG_BG}};
+
+    .scene-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .ui-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 600;
+      pointer-events: none;
+    }
+
+    .logo-text {
+      position: absolute;
+      top: var(--v-logo-top);
+      left: var(--v-logo-left);
+      transform: var(--v-logo-transform);
+      color: var(--v-logo-color);
+      font-size: calc(var(--cqmin) * var(--v-logo-size) / 720);
+      font-weight: 800;
+      letter-spacing: 0.3em;
       text-transform: uppercase;
-      margin-bottom: 24px;
+      white-space: nowrap;
+      display: var(--v-logo-show);
+      align-items: center;
+      gap: 15px;
     }
-    .scene-card.type-outro .scene-text {
-      font-size: {{BODY_SIZE}}px;
-      font-weight: 700;
-      line-height: 1.35;
-      color: {{BODY_COLOR}};
+
+    .logo-img {
+      height: 1.2em;
+      width: auto;
+      object-fit: contain;
+      display: {{ SHOW_LOGO_IMAGE }};
     }
-    .scene-card.type-outro .scene-follow {
-      margin-top: 40px;
-      font-size: 36px;
+
+    .tag-container {
+      position: absolute;
+      top: var(--v-tag-top);
+      left: var(--v-tag-left);
+      transform: var(--v-tag-transform);
+      display: var(--v-tag-show);
+      align-items: center;
+      gap: 30px;
+      white-space: nowrap;
+    }
+
+    .tag-badge {
+      background: var(--v-tag-bg);
+      color: var(--v-tag-color);
+      padding: 10px 30px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: calc(var(--cqmin) * var(--v-tag-size) / 720);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .datetime-text {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: calc(var(--cqmin) * 18 / 720);
       font-weight: 600;
-      color: rgba(255,255,255,0.6);
-      letter-spacing: 1px;
+      text-transform: uppercase;
+      letter-spacing: 4px;
     }
+
+    /* Modern geometric accents */
+    .geometric-accent {
+      position: absolute;
+      width: 2px;
+      height: 100px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      top: 10%;
+      right: 5%;
+      opacity: 0.5;
+    }
+
   </style>
 </head>
 
 <body>
-  <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-start="0">
-
-    <div id="bg-layers">
-      <img id="bg-1" class="bg-layer" src="{{BG_IMAGE_URL}}" style="opacity: {{BG_BRIGHTNESS}};" alt="">
-      <img id="bg-2" class="bg-layer" style="opacity: 0;" alt="">
+  <div id="root" data-composition-id="root" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}"
+    data-height="{{ HEIGHT }}">
+    <div id="scenes-container"></div>
+    <div class="geometric-accent"></div>
+    <div class="ui-layer">
+      <div class="logo-text">
+        <img class="logo-img" src="{{ LOGO_IMAGE }}" alt="">
+        {{ LOGO_TEXT }}
+      </div>
+      <div class="tag-container">
+        <div class="tag-badge">{{ TAG_TEXT }}</div>
+        <div class="datetime-text">{{ DATETIME }}</div>
+      </div>
     </div>
-    <div id="bg-overlay"></div>
-
-    <div id="brand-header" style="display: {{SHOW_LOGO}};">
-      <h1 id="brand-logo" style="color: {{LOGO_COLOR}}; font-size: {{LOGO_SIZE}}px;">{{LOGO_TEXT}}</h1>
-    </div>
-
-
-    <div id="scene-container"></div>
-
-    <div id="bottom-info">
-      <div id="tag-badge" style="display: {{SHOW_TAG}}; background: {{TAG_BG}}; color: {{TAG_COLOR}}; font-size: {{TAG_SIZE}}px;">{{TAG_TEXT}}</div>
-      <div id="datetime" style="display: {{SHOW_DATETIME}};">{{DATETIME}}</div>
-    </div>
-
   </div>
 
   <script>
-    window.__hf = {
-      duration: {{DURATION}},
-      seek: function(t) {
-        if (window._tl && typeof window._tl.seek === 'function') {
-          window._tl.pause().seek(t);
-        }
-      }
-    };
+    var SCENES_DATA = {{ SCENES_JSON }};
+    var SCENE_DURATIONS = {{ SCENE_DURATIONS_JSON }};
+    var DEFAULT_BG = {{ BG_IMAGE_URL_JS }};
   </script>
 
   <script>
-    var SCENES_DATA = {{SCENES_JSON}};
-    var SCENE_DURATIONS = {{SCENE_DURATIONS_JSON}};
-    var TOTAL_DURATION = {{DURATION}};
-  </script>
+    var scenes = SCENES_DATA;
+    var sceneDurations = SCENE_DURATIONS;
 
-  <script>
-    try {
-      if (typeof gsap === 'undefined') throw new Error('GSAP not loaded');
-
-      var scenes = SCENES_DATA;
-      var n = scenes.length;
-      var container = document.getElementById('scene-container');
-      
-      var hasDurations = SCENE_DURATIONS && SCENE_DURATIONS.length === n;
-      var leadIn = 0.5;
-      var animIn  = 0.4;
-      var animOut = 0.4;
-
-      window._tl = gsap.timeline({ paused: true });
-      window.__timelines = { 'main': window._tl };
-
-      window._tl.from('#brand-header', { y: -60, opacity: 0, duration: 0.6 }, 0);
-      window._tl.from('#bottom-info',  { y:  60, opacity: 0, duration: 0.6 }, 0.2);
-
-      var defaultBg = '{{BG_IMAGE_URL}}';
-      var currentBgIndex = 1;
-      var currentTime = leadIn;
-
-      for (var i = 0; i < n; i++) {
-        var s = scenes[i];
-        var duration = hasDurations ? SCENE_DURATIONS[i] : (TOTAL_DURATION - leadIn) / n;
-        var sceneStart = currentTime;
-        
-        var card = document.createElement('div');
-        card.className = 'scene-card type-' + s.type;
-        card.style.display = '{{SHOW_CARD}}';
-
-        function buildTypingContent(containerEl, text) {
-          containerEl.innerHTML = '';
-          var words = text.split(/(\s+)/);
-          var spans = [];
-          words.forEach(function(word) {
-            var wordSpan = document.createElement('span');
-            wordSpan.style.display = 'inline-block';
-            wordSpan.style.whiteSpace = 'pre';
-            
-            var chars = word.split('');
-            chars.forEach(function(char) {
-              var span = document.createElement('span');
-              span.textContent = char;
-              span.style.opacity = 0;
-              wordSpan.appendChild(span);
-              spans.push(span);
-            });
-            containerEl.appendChild(wordSpan);
-          });
-          return spans;
-        }
-
-        var textEl = document.createElement('div');
-        textEl.className = 'scene-text';
-
-        // Limit height and prepare for scrolling
-        var maxH = Math.max(400, {{TAG_TOP}} - {{MAIN_TOP}} - 80);
-        card.style.maxHeight = maxH + 'px';
-        card.style.overflow = 'hidden';
-
-        if (s.type === 'hook') {
-          card.innerHTML = '<div class="scene-label">TRENDING</div>';
-          textEl.style.color = '{{HOOK_COLOR}}';
-          textEl.style.fontSize = '{{HOOK_SIZE}}px';
-        } else if (s.type === 'outro') {
-          card.innerHTML = '<div class="scene-cta-label">JOIN US</div>';
-          textEl.style.color = '{{BODY_COLOR}}';
-          textEl.style.fontSize = '{{BODY_SIZE}}px';
-        } else {
-          textEl.style.color = '{{BODY_COLOR}}';
-          textEl.style.fontSize = '{{BODY_SIZE}}px';
-        }
-
-        var spans = buildTypingContent(textEl, s.voiceText);
-        card.appendChild(textEl);
-        container.appendChild(card);
-
-        window._tl.to(card, { opacity: 1, duration: animIn }, sceneStart);
-
-        // Calculate scroll if content overflows
-        var realH = textEl.offsetHeight + (s.type !== 'body' ? 120 : 40);
-        if (realH > maxH) {
-          var over = realH - maxH + 60;
-          window._tl.to(textEl, { 
-            y: -over, 
-            duration: duration * 0.9, 
-            ease: 'none' 
-          }, sceneStart + (duration * 0.05));
-        }
-
-        var staggerTime = Math.min(0.04, (duration * 0.7) / (spans.length || 1));
-        window._tl.to(spans, {
-          opacity: 1,
-          duration: 0.05,
-          stagger: staggerTime,
-          ease: 'none'
-        }, sceneStart + 0.2);
-        
-        // Background Cross-fade logic (on main timeline)
-        if (i > 0) {
-          var nextUrl = s.imageUrl || defaultBg;
-          var targetLayerId = currentBgIndex === 1 ? 'bg-2' : 'bg-1';
-          var prevLayerId = currentBgIndex === 1 ? 'bg-1' : 'bg-2';
-          
-          (function(lId, url) {
-            window._tl.set('#' + lId, { attr: { src: url } }, sceneStart);
-          })(targetLayerId, nextUrl);
-
-          window._tl.to('#' + targetLayerId, { opacity: {{BG_BRIGHTNESS}}, duration: 1.0, ease: 'none' }, sceneStart);
-          window._tl.to('#' + prevLayerId, { opacity: 0, duration: 1.0, ease: 'none' }, sceneStart);
-          
-          currentBgIndex = (currentBgIndex === 1 ? 2 : 1);
-        }
-
-
-
-        if (i < n - 1) {
-          window._tl.to(card, { opacity: 0, duration: animOut }, sceneStart + duration - animOut);
-        }
-        currentTime += duration;
+    var totalDuration = parseFloat("{{ DURATION }}") || 15;
+    if (!sceneDurations || sceneDurations.length === 0) {
+      var avg = totalDuration / (scenes.length || 1);
+      sceneDurations = [];
+      for (var s = 0; s < scenes.length; s++) {
+        sceneDurations.push(avg);
       }
-      window._tl.add(function() {}, TOTAL_DURATION);
-
-    } catch(e) {
-      console.error('Scene Animation Init Error:', e);
     }
+
+    var mainTl = gsap.timeline({ id: "root", paused: true });
+    window.__timelines = window.__timelines || {};
+    window.__timelines["root"] = mainTl;
+
+    var globalLastImage = DEFAULT_BG;
+
+    function createSceneUnit(scene, i, start, duration) {
+      var isHook = (scene.type === 'hook' || i === 0);
+      var unit = document.createElement('div');
+      unit.id = 'unit-' + i;
+      unit.className = 'scene-unit ' + (isHook ? 'type-hook' : 'type-body');
+      
+      unit.setAttribute('data-start', start.toFixed(3));
+      unit.setAttribute('data-duration', duration.toFixed(3));
+      unit.setAttribute('data-track-index', "1");
+
+      if (scene.imageUrl) globalLastImage = scene.imageUrl;
+      var imgUrl = globalLastImage;
+
+      unit.innerHTML = 
+        '<div class="scene-bg-container">' +
+          '<img class="scene-bg" src="' + imgUrl + '">' +
+        '</div>' +
+        '<div class="scene-overlay"></div>' +
+        '<div class="scene-content" style="text-align: {{ MAIN_CSS_TEXT_ALIGN }};">' +
+          '<div class="modern-label-box">' +
+            (isHook ? '<div class="trending-tag">EXCLUSIVE</div>' : '<div class="label-line"></div>') +
+          '</div>' +
+          '<div class="scene-title">' + (scene.text || scene.bodyText || '') + '</div>' +
+          '<div class="scene-progress-container">' +
+            '<div class="scene-progress-bar"></div>' +
+          '</div>' +
+        '</div>';
+      return unit;
+    }
+
+    function buildTypingContent(containerEl, text) {
+      containerEl.innerHTML = '';
+      if (!text) return [];
+      var words = text.split(/(\s+)/);
+      var spans = [];
+      for (var w = 0; w < words.length; w++) {
+        var word = words[w];
+        var wordSpan = document.createElement('span');
+        wordSpan.style.display = 'inline-block';
+        wordSpan.style.whiteSpace = 'pre';
+        var chars = word.split('');
+        for (var c = 0; c < chars.length; c++) {
+          var span = document.createElement('span');
+          span.textContent = chars[c];
+          span.style.opacity = 0;
+          wordSpan.appendChild(span);
+          spans.push(span);
+        }
+        containerEl.appendChild(wordSpan);
+      }
+      return spans;
+    }
+
+    var container = document.getElementById('scenes-container');
+    var currentTime = 0;
+
+    for (var i = 0; i < scenes.length; i++) {
+      var scene = scenes[i];
+      var dur = parseFloat(sceneDurations[i]) || 5;
+      var unit = createSceneUnit(scene, i, currentTime, dur);
+      container.appendChild(unit);
+
+      var bgImg = unit.querySelector('.scene-bg');
+      var titleEl = unit.querySelector('.scene-title');
+      var progBar = unit.querySelector('.scene-progress-bar');
+      var spans = buildTypingContent(titleEl, (scene.text || scene.bodyText || ''));
+
+      var tl = gsap.timeline();
+
+      // Modern slick animation
+      tl.from(unit, { opacity: 0, duration: 0.6, ease: "power2.inOut" }, 0)
+        .fromTo(bgImg, { scale: 1.2 }, { scale: 1, duration: dur, ease: "none" }, 0)
+        .from(unit.querySelector('.scene-content'), { y: 40, opacity: 0, duration: 0.8, ease: "expo.out" }, 0.2);
+
+      var staggerTime = Math.min(0.03, (dur * 0.6) / (spans.length || 1));
+      tl.to(spans, { opacity: 1, duration: 0.05, stagger: staggerTime, ease: 'none' }, 0.4);
+      
+      // Progress bar animation
+      tl.to(progBar, { width: "100%", duration: dur, ease: "none" }, 0);
+
+      // Smooth exit
+      var outDur = 0.5;
+      if (i < scenes.length - 1) {
+        tl.to(unit, { opacity: 0, scale: 1.05, duration: outDur, ease: "power2.in" }, dur - outDur);
+      } else {
+        tl.to(unit, { opacity: 0, duration: outDur }, dur - outDur);
+      }
+
+      mainTl.add(tl, currentTime);
+      currentTime += dur;
+    }
+
+    var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;
+    window.duration = finalDur;
+
+    mainTl.time(0);
+    if (!window.__hf) {
+      setTimeout(function() { mainTl.play(); }, 500);
+    }
+    console.log("[Template] Ultra Modern Init complete.");
   </script>
 </body>
-
 </html>

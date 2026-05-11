@@ -24,6 +24,19 @@ router.get('/', authenticate, async (req, res) => {
   res.json({ total, items, page, limit, totalPages: Math.ceil(total / limit) });
 });
 
+router.get('/:id', authenticate, async (req, res) => {
+  try {
+    const article = await prisma.article.findUnique({
+      where: { id: req.params.id },
+      include: { source: true }
+    });
+    if (!article) return res.status(404).json({ error: 'Article not found' });
+    res.json(article);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.post('/scrape', authenticate, async (req, res) => {
   try {
     const newArticles = await scrapeRssSources();

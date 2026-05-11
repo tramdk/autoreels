@@ -1,571 +1,190 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi"
+  style="--v-width: {{ WIDTH }}; --v-height: {{ HEIGHT }}; --v-logo-size: {{ LOGO_SIZE }}; --v-logo-color: {{ LOGO_COLOR }}; --v-logo-top: {{ LOGO_CSS_TOP }}; --v-logo-left: {{ LOGO_CSS_LEFT }}; --v-logo-transform: {{ LOGO_CSS_TRANSFORM }}; --v-tag-size: {{ TAG_SIZE }}; --v-tag-color: {{ TAG_COLOR }}; --v-tag-top: {{ TAG_CSS_TOP }}; --v-tag-left: {{ TAG_CSS_LEFT }}; --v-tag-transform: {{ TAG_CSS_TRANSFORM }}; --v-body-size: {{ BODY_SIZE }}; --v-body-color: {{ BODY_COLOR }}; --v-hook-size: {{ HOOK_SIZE }}; --v-hook-color: {{ HOOK_COLOR }}; --v-main-top: {{ MAIN_CSS_TOP }}; --v-main-left: {{ MAIN_CSS_LEFT }}; --v-main-transform: {{ MAIN_CSS_TRANSFORM }}; --v-main-align: {{ MAIN_CSS_ALIGN }}; --v-divider-color: {{ DIVIDER_COLOR }}; --v-content-gap: {{ CONTENT_GAP }};">
 
 <head>
+  <script>
+    var TOTAL_DURATION = {{ DURATION }};
+    var SCENES_DATA = {{ SCENES_JSON }};
+    var SCENE_DURATIONS = {{ SCENE_DURATIONS_JSON }};
+    var BG_BRIGHTNESS = {{ BG_BRIGHTNESS }};
+    var DEFAULT_BG = {{ BG_IMAGE_URL_JS }};
+    var LOGO_TEXT = {{ LOGO_TEXT_JS }};
+    var DATETIME = {{ DATETIME_JS }};
+  </script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1080, user-scalable=no">
-  <title>AutoReels Template</title>
+  <meta name="viewport" content="width={{ WIDTH }}, user-scalable=no">
+  <title>Bold Template</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Be+Vietnam+Pro:wght@400;600;700;900&display=swap"
-    rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <script src="/assets/js/gsap.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --cqmin: min(var(--v-width) * 1px, var(--v-height) * 1px);
     }
 
-    body,
-    html {
-      width: 1080px;
-      height: 1920px;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body, html {
+      width: calc(var(--v-width) * 1px);
+      height: calc(var(--v-height) * 1px);
       overflow: hidden;
       background-color: #000;
-      font-family: 'Be Vietnam Pro', sans-serif;
+      font-family: inter;
     }
 
     #root {
       position: relative;
-      width: 1080px;
-      height: 1920px;
-      background-color: #000000;
+      width: 100%;
+      height: 100%;
+      background: #000;
       color: white;
       overflow: hidden;
     }
 
-    /* Background */
     .bg-layer {
       position: absolute;
-      top: 0;
-      left: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       z-index: 0;
     }
 
     #bg-overlay {
       position: absolute;
-      top: 0;
-      left: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.8) 100%);
+      background: linear-gradient(180deg, {{ BG_GRADIENT_START }} 0%, {{ BG_GRADIENT_END }} 100%);
       z-index: 1;
+      opacity: var(--v-bg-brightness, 0.4);
     }
 
-    /* Brand */
-    #brand-header {
+    .logo-text {
       position: absolute;
-      top: 60px;
-      left: 60px;
-      z-index: 100;
-    }
-
-    #brand-logo {
-      font-family: 'Anton', sans-serif;
-      font-size: 50px;
-      color: #fff000;
+      top: var(--v-logo-top);
+      left: var(--v-logo-left);
+      transform: var(--v-logo-transform) skewX(-10deg);
+      color: var(--v-logo-color);
+      font-size: calc(var(--cqmin) * var(--v-logo-size) / 720);
+      font-weight: 900;
+      letter-spacing: -0.05em;
       text-transform: uppercase;
-      background: black;
-      padding: 5px 20px;
+      z-index: 40;
+      white-space: nowrap;
+      display: {{ SHOW_LOGO }};
     }
 
-    /* Bottom bar */
-    #bottom-info {
+    .tag-badge {
       position: absolute;
-
-      top: {
-          {
-          TAG_TOP
-        }
-      }
-
-      px;
-      left: 50%;
-
-      transform: translateX(-50%) translateX({
-          {
-          TAG_LEFT
-        }
-      }
-
-      px);
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    z-index: 100;
-    white-space: nowrap;
-    }
-
-    #tag-badge {
-      padding: 12px 30px;
-      font-family: 'Anton', sans-serif;
-
-      font-size: {
-          {
-          TAG_SIZE
-        }
-      }
-
-      px;
+      top: var(--v-tag-top);
+      left: var(--v-tag-left);
+      transform: var(--v-tag-transform) skewX(-15deg);
+      background: {{ TAG_BG }};
+      color: {{ TAG_COLOR }};
+      padding: 15px 50px;
+      font-weight: 900;
       text-transform: uppercase;
-
-      background-color: {
-          {
-          TAG_BG
-        }
-      }
-
-      ;
-
-      color: {
-          {
-          TAG_COLOR
-        }
-      }
-
-      ;
-      transform: skewX(-12deg);
-      letter-spacing: 2px;
+      font-size: calc(var(--cqmin) * var(--v-tag-size) / 720);
+      z-index: 40;
+      white-space: nowrap;
+      display: {{ SHOW_TAG }};
     }
 
-    #datetime {
-      font-size: 26px;
-      color: rgba(255, 255, 255, 0.55);
-      font-weight: 700;
-      letter-spacing: 2px;
-    }
-
-
-
-    /* Scene cards */
-    #scene-container {
+    #main-content {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: {{ MAIN_CSS_TOP }};
+      left: {{ MAIN_CSS_LEFT }};
+      transform: {{ MAIN_CSS_TRANSFORM }};
       z-index: 50;
-    }
-
-    .scene-card {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 100%;
-      transform: translateY(-50%);
+      width: 90%;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      text-align: center;
-
-      padding: 0 {
-          {
-          MAIN_LEFT
-        }
-      }
-
-      px;
-      gap: 40px;
-      opacity: 0;
-      pointer-events: none;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-
-      /* Dynamic styles */
-      background-color: {
-          {
-          CARD_BG_COLOR
-        }
-      }
-
-      ;
-
-      border-top: {
-          {
-          CARD_BORDER_TOP
-        }
-      }
-
-      px solid {
-          {
-          CARD_BORDER_COLOR
-        }
-      }
-
-      ;
-
-      border-bottom: {
-          {
-          CARD_BORDER_BOTTOM
-        }
-      }
-
-      px solid {
-          {
-          CARD_BORDER_COLOR
-        }
-      }
-
-      ;
-
-      border-left: {
-          {
-          CARD_BORDER_LEFT
-        }
-      }
-
-      px solid {
-          {
-          CARD_BORDER_COLOR
-        }
-      }
-
-      ;
-
-      border-right: {
-          {
-          CARD_BORDER_RIGHT
-        }
-      }
-
-      px solid {
-          {
-          CARD_BORDER_COLOR
-        }
-      }
-
-      ;
-
-      border-radius: {
-          {
-          CARD_BORDER_RADIUS
-        }
-      }
-
-      px;
+      align-items: {{ MAIN_CSS_ALIGN }};
+      gap: {{ CONTENT_GAP }}px;
     }
 
-    /* Hook scene */
-    .scene-card.type-hook .scene-label {
-      background: #fff000;
-      color: black;
-      font-family: 'Anton', sans-serif;
-      font-size: 40px;
-      padding: 10px 40px;
-      transform: rotate(-3deg);
+    .scene-box {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: {{ MAIN_CSS_ALIGN }};
+      gap: 20px;
+      text-align: {{ MAIN_CSS_TEXT_ALIGN }};
     }
 
-    .scene-card.type-hook .scene-text {
-      font-family: 'Anton', sans-serif;
-      font-size: 140px; /* Reduced from 160px to prevent overflow */
-      color: #fff000;
-      line-height: 1.1; /* Increased from 0.9 to prevent line overlap */
+    .scene-title {
+      font-family: inter;
+      font-size: calc(var(--cqmin) * {{ HOOK_SIZE }} / 720);
+      font-weight: 900;
+      line-height: 0.9;
+      letter-spacing: -0.08em;
       text-transform: uppercase;
-      text-shadow: 10px 10px 0px black;
-      word-break: break-word;
-    }
-
-    .scene-card.type-hook .scene-accent {
-      display: none;
-    }
-
-
-    .scene-card.type-body .scene-text {
-      font-size: {
-          {
-          BODY_SIZE
-        }
-      }
-
-      px;
-      font-weight: 700;
-      line-height: 1.35;
-
-      color: {
-          {
-          BODY_COLOR
-        }
-      }
-
-      ;
-      text-shadow: 0 4px 40px rgba(0,0,0,0.4);
-    }
-
-    .scene-text span {
-      /* opacity: 0; */
-      display: inline-block;
-      white-space: pre-wrap;
-    }
-
-    .scene-card.type-body .scene-text {
-      position: relative;
-      z-index: 2;
-    }
-
-    .scene-card.type-body .scene-bar {
-      width: 60px;
-      height: 5px;
-      border-radius: 3px;
-
-      background: {
-          {
-          DIVIDER_COLOR
-        }
-      }
-
-      ;
-    }
-
-    /* Outro scene */
-    .scene-card.type-outro {
-      justify-content: flex-start;
-    }
-
-    .scene-card.type-outro .scene-cta-label {
-      font-family: 'Anton', sans-serif;
-      font-size: 32px;
-      letter-spacing: 6px;
-
-      color: {
-          {
-          TAG_BG
-        }
-      }
-
-      ;
-      text-transform: uppercase;
-      margin-bottom: 24px;
-    }
-
-    .scene-card.type-outro .scene-text {
-      font-size: {
-          {
-          BODY_SIZE
-        }
-      }
-
-      px;
-      font-weight: 700;
-      line-height: 1.35;
-
-      color: {
-          {
-          BODY_COLOR
-        }
-      }
-
-      ;
-    }
-
-    .scene-card.type-outro .scene-follow {
-      margin-top: 40px;
-      font-size: 36px;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.6);
-      letter-spacing: 1px;
+      color: {{ HOOK_COLOR }};
     }
   </style>
 </head>
 
 <body>
-  <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-start="0">
-
-    <div id="bg-layers">
-      <img id="bg-1" class="bg-layer" src="{{BG_IMAGE_URL}}" style="opacity: {{BG_BRIGHTNESS}};" alt="">
-      <img id="bg-2" class="bg-layer" style="opacity: 0;" alt="">
-    </div>
+  <div id="root" data-composition-id="root" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" style="--v-bg-brightness: {{ BG_BRIGHTNESS }};">
+    <img id="bg-image" class="bg-layer" src="{{ BG_IMAGE_URL }}" alt="" onerror="this.style.display='none'">
     <div id="bg-overlay"></div>
 
-    <div id="brand-header" style="display: {{SHOW_LOGO}};">
-      <h1 id="brand-logo">{{LOGO_TEXT}}</h1>
-    </div>
+    <div class="logo-text">{{ LOGO_TEXT }}</div>
+    <div class="tag-badge">{{ TAG_TEXT }}</div>
+    <div class="date-info" style="position: absolute; bottom: 40px; right: 40px; font-weight: 900; font-size: 24px; color: #ffffff; display: {{ SHOW_DATETIME }}; opacity: 0.6;">{{ DATETIME }}</div>
 
-
-    <div id="scene-container" style="display: {{SHOW_CARD}};"></div>
-
-    <div id="bottom-info">
-      <div id="tag-badge" style="display: {{SHOW_TAG}};">{{TAG_TEXT}}</div>
-      <div id="datetime" style="display: {{SHOW_DATETIME}};">{{DATETIME}}</div>
-    </div>
-
+    <div id="main-content"></div>
   </div>
 
   <script>
-    // 1. MUST EXPOSE API IMMEDIATELY
-    window.__hf = {
-      duration: {{ DURATION }},
-    seek: function(t) {
-      if (window._tl && typeof window._tl.seek === 'function') {
-        window._tl.pause().seek(t);
-      }
-    }
-    };
-  </script>
+    var scenes = SCENES_DATA;
+    var sceneDurations = SCENE_DURATIONS;
+    
+    var mainTl = gsap.timeline({ id: "root", paused: true });
+    window.__timelines = window.__timelines || {};
+    window.__timelines["root"] = mainTl;
 
-  <script>
-    // 2. SCENE DATA (injected by renderer)
-    var SCENES_DATA = {{ SCENES_JSON }};
-    var TOTAL_DURATION = {{ DURATION }};
-    var LOGO_COLOR = '{{LOGO_COLOR}}';
-    var TAG_BG = '{{TAG_BG}}';
-  </script>
+    var currentTime = 0;
+    for (var i = 0; i < scenes.length; i++) {
+      var scene = scenes[i];
+      var duration = sceneDurations[i] || 5;
+      var sceneId = 'scene-' + i;
+      
+      var sceneEl = document.createElement('div');
+      sceneEl.id = sceneId;
+      sceneEl.className = 'scene-box type-' + scene.type;
+      
+      // HyperFrames native visibility control
+      sceneEl.setAttribute('data-start', currentTime.toFixed(3));
+      sceneEl.setAttribute('data-duration', duration.toFixed(3));
+      sceneEl.setAttribute('data-track-index', "1");
+      
+      var skew = scene.type === 'hook' ? 'skewX(-5deg)' : 'none';
+      var fontSizeKey = (scene.type === 'hook' ? '{{ HOOK_SIZE }}' : '{{ BODY_SIZE }}');
+      var fontColorKey = (scene.type === 'hook' ? '{{ HOOK_COLOR }}' : '{{ BODY_COLOR }}');
+      
+      sceneEl.innerHTML = '<div class="scene-title" style="font-size: calc(var(--cqmin) * ' + fontSizeKey + ' / 720); color: ' + fontColorKey + '; transform: ' + skew + '">' + (scene.text || scene.bodyText || '') + '</div>';
+      document.getElementById('main-content').appendChild(sceneEl);
 
-  <script>
-    // 3. BUILD SCENE CARDS + ANIMATE
-    try {
-      if (typeof gsap === 'undefined') throw new Error('GSAP not loaded');
-
-      var scenes = SCENES_DATA;
-      var n = scenes.length;
-      var container = document.getElementById('scene-container');
-
-      // Timing: reserve 0.5s lead-in, divide rest evenly
-      var leadIn = 0.5;
-      var usable = TOTAL_DURATION - leadIn;
-      var sceneDuration = usable / n;    // time each scene owns
-      var animIn = Math.min(0.7, sceneDuration * 0.25);
-      var animOut = Math.min(0.5, sceneDuration * 0.2);
-      var holdStart = animIn;
-      var holdEnd = sceneDuration - animOut;
-
-      window._tl = gsap.timeline({ paused: true });
-      window.__timelines = window.__timelines || {};
-      window.__timelines['main'] = window._tl;
-
-      // Animate brand + bottom in once at start
-      window._tl.from('#brand-header', { y: -60, opacity: 0, duration: 0.6, ease: 'power2.out' }, 0);
-      window._tl.from('#bottom-info', { y: 60, opacity: 0, duration: 0.6, ease: 'power2.out' }, 0.2);
-
-      var defaultBg = '{{BG_IMAGE_URL}}';
-      var currentBgIndex = 1;
-
-      // Build each scene card
-      for (var i = 0; i < n; i++) {
-        var s = scenes[i];
-        var sceneStart = leadIn + i * sceneDuration;
-        var card = document.createElement('div');
-        card.className = 'scene-card type-' + s.type;
-        card.id = 'scene-' + i;
-
-        function buildTypingContent(containerEl, text) {
-          containerEl.innerHTML = '';
-          var words = text.split(/(\s+)/);
-          var spans = [];
-          words.forEach(function(word) {
-            var wordSpan = document.createElement('span');
-            wordSpan.style.display = 'inline-block';
-            wordSpan.style.whiteSpace = 'pre';
-            
-            var chars = word.split('');
-            chars.forEach(function(char) {
-              var span = document.createElement('span');
-              span.textContent = char;
-              span.style.opacity = 0;
-              wordSpan.appendChild(span);
-              spans.push(span);
-            });
-            containerEl.appendChild(wordSpan);
-          });
-          return spans;
-        }
-
-        var textEl = document.createElement('div');
-        textEl.className = 'scene-text';
-
-        // Limit height and prepare for scrolling
-        var maxH = 1200; // Bold is centered, so we use a safe absolute limit
-        card.style.maxHeight = maxH + 'px';
-        card.style.overflow = 'hidden';
-
-        if (s.type === 'hook') {
-          card.innerHTML =
-            '<div class="scene-label">&#9679; BREAKING</div>' +
-            '<div class="scene-accent" id="scene-accent-' + i + '"></div>';
-        } else if (s.type === 'outro') {
-          card.innerHTML =
-            '<div class="scene-cta-label">&#128172; Bình luận ngay</div>' +
-            '<div class="scene-follow">Theo dõi để không bỏ lỡ.</div>';
-        } else {
-          card.innerHTML =
-            '<div class="scene-bar"></div>';
-        }
-
-        var spans = buildTypingContent(textEl, s.voiceText);
-        card.appendChild(textEl);
-        container.appendChild(card);
-
-        // Animate IN
-        window._tl.to(card, { opacity: 1, duration: animIn, ease: 'power2.out' }, sceneStart);
-
-        // Calculate scroll if content overflows
-        var realH = textEl.offsetHeight + (s.type === 'body' ? 100 : 250);
-        if (realH > maxH) {
-          var over = realH - maxH + 100;
-          window._tl.to(textEl, { 
-            y: -over, 
-            duration: sceneDuration * 0.9, 
-            ease: 'none' 
-          }, sceneStart + (sceneDuration * 0.05));
-        }
-        if (s.type === 'hook') {
-          window._tl.from(textEl, { y: 80, duration: animIn * 1.2, ease: 'back.out(1.5)' }, sceneStart);
-          var accentEl = card.querySelector('.scene-accent');
-          if (accentEl) {
-            window._tl.to(accentEl, { width: 180, duration: 0.6, ease: 'power2.inOut' }, sceneStart + animIn);
-          }
-        } else if (s.type === 'body') {
-          window._tl.from(textEl, { x: -60, duration: animIn, ease: 'power2.out' }, sceneStart);
-          window._tl.from(card.querySelector('.scene-bar'), { scaleX: 0, transformOrigin: 'left', duration: 0.4 }, sceneStart);
-        } else {
-          window._tl.from(textEl, { y: 50, duration: animIn, ease: 'power2.out' }, sceneStart);
-        }
-
-        // Typing animation
-        var staggerTime = Math.min(0.04, (sceneDuration * 0.7) / (spans.length || 1));
-        window._tl.to(spans, {
-          opacity: 1,
-          duration: 0.05,
-          stagger: staggerTime,
-          ease: 'none'
-        }, sceneStart + 0.2);
-
-        // Animate OUT (only if not last scene)
-        if (i < n - 1) {
-          var outStart = sceneStart + holdEnd;
-          window._tl.to(card, { opacity: 0, y: -30, duration: animOut, ease: 'power2.in' }, outStart);
-        }
-
-        // Background Cross-fade logic (on main timeline)
-        if (i > 0) {
-          var nextUrl = s.imageUrl || defaultBg;
-          var targetLayerId = currentBgIndex === 1 ? 'bg-2' : 'bg-1';
-          var prevLayerId = currentBgIndex === 1 ? 'bg-1' : 'bg-2';
-
-          (function (lId, url) {
-            window._tl.set('#' + lId, { attr: { src: url } }, sceneStart);
-          })(targetLayerId, nextUrl);
-
-          window._tl.to('#' + targetLayerId, { opacity: {{ BG_BRIGHTNESS }}, duration: 1.0, ease: 'none'
-      }, sceneStart);
-      window._tl.to('#' + prevLayerId, { opacity: 0, duration: 1.0, ease: 'none' }, sceneStart);
-
-      currentBgIndex = (currentBgIndex === 1 ? 2 : 1);
+      var tl = gsap.timeline();
+      tl.from(sceneEl, { opacity: 0, x: -100, skewX: 10, duration: 0.6, ease: "power4.out" }).to(sceneEl, { opacity: 0, x: 50, duration: 0.4, ease: "power4.in" }, (duration - 0.4)
+      );
+      
+      mainTl.add(tl, currentTime);
+      currentTime += duration;
     }
 
+    var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;
+    window.duration = finalDur;
 
-      }
-
-    // Hold last scene to end
-    window._tl.add(function () { }, TOTAL_DURATION);
-
-    } catch (e) {
-      console.error('Scene Animation Init Error:', e);
-    }
+    mainTl.time(0);
+    console.log("[Template] Init complete. Duration: " + finalDur + "s");
   </script>
 </body>
-
 </html>

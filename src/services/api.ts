@@ -41,6 +41,7 @@ export const api = {
   getStats: () => fetchWithAuth('/api/stats').then(r => r.json() as Promise<{sources: number, articles: number, videos: number, postedVideos: number}>),
   getSources: () => fetchWithAuth('/api/sources').then(r => r.json() as Promise<Source[]>),
   getArticles: (page: number = 1, limit: number = 20) => fetchWithAuth(`/api/articles?page=${page}&limit=${limit}`).then(r => r.json() as Promise<{total: number, items: Article[], page: number, limit: number, totalPages: number}>),
+  getArticle: (id: string) => fetchWithAuth(`/api/articles/${id}`).then(r => r.json() as Promise<Article>),
   getVideos: (page: number = 1, limit: number = 20, status?: string) => 
     fetchWithAuth(`/api/videos?page=${page}&limit=${limit}${status ? `&status=${status}` : ''}`).then(r => r.json() as Promise<{total: number, items: VideoItem[], page: number, limit: number, totalPages: number}>),
   
@@ -63,8 +64,14 @@ export const api = {
   updateScript: (id: string, script: any) => 
     fetchWithAuth(`/api/articles/${id}/script`, { method: 'PUT', body: JSON.stringify({ script }) }).then(r => r.json()),
   
-  generateVideo: (id: string, templateId?: string, options: any = {}) => 
-    fetchWithAuth(`/api/videos/generate`, { method: 'POST', body: JSON.stringify({ articleId: id, templateId, ...options }) }).then(r => r.json()),
+  generateVideo: (id: string, templateId?: string, options: any = {}) => {
+    const body = { articleId: id, templateId, ...options };
+    console.log('🚀 [API] Sending generateVideo request with body:', body);
+    return fetchWithAuth(`/api/videos/generate`, { 
+      method: 'POST', 
+      body: JSON.stringify(body) 
+    }).then(r => r.json());
+  },
   getVideoProgressUrl: (id: string) => `/api/videos/progress/${id}`, // For EventSource
   
   deleteVideo: (id: string) => fetchWithAuth(`/api/videos/${id}`, { method: 'DELETE' }).then(r => r.json()),
@@ -81,6 +88,7 @@ export const api = {
   getSetting: (key: string) => fetchWithAuth(`/api/settings/${key}`).then(r => r.json() as Promise<{ key: string, value: any }>),
   updateSetting: (key: string, value: any) => 
     fetchWithAuth('/api/settings', { method: 'POST', body: JSON.stringify({ key, value }) }).then(r => r.json()),
+  getRawTemplateHtml: (id: string) => fetchWithAuth(`/api/settings/templates/${id}/raw`).then(r => r.text()),
   uploadBackground: (file: File) => {
     const formData = new FormData();
     formData.append('image', file);

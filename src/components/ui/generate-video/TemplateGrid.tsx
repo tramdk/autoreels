@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Monitor, Film, Zap } from 'lucide-react';
+import { Layout, Monitor, Film, Zap, Sparkles, Dna } from 'lucide-react';
 
 interface TemplateGridProps {
   selected: string;
@@ -9,9 +9,13 @@ interface TemplateGridProps {
 export const TemplateGrid: React.FC<TemplateGridProps> = ({ selected, onSelect }) => {
   const templates = [
     { id: 'classic', label: 'Classic', icon: <Layout className="w-4 h-4" />, desc: 'Truyền thống' },
-    { id: 'modern', label: 'Modern', icon: <Monitor className="w-4 h-4" />, desc: 'Tối giản' },
+    { id: 'modern', label: 'Modern', icon: <Monitor className="w-4 h-4" />, desc: 'Chuyên nghiệp' },
     { id: 'cinematic', label: 'Cinematic', icon: <Film className="w-4 h-4" />, desc: 'Điện ảnh' },
-    { id: 'bold', label: 'Bold', icon: <Zap className="w-4 h-4" />, desc: 'Phá cách' }
+    { id: 'cyberpunk', label: 'Cyberpunk', icon: <Zap className="w-4 h-4" />, desc: 'Neon Glitch' },
+    { id: 'glassmorphism', label: 'Glass', icon: <Sparkles className="w-4 h-4" />, desc: 'Kính mờ' },
+    { id: 'minimal', label: 'Minimal', icon: <Monitor className="w-4 h-4" />, desc: 'Tối giản' },
+    { id: 'y2k', label: 'Y2K Retro', icon: <Dna className="w-4 h-4" />, desc: 'Vintage' },
+    { id: 'bold', label: 'Bold', icon: <Zap className="w-4 h-4" />, desc: 'Mạnh mẽ' }
   ];
 
   return (

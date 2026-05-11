@@ -7,9 +7,9 @@
   <title>AutoReels Template</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Be+Vietnam+Pro:wght@400;600;700;900&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
     rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="/assets/js/gsap.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -19,18 +19,46 @@
 
     body,
     html {
-      width: 1080px;
-      height: 1920px;
+      width: {
+          {
+          WIDTH
+        }
+      }
+
+      px;
+
+      height: {
+          {
+          HEIGHT
+        }
+      }
+
+      px;
       overflow: hidden;
-      background-color: #000;
-      font-family: 'Be Vietnam Pro', sans-serif;
+      background-color: #0F172A;
+      font-family: 'Plus Jakarta Sans',
+      sans-serif;
     }
 
     #root {
       position: relative;
-      width: 1080px;
-      height: 1920px;
-      background-color: #111;
+
+      width: {
+          {
+          WIDTH
+        }
+      }
+
+      px;
+
+      height: {
+          {
+          HEIGHT
+        }
+      }
+
+      px;
+      background-color: #0F172A;
       color: white;
       overflow: hidden;
     }
@@ -42,7 +70,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       z-index: 0;
     }
 
@@ -52,7 +80,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.85) 100%);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.6) 50%, rgba(15, 23, 42, 0.85) 100%);
       z-index: 1;
     }
 
@@ -83,7 +111,8 @@
     }
 
     #brand-logo {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
 
       font-size: {
           {
@@ -92,7 +121,7 @@
       }
 
       px;
-      letter-spacing: 6px;
+      letter-spacing: 5px;
       text-transform: uppercase;
 
       color: {
@@ -146,7 +175,8 @@
 
     #tag-badge {
       padding: 12px 30px;
-      font-family: 'Anton', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
 
       font-size: {
           {
@@ -172,8 +202,8 @@
       }
 
       ;
-      transform: skewX(-12deg);
-      letter-spacing: 2px;
+      border-radius: 8px;
+      letter-spacing: 1px;
 
       display: {
           {
@@ -318,9 +348,10 @@
 
     /* Scene text styles */
     .scene-card.type-hook .scene-label {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
       font-size: 28px;
-      letter-spacing: 8px;
+      letter-spacing: 4px;
 
       color: {
           {
@@ -334,7 +365,8 @@
     }
 
     .scene-card.type-hook .scene-text {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
 
       font-size: {
           {
@@ -408,7 +440,8 @@
     }
 
     .scene-card.type-outro .scene-cta-label {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
       font-size: 32px;
       letter-spacing: 6px;
 
@@ -471,7 +504,8 @@
 </head>
 
 <body>
-  <div id="root">
+  <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0"
+    data-duration="{{ DURATION }}">
     <div id="preloader"></div>
     <div id="bg-layers">
       <img id="bg-1" class="bg-layer" src="{{BG_IMAGE_URL}}" style="opacity: {{BG_BRIGHTNESS}};" alt="">

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="vi"
+  style="--v-width: {{ WIDTH }}; --v-height: {{ HEIGHT }}; --v-logo-size: {{ LOGO_SIZE }}; --v-logo-color: {{ LOGO_COLOR }}; --v-logo-top: {{ LOGO_CSS_TOP }}; --v-logo-left: {{ LOGO_CSS_LEFT }}; --v-logo-transform: {{ LOGO_CSS_TRANSFORM }}; --v-logo-show: {{ SHOW_LOGO }}; --v-tag-size: {{ TAG_SIZE }}; --v-tag-color: {{ TAG_COLOR }}; --v-tag-bg: {{ TAG_BG }}; --v-tag-show: {{ SHOW_TAG }}; --v-body-size: {{ BODY_SIZE }}; --v-body-color: {{ BODY_COLOR }}; --v-hook-size: {{ HOOK_SIZE }}; --v-hook-color: {{ HOOK_COLOR }}; --v-main-top: {{ MAIN_CSS_TOP }}; --v-main-left: {{ MAIN_CSS_LEFT }}; --v-main-transform: {{ MAIN_CSS_TRANSFORM }}; --v-main-align: {{ MAIN_CSS_ALIGN }}; --v-divider-color: {{ DIVIDER_COLOR }}; --v-content-gap: {{ CONTENT_GAP }}; --v-bg-start: {{ BG_GRADIENT_START }}; --v-bg-end: {{ BG_GRADIENT_END }}; --v-bg-brightness: {{ BG_BRIGHTNESS }};">
+
+<head>
+  <script>
+    var TOTAL_DURATION = {{ DURATION }};
+    var SCENES_DATA = {{ SCENES_JSON }};
+    var SCENE_DURATIONS = {{ SCENE_DURATIONS_JSON }};
+    var BG_BRIGHTNESS = {{ BG_BRIGHTNESS }};
+    var DEFAULT_BG = {{ BG_IMAGE_URL_JS }};
+    var LOGO_TEXT = {{ LOGO_TEXT_JS }};
+    var DATETIME = {{ DATETIME_JS }};
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width={{ WIDTH }}, user-scalable=no">
+  <title>True Y2K Aesthetic Template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@800&family=Inter:wght@900&display=swap" rel="stylesheet">
+  <script src="/assets/js/gsap.min.js"></script>
+  <style>
+    :root {
+      --cqmin: min(var(--v-width) * 1px, var(--v-height) * 1px);
+      --y2k-pink: #ff00ff;
+      --y2k-cyan: #00ffff;
+      --y2k-lime: #00ff00;
+      --y2k-silver: #c0c0c0;
+      --accent: {{ DIVIDER_COLOR }};
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body, html {
+      width: calc(var(--v-width) * 1px);
+      height: calc(var(--v-height) * 1px);
+      overflow: hidden;
+      background-color: #000;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    #root {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+
+    /* Cyber Grid Background */
+    .cyber-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(var(--y2k-pink) 1px, transparent 1px),
+        linear-gradient(90deg, var(--y2k-pink) 1px, transparent 1px);
+      background-size: 50px 50px;
+      background-position: center center;
+      opacity: 0.15;
+      transform: perspective(500px) rotateX(60deg) scale(2);
+      transform-origin: top;
+      z-index: 1;
+    }
+
+    .bg-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      filter: saturate(2) contrast(1.2);
+    }
+
+    #bg-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, {{ BG_GRADIENT_START }} 0%, {{ BG_GRADIENT_END }} 100%);
+      z-index: 2;
+      opacity: var(--v-bg-brightness);
+    }
+
+    /* Win98 Style Window */
+    .win-window {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: var(--y2k-silver);
+      border: 3px solid;
+      border-color: #fff #808080 #808080 #fff;
+      padding: 4px;
+      box-shadow: 15px 15px 0px rgba(0,0,0,0.5);
+    }
+
+    .win-header {
+      background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
+      padding: 6px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .win-title {
+      color: #fff;
+      font-size: calc(var(--cqmin) * 20 / 720);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .win-controls {
+      display: flex;
+      gap: 4px;
+    }
+
+    .win-btn {
+      width: 20px;
+      height: 20px;
+      background: var(--y2k-silver);
+      border: 2px solid;
+      border-color: #fff #404040 #404040 #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #000;
+      font-weight: 900;
+    }
+
+    .win-content {
+      background: #fff;
+      border: 3px solid;
+      border-color: #404040 #fff #fff #404040;
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    .scene-text {
+      font-family: {{ FONT_FAMILY }};
+      font-size: calc(var(--cqmin) * var(--v-body-size) / 720);
+      font-weight: 900;
+      line-height: {{ LINE_HEIGHT }};
+      text-transform: uppercase;
+      color: #000;
+    }
+
+    .type-hook .win-header {
+      background: linear-gradient(90deg, #ff00ff 0%, #800080 100%);
+    }
+
+    .type-hook .scene-text {
+      color: #ff00ff;
+      font-size: calc(var(--cqmin) * var(--v-hook-size) / 720);
+    }
+
+    /* Floating UI Elements */
+    .y2k-logo {
+      position: absolute;
+      top: var(--v-logo-top);
+      left: var(--v-logo-left);
+      transform: var(--v-logo-transform);
+      background: var(--y2k-cyan);
+      color: #000;
+      padding: 10px 30px;
+      border: 4px solid #000;
+      font-weight: 900;
+      font-size: calc(var(--cqmin) * var(--v-logo-size) / 720);
+      box-shadow: 8px 8px 0px var(--y2k-pink);
+      display: var(--v-logo-show);
+      z-index: 100;
+      text-transform: uppercase;
+    }
+
+    .y2k-tag {
+      position: absolute;
+      top: var(--v-tag-top);
+      left: var(--v-tag-left);
+      transform: var(--v-tag-transform);
+      background: var(--y2k-pink);
+      color: #fff;
+      padding: 8px 25px;
+      border: 3px solid #000;
+      font-weight: 900;
+      font-size: calc(var(--cqmin) * var(--v-tag-size) / 720);
+      box-shadow: 5px 5px 0px #000;
+      display: var(--v-tag-show);
+      z-index: 100;
+      text-transform: uppercase;
+    }
+
+    .y2k-date {
+      position: absolute;
+      bottom: 50px;
+      right: 50px;
+      color: var(--y2k-lime);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: calc(var(--cqmin) * 22 / 720);
+      text-shadow: 0 0 10px var(--y2k-lime);
+      z-index: 100;
+    }
+
+    /* Star Shapes */
+    .y2k-star {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: var(--y2k-cyan);
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      z-index: 5;
+      opacity: 0.8;
+    }
+
+    #main-content {
+      position: absolute;
+      top: var(--v-main-top);
+      left: var(--v-main-left);
+      transform: var(--v-main-transform);
+      z-index: 200;
+      width: 85%;
+      display: flex;
+      flex-direction: column;
+      align-items: var(--v-main-align);
+    }
+
+    .scene-progress-container {
+      width: 100%;
+      height: 20px;
+      background: #fff;
+      border: 2px solid #000;
+      margin-top: 20px;
+      display: {{ SHOW_PROGRESS_BAR }};
+    }
+
+    .scene-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: var(--y2k-lime);
+      border-right: 2px solid #000;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="root" data-composition-id="root" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}">
+    <img id="bg-image" class="bg-layer" src="{{ BG_IMAGE_URL }}" alt="">
+    <div id="bg-overlay"></div>
+    <div class="cyber-grid"></div>
+
+    <div class="y2k-star" style="top: 15%; left: 80%; background: var(--y2k-pink);"></div>
+    <div class="y2k-star" style="top: 70%; left: 10%; background: var(--y2k-cyan);"></div>
+    <div class="y2k-star" style="top: 40%; left: 85%; background: var(--y2k-lime);"></div>
+
+    <div class="y2k-logo">{{ LOGO_TEXT }}</div>
+    <div class="y2k-tag">[{{ TAG_TEXT }}]</div>
+    <div class="y2k-date">{{ DATETIME }}</div>
+
+    <div id="main-content"></div>
+  </div>
+
+  <script>
+    var scenes = SCENES_DATA;
+    var sceneDurations = SCENE_DURATIONS;
+
+    var mainTl = gsap.timeline({ id: "root", paused: true });
+    window.__timelines = window.__timelines || {};
+    window.__timelines["root"] = mainTl;
+
+    var currentTime = 0;
+    for (var i = 0; i < scenes.length; i++) {
+      var scene = scenes[i];
+      var duration = sceneDurations[i] || 5;
+      var sceneId = 'scene-' + i;
+      
+      var unit = document.createElement('div');
+      unit.id = sceneId;
+      unit.className = 'win-window type-' + (scene.type || 'body');
+      
+      unit.setAttribute('data-start', currentTime.toFixed(3));
+      unit.setAttribute('data-duration', duration.toFixed(3));
+      unit.setAttribute('data-track-index', "1");
+
+      unit.innerHTML = `
+        <div class="win-header">
+          <div class="win-title">${scene.type === 'hook' ? 'VIRAL_ALERT.EXE' : 'SYSTEM_UPDATE.SYS'}</div>
+          <div class="win-controls">
+            <div class="win-btn">_</div>
+            <div class="win-btn">□</div>
+            <div class="win-btn">X</div>
+          </div>
+        </div>
+        <div class="win-content">
+          <div class="scene-text">${scene.text || scene.bodyText || ''}</div>
+          <div class="scene-progress-container"><div class="scene-progress-bar"></div></div>
+        </div>
+      `;
+      document.getElementById('main-content').appendChild(unit);
+
+      var tl = gsap.timeline();
+      var progBar = unit.querySelector('.scene-progress-bar');
+
+      // Glitchy Y2K entry
+      tl.from(unit, { 
+        opacity: 0, 
+        scale: 0.5, 
+        x: i % 2 === 0 ? -100 : 100, 
+        rotate: i % 2 === 0 ? -10 : 10,
+        duration: 0.6, 
+        ease: "back.out(2)" 
+      });
+
+      if (progBar) {
+        tl.to(progBar, { width: "100%", duration: duration, ease: "none" }, 0);
+      }
+
+      // Exit
+      tl.to(unit, { 
+        opacity: 0, 
+        scale: 1.2, 
+        filter: "blur(20px)",
+        duration: 0.4, 
+        ease: "power2.in" 
+      }, duration - 0.4);
+      
+      mainTl.add(tl, currentTime);
+      currentTime += duration;
+    }
+
+    var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;
+    window.duration = finalDur;
+
+    // Background animation
+    mainTl.add(gsap.to(".cyber-grid", { backgroundPosition: "0px 100px", duration: 10, repeat: -1, ease: "none" }), 0);
+    mainTl.add(gsap.to(".y2k-star", { 
+      rotation: 360, 
+      scale: 1.2, 
+      duration: 3, 
+      repeat: -1, 
+      yoyo: true, 
+      ease: "sine.inOut" 
+    }), 0);
+
+    mainTl.time(0);
+    if (!window.__hf) {
+      setTimeout(function() { mainTl.play(); }, 500);
+    }
+    console.log("[Template] True Y2K Init complete.");
+  </script>
+</body>
+</html>

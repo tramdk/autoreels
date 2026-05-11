@@ -7,7 +7,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 
 const router = Router();
-const upload = multer({ dest: 'temp_renders/uploads/' });
+const upload = multer({ dest: 'render_cache/uploads/' });
 
 // Helper to calculate file hash
 function calculateHash(filePath: string): Promise<string> {
@@ -38,9 +38,15 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
       return res.json(existingAsset);
     }
 
-    // 2. Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(filePath, {
+    // 2. Prepare file with extension for Cloudinary to avoid "unknown format: mpa"
+    const extension = originalname.split('.').pop();
+    const filePathWithExt = `${filePath}.${extension}`;
+    fs.renameSync(filePath, filePathWithExt);
+
+    // 3. Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(filePathWithExt, {
       folder: 'autoreels/assets',
+      resource_type: 'auto', 
     });
 
     // 3. Save metadata to DB
@@ -57,7 +63,7 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
     });
 
     // Cleanup
-    fs.unlinkSync(filePath);
+    if (fs.existsSync(filePathWithExt)) fs.unlinkSync(filePathWithExt);
 
     res.json(newAsset);
   } catch (error: any) {

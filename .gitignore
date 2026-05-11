@@ -21,6 +21,7 @@ temp_renders/
 temp_renders_test/
 work-*/
 uploads/
+render_cache/
 # Binary files to be downloaded via Dockerfile or kept external
 **/*.jpg
 **/*.png

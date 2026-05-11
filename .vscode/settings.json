@@ -1,0 +1,9 @@
+{
+  "editor.formatOnSave": true,
+  "[html]": {
+    "editor.formatOnSave": false
+  },
+  "files.associations": {
+    "app/templates/**/*.html": "handlebars"
+  }
+}

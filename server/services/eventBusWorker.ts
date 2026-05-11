@@ -18,12 +18,21 @@ export async function startEventBusWorker() {
   console.log(`📡 [EVENT BUS] Worker ${CONSUMER_NAME} starting...`);
 
   // 1. Create Consumer Group if it doesn't exist
-  try {
-    await redis.xgroup('CREATE', STREAM_NAME, GROUP_NAME, '0', 'MKSTREAM');
-    console.log(`📡 [EVENT BUS] Created consumer group: ${GROUP_NAME}`);
-  } catch (err: any) {
-    if (!err.message.includes('BUSYGROUP')) {
-      console.error('❌ [EVENT BUS] Error creating group:', err.message);
+  let groupCreated = false;
+  while (!groupCreated) {
+    try {
+      await redis.xgroup('CREATE', STREAM_NAME, GROUP_NAME, '0', 'MKSTREAM');
+      console.log(`📡 [EVENT BUS] Created consumer group: ${GROUP_NAME}`);
+      groupCreated = true;
+    } catch (err: any) {
+      if (err.message.includes('BUSYGROUP')) {
+        console.log(`📡 [EVENT BUS] Consumer group ${GROUP_NAME} already exists.`);
+        groupCreated = true;
+      } else {
+        console.error('❌ [EVENT BUS] Error creating group:', err.message);
+        console.log('🔄 [EVENT BUS] Retrying in 5s...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
     }
   }
 

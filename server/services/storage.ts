@@ -73,6 +73,33 @@ export function downloadFile(url: string, dest: string): Promise<void> {
       fs.mkdirSync(dir, { recursive: true });
     }
 
+    // Handle local files
+    if (url.startsWith('/') || url.match(/^[a-zA-Z]:\\/) || !url.startsWith('http')) {
+      try {
+        let localPath = url;
+        // If relative to root, check public folder first then absolute
+        if (url.startsWith('/')) {
+          const publicPath = path.join(process.cwd(), 'public', url);
+          const rootPath = path.join(process.cwd(), url);
+          if (fs.existsSync(publicPath)) {
+            localPath = publicPath;
+          } else if (fs.existsSync(rootPath)) {
+            localPath = rootPath;
+          }
+        }
+        
+        if (fs.existsSync(localPath)) {
+          console.log(`[Storage] Copying local file: ${localPath} -> ${dest}`);
+          fs.copyFileSync(localPath, dest);
+          return resolve();
+        } else {
+          return reject(new Error(`Local file not found: ${localPath}`));
+        }
+      } catch (err) {
+        return reject(err);
+      }
+    }
+
     const file = fs.createWriteStream(dest);
     const protocol = url.startsWith('https') ? https : http;
     

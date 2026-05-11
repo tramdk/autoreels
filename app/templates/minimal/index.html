@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi"
+  style="--v-width: {{ WIDTH }}; --v-height: {{ HEIGHT }}; --v-logo-size: {{ LOGO_SIZE }}; --v-logo-color: {{ LOGO_COLOR }}; --v-logo-top: {{ LOGO_CSS_TOP }}; --v-logo-left: {{ LOGO_CSS_LEFT }}; --v-logo-transform: {{ LOGO_CSS_TRANSFORM }}; --v-tag-size: {{ TAG_SIZE }}; --v-tag-color: {{ TAG_COLOR }}; --v-tag-top: {{ TAG_CSS_TOP }}; --v-tag-left: {{ TAG_CSS_LEFT }}; --v-tag-transform: {{ TAG_CSS_TRANSFORM }}; --v-body-size: {{ BODY_SIZE }}; --v-body-color: {{ BODY_COLOR }}; --v-hook-size: {{ HOOK_SIZE }}; --v-hook-color: {{ HOOK_COLOR }}; --v-main-top: {{ MAIN_CSS_TOP }}; --v-main-left: {{ MAIN_CSS_LEFT }}; --v-main-transform: {{ MAIN_CSS_TRANSFORM }}; --v-main-align: {{ MAIN_CSS_ALIGN }}; --v-divider-color: {{ DIVIDER_COLOR }}; --v-content-gap: {{ CONTENT_GAP }};">
+
+<head>
+  <script>
+    var TOTAL_DURATION = {{ DURATION }};
+    var SCENES_DATA = {{ SCENES_JSON }};
+    var SCENE_DURATIONS = {{ SCENE_DURATIONS_JSON }};
+    var BG_BRIGHTNESS = {{ BG_BRIGHTNESS }};
+    var DEFAULT_BG = {{ BG_IMAGE_URL_JS }};
+    var LOGO_TEXT = {{ LOGO_TEXT_JS }};
+    var DATETIME = {{ DATETIME_JS }};
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width={{ WIDTH }}, user-scalable=no">
+  <title>Minimal Template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@100;400;700;900&display=swap" rel="stylesheet">
+  <script src="/assets/js/gsap.min.js"></script>
+  <style>
+    :root {
+      --cqmin: min(var(--v-width) * 1px, var(--v-height) * 1px);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body, html {
+      width: calc(var(--v-width) * 1px);
+      height: calc(var(--v-height) * 1px);
+      overflow: hidden;
+      background-color: #000;
+      font-family: inter;
+    }
+
+    #root {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: white;
+      overflow: hidden;
+    }
+
+    .bg-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    #bg-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, {{ BG_GRADIENT_START }} 0%, {{ BG_GRADIENT_END }} 100%);
+      z-index: 1;
+      opacity: var(--v-bg-brightness, 0.4);
+    }
+
+    .logo-text {
+      position: absolute;
+      top: var(--v-logo-top);
+      left: var(--v-logo-left);
+      transform: var(--v-logo-transform);
+      color: var(--v-logo-color);
+      font-size: calc(var(--cqmin) * var(--v-logo-size) / 720);
+      font-weight: 100;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      opacity: 0.8;
+      z-index: 40;
+      white-space: nowrap;
+      display: {{ SHOW_LOGO }};
+    }
+
+    .tag-badge {
+      position: absolute;
+      top: var(--v-tag-top);
+      left: var(--v-tag-left);
+      transform: var(--v-tag-transform);
+      color: rgba(255, 255, 255, 0.4);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-size: calc(var(--cqmin) * var(--v-tag-size) / 720);
+      z-index: 40;
+      white-space: nowrap;
+      display: {{ SHOW_TAG }};
+    }
+
+    #main-content {
+      position: absolute;
+      top: {{ MAIN_CSS_TOP }};
+      left: {{ MAIN_CSS_LEFT }};
+      transform: {{ MAIN_CSS_TRANSFORM }};
+      z-index: 50;
+      width: 85%;
+      display: flex;
+      flex-direction: column;
+      align-items: {{ MAIN_CSS_ALIGN }};
+      gap: {{ CONTENT_GAP }}px;
+    }
+
+    .scene-box {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: {{ MAIN_CSS_ALIGN }};
+      gap: 20px;
+      text-align: {{ MAIN_CSS_TEXT_ALIGN }};
+    }
+
+    .scene-title {
+      font-family: inter;
+      font-weight: 100;
+      line-height: 1.1;
+      text-transform: uppercase;
+      color: {{ HOOK_COLOR }};
+      letter-spacing: -0.02em;
+    }
+
+    .type-hook .scene-title {
+      font-weight: 700;
+      font-size: calc(var(--cqmin) * {{ HOOK_SIZE }} / 720);
+    }
+    
+    .type-body .scene-title {
+      font-size: calc(var(--cqmin) * {{ BODY_SIZE }} / 720);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root" data-composition-id="root" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" style="--v-bg-brightness: {{ BG_BRIGHTNESS }};">
+    <img id="bg-image" class="bg-layer" src="{{ BG_IMAGE_URL }}" alt="" onerror="this.style.display='none'">
+    <div id="bg-overlay"></div>
+
+    <div class="logo-text">{{ LOGO_TEXT }}</div>
+    <div class="tag-badge">{{ TAG_TEXT }}</div>
+    <div class="date-text" style="position: absolute; top: 40px; right: 40px; font-weight: 400; font-size: 18px; color: #ffffff; opacity: 0.5; display: {{ SHOW_DATETIME }};">{{ DATETIME }}</div>
+
+    <div id="main-content"></div>
+  </div>
+
+  <script>
+    var scenes = SCENES_DATA;
+    var sceneDurations = SCENE_DURATIONS;
+    
+    var mainTl = gsap.timeline({ id: "root", paused: true });
+    window.__timelines = window.__timelines || {};
+    window.__timelines["root"] = mainTl;
+
+    var currentTime = 0;
+    for (var i = 0; i < scenes.length; i++) {
+      var scene = scenes[i];
+      var duration = sceneDurations[i] || 5;
+      var sceneId = 'scene-' + i;
+      
+      var sceneEl = document.createElement('div');
+      sceneEl.id = sceneId;
+      sceneEl.className = 'scene-box type-' + scene.type;
+      
+      // HyperFrames native visibility control
+      sceneEl.setAttribute('data-start', currentTime.toFixed(3));
+      sceneEl.setAttribute('data-duration', duration.toFixed(3));
+      sceneEl.setAttribute('data-track-index', "1");
+
+      var fontSizeKey = (scene.type === 'hook' ? '{{ HOOK_SIZE }}' : '{{ BODY_SIZE }}');
+      sceneEl.innerHTML = '<div class="scene-title" style="font-size: calc(var(--cqmin) * ' + fontSizeKey + ' / 720)">' + (scene.text || scene.bodyText || '') + '</div>';
+      document.getElementById('main-content').appendChild(sceneEl);
+
+      var tl = gsap.timeline();
+      tl.from(sceneEl, { opacity: 0, y: 20, duration: 1.2, ease: "power2.out" }).to(sceneEl, { opacity: 0, duration: 0.8, ease: "power2.in" }, (duration - 0.8)
+      );
+      
+      mainTl.add(tl, currentTime);
+      currentTime += duration;
+    }
+
+    var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;
+    window.duration = finalDur;
+
+    mainTl.time(0);
+    console.log("[Template] Init complete. Duration: " + finalDur + "s");
+  </script>
+</body>
+</html>

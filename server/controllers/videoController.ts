@@ -15,29 +15,32 @@ export const videoProgress = new Map<string, number>();
 function generateScriptFromText(text: string, imageUrl?: string | null) {
   const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
   const cleanContent = text.replace(emojiRegex, '').replace(/[*_~`|>\\\[\]]/g, ' ').replace(/\s+/g, ' ').trim();
-  
-  const lines = cleanContent
-    .split(/\. |\n|\.|\!|\?/)
-    .map(line => line.trim())
-    .filter(line => line.length > 10); // Minimum length for a scene
 
-  if (lines.length > 1) {
+  // Improved splitting: split by common sentence enders followed by space or newline, or at line breaks
+  const lines = cleanContent
+    .split(/(?<=[.!?])\s+|\n/)
+    .map(line => line.trim())
+    .filter(line => line.length >= 3); // Allow short impactful hooks like "TIN NÓNG!"
+
+  if (lines.length > 0) {
     return {
       scenes: lines.map((line, idx) => ({
         id: idx + 1,
         type: idx === 0 ? 'hook' : (idx === lines.length - 1 ? 'outro' : 'body'),
         voiceText: line,
+        bodyText: line,
         imageUrl: imageUrl || null
       }))
     };
   }
-  
+
   return {
     scenes: [
       {
         id: 1,
         type: 'body',
         voiceText: text,
+        bodyText: text,
         imageUrl: imageUrl || null
       }
     ]
@@ -84,35 +87,49 @@ export const generateBulk = async (req: Request, res: Response) => {
     }
 
     console.log(`🚀 [API] Received bulk-generate request for ${items.length} items from source: ${items[0]?.source || 'unknown'}`);
-    
+
     const results = [];
     for (const item of items) {
-      const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, content, script, title, imageUrl, source } = item;
-      
+      const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, ratio, content, script, title, imageUrl, source } = item;
+
+      // Get global default template if not specified
+      const globalTpl = await prisma.setting.findUnique({ where: { key: 'global_default_template' } });
+      const defaultTplId = globalTpl?.value || 'classic';
+
       // Create a persistent task in the database
       const task = await prisma.videoTask.create({
         data: {
           articleId: articleId || null,
-          templateId: templateId || 'modern',
+          templateId: templateId || defaultTplId,
           title: title || (content ? content.substring(0, 50) : null),
           content: content || null,
           script: script ? (typeof script === 'string' ? script : JSON.stringify(script)) : null,
           imageUrl: imageUrl || null,
           ttsProvider: ttsProvider || 'edge',
-          ttsVoiceId: ttsVoiceId || 'vi-VN-HoaiMyNeural',
+          ttsVoiceId: ttsVoiceId || 'vi-VN-NamMinhNeural',
           bgmAssetId: bgmAssetId || null,
           bgmVolume: typeof bgmVolume === 'number' ? bgmVolume : 0.15,
+          ratio: ratio || '9:16',
           status: 'pending',
           source: source || 'internal'
         }
       });
 
       console.log(`📝 [API] Task created: ${task.id} (Status: pending)`);
+      
+      // CRITICAL: Update article status to 'generating' immediately so UI knows it's in progress
+      if (articleId) {
+        await prisma.article.update({
+          where: { id: articleId },
+          data: { status: 'generating' }
+        });
+      }
+
       results.push({ videoId: task.id, status: 'pending' });
     }
 
     res.status(201).json({ success: true, videos: results });
-    
+
     // Poke the worker
     console.log('🔔 [API] Triggering background worker...');
     const { triggerWorker } = await import('../services/videoWorker');
@@ -157,33 +174,33 @@ export const getBulkStatus = async (req: Request, res: Response, next: NextFunct
       if (task) {
         const status = task.status;
         let videoUrl = undefined;
-        
+
         if (status === 'completed') {
-           // Get the final URL from Video table before deleting the task
-           const video = await prisma.video.findUnique({ where: { id } });
-           videoUrl = video?.videoUrl;
-           
-           // Cleanup: Delete the task now that it's completed and status is being returned
-           await prisma.videoTask.delete({ where: { id } }).catch(() => {});
+          // Get the final URL from Video table before deleting the task
+          const video = await prisma.video.findUnique({ where: { id } });
+          videoUrl = video?.videoUrl;
+
+          // Cleanup: Delete the task now that it's completed and status is being returned
+          await prisma.videoTask.delete({ where: { id } }).catch(() => { });
         }
 
-        return { 
-          id, 
-          status: status, 
-          error: task.error, 
+        return {
+          id,
+          status: status,
+          error: task.error,
           videoUrl,
-          progress: status === 'pending' ? 0 : (status === 'completed' ? 100 : 10) 
+          progress: status === 'pending' ? 0 : (status === 'completed' ? 100 : 10)
         };
       }
 
       // 3. Fallback: If not in Task table, check if it already finished and was deleted
       const finishedVideo = await prisma.video.findUnique({ where: { id } });
       if (finishedVideo) {
-        return { 
-          id, 
-          status: 'completed', 
-          videoUrl: finishedVideo.videoUrl, 
-          progress: 100 
+        return {
+          id,
+          status: 'completed',
+          videoUrl: finishedVideo.videoUrl,
+          progress: 100
         };
       }
 
@@ -197,26 +214,63 @@ export const getBulkStatus = async (req: Request, res: Response, next: NextFunct
 };
 
 export const generateVideo = async (req: Request, res: Response, next: NextFunction) => {
-  const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume } = req.body;
-  
+  const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, ratio, imageUrl, settings, customScript, title } = req.body;
+
   try {
     const article = await prisma.article.findUnique({ where: { id: articleId } });
     if (!article) return res.status(404).json({ error: 'Article not found' });
 
-    // Create a persistent task with the script ALREADY SNAPSHOTTED into 'content'
+    // Correctly extract the scenes array from various possible formats
+    let finalScenes: any[] = [];
+    const scriptToParse = customScript || article.script;
+    
+    if (scriptToParse) {
+      try {
+        let parsed = typeof scriptToParse === 'string' ? JSON.parse(scriptToParse) : scriptToParse;
+        // Handle the case where the script is wrapped in another object { scenes: [...], customSettings: {...} }
+        if (parsed && parsed.scenes && Array.isArray(parsed.scenes)) {
+          finalScenes = parsed.scenes;
+        } else if (Array.isArray(parsed)) {
+          finalScenes = parsed;
+        } else if (parsed && typeof parsed === 'object') {
+          finalScenes = [parsed]; // Single scene object fallback
+        }
+      } catch (e) {
+        console.warn(`[API] Failed to parse script for article ${articleId}, falling back to text generation.`);
+      }
+    }
+
+    // Fallback: Generate from content if script is missing or invalid
+    if (finalScenes.length === 0) {
+      const gen = generateScriptFromText(article.content || article.title, article.imageUrl);
+      finalScenes = gen.scenes;
+    }
+
+    // Get global default template if not specified
+    const globalTpl = await prisma.setting.findUnique({ where: { key: 'global_default_template' } });
+    const defaultTplId = globalTpl?.value || 'classic';
+
+    // Construct a comprehensive payload that includes both script and custom settings
+    // Prioritize title from payload if provided
+    const payload = {
+      scenes: finalScenes,
+      customSettings: settings || null
+    };
+
+    // Create a persistent task with the payload SNAPSHOTTED into the script field
     const task = await prisma.videoTask.create({
       data: {
         articleId: articleId,
-        templateId: templateId || 'modern',
-        title: article.title,
-        // Snapshot the script into script field so worker doesn't need to query Article table
-        script: article.script ? JSON.stringify(article.script) : null,
-        // Also keep content for backward compatibility if needed, but title is better
-        content: article.title,
+        templateId: templateId || defaultTplId,
+        title: title || article.title,
+        script: JSON.stringify(payload),
+        imageUrl: imageUrl || article.imageUrl,
+        content: article.content || article.title,
         ttsProvider: ttsProvider || 'edge',
         ttsVoiceId: ttsVoiceId || 'vi-VN-HoaiMyNeural',
         bgmAssetId: bgmAssetId || null,
         bgmVolume: typeof bgmVolume === 'number' ? bgmVolume : 0.15,
+        ratio: ratio || '9:16',
         status: 'pending'
       }
     });
@@ -224,7 +278,7 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
     // Save render settings to article script (optional metadata)
     await prisma.article.updateMany({
       where: { id: articleId },
-      data: { 
+      data: {
         script: {
           ...(article.script as any),
           renderSettings: { templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume }
@@ -233,7 +287,7 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
     });
 
     res.json({ videoId: task.id, status: 'pending' });
-    
+
     // Poke the worker to start immediately if idle
     const { triggerWorker } = await import('../services/videoWorker');
     triggerWorker();
@@ -244,13 +298,13 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
 
 
 export const runVideoGenerationPipeline = async (articleId: string, settings: any, existingVideoId?: string) => {
-  const { 
-    templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, 
-    customContent, customScript, customImageUrl, source, title: settingsTitle 
+  const {
+    templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, ratio,
+    customContent, customScript, customImageUrl, source, title: settingsTitle
   } = settings;
-  
+
   const videoId = existingVideoId || `v_${articleId}_${Date.now()}`;
-  
+
   console.log(`🎬 [RENDER START] Beginning pipeline for Video ID: ${videoId}`);
   console.log(`🔍 [RENDER INFO] ArticleID: ${articleId || 'None'}, Source: ${source || 'internal'}`);
   console.log(`📝 [RENDER DATA] hasContent: ${!!customContent}, hasScript: ${!!customScript}`);
@@ -261,39 +315,49 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
   try {
     let script: any = { scenes: [] };
     let title = settingsTitle || 'Untitled Video';
-
+    
     // 1. Load script from customScript or customContent (Snapshot)
     const scriptSource = customScript || customContent;
-    
-    if (scriptSource && typeof scriptSource === 'string' && scriptSource.trim() !== '' && scriptSource !== 'null' && scriptSource !== 'undefined') {
+    let customSettings: any = null;
+
+    if (scriptSource) {
       try {
-        if (scriptSource.trim().startsWith('{') || scriptSource.trim().startsWith('[')) {
+        if (typeof scriptSource === 'string' && scriptSource.trim().startsWith('{')) {
           const parsed = JSON.parse(scriptSource);
-          if (parsed && (parsed.scenes || Array.isArray(parsed))) {
-            script = Array.isArray(parsed) ? { scenes: parsed } : parsed;
-            console.log(`📦 [RENDER] Using script snapshot from VideoTask (${script.scenes?.length || 0} scenes).`);
+          if (parsed.scenes && Array.isArray(parsed.scenes)) {
+            script = { scenes: parsed.scenes };
+            customSettings = parsed.customSettings || null;
+          } else if (Array.isArray(parsed)) {
+            script = { scenes: parsed };
           } else {
-            console.log(`📦 [RENDER] JSON detected but no scenes found. Generating from text...`);
             script = generateScriptFromText(scriptSource, customImageUrl);
           }
+        } else if (typeof scriptSource === 'object') {
+          if (Array.isArray(scriptSource)) {
+            script = { scenes: scriptSource };
+          } else if ((scriptSource as any).scenes) {
+            script = { scenes: (scriptSource as any).scenes };
+            customSettings = (scriptSource as any).customSettings || null;
+          } else {
+            script = { scenes: [scriptSource] };
+          }
         } else {
-          script = generateScriptFromText(scriptSource, customImageUrl);
+          script = generateScriptFromText(String(scriptSource), customImageUrl);
         }
       } catch (e) {
-        console.warn(`⚠️ [RENDER] Failed to parse script as JSON, falling back to text generation.`);
-        script = generateScriptFromText(scriptSource, customImageUrl);
+        script = generateScriptFromText(String(scriptSource), customImageUrl);
       }
-      
-      // If title is still default and we have content that isn't JSON, use it as title
-      if (title === 'Untitled Video' && scriptSource && !scriptSource.trim().startsWith('{')) {
-        title = scriptSource.substring(0, 50) + (scriptSource.length > 50 ? '...' : '');
-      }
-    } else if (scriptSource && typeof scriptSource === 'object') {
-       // If it's already an object
-       script = (scriptSource as any).scenes ? scriptSource : { scenes: scriptSource };
-       console.log(`📦 [RENDER] Using script object from settings (${script.scenes?.length || 0} scenes).`);
     }
-    
+
+    // Merge customSettings from the pipeline parameters if provided directly
+    if (!customSettings && settings.settings) {
+      customSettings = settings.settings;
+    }
+
+    if (script.scenes) {
+      console.log(`📦 [RENDER] Script initialized (${script.scenes.length} scenes).`);
+    }
+
     // 2. Fallback only if snapshot is missing (Legacy)
     if ((!script.scenes || script.scenes.length === 0) && articleId) {
       console.log(`📂 [RENDER] Falling back to Article query for ID: ${articleId}...`);
@@ -312,140 +376,152 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
     let bgmTempPath: string | undefined;
     try {
 
-    const scenes: any[] = script.scenes || [];
-    const localTmpDir = path.join(process.cwd(), 'temp_renders');
-    if (!fs.existsSync(localTmpDir)) fs.mkdirSync(localTmpDir);
+      const rawScenes = script.scenes;
+      const scenes: any[] = Array.isArray(rawScenes) ? rawScenes : (rawScenes ? [rawScenes] : []);
+      const localTmpDir = path.join(process.cwd(), 'render_cache');
+      if (!fs.existsSync(localTmpDir)) fs.mkdirSync(localTmpDir, { recursive: true });
 
-    // === BGM DOWNLOAD (if selected) ===
-    if (bgmAssetId && bgmAssetId !== 'none') {
-      try {
-        // Check if it's a preset BGM (starts with 'preset:')
-        if (bgmAssetId.startsWith('preset:')) {
-          const presetName = bgmAssetId.replace('preset:', '');
-          const presetPath = path.join(process.cwd(), 'public', 'bgm', presetName);
-          if (fs.existsSync(presetPath)) {
-            bgmTempPath = presetPath;
-            console.log(`[RENDER] Using preset BGM: ${presetName}`);
+      // === BGM DOWNLOAD (if selected) ===
+      if (bgmAssetId && bgmAssetId !== 'none') {
+        try {
+          // Check if it's a preset BGM (starts with 'preset:')
+          if (bgmAssetId.startsWith('preset:')) {
+            const presetName = bgmAssetId.replace('preset:', '');
+            const presetPath = path.join(process.cwd(), 'public', 'bgm', presetName);
+            if (fs.existsSync(presetPath)) {
+              bgmTempPath = presetPath;
+              console.log(`[RENDER] Using preset BGM: ${presetName}`);
+            }
+          } else {
+            // It's an asset ID — look up from DB
+            const bgmAsset = await prisma.asset.findUnique({ where: { id: bgmAssetId } });
+            if (bgmAsset && bgmAsset.url) {
+              const extension = bgmAsset.url.split('.').pop()?.split('?')[0] || 'mp3';
+              bgmTempPath = path.join(localTmpDir, `${videoId}_bgm.${extension}`);
+              console.log(`[RENDER] Downloading BGM (${extension}) from: ${bgmAsset.url}`);
+              await downloadFile(bgmAsset.url, bgmTempPath);
+            }
           }
-        } else {
-          // It's an asset ID — look up from DB
-          const bgmAsset = await prisma.asset.findUnique({ where: { id: bgmAssetId } });
-          if (bgmAsset && bgmAsset.url) {
-            bgmTempPath = path.join(localTmpDir, `${videoId}_bgm.mp3`);
-            console.log(`[RENDER] Downloading BGM from: ${bgmAsset.url}`);
-            await downloadFile(bgmAsset.url, bgmTempPath);
-          }
+        } catch (bgmErr) {
+          console.error('[RENDER] BGM download failed, continuing without BGM:', bgmErr);
+          bgmTempPath = undefined;
         }
-      } catch (bgmErr) {
-        console.error('[RENDER] BGM download failed, continuing without BGM:', bgmErr);
-        bgmTempPath = undefined;
       }
-    }
 
-    // === AUDIO GENERATION ===
-    const SEPARATOR = '... ';
-    const validScenes = scenes.map(s => ({ ...s, voiceText: s.voiceText || '' }));
-    const fullText = validScenes.map(s => s.voiceText).join(SEPARATOR);
-    
-    console.log(`[RENDER] Generating single audio for entire script (${fullText.length} chars)...`);
-    
-    const ttsRes = await generateAudio(fullText, templateId, {
-      provider: ttsProvider,
-      voiceId: ttsVoiceId,
-    });
+      // === AUDIO GENERATION ===
+      const SEPARATOR = '... ';
+      const validScenes = scenes.map(s => ({ ...s, voiceText: s.voiceText || '' }));
+      const fullText = validScenes.map(s => s.voiceText).join(SEPARATOR);
 
-    const audioPath = path.join(localTmpDir, `${videoId}_total.${ttsRes.ext}`);
-    fs.writeFileSync(audioPath, ttsRes.buffer);
+      console.log(`[PIPELINE] STEP 1: Generating audio for entire script (${fullText.length} chars)...`);
+      videoProgress.set(videoId, 10); 
 
-    let totalDuration = getAudioDuration(audioPath);
-    if (!totalDuration || totalDuration <= 0) {
-      totalDuration = ttsRes.durationSeconds;
-    }
-    
-    videoProgress.set(videoId, 20);
+      const ttsStartTime = Date.now();
+      const ttsRes = await generateAudio(fullText, templateId, {
+        provider: ttsProvider,
+        voiceId: ttsVoiceId,
+      });
+      const ttsDuration = (Date.now() - ttsStartTime) / 1000;
+      console.log(`[PIPELINE] TTS COMPLETE: Duration ${ttsRes.durationSeconds}s, Provider ${ttsRes.provider}, Buffer ${ttsRes.buffer.length} bytes`);
 
-    // Distribute durations
-    const pausePerScene = 0.3;
-    const totalPauseTime = pausePerScene * (validScenes.length - 1);
-    const speechOnlyDuration = totalDuration - totalPauseTime;
-    const totalChars = validScenes.reduce((sum, s) => sum + (s.voiceText?.length || 0), 0);
-    
-    const sceneDurations = validScenes.map((s, i) => {
-      const speechTime = totalChars > 0 
-        ? ((s.voiceText?.length || 0) / totalChars) * speechOnlyDuration 
-        : speechOnlyDuration / validScenes.length;
-      return i < validScenes.length - 1 ? speechTime + pausePerScene : speechTime;
-    });
+      // Use a timestamped filename to avoid any OS-level file caching
+      const audioPath = path.join(localTmpDir, `${videoId}_${Date.now()}_audio.${ttsRes.ext}`);
+      fs.writeFileSync(audioPath, ttsRes.buffer);
 
-    // === VIDEO RENDERING ===
-    const outputPath = path.join(localTmpDir, `${videoId}.mp4`);
-    
-    await renderWithHyperFrames({
-      videoId,
-      scenes,
-      sceneDurations,
-      templateId,
-      outputPath,
-      audioBuffer: ttsRes.buffer,
-      audioExt: ttsRes.ext,
-      audioDuration: totalDuration,
-      bgmPath: bgmTempPath,
-      bgmVolume: typeof bgmVolume === 'number' ? bgmVolume : 0.15,
-      onProgress: (p) => {
-        const scaledProgress = 20 + (p * 0.75); // 20% to 95%
-        videoProgress.set(videoId, Math.round(scaledProgress));
+      let totalDuration = getAudioDuration(audioPath);
+      console.log(`[PIPELINE] FFPROBE Duration for ${path.basename(audioPath)}: ${totalDuration}s`);
+
+      if (!totalDuration || totalDuration <= 0) {
+        console.warn(`[PIPELINE] ffprobe failed, falling back to TTS estimate: ${ttsRes.durationSeconds}`);
+        totalDuration = ttsRes.durationSeconds || 5; 
       }
-    });
+      
+      // Ensure minimum duration to prevent HyperFrames crash
+      totalDuration = Math.max(totalDuration, 1.0);
+      console.log(`[PIPELINE] Final Audio Master Duration: ${totalDuration.toFixed(2)}s`);
 
-    // === CLOUD UPLOAD ===
-    console.log(`[RENDER] Uploading results to Cloudinary for persistence...`);
-    videoProgress.set(videoId, 96);
-    
-    // Upload video and audio to Cloudinary
-    const [videoCloudUrl, audioCloudUrl] = await Promise.all([
-      uploadVideo(outputPath, 'autoreels_videos', true), // Keep local for a bit
-      uploadVideo(audioPath, 'autoreels_audio', true)
-    ]);
+      videoProgress.set(videoId, 20); // TTS Fully finished and analyzed
 
-    // Save to DB with Cloud URLs
-    const video = await prisma.video.create({
-      data: {
-        id: videoId,
-        title: title,
-        videoUrl: videoCloudUrl,
-        audioUrl: audioCloudUrl,
-        status: 'ready',
-        source: source || 'internal'
-      }
-    });
+      // Distribute durations
+      const totalChars = validScenes.reduce((sum, s) => sum + (s.voiceText?.length || 0), 0);
+      const sceneDurations = validScenes.map((s) => {
+        const charCount = s.voiceText?.length || 1;
+        return (charCount / totalChars) * totalDuration;
+      });
 
-    // Try to link to article and update its status
-    if (articleId) {
-      await prisma.article.updateMany({
-        where: { id: articleId },
-        data: { 
-          status: 'video_generated', 
-          videoId: video.id 
+      console.log(`[PIPELINE] Proportional Scene Durations: ${sceneDurations.map(d => d.toFixed(2)).join(', ')} (Total: ${totalDuration.toFixed(2)}s)`);
+
+      // === VIDEO RENDERING ===
+      const outputPath = path.join(localTmpDir, `${videoId}.mp4`);
+
+      await renderWithHyperFrames({
+        videoId,
+        scenes: validScenes, // Use cleaned scenes
+        sceneDurations,
+        templateId,
+        outputPath,
+        audioBuffer: ttsRes.buffer,
+        audioExt: ttsRes.ext,
+        audioDuration: totalDuration,
+        bgmPath: bgmTempPath,
+        bgmVolume: typeof bgmVolume === 'number' ? bgmVolume : 0.15,
+        ratio: ratio || '9:16',
+        settings: customSettings || undefined, // PASS CUSTOM SETTINGS TO RENDERER
+        onProgress: (p) => {
+          const scaledProgress = 20 + (p * 0.75); // 20% to 95%
+          videoProgress.set(videoId, Math.round(scaledProgress));
         }
       });
-    }
 
-    videoProgress.set(videoId, 100);
+      // === CLOUD UPLOAD ===
+      console.log(`[RENDER] Uploading results to Cloudinary for persistence...`);
+      videoProgress.set(videoId, 96);
 
-    // === CLEANUP ===
-    // Cleanup temp audio file (TTS)
-    try { if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath); } catch (_) {}
-    
-    // Cleanup temp BGM file (but not preset files)
-    if (bgmTempPath && bgmAssetId && !bgmAssetId.startsWith('preset:')) {
-      try { if (fs.existsSync(bgmTempPath)) fs.unlinkSync(bgmTempPath); } catch (_) {}
-    }
+      // Upload video and audio to Cloudinary
+      const [videoCloudUrl, audioCloudUrl] = await Promise.all([
+        uploadVideo(outputPath, 'autoreels_videos', true), // Keep local for a bit
+        uploadVideo(audioPath, 'autoreels_audio', true)
+      ]);
+
+      // Save to DB with Cloud URLs
+      const video = await prisma.video.create({
+        data: {
+          id: videoId,
+          title: title,
+          videoUrl: videoCloudUrl,
+          audioUrl: audioCloudUrl,
+          status: 'ready',
+          source: source || 'internal'
+        }
+      });
+
+      // Try to link to article and update its status
+      if (articleId) {
+        await prisma.article.updateMany({
+          where: { id: articleId },
+          data: {
+            status: 'video_generated',
+            videoId: video.id
+          }
+        });
+      }
+
+      videoProgress.set(videoId, 100);
+
+      // === CLEANUP ===
+      // Cleanup temp audio file (TTS)
+      try { if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath); } catch (_) { }
+
+      // Cleanup temp BGM file (but not preset files)
+      if (bgmTempPath && bgmAssetId && !bgmAssetId.startsWith('preset:')) {
+        try { if (fs.existsSync(bgmTempPath)) fs.unlinkSync(bgmTempPath); } catch (_) { }
+      }
     } catch (err: any) {
       console.error('[VIDEO GEN ERROR]', err);
       videoProgress.set(videoId, -1);
-      
+
       if (bgmTempPath && settings.bgmAssetId && !settings.bgmAssetId.startsWith('preset:')) {
-        try { fs.unlinkSync(bgmTempPath); } catch (_) {}
+        try { fs.unlinkSync(bgmTempPath); } catch (_) { }
       }
 
       if (articleId) {
@@ -454,6 +530,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
           data: { status: 'summarized' }
         });
       }
+      throw err;
     }
   } catch (err: any) {
     console.error('[PIPELINE FATAL ERROR]', err);
@@ -498,16 +575,16 @@ export const deleteVideo = async (req: Request, res: Response, next: NextFunctio
       console.log(`[Video] Deleting remote video: ${video.videoUrl}`);
       await deleteRemoteFile(video.videoUrl).catch(err => console.error('[Video] Cloudinary delete failed:', err));
     }
-    
+
     if (video.audioUrl && video.audioUrl.startsWith('http')) {
       console.log(`[Video] Deleting remote audio: ${video.audioUrl}`);
       await deleteRemoteFile(video.audioUrl).catch(err => console.error('[Video] Cloudinary audio delete failed:', err));
     }
 
     // 2. Delete local file (if exists)
-    const videoPath = path.join(process.cwd(), 'temp_renders', `${req.params.id}.mp4`);
+    const videoPath = path.join(process.cwd(), 'render_cache', `${req.params.id}.mp4`);
     if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath);
-    
+
     // 3. Delete from DB
     await prisma.video.delete({ where: { id: req.params.id } });
     res.json({ success: true });
@@ -527,8 +604,8 @@ export const postToTikTok = async (req: Request, res: Response, next: NextFuncti
 
 export const playVideo = async (req: Request, res: Response) => {
   const videoId = req.params.id;
-  const videoPath = path.join(process.cwd(), 'temp_renders', videoId.endsWith('.mp4') ? videoId : `${videoId}.mp4`);
-  
+  const videoPath = path.join(process.cwd(), 'render_cache', videoId.endsWith('.mp4') ? videoId : `${videoId}.mp4`);
+
   if (fs.existsSync(videoPath)) {
     return res.sendFile(videoPath);
   }

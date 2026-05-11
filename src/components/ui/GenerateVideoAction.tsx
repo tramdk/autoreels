@@ -3,25 +3,29 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Video as VideoIcon, RefreshCw, X, Music } from 'lucide-react';
 import { api } from '../../services/api';
+import { cn } from '../../utils/cn';
 
 // Sub-components
 import { TemplateGrid } from './generate-video/TemplateGrid';
 import { BGMSection } from './generate-video/BGMSection';
 import { VoiceSelector } from './generate-video/VoiceSelector';
 import { LivePreview } from './generate-video/LivePreview';
+import { RatioSelector, Ratio } from './generate-video/RatioSelector';
 
 interface GenerateVideoActionProps {
   articleId: string;
   loading: boolean;
-  onGenerate: (articleId: string, templateId: string, options?: { ttsProvider?: string, ttsVoiceId?: string, bgmAssetId?: string, bgmVolume?: number }) => void;
+  onGenerate: (articleId: string, templateId: string, options: any) => void;
   t: (key: string) => string;
+  compact?: boolean;
 }
 
 export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
   articleId,
   loading,
   onGenerate,
-  t
+  t,
+  compact = false
 }) => {
   const [showPicker, setShowPicker] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('classic');
@@ -31,6 +35,8 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
   const [customVoices, setCustomVoices] = useState<any[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string>('all');
   const [selectedVoiceId, setSelectedVoiceId] = useState<string>('default');
+  const [selectedRatio, setSelectedRatio] = useState<Ratio>('9:16');
+  const [currentArticle, setCurrentArticle] = useState<any>(null);
 
   // BGM State
   const [bgmPresets, setBgmPresets] = useState<any[]>([]);
@@ -38,6 +44,7 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
   const [bgmVolume, setBgmVolume] = useState(0.15);
   const [previewAudio, setPreviewAudio] = useState<HTMLAudioElement | null>(null);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
+  const [isUploadingBgm, setIsUploadingBgm] = useState(false);
 
   // Optimized Data Fetching (Parallel)
   useEffect(() => {
@@ -47,24 +54,52 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
 
     const fetchData = async () => {
       try {
-        const [voices, bgmList, templateRes, priorityRes] = await Promise.all([
+        const [voices, bgmList, templateRes, priorityRes, articleRes] = await Promise.all([
           api.getVoices(),
           api.getBgmPresets().catch(() => []),
           api.getSetting(`video_template_${selectedTemplate}`).then(res => res.value ? res : api.getSetting('video_template')),
-          api.getSetting(`tts_priority_${selectedTemplate}`).then(res => res.value ? res : api.getSetting('tts_priority'))
+          api.getSetting(`tts_priority_${selectedTemplate}`).then(res => res.value ? res : api.getSetting('tts_priority')),
+          api.getArticle(articleId).catch(() => null)
         ]);
 
         setCustomVoices(voices);
         setBgmPresets(bgmList || []);
-        setTemplateData(templateRes.value);
+        
+        // Safe parsing for template settings
+        let settings = templateRes.value;
+        if (typeof settings === 'string') {
+          try { settings = JSON.parse(settings); } catch { settings = {}; }
+        }
 
-        // Priority logic
+        // Safe parsing for script
+        const articleScript = articleRes?.script 
+          ? (typeof articleRes.script === 'string' ? JSON.parse(articleRes.script) : articleRes.script)
+          : {};
+
+        const combinedData = {
+          settings: settings,
+          ...articleScript,
+          title: articleRes?.title,
+          content: articleRes?.contentSnippet,
+          backgroundImage: articleRes?.imageUrl || settings?.backgroundImage
+        };
+        setTemplateData(combinedData);
+        setCurrentArticle(articleRes);
+        
+        // Auto-select the default ratio from settings if available
+        if (settings?.defaultRatio) {
+          setSelectedRatio(settings.defaultRatio);
+        }
+
+        // Priority logic with safe parsing
         let topProvider = 'ohfree';
-        if (priorityRes?.value) {
-          const p = priorityRes.value;
-          let priorityArray: string[] = Array.isArray(p) ? p : [];
-          if (!Array.isArray(p) && typeof p === 'string') {
-            try { priorityArray = JSON.parse(p); } catch { priorityArray = p.split(',').map(s => s.trim()); }
+        let priorityValue = priorityRes?.value;
+        if (priorityValue) {
+          let priorityArray: string[] = [];
+          if (typeof priorityValue === 'string') {
+            try { priorityArray = JSON.parse(priorityValue); } catch { priorityArray = priorityValue.split(',').map(s => s.trim()); }
+          } else if (Array.isArray(priorityValue)) {
+            priorityArray = priorityValue;
           }
           if (priorityArray.length > 0) topProvider = priorityArray[0];
         }
@@ -120,17 +155,51 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
     if (previewAudio) previewAudio.volume = Math.min(1, bgmVolume * 3);
   }, [bgmVolume, previewAudio]);
 
+  const handleUploadBGM = async (file: File) => {
+    setIsUploadingBgm(true);
+    try {
+      const asset = await api.uploadAsset(file);
+      // Construct a bgm item similar to presets
+      const newBgm = {
+        id: asset.id,
+        name: asset.name,
+        url: asset.url,
+        type: 'uploaded'
+      };
+      setBgmPresets(prev => [newBgm, ...prev]);
+      setSelectedBgmId(asset.id);
+      stopPreview();
+    } catch (error: any) {
+      console.error('BGM Upload failed:', error);
+    } finally {
+      setIsUploadingBgm(false);
+    }
+  };
+
   const handleConfirm = () => {
     stopPreview();
-    let options: any = {};
+    
+    // Construct the complete render payload
+    const options: any = {
+      ratio: selectedRatio,
+      bgmAssetId: selectedBgmId !== 'none' ? selectedBgmId : undefined,
+      bgmVolume: selectedBgmId !== 'none' ? bgmVolume : undefined,
+      imageUrl: templateData?.backgroundImage || currentArticle?.imageUrl,
+      settings: templateData?.settings,
+      // Pass latest script and title to ensure 1:1 parity with what user sees
+      customScript: currentArticle?.script ? (typeof currentArticle.script === 'string' ? JSON.parse(currentArticle.script) : currentArticle.script) : undefined,
+      title: currentArticle?.title
+    };
+
     if (selectedVoiceId !== 'default') {
       const v = customVoices.find(v => v.id === selectedVoiceId);
-      if (v) options = { ttsProvider: v.provider, ttsVoiceId: v.voiceId };
+      if (v) {
+        options.ttsProvider = v.provider;
+        options.ttsVoiceId = v.voiceId;
+      }
     }
-    if (selectedBgmId !== 'none') {
-      options.bgmAssetId = selectedBgmId;
-      options.bgmVolume = bgmVolume;
-    }
+
+    console.log('[Studio] Dispatching Generate with Payload:', options);
     onGenerate(articleId, selectedTemplate, options);
     setShowPicker(false);
   };
@@ -140,11 +209,12 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
       <button
         onClick={() => setShowPicker(true)}
         disabled={loading}
-        className="group relative bg-purple-600/10 text-purple-400 hover:bg-purple-600/20 px-5 py-2.5 rounded-xl text-sm font-black border border-purple-500/20 transition-all flex items-center gap-2 overflow-hidden"
+        title={t('dashboard.generate')}
+        className="h-9 sm:h-10 px-2 sm:px-4 rounded-xl bg-purple-600/10 text-purple-400 hover:bg-purple-600/20 border border-purple-500/20 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 whitespace-nowrap group relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-        <VideoIcon className="w-4 h-4 group-hover:rotate-12 transition-transform" /> 
-        <span className="tracking-tight">{t('dashboard.generate')}</span>
+        <VideoIcon className="w-4 h-4 group-hover:rotate-12 transition-transform relative z-10 shrink-0" /> 
+        <span className={cn("relative z-10 line-clamp-1", compact ? "hidden md:inline" : "hidden sm:inline")}>{t('dashboard.generate')}</span>
       </button>
 
       {createPortal(
@@ -188,6 +258,10 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
                   <TemplateGrid selected={selectedTemplate} onSelect={setSelectedTemplate} />
                   
                   <div className="h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+
+                  <RatioSelector selected={selectedRatio} onSelect={setSelectedRatio} />
+                  
+                  <div className="h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
                   
                   <VoiceSelector 
                     voices={customVoices}
@@ -206,6 +280,8 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
                     volume={bgmVolume}
                     onVolumeChange={setBgmVolume}
                     isPlaying={isPreviewPlaying}
+                    onUpload={handleUploadBGM}
+                    isUploading={isUploadingBgm}
                     onTogglePlay={() => {
                       if (isPreviewPlaying) stopPreview();
                       else {
@@ -221,6 +297,7 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
                   templateId={selectedTemplate}
                   templateData={templateData}
                   loading={loadingData}
+                  ratio={selectedRatio}
                 />
               </div>
 

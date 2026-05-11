@@ -11,7 +11,7 @@ export async function publishToTikTok(videoId: string) {
   const account = await prisma.account.findUnique({ where: { platform: 'tiktok' } });
   if (!account) throw new Error('TikTok account not connected');
 
-  const tempDir = path.join(process.cwd(), 'temp_renders');
+  const tempDir = path.join(process.cwd(), 'render_cache');
   if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
   
   const localPath = path.join(tempDir, `${video.id}.mp4`);

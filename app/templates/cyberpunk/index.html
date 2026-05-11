@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="vi"
+  style="--v-width: {{ WIDTH }}; --v-height: {{ HEIGHT }}; --v-logo-size: {{ LOGO_SIZE }}; --v-logo-color: {{ LOGO_COLOR }}; --v-logo-top: {{ LOGO_CSS_TOP }}; --v-logo-left: {{ LOGO_CSS_LEFT }}; --v-logo-transform: {{ LOGO_CSS_TRANSFORM }}; --v-tag-size: {{ TAG_SIZE }}; --v-tag-color: {{ TAG_COLOR }}; --v-tag-top: {{ TAG_CSS_TOP }}; --v-tag-left: {{ TAG_CSS_LEFT }}; --v-tag-transform: {{ TAG_CSS_TRANSFORM }}; --v-body-size: {{ BODY_SIZE }}; --v-body-color: {{ BODY_COLOR }}; --v-hook-size: {{ HOOK_SIZE }}; --v-hook-color: {{ HOOK_COLOR }}; --v-main-top: {{ MAIN_CSS_TOP }}; --v-main-left: {{ MAIN_CSS_LEFT }}; --v-main-transform: {{ MAIN_CSS_TRANSFORM }}; --v-main-align: {{ MAIN_CSS_ALIGN }}; --v-divider-color: {{ DIVIDER_COLOR }}; --v-content-gap: {{ CONTENT_GAP }};">
+
+<head>
+  <script>
+    var TOTAL_DURATION = {{ DURATION }};
+    var SCENES_DATA = {{ SCENES_JSON }};
+    var SCENE_DURATIONS = {{ SCENE_DURATIONS_JSON }};
+    var BG_BRIGHTNESS = {{ BG_BRIGHTNESS }};
+    var DEFAULT_BG = {{ BG_IMAGE_URL_JS }};
+    var LOGO_TEXT = {{ LOGO_TEXT_JS }};
+    var DATETIME = {{ DATETIME_JS }};
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width={{ WIDTH }}, user-scalable=no">
+  <title>Cyberpunk Template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <script src="/assets/js/gsap.min.js"></script>
+  <style>
+    :root {
+      --cqmin: min({{ WIDTH }} * 1px, {{ HEIGHT }} * 1px);
+
+    --accent-color: {{ LOGO_COLOR }};
+
+    --secondary-color: {{ DIVIDER_COLOR }};
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body,
+    html {
+      width: calc({{ WIDTH }} * 1px);
+
+    height: calc({{ HEIGHT }} * 1px);
+    overflow: hidden;
+    background-color: #000;
+    font-family: {{ FONT_FAMILY }};
+    }
+
+    #root {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: white;
+      overflow: hidden;
+    }
+
+    .bg-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    #bg-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+
+      background: linear-gradient(180deg, {{ BG_GRADIENT_START }} 0%, {{ BG_GRADIENT_END }} 100%);
+    z-index: 1;
+
+    opacity: {{ BG_BRIGHTNESS }};
+    }
+
+    .cyber-frame-container {
+      position: absolute;
+      inset: 40px;
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      box-shadow: inset 0 0 30px rgba(34, 211, 238, 0.1);
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .corner {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--accent-color);
+      opacity: 0.8;
+    }
+
+    .tl {
+      top: -4px;
+      left: -4px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .tr {
+      top: -4px;
+      right: -4px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .bl {
+      bottom: -4px;
+      left: -4px;
+      border-right: none;
+      border-top: none;
+    }
+
+    .br {
+      bottom: -4px;
+      right: -4px;
+      border-left: none;
+      border-top: none;
+    }
+
+    .scan-line {
+      position: absolute;
+      width: 100%;
+      height: 150px;
+      z-index: 30;
+      opacity: 0.2;
+      background: linear-gradient(to bottom, transparent, var(--accent-color), transparent);
+    }
+
+    .header-info {
+      position: absolute;
+
+      top: {{ LOGO_CSS_TOP }};
+
+      left: {{ LOGO_CSS_LEFT }};
+
+      transform: {{ LOGO_CSS_TRANSFORM }};
+      display:flex;
+      visibility: {{ SHOW_LOGO }};
+      align-items: center;
+      gap: 24px;
+      z-index: 100;
+    }
+
+    .status-dot {
+      width: 16px;
+      height: 16px;
+      background: var(--secondary-color);
+      border-radius: 2px;
+      box-shadow: 0 0 15px var(--secondary-color);
+    }
+
+    .status-text {
+      color: var(--accent-color);
+
+      font-size: calc(var(--cqmin) * {{ LOGO_SIZE }}
+
+        / 720);
+      font-weight: 900;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      text-shadow: 0 0 15px var(--accent-color);
+    }
+
+    .tx-info {
+      position: absolute;
+
+      top: {{ TAG_CSS_TOP }};
+
+      left: {{ TAG_CSS_LEFT }};
+
+      transform: {{ TAG_CSS_TRANSFORM }};
+
+      display: {{ SHOW_TAG }};
+      z-index: 100;
+    }
+
+    .tag-badge {
+      background: rgba(0, 0, 0, 0.6);
+      color: var(--accent-color);
+      border-left: 4px solid var(--secondary-color);
+      padding: 8px 24px;
+      font-family: 'jetbrains mono';
+
+      font-size: calc(var(--cqmin) * {{ TAG_SIZE }}
+
+        / 720);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      backdrop-filter: blur(8px);
+    }
+
+    #main-content {
+      position: absolute;
+
+      top: {{ MAIN_CSS_TOP }};
+
+      left: {{ MAIN_CSS_LEFT }};
+
+      transform: {{ MAIN_CSS_TRANSFORM }};
+      z-index: 50;
+      width: 85%;
+      display: flex;
+      flex-direction: column;
+
+      align-items: {{ MAIN_CSS_ALIGN }};
+
+      gap: {{ CONTENT_GAP }}
+
+      px;
+    }
+
+    .scene-box {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      border-left: 10px solid var(--secondary-color);
+      padding: 50px 60px;
+      width: 100%;
+      box-shadow: 15px 0 50px rgba(0, 0, 0, 0.6);
+
+      text-align: {{ MAIN_CSS_TEXT_ALIGN }};
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+
+      align-items: {{ MAIN_CSS_ALIGN }};
+    }
+
+    .scene-box::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 40px;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.05));
+    }
+
+    .scene-text {
+      font-family: {{ FONT_FAMILY }};
+      font-size: calc(var(--cqmin) * {{ BODY_SIZE }} / 720);
+      font-weight: 900;
+      line-height: {{ LINE_HEIGHT }};
+      text-transform: uppercase;
+      color: {{ BODY_COLOR }};
+      text-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+    }
+
+    .type-hook .scene-text {
+      color: {{ HOOK_COLOR }};
+
+      font-size: calc(var(--cqmin) * {{ HOOK_SIZE }}
+
+        / 720);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root" data-composition-id="root" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}"
+    data-height="{{ HEIGHT }}" style="--v-bg-brightness: {{ BG_BRIGHTNESS }};">
+    <img id="bg-image" class="bg-layer" src="{{ BG_IMAGE_URL }}" alt="" onerror="this.style.display='none'">
+    <div id="bg-overlay"></div>
+
+    <div class="scan-line"></div>
+    <div class="cyber-frame-container">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+    </div>
+
+    <div class="header-info">
+      <div class="status-dot"></div>
+      <div class="status-text">{{ LOGO_TEXT }}</div>
+    </div>
+
+    <div class="tx-info">
+      <div class="tag-badge">[{{ TAG_TEXT }}]</div>
+    </div>
+
+    <div id="main-content"></div>
+  </div>
+
+  <script>
+    var scenes = SCENES_DATA;
+    var sceneDurations = SCENE_DURATIONS;
+
+    var mainTl = gsap.timeline({ id: "root", paused: true });
+    window.__timelines = window.__timelines || {};
+    window.__timelines["root"] = mainTl;
+
+    var currentTime = 0;
+    for (var i = 0; i < scenes.length; i++) {
+      var scene = scenes[i];
+      var duration = sceneDurations[i] || 5;
+      var sceneId = 'scene-' + i;
+
+      var sceneEl = document.createElement('div');
+      sceneEl.id = sceneId;
+      sceneEl.className = 'scene-box type-' + scene.type;
+
+      // HyperFrames native visibility control
+      sceneEl.setAttribute('data-start', currentTime.toFixed(3));
+      sceneEl.setAttribute('data-duration', duration.toFixed(3));
+      sceneEl.setAttribute('data-track-index', "1");
+
+      sceneEl.innerHTML = '<div class="scene-text">' + (scene.text || scene.bodyText || '') + '</div>';
+      document.getElementById('main-content').appendChild(sceneEl);
+
+      var tl = gsap.timeline();
+      tl.from(sceneEl, { opacity: 0, x: 100, skewX: -20, duration: 0.8, ease: "expo.out" }).to(sceneEl, { opacity: 0, x: -100, skewX: 20, duration: 0.6, ease: "expo.in" }, (duration - 0.6)
+      );
+
+      mainTl.add(tl, currentTime);
+      currentTime += duration;
+    }
+
+    var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;
+    window.duration = finalDur;
+
+    // Deterministic scan line
+    var scanRepeat = Math.ceil(finalDur / 4.0) - 1;
+    mainTl.add(gsap.fromTo(".scan-line", { y: -150 }, { y: {{ HEIGHT }}, duration: 4, repeat: scanRepeat, ease: "none" }), 0);
+
+    // Status dot pulse
+    var pulseRepeat = Math.ceil(finalDur / 1.0) - 1;
+    mainTl.add(gsap.fromTo(".status-dot", { opacity: 1 }, { opacity: 0.4, duration: 0.5, repeat: pulseRepeat * 2, yoyo: true, ease: "sine.inOut" }), 0);
+
+    mainTl.time(0);
+    if (!window.__hf) {
+      setTimeout(function() { mainTl.play(); }, 500);
+    }
+    console.log("[Template] Init complete. Duration: " + finalDur + "s");
+  </script>
+</body>
+
+</html>

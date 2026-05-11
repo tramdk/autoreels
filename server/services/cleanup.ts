@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 export function cleanupTempRenders() {
-  const localTmpDir = path.join(process.cwd(), 'temp_renders');
+  const localTmpDir = path.join(process.cwd(), 'render_cache');
   if (!fs.existsSync(localTmpDir)) return;
 
   const now = Date.now();

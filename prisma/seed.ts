@@ -51,6 +51,8 @@ async function main() {
 
     // LucyLab (ViVibe)
     { voiceId: 'mhsL3CPLxmLYdSTKp3GANj', name: 'Nam Đỹ (LucyLab)', provider: 'lucylab' },
+    { voiceId: '7Tb4dvGZyJMPjnnfxVBgik', name: 'CD Team (LucyLab)', provider: 'lucylab' },
+    { voiceId: '24oEtXGic7NhDjXzmDbDvt', name: 'Thời sự (LucyLab)', provider: 'lucylab' },
 
 
     // ElevenLabs
@@ -83,19 +85,24 @@ async function main() {
 
   // 5. Default Settings
   const defaultSettings = [
-    { key: 'tts_priority', value: JSON.stringify(['ohfree', 'edge', 'lucylab', 'elevenlabs', 'gemini']) },
-    { key: 'ohfree_voice_id', value: '1402' },
-    { key: 'edge_tts_voice', value: 'vi-VN-HoaiMyNeural' },
+    { key: 'tts_priority', value: JSON.stringify(['edge', 'ohfree', 'lucylab', 'elevenlabs', 'gemini']) },
+    { key: 'ohfree_voice_id', value: '294' },
+    { key: 'edge_tts_voice', value: 'vi-VN-NamMinhNeural' },
     {
       key: 'video_template', value: JSON.stringify({
-        logoText: 'AUTOREELS',
+        logoText: 'TDK',
         logoColor: '#ffffff',
-        tagText: 'HOT NEWS',
+        tagText: '',
         tagBg: '#ff0000',
         backgroundBrightness: 0.4,
         dividerColor: '#00f2ff'
       })
-    }
+    },
+    { key: 'video_template_cinematic', value: JSON.stringify({ logoText: 'CINEMATIC', logoColor: '#ffcc00', backgroundBrightness: 0.5, dividerColor: '#ffcc00' }) },
+    { key: 'video_template_cyberpunk', value: JSON.stringify({ logoText: 'CYBER_REEL', logoColor: '#22d3ee', backgroundBrightness: 0.3, dividerColor: '#d946ef' }) },
+    { key: 'video_template_glassmorphism', value: JSON.stringify({ logoText: 'GLASS_STUDIO', logoColor: '#ffffff', backgroundBrightness: 0.6, dividerColor: '#8b5cf6' }) },
+    { key: 'video_template_minimal', value: JSON.stringify({ logoText: 'MINIMAL', logoColor: '#ffffff', backgroundBrightness: 0.5, dividerColor: '#ffffff' }) },
+    { key: 'video_template_y2k', value: JSON.stringify({ logoText: 'RETRO_Y2K', logoColor: '#00f2ff', backgroundBrightness: 0.4, dividerColor: '#ff00ff' }) }
   ];
 
   for (const s of defaultSettings) {

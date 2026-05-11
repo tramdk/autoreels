@@ -83,7 +83,7 @@ const en: Translations = {
     imageKeyword: "Image Keyword"
   },
   sources: {
-    title: "Knowledge Base",
+    title: "Resources",
     addBtn: "Add Source",
     name: "Source Name",
     url: "RSS/Website URL",

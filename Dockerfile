@@ -35,7 +35,7 @@ RUN mkdir -p public/bgm app/templates/bold app/templates/cinematic app/templates
 RUN npm run build
 
 # Hugging Face Spaces chạy với User ID 1000
-RUN mkdir -p /app/temp_renders && chmod -R 777 /app/temp_renders
+RUN mkdir -p /app/render_cache && chmod -R 777 /app/render_cache
 USER 1000
 
 # Biến môi trường mặc định cho cổng của Hugging Face

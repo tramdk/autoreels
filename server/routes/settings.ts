@@ -3,9 +3,11 @@ import multer from 'multer';
 import prisma from '../lib/prisma';
 import { authenticate } from '../middleware/auth';
 import cloudinary from '../lib/cloudinary';
+import fs from 'fs';
+import path from 'path';
 
 const router = Router();
-const upload = multer({ dest: 'temp_renders/uploads/' });
+const upload = multer({ dest: 'render_cache/uploads/' });
 
 // Default settings
 const DEFAULT_SETTINGS: Record<string, string> = {
@@ -18,6 +20,7 @@ const DEFAULT_SETTINGS: Record<string, string> = {
     mainTop: 600, mainLeft: 100, contentGap: 40,
     tagText: 'HOT NEWS', tagBg: '#fff000', tagColor: '#000000', tagTop: 1600, tagLeft: 0, tagAnim: 'slide-right', tagSize: 32,
     backgroundBrightness: 0.4, backgroundImage: '',
+    bgGradientStart: 'rgba(139, 169, 239, 0.4)', bgGradientEnd: 'rgba(178, 215, 93, 0.7)',
     cardBgColor: 'rgba(0,0,0,0)', cardBorderColor: 'rgba(255,255,255,0.1)',
     cardBorderTop: 0, cardBorderBottom: 0, cardBorderLeft: 0, cardBorderRight: 0, cardBorderRadius: 0,
     showLogo: true, showTag: true, showDatetime: true, showCard: true
@@ -30,6 +33,7 @@ const DEFAULT_SETTINGS: Record<string, string> = {
     mainTop: 600, mainLeft: 100, contentGap: 40,
     tagText: 'HOT NEWS', tagBg: '#fff000', tagColor: '#000000', tagTop: 1600,
     backgroundBrightness: 0.4, backgroundImage: '',
+    bgGradientStart: 'rgba(139, 169, 239, 0.4)', bgGradientEnd: 'rgba(178, 215, 93, 0.7)',
     cardBgColor: 'rgba(0,0,0,0)', cardBorderColor: 'rgba(255,255,255,0.1)',
     showLogo: true, showTag: true, showDatetime: true, showCard: true
   }),
@@ -41,31 +45,78 @@ const DEFAULT_SETTINGS: Record<string, string> = {
     mainTop: 650, mainLeft: 100, contentGap: 50,
     tagText: 'TRENDING', tagBg: '#a855f7', tagColor: '#ffffff', tagTop: 1550,
     backgroundBrightness: 0.35, backgroundImage: '',
+    bgGradientStart: 'rgba(168, 85, 247, 0.3)', bgGradientEnd: 'rgba(30, 41, 59, 0.6)',
     cardBgColor: 'rgba(0,0,0,0.2)', cardBorderColor: 'rgba(168, 85, 247, 0.2)',
     showLogo: true, showTag: true, showDatetime: true, showCard: true
   }),
   video_template_bold: JSON.stringify({
     logoText: 'BOLD MEDIA', logoColor: '#ff0055', logoTop: 120, logoLeft: 0,
-    hookColor: '#ff0055', hookSize: 150,
-    bodyColor: '#ffffff', bodySize: 56,
+    hookColor: '#ffffff', hookSize: 140,
+    bodyColor: 'rgba(255, 255, 255, 1)', bodySize: 56,
     dividerColor: '#ff0055',
-    mainTop: 550, mainLeft: 100, contentGap: 30,
-    tagText: 'URGENT', tagBg: '#ff0055', tagColor: '#ffffff', tagTop: 1650,
-    backgroundBrightness: 0.5, backgroundImage: '',
-    cardBgColor: 'rgba(0,0,0,0.8)', cardBorderColor: '#ff0055',
+    mainTop: 700, mainLeft: 100, contentGap: 60,
+    tagText: 'EXCLUSIVE', tagBg: '#ff0055', tagColor: '#ffffff', tagTop: 1500,
+    backgroundBrightness: 0.3, backgroundImage: '',
+    bgGradientStart: 'rgba(255, 0, 85, 0.4)', bgGradientEnd: 'rgba(0, 0, 0, 0.8)',
+    cardBgColor: 'rgba(0,0,0,0.4)', cardBorderColor: 'rgba(255, 0, 85, 0.3)',
     showLogo: true, showTag: true, showDatetime: true, showCard: true
   }),
   video_template_cinematic: JSON.stringify({
-    logoText: 'CINEMA', logoColor: '#e2b714', logoTop: 150, logoLeft: 0,
+    logoText: 'CINEMA', logoColor: '#ffcc00', logoTop: 150, logoLeft: 0,
     hookColor: '#ffffff', hookSize: 110,
     bodyColor: 'rgba(255, 255, 255, 0.8)', bodySize: 44,
-    dividerColor: '#e2b714',
+    dividerColor: '#ffcc00',
     mainTop: 700, mainLeft: 120, contentGap: 60,
-    tagText: 'PREMIUM', tagBg: '#111111', tagColor: '#e2b714', tagTop: 1700,
+    tagText: 'PREMIUM', tagBg: '#111111', tagColor: '#ffcc00', tagTop: 1700,
     backgroundBrightness: 0.3, backgroundImage: '',
-    cardBgColor: 'rgba(0,0,0,0)', cardBorderColor: 'rgba(226, 183, 20, 0.1)',
+    cardBgColor: 'rgba(0,0,0,0)', cardBorderColor: 'rgba(255, 204, 0, 0.1)',
     showLogo: true, showTag: true, showDatetime: true, showCard: true
-  })
+  }),
+  video_template_cyberpunk: JSON.stringify({
+    logoText: 'CYBER_REEL', logoColor: '#22d3ee', logoTop: 100, logoLeft: 0,
+    hookColor: '#ffffff', hookSize: 130,
+    bodyColor: 'rgba(255, 255, 255, 0.9)', bodySize: 48,
+    dividerColor: '#d946ef',
+    mainTop: 650, mainLeft: 100, contentGap: 50,
+    tagText: 'ENCRYPTED', tagBg: '#d946ef', tagColor: '#ffffff', tagTop: 1600,
+    backgroundBrightness: 0.35, backgroundImage: '',
+    cardBgColor: 'rgba(0,0,0,0.2)', cardBorderColor: '#22d3ee',
+    showLogo: true, showTag: true, showDatetime: true, showCard: true
+  }),
+  video_template_glassmorphism: JSON.stringify({
+    logoText: 'GLASS_STUDIO', logoColor: '#ffffff', logoTop: 120, logoLeft: 0,
+    hookColor: '#ffffff', hookSize: 120,
+    bodyColor: '#ffffff', bodySize: 50,
+    dividerColor: '#8b5cf6',
+    mainTop: 600, mainLeft: 100, contentGap: 40,
+    tagText: 'FROSTED', tagBg: 'rgba(255,255,255,0.2)', tagColor: '#ffffff', tagTop: 1650,
+    backgroundBrightness: 0.45, backgroundImage: '',
+    cardBgColor: 'rgba(255,255,255,0.1)', cardBorderColor: 'rgba(255,255,255,0.2)',
+    showLogo: true, showTag: true, showDatetime: true, showCard: true
+  }),
+  video_template_minimal: JSON.stringify({
+    logoText: 'MINIMAL', logoColor: '#ffffff', logoTop: 100, logoLeft: 0,
+    hookColor: '#ffffff', hookSize: 140,
+    bodyColor: '#ffffff', bodySize: 48,
+    dividerColor: '#ffffff',
+    mainTop: 600, mainLeft: 100, contentGap: 40,
+    tagText: 'CLEAN', tagBg: '#ffffff', tagColor: '#000000', tagTop: 1600,
+    backgroundBrightness: 0.5, backgroundImage: '',
+    cardBgColor: 'transparent', cardBorderColor: 'transparent',
+    showLogo: true, showTag: true, showDatetime: true, showCard: true
+  }),
+  video_template_y2k: JSON.stringify({
+    logoText: 'RETRO_Y2K', logoColor: '#00f2ff', logoTop: 80, logoLeft: 0,
+    hookColor: '#000000', hookSize: 120,
+    bodyColor: '#000000', bodySize: 44,
+    dividerColor: '#ff00ff',
+    mainTop: 600, mainLeft: 100, contentGap: 40,
+    tagText: 'SYSTEM_READY', tagBg: '#c0c0c0', tagColor: '#000000', tagTop: 1600,
+    backgroundBrightness: 0.4, backgroundImage: '',
+    cardBgColor: '#c0c0c0', cardBorderColor: '#ffffff',
+    showLogo: true, showTag: true, showDatetime: true, showCard: true
+  }),
+  global_default_template: 'classic'
 };
 
 router.post('/upload-bg', authenticate, upload.single('image'), async (req, res) => {
@@ -138,6 +189,22 @@ router.post('/', authenticate, async (req, res) => {
       },
     });
     res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get raw template HTML for preview
+router.get('/templates/:id/raw', authenticate, async (req, res) => {
+  const { id } = req.params;
+  const templatePath = path.join(process.cwd(), 'app', 'templates', id, 'index.html');
+  
+  try {
+    if (!fs.existsSync(templatePath)) {
+      return res.status(404).json({ error: 'Template not found' });
+    }
+    const html = fs.readFileSync(templatePath, 'utf-8');
+    res.send(html);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

@@ -18,10 +18,13 @@ export async function createApp() {
   app.use(cookieParser());
 
   // Static files for video renders
-  app.use('/temp_renders', express.static(path.join(process.cwd(), 'temp_renders')));
+  app.use('/render_cache', express.static(path.join(process.cwd(), 'render_cache')));
 
   // Static files for BGM presets
   app.use('/bgm', express.static(path.join(process.cwd(), 'public', 'bgm')));
+
+  // Static files for Template Assets (GSAP, fonts, etc.)
+  app.use('/assets', express.static(path.join(process.cwd(), 'app', 'templates', 'assets')));
 
   // API Routes
   app.use('/api', routes);

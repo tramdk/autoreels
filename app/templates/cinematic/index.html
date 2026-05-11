@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi"
+  style="--v-width: {{ WIDTH }}; --v-height: {{ HEIGHT }}; --v-logo-size: {{ LOGO_SIZE }}; --v-logo-color: {{ LOGO_COLOR }}; --v-logo-top: {{ LOGO_CSS_TOP }}; --v-logo-left: {{ LOGO_CSS_LEFT }}; --v-logo-transform: {{ LOGO_CSS_TRANSFORM }}; --v-tag-size: {{ TAG_SIZE }}; --v-tag-color: {{ TAG_COLOR }}; --v-tag-bg: {{ TAG_BG }}; --v-tag-show: {{ SHOW_TAG }}; --v-body-size: {{ BODY_SIZE }}; --v-body-color: {{ BODY_COLOR }}; --v-hook-size: {{ HOOK_SIZE }}; --v-hook-color: {{ HOOK_COLOR }}; --v-main-top: {{ MAIN_CSS_TOP }}; --v-main-left: {{ MAIN_CSS_LEFT }}; --v-main-transform: {{ MAIN_CSS_TRANSFORM }}; --v-main-align: {{ MAIN_CSS_ALIGN }}; --v-divider-color: {{ DIVIDER_COLOR }}; --v-content-gap: {{ CONTENT_GAP }}; --v-bg-start: {{ BG_GRADIENT_START }}; --v-bg-end: {{ BG_GRADIENT_END }}; --v-bg-brightness: {{ BG_BRIGHTNESS }};">
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1080, user-scalable=no">
-  <title>AutoReels Template</title>
+  <meta name="viewport" content="width={{ WIDTH }}, user-scalable=no">
+  <title>Cinematic Template</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Be+Vietnam+Pro:wght@400;600;700;900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap"
     rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="/assets/js/gsap.min.js"></script>
   <style>
+    :root {
+      --v-bg-brightness: {{ BG_BRIGHTNESS }};
+      --cqmin: min(calc(var(--v-width) * 1px), calc(var(--v-height) * 1px));
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -20,561 +27,358 @@
 
     body,
     html {
-      width: 1080px;
-      height: 1920px;
+      width: calc(var(--v-width) * 1px);
+      height: calc(var(--v-height) * 1px);
       overflow: hidden;
       background-color: #000;
-      font-family: 'Be Vietnam Pro', sans-serif;
+      font-family: {{ FONT_FAMILY }};
     }
 
     #root {
       position: relative;
-      width: 1080px;
-      height: 1920px;
-      background-color: #050505;
+      width: 100%;
+      height: 100%;
+      background: #000;
       color: white;
       overflow: hidden;
     }
 
-    /* Background */
-    .bg-layer {
+    #scenes-container {
       position: absolute;
-      top: 0;
-      left: 0;
+      inset: 0;
+      z-index: 10;
+    }
+
+    .scene-unit {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      background-color: #000;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .scene-bg-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       z-index: 0;
+      overflow: hidden;
     }
 
-    #bg-overlay {
+    .scene-bg {
       position: absolute;
-      top: 0;
-      left: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at center, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.95) 100%);
+      object-fit: cover;
+      transform: scale(1.1);
+      /* Prevent white edges during blur */
+    }
+
+    .scene-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, var(--v-bg-start) 0%, var(--v-bg-end) 100%);
       z-index: 1;
+      opacity: var(--v-bg-brightness);
     }
 
-    /* Brand */
-    #brand-header {
+    .scene-content {
       position: absolute;
-      top: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 100;
-      text-align: center;
-    }
-
-    #brand-logo {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: 40px;
-      letter-spacing: 12px;
-      text-transform: uppercase;
-      color: #ffffff;
-      opacity: 0.6;
-    }
-
-    /* Bottom bar */
-    #bottom-info {
-      position: absolute;
-
-      top: {
-          {
-          TAG_TOP
-        }
-      }
-
-      px;
-      left: 50%;
-
-      transform: translateX(-50%) translateX({
-          {
-          TAG_LEFT
-        }
-      }
-
-      px);
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    z-index: 100;
-    white-space: nowrap;
-    }
-
-    #tag-badge {
-      padding: 12px 30px;
-      font-family: 'Anton', sans-serif;
-
-      font-size: {
-          {
-          TAG_SIZE
-        }
-      }
-
-      px;
-      text-transform: uppercase;
-
-      background-color: {
-          {
-          TAG_BG
-        }
-      }
-
-      ;
-
-      color: {
-          {
-          TAG_COLOR
-        }
-      }
-
-      ;
-      transform: skewX(-12deg);
-      letter-spacing: 2px;
-    }
-
-    #datetime {
-      font-size: 26px;
-      color: rgba(255, 255, 255, 0.55);
-      font-weight: 700;
-      letter-spacing: 2px;
-    }
-
-
-
-    /* Scene cards */
-    #scene-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: calc(4% + var(--v-main-top));
+      left: calc(4% + 5%);
+      width: 85%;
+      height: 80%;
       z-index: 50;
-    }
-
-    .scene-card {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
       display: flex;
       flex-direction: column;
+      align-items: flex-start;
       justify-content: flex-start;
-
-      padding-top: {
-          {
-          MAIN_TOP
-        }
-      }
-
-      px;
-
-      padding-left: {
-          {
-          MAIN_LEFT
-        }
-      }
-
-      px;
-
-      padding-right: {
-          {
-          MAIN_LEFT
-        }
-      }
-
-      px;
-
-      gap: {
-          {
-          CONTENT_GAP
-        }
-      }
-
-      px;
-      opacity: 0;
-      pointer-events: none;
-      word-wrap: break-word;
-      /* Typing cursor effect support */
-      --cursor-color: rgba(255, 255, 255, 0.8);
-      overflow-wrap: break-word;
-
-      /* Dynamic styles */
-      background-color: {
-          {
-          CARD_BG_COLOR
-        }
-      }
-
-      ;
-
-      border-top: {
-          {
-          CARD_BORDER_TOP
-        }
-      }
-
-      px solid {
-          {
-          CARD_BORDER_COLOR
-        }
-      }
-
-      ;
-
-      border-bottom: {
-          {
-          CARD_BORDER_BOTTOM
-        }
-      }
-
-      px solid {
-          {
-          CARD_BORDER_COLOR
-        }
-      }
-
-      ;
-
-      border-left: {
-          {
-          CARD_BORDER_LEFT
-        }
-      }
-
-      px solid {
-          {
-          CARD_BORDER_COLOR
-        }
-      }
-
-      ;
-
-      border-right: {
-          {
-          CARD_BORDER_RIGHT
-        }
-      }
-
-      px solid {
-          {
-          CARD_BORDER_COLOR
-        }
-      }
-
-      ;
-
-      border-radius: {
-          {
-          CARD_BORDER_RADIUS
-        }
-      }
-
-      px;
     }
 
-    /* Hook scene */
-    .scene-card.type-hook .scene-label {
-      font-family: 'Be Vietnam Pro', sans-serif;
-      font-weight: 400;
-      font-size: 20px;
-      letter-spacing: 12px;
-      color: rgba(255, 255, 255, 0.4);
+    .scene-title {
+      font-family: {{ FONT_FAMILY }};
+      font-weight: 900;
+      line-height: {{ LINE_HEIGHT }};
       text-transform: uppercase;
-      margin-bottom: 20px;
-    }
-
-    .scene-card.type-hook .scene-text {
-      font-family: 'Playfair Display', serif;
-      font-size: 120px; /* Reduced from 140px to prevent overlap */
-      line-height: 1.2; /* Increased to prevent overlapping lines */
       color: #ffffff;
-      text-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      word-break: break-word;
+      padding: 15px 30px;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 4px;
+      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      max-width: 95%;
     }
 
-    .scene-card.type-hook .scene-accent {
-      width: 0;
-      height: 1px;
-      background: rgba(255, 255, 255, 0.8);
-      margin-top: 40px;
+    .film-grain {
+      position: absolute;
+      inset: 0;
+      opacity: 0.12;
+      mix-blend-mode: overlay;
+      z-index: 500;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     }
 
+    .ui-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 600;
+      pointer-events: none;
+    }
 
-    .scene-card.type-body .scene-text {
-      font-size: {
-          {
-          BODY_SIZE
-        }
-      }
+    .letterbox {
+      width: 100%;
+      height: 10%;
+      background: #000;
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 60px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
 
-      px;
+    .letterbox-top {
+      top: 0;
+    }
+
+    .letterbox-bottom {
+      bottom: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      justify-content: center;
+    }
+
+    .letterbox-logo {
+      font-family: 'jetbrains mono';
       font-weight: 700;
-      line-height: 1.35;
-
-      color: {
-          {
-          BODY_COLOR
-        }
-      }
-
-      ;
-      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
-      position: relative;
-      z-index: 2;
-    }
-
-    .scene-text span {
-      /* opacity: 0; Removed to prevent hiding word-wrappers */
-      display: inline-block;
-      white-space: pre-wrap;
-    }
-
-    .scene-card.type-body .scene-bar {
-      width: 60px;
-      height: 5px;
-      border-radius: 3px;
-
-      background: {
-          {
-          DIVIDER_COLOR
-        }
-      }
-
-      ;
-    }
-
-    /* Outro scene */
-    .scene-card.type-outro {
-      justify-content: flex-start;
-    }
-
-    .scene-card.type-outro .scene-cta-label {
-      font-family: 'Anton', sans-serif;
-      font-size: 32px;
-      letter-spacing: 6px;
-
-      color: {
-          {
-          TAG_BG
-        }
-      }
-
-      ;
+      letter-spacing: 0.3em;
       text-transform: uppercase;
-      margin-bottom: 24px;
+      font-size: calc(var(--cqmin) * 24 / 720);
+      color: rgba(255, 255, 255, 0.7);
     }
 
-    .scene-card.type-outro .scene-text {
-      font-size: {
-          {
-          BODY_SIZE
-        }
-      }
+    .rec-indicator {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'jetbrains mono';
+      font-size: calc(var(--cqmin) * 18 / 720);
+      color: rgba(255, 255, 255, 0.7);
+    }
 
-      px;
+    .rec-dot {
+      width: 12px;
+      height: 12px;
+      background: #ff0000;
+      border-radius: 50%;
+    }
+
+    .tag-badge {
+      position: absolute;
+      bottom: 12%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--v-tag-bg);
+      color: var(--v-tag-color);
+      padding: 8px 24px;
+      font-family: 'jetbrains mono';
+      font-size: calc(var(--cqmin) * 20 / 720);
       font-weight: 700;
-      line-height: 1.35;
-
-      color: {
-          {
-          BODY_COLOR
-        }
-      }
-
-      ;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      border-radius: 2px;
+      display: var(--v-tag-show);
     }
 
-    .scene-card.type-outro .scene-follow {
-      margin-top: 40px;
-      font-size: 36px;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.6);
-      letter-spacing: 1px;
+    .scene-progress-container {
+      position: absolute;
+      bottom: 12%;
+      left: 5%;
+      width: 120px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      z-index: 100;
+      overflow: hidden;
+      display: {{ SHOW_PROGRESS_BAR }};
+    }
+
+    .scene-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: #ff0000; /* Matching REC dot */
     }
   </style>
 </head>
 
 <body>
-  <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-start="0">
-
-    <div id="bg-layers">
-      <img id="bg-1" class="bg-layer" src="{{BG_IMAGE_URL}}" style="opacity: {{BG_BRIGHTNESS}};" alt="">
-      <img id="bg-2" class="bg-layer" style="opacity: 0;" alt="">
+  <div id="root" data-composition-id="root" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}"
+    data-height="{{ HEIGHT }}">
+    <div id="scenes-container"></div>
+    <div class="film-grain"></div>
+    <div class="ui-layer">
+      <div class="letterbox letterbox-top">
+        <div class="letterbox-logo">{{ LOGO_TEXT }}</div>
+        <div class="rec-indicator">
+          <div class="rec-dot"></div>
+          <div id="datetime-val">{{ DATETIME }}</div>
+        </div>
+      </div>
+      <div class="tag-badge">{{ TAG_TEXT }}</div>
+      <div class="letterbox letterbox-bottom">
+        <div style="width: 80px; height: 2px; background: rgba(255,255,255,0.1); border-radius: 100px;"></div>
+      </div>
     </div>
-    <div id="bg-overlay"></div>
-
-    <div id="brand-header" style="display: {{SHOW_LOGO}};">
-      <h1 id="brand-logo" style="color: {{LOGO_COLOR}}; font-size: {{LOGO_SIZE}}px;">{{LOGO_TEXT}}</h1>
-    </div>
-
-
-    <div id="scene-container"></div>
-
-    <div id="bottom-info">
-      <div id="tag-badge"
-        style="display: {{SHOW_TAG}}; background: {{TAG_BG}}; color: {{TAG_COLOR}}; font-size: {{TAG_SIZE}}px;">
-        {{TAG_TEXT}}</div>
-      <div id="datetime" style="display: {{SHOW_DATETIME}};">{{DATETIME}}</div>
-    </div>
-
   </div>
-
-  <script>
-    window.__hf = {
-      duration: {{ DURATION }},
-    seek: function(t) {
-      if (window._tl && typeof window._tl.seek === 'function') {
-        window._tl.pause().seek(t);
-      }
-    }
-    };
-  </script>
-
   <script>
     var SCENES_DATA = {{ SCENES_JSON }};
     var SCENE_DURATIONS = {{ SCENE_DURATIONS_JSON }};
-    var TOTAL_DURATION = {{ DURATION }};
+    var DEFAULT_BG = {{ BG_IMAGE_URL_JS }};
   </script>
-
   <script>
-    try {
-      if (typeof gsap === 'undefined') throw new Error('GSAP not loaded');
+    console.log("[Template] Cinematic script starting...");
+    var scenes = SCENES_DATA;
+    var sceneDurations = SCENE_DURATIONS;
 
-      var scenes = SCENES_DATA;
-      var n = scenes.length;
-      var container = document.getElementById('scene-container');
-
-      var hasDurations = SCENE_DURATIONS && SCENE_DURATIONS.length === n;
-      var leadIn = 0.5;
-      var animIn = 0.4;
-      var animOut = 0.4;
-
-      window._tl = gsap.timeline({ paused: true });
-      window.__timelines = { 'main': window._tl };
-
-      window._tl.from('#brand-header', { y: -60, opacity: 0, duration: 0.6 }, 0);
-      window._tl.from('#bottom-info', { y: 60, opacity: 0, duration: 0.6 }, 0.2);
-
-      var defaultBg = '{{BG_IMAGE_URL}}';
-      var currentBgIndex = 1;
-      var currentTime = leadIn;
-
-      for (var i = 0; i < n; i++) {
-        var s = scenes[i];
-        var duration = hasDurations ? SCENE_DURATIONS[i] : (TOTAL_DURATION - leadIn) / n;
-        var sceneStart = currentTime;
-
-        var card = document.createElement('div');
-        card.className = 'scene-card type-' + s.type;
-        card.style.display = '{{SHOW_CARD}}';
-
-        // Helper to split text into words and then spans to prevent line-break jumping
-        function buildTypingContent(containerEl, text) {
-          containerEl.innerHTML = '';
-          if (!text) return [];
-          var words = text.split(/(\s+)/);
-          var spans = [];
-          words.forEach(function(word) {
-            var wordSpan = document.createElement('span');
-            wordSpan.style.display = 'inline-block';
-            wordSpan.style.whiteSpace = 'pre';
-            
-            var chars = word.split('');
-            chars.forEach(function(char) {
-              var span = document.createElement('span');
-              span.textContent = char;
-              span.style.opacity = 0;
-              wordSpan.appendChild(span);
-              spans.push(span);
-            });
-            containerEl.appendChild(wordSpan);
-          });
-          return spans;
-        }
-
-        var textEl = document.createElement('div');
-        textEl.className = 'scene-text';
-
-        // Limit height and prepare for scrolling
-        var maxH = Math.max(400, {{TAG_TOP}} - {{MAIN_TOP}} - 80);
-        card.style.maxHeight = maxH + 'px';
-        card.style.overflow = 'hidden';
-        
-        if (s.type === 'hook') {
-          card.innerHTML = '<div class="scene-label">CINEMATIC HOOK</div>';
-          textEl.style.color = '{{HOOK_COLOR}}';
-          textEl.style.fontSize = '{{HOOK_SIZE}}px';
-        } else if (s.type === 'outro') {
-          card.innerHTML = '<div class="scene-cta-label">WATCH MORE</div>';
-          textEl.style.color = '{{BODY_COLOR}}';
-          textEl.style.fontSize = '{{BODY_SIZE}}px';
-        } else {
-          textEl.style.color = '{{BODY_COLOR}}';
-          textEl.style.fontSize = '{{BODY_SIZE}}px';
-        }
-        
-        var spans = buildTypingContent(textEl, s.voiceText);
-        card.appendChild(textEl);
-        container.appendChild(card);
-
-        // Animate Card In
-        window._tl.to(card, { opacity: 1, duration: animIn }, sceneStart);
-
-        // Calculate scroll if content overflows
-        var realH = textEl.offsetHeight + (s.type !== 'body' ? 120 : 40);
-        if (realH > maxH) {
-          var over = realH - maxH + 60;
-          window._tl.to(textEl, { 
-            y: -over, 
-            duration: duration * 0.9, 
-            ease: 'none' 
-          }, sceneStart + (duration * 0.05));
-        }
-        
-        // Animate Characters (Typing Effect)
-        var staggerTime = Math.min(0.04, (duration * 0.7) / (spans.length || 1));
-        window._tl.to(spans, {
-          opacity: 1,
-          duration: 0.05,
-          stagger: staggerTime,
-          ease: 'none'
-        }, sceneStart + 0.2);
-
-        // Background Cross-fade logic (on main timeline)
-        if (i > 0) {
-          var nextUrl = s.imageUrl || defaultBg;
-          var targetLayerId = currentBgIndex === 1 ? 'bg-2' : 'bg-1';
-          var prevLayerId = currentBgIndex === 1 ? 'bg-1' : 'bg-2';
-
-          (function (lId, url) {
-            window._tl.set('#' + lId, { attr: { src: url } }, sceneStart);
-          })(targetLayerId, nextUrl);
-
-          window._tl.to('#' + targetLayerId, { opacity: {{ BG_BRIGHTNESS }}, duration: 1.0, ease: 'none'
-      }, sceneStart);
-      window._tl.to('#' + prevLayerId, { opacity: 0, duration: 1.0, ease: 'none' }, sceneStart);
-
-      currentBgIndex = (currentBgIndex === 1 ? 2 : 1);
-    }
-
-
-
-        if (i < n - 1) {
-      window._tl.to(card, { opacity: 0, duration: animOut }, sceneStart + duration - animOut);
-    }
-    currentTime += duration;
+    // --- DOUBLE SAFETY NET (CLIENT-SIDE FALLBACK) ---
+    var totalDuration = parseFloat("{{ DURATION }}") || 15;
+    if (!sceneDurations || sceneDurations.length === 0) {
+      var avg = totalDuration / (scenes.length || 1);
+      sceneDurations = [];
+      for (var s = 0; s < scenes.length; s++) {
+        sceneDurations.push(avg);
       }
-    window._tl.add(function () { }, TOTAL_DURATION);
-
-    } catch (e) {
-      console.error('Scene Animation Init Error:', e);
     }
+
+    var mainTl = gsap.timeline({ id: "root", paused: true });
+    window.__timelines = window.__timelines || {};
+    window.__timelines["root"] = mainTl;
+
+    var globalLastImage = DEFAULT_BG;
+
+    function createSceneUnit(scene, i, start, duration) {
+      var isHook = (scene.type === 'hook' || i === 0);
+      var unit = document.createElement('div');
+      unit.id = 'unit-' + i;
+      unit.className = 'scene-unit ' + (isHook ? 'scene-hook' : 'scene-body');
+      
+      // HyperFrames native visibility control via data attributes
+      unit.setAttribute('data-start', start.toFixed(3));
+      unit.setAttribute('data-duration', duration.toFixed(3));
+      unit.setAttribute('data-track-index', "1");
+      
+      unit.style.zIndex = 100 + i;
+
+      if (scene.imageUrl) globalLastImage = scene.imageUrl;
+      var imgUrl = globalLastImage;
+
+      var fontSize = isHook ? '{{ HOOK_SIZE }}' : '{{ BODY_SIZE }}';
+      var color = isHook ? '{{ HOOK_COLOR }}' : '{{ BODY_COLOR }}';
+
+      var contentHtml = isHook ? 
+        '<div class="scene-label" style="font-family: inter; font-weight: 400; font-size: calc(var(--cqmin) * 20 / 720); letter-spacing: 0.3em; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; margin-bottom: 20px;">CINEMATIC HOOK</div>' +
+        '<div class="scene-title hook-title" style="font-family: \'playfair display\'; font-size: calc(var(--cqmin) * ' + fontSize + ' / 720); color: ' + color + '; line-height: 1.2; text-shadow: 0 10px 30px rgba(0,0,0,0.5); word-break: break-word;">' + (scene.text || scene.bodyText || '') + '</div>' +
+        '<div class="scene-accent" style="width: 100px; height: 1px; background: rgba(255,255,255,0.8); margin-top: 40px; opacity: 0;"></div>' :
+        '<div class="scene-title" style="font-size: calc(var(--cqmin) * ' + fontSize + ' / 720); color: ' + color + ';">' + (scene.text || scene.bodyText || '') + '</div>';
+
+      unit.innerHTML = 
+        '<div class="scene-bg-container">' +
+          '<img class="scene-bg" src="' + imgUrl + '">' +
+        '</div>' +
+        '<div class="scene-overlay"></div>' +
+        '<div class="scene-progress-container"><div class="scene-progress-bar"></div></div>' +
+        '<div class="scene-content">' +
+          contentHtml +
+        '</div>';
+      return unit;
+    }
+
+    function buildTypingContent(containerEl, text) {
+      containerEl.innerHTML = '';
+      if (!text) return [];
+      var words = text.split(/(\s+)/);
+      var spans = [];
+      for (var w = 0; w < words.length; w++) {
+        var word = words[w];
+        var wordSpan = document.createElement('span');
+        wordSpan.style.display = 'inline-block';
+        wordSpan.style.whiteSpace = 'pre';
+        var chars = word.split('');
+        for (var c = 0; c < chars.length; c++) {
+          var span = document.createElement('span');
+          span.textContent = chars[c];
+          span.style.opacity = 0;
+          wordSpan.appendChild(span);
+          spans.push(span);
+        }
+        containerEl.appendChild(wordSpan);
+      }
+      return spans;
+    }
+
+    var container = document.getElementById('scenes-container');
+    var currentTime = 0;
+
+    for (var i = 0; i < scenes.length; i++) {
+      var scene = scenes[i];
+      var dur = parseFloat(sceneDurations[i]) || 5;
+      var unit = createSceneUnit(scene, i, currentTime, dur);
+      container.appendChild(unit);
+
+      var bgImg = unit.querySelector('.scene-bg');
+      var titleEl = unit.querySelector('.scene-title');
+      var progBar = unit.querySelector('.scene-progress-bar');
+      var spans = buildTypingContent(titleEl, (scene.text || scene.bodyText || ''));
+
+      var tl = gsap.timeline();
+
+      // Entrance animation (using gsap.from as per best practices)
+      tl.from(unit, { opacity: 0, duration: 0.5, ease: "power2.out" }, 0)
+        .fromTo(bgImg, { scale: 1.1 }, { scale: 1, duration: dur, ease: "none" }, 0);
+
+      // Text animation
+      var staggerTime = Math.min(0.04, (dur * 0.7) / (spans.length || 1));
+      tl.to(spans, { opacity: 1, duration: 0.05, stagger: staggerTime, ease: 'none' }, 0.2);
+      
+      // Progress bar animation
+      if (progBar) {
+        tl.to(progBar, { width: "100%", duration: dur, ease: "none" }, 0);
+      }
+
+      // Exit animation (only if it's the last scene, or use a transition)
+      // For multi-scene cinematic, we do a quick fade out to transition smoothly
+      var outDur = 0.4;
+      if (i < scenes.length - 1) {
+        tl.to(unit, { opacity: 0, duration: outDur }, dur - outDur);
+      } else {
+        tl.to(unit, { opacity: 0, duration: outDur }, dur - outDur);
+      }
+
+      mainTl.add(tl, currentTime);
+      currentTime += dur;
+    }
+
+    var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;
+    window.duration = finalDur;
+
+    // Fixed repeat counts for deterministic rendering
+    var recDotRepeat = Math.ceil(finalDur / 1.0) - 1;
+    mainTl.add(gsap.to(".rec-dot", { opacity: 0.3, duration: 0.5, repeat: recDotRepeat, yoyo: true, ease: "sine.inOut" }), 0);
+
+    // Initial state trigger
+    mainTl.time(0);
+    
+    if (!window.__hf) {
+      setTimeout(function() { mainTl.play(); }, 500);
+    }
+    
+    console.log("[Template] Init complete. Duration: " + finalDur + "s. Scenes: " + scenes.length);
   </script>
 </body>
-
 </html>
