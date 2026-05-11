@@ -6,7 +6,7 @@ import { getTopPercent, getLeftPercent, getTransform } from "../../utils/pos";
 export function ClassicFrame({
   ratio, title, content, type, bodyText,
   logoText, logoColor, logoTop, logoLeft, logoSize, logoAlign, logoPlacement,
-  hookColor, hookSize, bodyColor, bodySize,
+  hookColor, hookSize, bodyColor, bodySize, textColor,
   showLogo, showDatetime, showTag, tagText, tagBg, tagColor,
   tagTop, tagLeft, tagSize, tagAlign, tagPlacement,
   mainTop, mainLeft, mainAlign, mainPlacement, dividerColor

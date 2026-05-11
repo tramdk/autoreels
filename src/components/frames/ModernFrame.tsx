@@ -8,7 +8,7 @@ export function ModernFrame(props: FrameProps) {
   const s = props.settings || props;
   const {
     logoText, logoColor, logoTop, logoLeft, logoSize, logoAlign, logoPlacement,
-    hookColor, hookSize, bodyColor, bodySize,
+    hookColor, hookSize, bodyColor, bodySize, textColor,
     showLogo, showTag, tagText, tagBg, tagColor,
     tagTop, tagLeft, tagSize, tagAlign, tagPlacement,
     mainTop, mainLeft, mainAlign, mainPlacement

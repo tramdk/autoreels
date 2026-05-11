@@ -26,6 +26,7 @@ export interface FrameProps {
   bodyColor?: string;
   bodySize?: number;
   bodyAnim?: string;
+  textColor?: string;
   dividerColor?: string;
   dividerWidth?: number;
   mainTop?: number;
@@ -52,7 +53,7 @@ export function CyberpunkFrame(props: FrameProps) {
   const s = props.settings || props;
   const {
     logoText, logoColor, logoTop, logoLeft, logoSize, logoAlign, logoPlacement,
-    hookColor, hookSize, bodyColor, bodySize,
+    hookColor, hookSize, bodyColor, bodySize, textColor, bodyText,
     dividerColor, showLogo, showTag, tagText, tagBg, tagColor,
     tagTop, tagLeft, tagSize, tagAlign, tagPlacement,
     mainTop, mainLeft, mainAlign, mainPlacement

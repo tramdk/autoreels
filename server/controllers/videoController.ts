@@ -242,7 +242,7 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
 
     // Fallback: Generate from content if script is missing or invalid
     if (finalScenes.length === 0) {
-      const gen = generateScriptFromText(article.content || article.title, article.imageUrl);
+      const gen = generateScriptFromText(article.contentSnippet || article.title, article.imageUrl);
       finalScenes = gen.scenes;
     }
 
@@ -265,7 +265,7 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
         title: title || article.title,
         script: JSON.stringify(payload),
         imageUrl: imageUrl || article.imageUrl,
-        content: article.content || article.title,
+        content: article.contentSnippet || article.title,
         ttsProvider: ttsProvider || 'edge',
         ttsVoiceId: ttsVoiceId || 'vi-VN-HoaiMyNeural',
         bgmAssetId: bgmAssetId || null,
