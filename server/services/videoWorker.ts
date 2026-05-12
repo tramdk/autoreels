@@ -14,13 +14,27 @@ const MAX_TASK_DURATION = 20 * 60 * 1000; // 20 minutes safety limit
 
 export async function triggerWorker() {
   if (isWorking) return;
+  isWorking = true;
   processNextTask();
 }
 
 async function processNextTask() {
-  if (isWorking) return;
+  // We expect isWorking to be true when entering here from triggerWorker
+  // but we keep the check for safety during the interval loop
+  isWorking = true;
   
   try {
+    // CRITICAL: Double check if any other task is ALREADY processing in DB
+    // This handles cases where local state might be out of sync or race conditions
+    const activeTask = await prisma.videoTask.findFirst({
+      where: { status: 'processing' }
+    });
+
+    if (activeTask) {
+      console.log(`⏳ [VIDEO WORKER] Task ${activeTask.id} is already in progress. Queueing current request.`);
+      return; 
+    }
+
     const task = await prisma.videoTask.findFirst({
       where: { status: 'pending' },
       orderBy: { createdAt: 'asc' }
@@ -31,19 +45,19 @@ async function processNextTask() {
       return;
     }
 
-    // ATOMIC CLAIM
+    // ATOMIC CLAIM with status check
     const updateResult = await prisma.videoTask.updateMany({
       where: { id: task.id, status: 'pending' },
       data: { status: 'processing' }
     });
 
     if (updateResult.count === 0) {
+      // Someone else (or another thread) claimed it
       isWorking = false;
       setTimeout(processNextTask, 500);
       return;
     }
 
-    isWorking = true;
     lastTaskStartTime = Date.now();
     console.log(`🎬 [VIDEO WORKER] Starting Task ${task.id}...`);
 

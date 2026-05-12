@@ -22,9 +22,11 @@
   <style>
     :root {
       --cqmin: min(var(--v-width) * 1px, var(--v-height) * 1px);
-      --glass-bg: rgba(255, 255, 255, 0.03);
-      --glass-border: rgba(255, 255, 255, 0.12);
-      --glass-shine: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.05) 100%);
+      --glass-bg: rgba(255, 255, 255, 0.015);
+      --glass-border: rgba(255, 255, 255, 0.25);
+      --glass-edge: rgba(255, 255, 255, 0.15);
+      --glass-shine: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.1) 100%);
+      --accent-color: {{ DIVIDER_COLOR }};
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -80,10 +82,16 @@
     .orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(120px);
+      filter: blur(60px);
       z-index: 5;
       mix-blend-mode: screen;
+      opacity: 0.6;
+      pointer-events: none;
     }
+
+    .orb-1 { background: var(--accent-color); width: 800px; height: 800px; top: -20%; left: -20%; }
+    .orb-2 { background: {{ LOGO_COLOR }}; width: 700px; height: 700px; bottom: -10%; right: -10%; }
+    .orb-3 { background: #6366f1; width: 600px; height: 600px; top: 30%; left: 40%; }
 
     .logo-badge {
       position: absolute;
@@ -156,6 +164,7 @@
       display: flex;
       flex-direction: column;
       align-items: var(--v-main-align);
+      perspective: 2000px;
     }
 
     .scene-card {
@@ -165,12 +174,21 @@
       width: 100%;
       background: var(--glass-bg);
       border: 1px solid var(--glass-border);
-      padding: 80px 60px;
-      border-radius: 64px;
-      backdrop-filter: blur(45px) saturate(200%);
+      padding: 90px 70px;
+      border-radius: 72px;
+      backdrop-filter: blur(40px) saturate(250%) contrast(110%);
+      -webkit-backdrop-filter: blur(40px) saturate(250%) contrast(110%);
       text-align: center;
-      box-shadow: 0 40px 120px rgba(0, 0, 0, 0.5), inset 0 0 80px rgba(255, 255, 255, 0.05);
+      box-shadow: 
+        0 60px 150px rgba(0, 0, 0, 0.7),
+        inset 0 0 0 1px var(--glass-edge),
+        inset 0 0 100px rgba(255, 255, 255, 0.08);
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transform-style: preserve-3d;
     }
 
     .scene-card::before {
@@ -238,11 +256,11 @@
     <div class="grain"></div>
 
     <!-- Animated Orbs -->
-    <div class="orb" style="width: 500px; height: 500px; top: -10%; left: -10%; background: {{ DIVIDER_COLOR }}; opacity: 0.2;"></div>
-    <div class="orb" style="width: 400px; height: 400px; bottom: 10%; right: -5%; background: {{ LOGO_COLOR }}; opacity: 0.15;"></div>
-    <div class="orb" style="width: 300px; height: 300px; top: 40%; left: 60%; background: #ffffff; opacity: 0.1;"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
 
-    <div class="logo-badge">
+    <div class="logo-badge" style="display: flex;">
       <img class="logo-img" src="{{ LOGO_IMAGE }}" alt="">
       <div style="width: 12px; height: 12px; border-radius: 50%; background: {{ DIVIDER_COLOR }}; box-shadow: 0 0 10px {{ DIVIDER_COLOR }}; display: {{ SHOW_LOGO_IMAGE === 'none' ? 'block' : 'none' }};"></div>
       {{ LOGO_TEXT }}
@@ -296,12 +314,23 @@
 
       tl.from(sceneEl, { 
         opacity: 0, 
-        y: 80, 
-        scale: 0.85, 
-        rotationX: 20,
+        y: 120, 
+        scale: 0.7, 
+        rotationX: 45,
+        rotationY: -10,
+        z: -200,
         duration: inDur, 
         ease: "power4.out" 
       });
+
+      // Subtle floating 3D effect
+      tl.to(sceneEl, {
+        rotationX: -5,
+        rotationY: 5,
+        y: "-=20",
+        duration: duration,
+        ease: "sine.inOut"
+      }, inDur);
 
       if (i < scenes.length - 1) {
         tl.to(sceneEl, { 

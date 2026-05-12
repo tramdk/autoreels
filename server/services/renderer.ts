@@ -408,7 +408,7 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
       '-f', '30',
       '-q', 'standard'
     ], {
-      env,
+      env: { ...env, PUPPETEER_HEADLESS: 'old' },
       cwd: process.cwd(),
       shell: process.platform === 'win32' // Still need shell for .cmd on Windows
     });
