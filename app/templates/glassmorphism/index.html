@@ -336,12 +336,12 @@
         opacity: 0, 
         y: 120, 
         scale: 0.8, 
-        rotationX: isRendering ? 0 : 45, // Disable 3D rotation during render
+        rotationX: isRendering ? 0 : 45,
         rotationY: isRendering ? 0 : -10,
         z: isRendering ? 0 : -200,
         duration: inDur, 
         ease: "power4.out" 
-      });
+      }, 0);
 
       // Subtle floating effect - Simplified for render
       var floatDur = Math.max(0.1, duration - inDur - outDur);
