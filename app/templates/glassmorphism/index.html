@@ -324,7 +324,7 @@
       document.getElementById('main-content').appendChild(sceneEl);
 
       var inDur = 0.8;  // Faster entrance for snappier feel
-      var outDur = 0.6;  // Slightly faster exit
+      var outDur = 0.9;  // Exit longer than CROSSFADE for clean 24fps transition
 
       var progBar = sceneEl.querySelector('.scene-progress-bar');
       var tl = gsap.timeline();

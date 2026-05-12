@@ -174,7 +174,7 @@
       document.getElementById('main-content').appendChild(sceneEl);
 
       var inDur = 0.5;
-      var outDur = 0.4;
+      var outDur = 0.8;
       var tl = gsap.timeline();
       tl.from(sceneEl, { opacity: 0, x: -80, skewX: 8, duration: inDur, ease: "power3.out" });
       tl.to(sceneEl, { opacity: 0, x: 40, duration: outDur, ease: "power2.in" }, duration - outDur);

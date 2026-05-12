@@ -179,7 +179,7 @@
       document.getElementById('main-content').appendChild(sceneEl);
 
       var inDur = 0.8;
-      var outDur = 0.6;
+      var outDur = 0.9;
       var tl = gsap.timeline();
       tl.from(sceneEl, { opacity: 0, y: 15, duration: inDur, ease: "power2.out" });
       tl.to(sceneEl, { opacity: 0, duration: outDur, ease: "power2.in" }, duration - outDur);

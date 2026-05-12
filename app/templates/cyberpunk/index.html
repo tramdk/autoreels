@@ -317,7 +317,7 @@
       document.getElementById('main-content').appendChild(sceneEl);
 
       var inDur = 0.6;
-      var outDur = 0.5;
+      var outDur = 0.8;
       var tl = gsap.timeline();
       tl.from(sceneEl, { opacity: 0, x: 80, skewX: -15, duration: inDur, ease: "expo.out" });
       tl.to(sceneEl, { opacity: 0, x: -60, skewX: 10, duration: outDur, ease: "expo.in" }, duration - outDur);
