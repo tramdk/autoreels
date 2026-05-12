@@ -293,6 +293,9 @@
   <script>
     var scenes = SCENES_DATA;
     var sceneDurations = SCENE_DURATIONS;
+    
+    // Detect rendering mode early to avoid ReferenceError
+    var isRendering = window.__hf && (window.__hf.active || window.__hf.duration);
 
     var mainTl = gsap.timeline({ id: "root", paused: true });
     window.__timelines = window.__timelines || {};
@@ -385,7 +388,6 @@
     });
 
     mainTl.time(0);
-    var isRendering = window.__hf && (window.__hf.active || window.__hf.duration);
     if (isRendering) {
       document.body.classList.add('is-rendering');
     } else {

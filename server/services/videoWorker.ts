@@ -128,7 +128,20 @@ async function recoverStuckTasks() {
 }
 
 async function cleanupOldTasks() {
-  console.log('[VIDEO WORKER] Cleanup skipped to preserve history.');
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const result = await prisma.videoTask.deleteMany({
+      where: {
+        status: { in: ['completed', 'error'] },
+        createdAt: { lt: sevenDaysAgo }
+      }
+    });
+    if (result.count > 0) {
+      console.log(`🧹 [VIDEO WORKER] Cleaned up ${result.count} old tasks.`);
+    }
+  } catch (err) {
+    console.error('[VIDEO WORKER] Cleanup error:', err);
+  }
 }
 
 export async function startVideoWorker() {
@@ -138,8 +151,16 @@ export async function startVideoWorker() {
 
   setInterval(async () => {
     if (isWorking && lastTaskStartTime && (Date.now() - lastTaskStartTime > MAX_TASK_DURATION)) {
-      console.warn('⚠️ [VIDEO WORKER] Task taking too long.');
+      console.warn('⚠️ [VIDEO WORKER] Task taking too long. Attempting to reset state...');
+      // Note: We don't have a direct handle to kill the renderer here yet, 
+      // but setting isWorking to false allows the next task to try.
+      isWorking = false; 
+      lastTaskStartTime = null;
     }
     if (!isWorking) processNextTask();
   }, 10000);
+
+  // Run cleanup every 24 hours
+  setInterval(cleanupOldTasks, 24 * 60 * 60 * 1000);
+  cleanupOldTasks(); // Also run once at startup
 }

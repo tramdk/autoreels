@@ -397,6 +397,14 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
   const absoluteWorkDir = path.resolve(workDir);
 
   return new Promise(async (resolve, reject) => {
+    // 15-minute safety timeout for the entire subprocess
+    const RENDER_TIMEOUT = 15 * 60 * 1000;
+    const timeoutHandle = setTimeout(() => {
+      console.error(`[Renderer] TIMEOUT: Rendering exceeded ${RENDER_TIMEOUT/1000}s. Killing process.`);
+      child.kill('SIGKILL');
+      reject(new Error(`Rendering timed out after ${RENDER_TIMEOUT/1000} seconds`));
+    }, RENDER_TIMEOUT);
+
     // Increase delay to 1s to ensure everything is ready
     await new Promise(r => setTimeout(r, 1000));
 
@@ -426,6 +434,7 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
     });
 
     child.on('close', (code) => {
+      clearTimeout(timeoutHandle);
       if (code !== 0) return reject(new Error(`HyperFrames failed with code ${code}. Error: ${hyperError}`));
       try {
         let mergeCmd: string;

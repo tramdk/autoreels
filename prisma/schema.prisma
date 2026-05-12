@@ -113,5 +113,5 @@ model VideoTask {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  @@index([status])
+  @@index([status, createdAt])
 }
