@@ -4,7 +4,26 @@ import { triggerWorker } from './videoWorker';
 import { EventBusClient } from './EventBusClient';
 
 const prisma = new PrismaClient();
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+
+const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+const redis = new Redis(redisUrl, {
+  maxRetriesPerRequest: null, // Required for blocking commands like XREADGROUP
+  retryStrategy(times) {
+    const delay = Math.min(times * 2000, 30000); // Max 30s between retries
+    console.log(`🔄 [EVENT BUS] Redis reconnecting in ${delay/1000}s (attempt ${times})...`);
+    return delay;
+  },
+  lazyConnect: true, // Don't connect until we call .connect()
+});
+
+redis.on('error', (err) => {
+  console.error(`⚠️ [EVENT BUS] Redis error: ${err.message}`);
+});
+
+redis.on('connect', () => {
+  console.log('✅ [EVENT BUS] Redis connected.');
+});
+
 const eb = new EventBusClient();
 
 const STREAM_NAME = 'reels_stream';
@@ -16,6 +35,14 @@ const CONSUMER_NAME = `worker_${Math.random().toString(36).substring(7)}`;
  */
 export async function startEventBusWorker() {
   console.log(`📡 [EVENT BUS] Worker ${CONSUMER_NAME} starting...`);
+
+  // 0. Connect to Redis (with lazyConnect)
+  try {
+    await redis.connect();
+  } catch (err: any) {
+    console.error(`⚠️ [EVENT BUS] Initial Redis connect failed: ${err.message}. Worker will retry in background.`);
+    return; // Don't block server startup; ioredis retryStrategy handles reconnection
+  }
 
   // 1. Create Consumer Group if it doesn't exist
   let groupCreated = false;
