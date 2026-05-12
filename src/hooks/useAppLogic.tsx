@@ -27,6 +27,7 @@ export const useAppLogic = () => {
   const [videosTotalPages, setVideosTotalPages] = useState(1);
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [isTikTokConnected, setIsTikTokConnected] = useState(false);
   
   // Auth state
@@ -58,6 +59,15 @@ export const useAppLogic = () => {
     } catch (error) {}
   }, [isAuthenticated]);
 
+  // Initial load: fetch all data with loading indicator
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    setInitialLoading(true);
+    Promise.all([fetchStats(), fetchSources()]).finally(() => {
+      setInitialLoading(false);
+    });
+  }, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const fetchSources = useCallback(async () => {
     if (!isAuthenticated) return;
     try {
@@ -68,6 +78,7 @@ export const useAppLogic = () => {
 
   const fetchArticles = useCallback(async (page: number = 1) => {
     if (!isAuthenticated) return;
+    setInitialLoading(true);
     try {
       const data = await api.getArticles(page, 10);
       setArticles(data.items || []);
@@ -75,11 +86,14 @@ export const useAppLogic = () => {
       setArticlesTotalPages(data.totalPages || 1);
     } catch (error) {
       console.error('[AppLogic] fetchArticles error:', error);
+    } finally {
+      setInitialLoading(false);
     }
   }, [isAuthenticated]);
 
   const fetchVideos = useCallback(async (page: number = 1, status?: string) => {
     if (!isAuthenticated) return;
+    setInitialLoading(true);
     try {
       const data = await api.getVideos(page, 9, status);
       setVideos(data.items || []);
@@ -87,15 +101,21 @@ export const useAppLogic = () => {
       setVideosTotalPages(data.totalPages || 1);
     } catch (error) {
       console.error('[AppLogic] fetchVideos error:', error);
+    } finally {
+      setInitialLoading(false);
     }
   }, [isAuthenticated]);
 
   const fetchVoices = useCallback(async () => {
     if (!isAuthenticated) return;
+    setInitialLoading(true);
     try {
       const data = await api.getVoices();
       setVoices(data);
     } catch (error) {}
+    finally {
+      setInitialLoading(false);
+    }
   }, [isAuthenticated]);
 
   const reloadCurrentView = useCallback(async () => {
@@ -111,12 +131,7 @@ export const useAppLogic = () => {
     checkAuth();
   }, [checkAuth]);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchStats();
-      fetchSources(); // usually small enough to load once for dropdowns
-    }
-  }, [isAuthenticated, fetchStats, fetchSources]);
+  // Note: initial data loading is handled by the initialLoading useEffect above
 
   useEffect(() => {
     if (isAuthenticated && activeTab === 'dashboard') {
@@ -465,7 +480,7 @@ export const useAppLogic = () => {
     sources,
     articles,
     videos,
-    loading,
+    loading: loading || initialLoading,
     isTikTokConnected,
     setIsTikTokConnected,
     isAuthenticated,
