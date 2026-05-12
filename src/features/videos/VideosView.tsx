@@ -19,11 +19,21 @@ interface VideosViewProps {
 }
 
 const VideoSkeleton = () => (
-  <div className="glass flex flex-col rounded-3xl border border-white/5 overflow-hidden">
-    <div className="aspect-[9/16] bg-slate-900/50 skeleton-item" />
-    <div className="p-6 space-y-4">
-      <div className="h-6 w-full skeleton-item" />
-      <div className="h-12 w-full skeleton-item" />
+  <div className="glass flex flex-col rounded-[32px] border border-white/5 overflow-hidden">
+    <div className="aspect-[9/16] bg-slate-900/50 relative overflow-hidden">
+      <div className="absolute inset-0 skeleton-item" style={{ borderRadius: 0 }} />
+      <div className="absolute top-4 left-4">
+        <div className="w-20 h-6 skeleton-item" />
+      </div>
+    </div>
+    <div className="p-6 flex-1 flex flex-col gap-4">
+      <div className="space-y-2">
+        <div className="h-5 w-full skeleton-item" />
+        <div className="h-5 w-3/4 skeleton-item" />
+      </div>
+      <div className="mt-auto">
+        <div className="h-14 w-full skeleton-item" style={{ borderRadius: 16 }} />
+      </div>
     </div>
   </div>
 );

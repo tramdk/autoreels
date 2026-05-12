@@ -14,9 +14,10 @@ interface StatCardProps {
   icon: React.ReactNode;
   color?: keyof typeof colorMap;
   onClick?: () => void;
+  loading?: boolean;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color = 'blue', onClick }) => {
+export const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color = 'blue', onClick, loading }) => {
   const styles = colorMap[color];
   
   return (
@@ -31,20 +32,31 @@ export const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color = 
       {/* Dynamic Background Glow */}
       <div className={`absolute -bottom-12 -right-12 w-32 h-32 blur-[60px] opacity-20 rounded-full ${styles.bg}`} />
       
-      <div className={`p-4 sm:p-5 rounded-2xl ${styles.bg} ${styles.text} mb-4 sm:mb-6 transition-all duration-500 group-hover:scale-110 shadow-lg ${styles.glow} border ${styles.border}`}>
-        {React.cloneElement(icon as React.ReactElement, { className: 'w-6 h-6 sm:w-7 h-7' })}
-      </div>
-      
-      <p className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2 sm:mb-3 leading-none">
-        {title}
-      </p>
-      
-      <div className="relative">
-        <p className="text-3xl sm:text-5xl font-black text-white tracking-tighter leading-none mb-1">
-          {value}
-        </p>
-        <div className={`h-1 w-8 mx-auto rounded-full ${styles.bg} opacity-50`} />
-      </div>
+      {loading ? (
+        <>
+          <div className={`p-4 sm:p-5 rounded-2xl mb-4 sm:mb-6 skeleton-item w-14 h-14 sm:w-16 sm:h-16`} />
+          <div className="w-16 h-3 skeleton-item mb-3" />
+          <div className="w-20 h-10 sm:h-12 skeleton-item mb-1" />
+          <div className="h-1 w-8 skeleton-item mt-1" />
+        </>
+      ) : (
+        <>
+          <div className={`p-4 sm:p-5 rounded-2xl ${styles.bg} ${styles.text} mb-4 sm:mb-6 transition-all duration-500 group-hover:scale-110 shadow-lg ${styles.glow} border ${styles.border}`}>
+            {React.cloneElement(icon as React.ReactElement, { className: 'w-6 h-6 sm:w-7 h-7' })}
+          </div>
+          
+          <p className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2 sm:mb-3 leading-none">
+            {title}
+          </p>
+          
+          <div className="relative">
+            <p className="text-3xl sm:text-5xl font-black text-white tracking-tighter leading-none mb-1">
+              {value}
+            </p>
+            <div className={`h-1 w-8 mx-auto rounded-full ${styles.bg} opacity-50`} />
+          </div>
+        </>
+      )}
     </motion.div>
   );
 };

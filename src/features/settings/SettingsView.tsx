@@ -318,9 +318,82 @@ export const SettingsView: React.FC = () => {
 
 
   if (loading) return (
-    <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center gap-6">
-      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Loading Environment</span>
+    <div className="min-h-screen bg-[#050505] text-white p-4 md:p-8 font-sans">
+      <div className="max-w-[1600px] mx-auto space-y-8">
+        {/* Header skeleton */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-8">
+          <div className="space-y-3">
+            <div className="w-48 h-10 skeleton-item" />
+            <div className="w-72 h-4 skeleton-item" />
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-2 bg-white/5 p-1.5 rounded-2xl border border-white/10">
+              {Array(8).fill(0).map((_, i) => (
+                <div key={i} className="w-16 h-8 skeleton-item" style={{ borderRadius: 12 }} />
+              ))}
+            </div>
+            <div className="w-32 h-12 skeleton-item" style={{ borderRadius: 999 }} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Config area skeleton */}
+          <div className="lg:col-span-7 space-y-8">
+            <div className="backdrop-blur-xl bg-white/[0.03] border border-white/10 rounded-[32px] overflow-hidden">
+              {/* Tabs skeleton */}
+              <div className="flex border-b border-white/5 bg-white/[0.01] p-1">
+                {Array(4).fill(0).map((_, i) => (
+                  <div key={i} className="flex-1 py-5 flex justify-center">
+                    <div className="w-16 h-4 skeleton-item" />
+                  </div>
+                ))}
+              </div>
+              {/* Content skeleton */}
+              <div className="p-8 space-y-6">
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <div className="w-24 h-3 skeleton-item" />
+                    <div className="h-12 skeleton-item" style={{ borderRadius: 12 }} />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="h-20 skeleton-item" style={{ borderRadius: 12 }} />
+                      <div className="h-20 skeleton-item" style={{ borderRadius: 12 }} />
+                    </div>
+                    <div className="h-10 skeleton-item" style={{ borderRadius: 8 }} />
+                  </div>
+                  <div className="space-y-4">
+                    <div className="w-24 h-3 skeleton-item" />
+                    <div className="h-10 skeleton-item" style={{ borderRadius: 8 }} />
+                    <div className="h-10 skeleton-item" style={{ borderRadius: 8 }} />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="h-20 skeleton-item" style={{ borderRadius: 12 }} />
+                      <div className="h-20 skeleton-item" style={{ borderRadius: 12 }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Preview skeleton */}
+          <div className="lg:col-span-5">
+            <div className="sticky top-8 space-y-8">
+              <div className="backdrop-blur-2xl bg-white/[0.03] border border-white/10 rounded-[40px] overflow-hidden">
+                <div className="p-6 border-b border-white/5 flex justify-between items-center">
+                  <div className="w-40 h-4 skeleton-item" />
+                  <div className="w-28 h-8 skeleton-item" style={{ borderRadius: 12 }} />
+                </div>
+                <div className="bg-black/40 min-h-[500px] flex items-center justify-center">
+                  <div className="w-[200px] h-[356px] skeleton-item" style={{ borderRadius: 16 }} />
+                </div>
+                <div className="p-5 border-t border-white/5 flex justify-between">
+                  <div className="w-40 h-3 skeleton-item" />
+                  <div className="w-24 h-3 skeleton-item" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 

@@ -172,10 +172,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="px-6 py-8 md:px-12 md:py-10 pb-32">
         <div className="max-w-7xl mx-auto space-y-10">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <StatCard title={t('dashboard.sources')} value={stats.sources} icon={<Rss className="w-5 h-5" />} color="rose" onClick={() => navigate('/sources')} />
-            <StatCard title={t('dashboard.articles')} value={stats.articles} icon={<FileText className="w-5 h-5" />} color="blue" onClick={() => navigate('/dashboard')} />
-            <StatCard title={t('dashboard.videos')} value={stats.videos} icon={<VideoIcon className="w-5 h-5" />} color="purple" onClick={() => navigate('/videos')} />
-            <StatCard title={t('dashboard.posted')} value={stats.postedVideos} icon={<CheckCircle2 className="w-5 h-5" />} color="green" onClick={() => navigate('/videos?status=posted')} />
+            <StatCard title={t('dashboard.sources')} value={stats.sources} icon={<Rss className="w-5 h-5" />} color="rose" onClick={() => navigate('/sources')} loading={loading && articles.length === 0} />
+            <StatCard title={t('dashboard.articles')} value={stats.articles} icon={<FileText className="w-5 h-5" />} color="blue" onClick={() => navigate('/dashboard')} loading={loading && articles.length === 0} />
+            <StatCard title={t('dashboard.videos')} value={stats.videos} icon={<VideoIcon className="w-5 h-5" />} color="purple" onClick={() => navigate('/videos')} loading={loading && articles.length === 0} />
+            <StatCard title={t('dashboard.posted')} value={stats.postedVideos} icon={<CheckCircle2 className="w-5 h-5" />} color="green" onClick={() => navigate('/videos?status=posted')} loading={loading && articles.length === 0} />
           </div>
 
           <div className="glass rounded-[32px] p-6 sm:p-10 border border-white/5">
