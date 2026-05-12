@@ -415,7 +415,7 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
       'render', absoluteWorkDir,
       '-o', tempVideoPath,
       '-f', '24',              // 24fps: 20% fewer frames vs 30fps, negligible quality loss for text
-      '-q', 'fast',            // Fast encoding: prioritize speed over compression ratio
+      '-q', 'draft',            // Fastest quality: prioritize speed over compression ratio
       '--max-workers', '2'     // Limit concurrent Chrome tabs to prevent CPU saturation
     ], {
       env: { ...env, PUPPETEER_HEADLESS: 'old' },
