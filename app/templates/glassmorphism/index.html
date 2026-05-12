@@ -31,7 +31,16 @@
     }
 
     body.is-rendering {
-      --blur-amount: 12px; /* Drastically reduce blur during render for 5x speedup */
+      --blur-amount: 8px; /* Extreme reduction */
+    }
+
+    body.is-rendering .grain,
+    body.is-rendering .orb {
+      display: none !important; /* Disable high-cost background elements */
+    }
+
+    body.is-rendering .scene-card {
+      background: rgba(255, 255, 255, 0.08); /* Increase opacity to compensate for less blur */
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
