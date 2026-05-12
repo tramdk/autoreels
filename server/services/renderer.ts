@@ -340,6 +340,8 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
   const durVal = String(Math.ceil(dVal));
   const hfScript = `
   <script>
+    window.__hf = window.__hf || {};
+    window.__hf.active = true;
     (function() {
       var fallbackDur = ${dVal};
       var d = window.duration || fallbackDur;
@@ -351,7 +353,6 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
       window.duration = d;
       window.remotion_duration = d;
       window.remotion_totalFrames = Math.ceil(d * 30);
-      if (!window.__hf) window.__hf = {};
       window.__hf.duration = d;
       window.__hf.getDuration = function() { return d; };
       window.__hf.seek = function(t) { 
@@ -364,8 +365,8 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
   </script>
   `;
 
-  // Inject HyperFrames seeker script
-  rendered = rendered.replace('</body>', `${hfScript}\n</body>`);
+  // Inject HyperFrames seeker script into <head> so it's available immediately
+  rendered = rendered.replace('<head>', `<head>\n${hfScript}`);
 
   // FINAL VERIFICATION: Check if our unique placeholders were replaced
   if (rendered.includes('__SCENE_DURATIONS_INJECTED__')) {

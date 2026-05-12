@@ -332,19 +332,19 @@
       tl.from(sceneEl, { 
         opacity: 0, 
         y: 120, 
-        scale: 0.7, 
-        rotationX: 45,
-        rotationY: -10,
-        z: -200,
+        scale: 0.8, 
+        rotationX: isRendering ? 0 : 45, // Disable 3D rotation during render
+        rotationY: isRendering ? 0 : -10,
+        z: isRendering ? 0 : -200,
         duration: inDur, 
         ease: "power4.out" 
       });
 
-      // Subtle floating 3D effect - constrained to the available time
+      // Subtle floating effect - Simplified for render
       var floatDur = Math.max(0.1, duration - inDur - outDur);
       tl.to(sceneEl, {
-        rotationX: -5,
-        rotationY: 5,
+        rotationX: isRendering ? 0 : -5,
+        rotationY: isRendering ? 0 : 5,
         y: "-=20",
         duration: floatDur,
         ease: "sine.inOut"
@@ -385,7 +385,8 @@
     });
 
     mainTl.time(0);
-    if (window.__hf) {
+    var isRendering = window.__hf && (window.__hf.active || window.__hf.duration);
+    if (isRendering) {
       document.body.classList.add('is-rendering');
     } else {
       setTimeout(function() { mainTl.play(); }, 500);
