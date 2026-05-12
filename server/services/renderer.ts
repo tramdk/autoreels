@@ -304,7 +304,7 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
     'MAIN_CSS_TRANSFORM': getTransform(tpl.mainAlign || 'center', tpl.mainPlacement || 'center'),
     'MAIN_CSS_ALIGN': getAlignItems(tpl.mainAlign || 'center'),
     'MAIN_CSS_TEXT_ALIGN': tpl.mainAlign || 'center',
-    'FONT_FAMILY': tpl.fontFamily || 'Inter',
+    'FONT_FAMILY': (tpl.fontFamily || 'Inter').replace(/playfair display/i, 'playfair-display'),
     'LINE_HEIGHT': String(tpl.lineHeight || 1.1),
     'SHOW_PROGRESS_BAR': tpl.showProgressBar !== false ? 'block' : 'none',
     'LOGO_IMAGE': tpl.logoImage || '',

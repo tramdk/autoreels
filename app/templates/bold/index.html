@@ -174,17 +174,13 @@
       document.getElementById('main-content').appendChild(sceneEl);
 
       var inDur = 0.5;
-      var outDur = 0.8;
+      var outDur = 0.4;
       var tl = gsap.timeline();
       tl.from(sceneEl, { opacity: 0, x: -80, skewX: 8, duration: inDur, ease: "power3.out" });
       tl.to(sceneEl, { opacity: 0, x: 40, duration: outDur, ease: "power2.in" }, duration - outDur);
       
       mainTl.add(tl, currentTime);
-      if (i < scenes.length - 1) {
-        currentTime += duration - CROSSFADE;
-      } else {
-        currentTime += duration;
-      }
+      currentTime += duration;
     }
 
     var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;

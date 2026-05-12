@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../services/api';
 import { Source, Article, VideoItem, TabType, Voice } from '../types';
 import toast from 'react-hot-toast';
@@ -213,6 +213,16 @@ export const useAppLogic = () => {
   };
 
   const [renderingVideos, setRenderingVideos] = useState<Record<string, number>>({});
+  const activeEventSources = useRef<Record<string, EventSource>>({});
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(activeEventSources.current).forEach((es: any) => {
+        if (es && typeof es.close === 'function') es.close();
+      });
+    };
+  }, []);
 
   const handleGenerateVideo = async (id: string, templateId?: string, options: any = {}) => {
     setLoading(true);
@@ -231,6 +241,7 @@ export const useAppLogic = () => {
 
       // Start listening for progress via SSE
       const eventSource = new EventSource(api.getVideoProgressUrl(videoId));
+      activeEventSources.current[videoId] = eventSource;
       
       const toastId = toast.loading(`Rendering video: 5%`, { duration: Infinity });
 
@@ -240,6 +251,7 @@ export const useAppLogic = () => {
         if (progress === -1) {
           toast.error('Video generation failed.', { id: toastId });
           eventSource.close();
+          delete activeEventSources.current[videoId];
           setRenderingVideos(prev => {
             const next = { ...prev };
             delete next[progressKey];
@@ -253,6 +265,7 @@ export const useAppLogic = () => {
 
         if (progress >= 100) {
           eventSource.close();
+          delete activeEventSources.current[videoId];
           toast.success((t) => (
             <div onClick={() => { setActiveTab('videos'); toast.dismiss(t.id); }} className="cursor-pointer">
               Video Rendered! Click to view.
@@ -272,6 +285,7 @@ export const useAppLogic = () => {
 
       eventSource.onerror = () => {
         eventSource.close();
+        delete activeEventSources.current[videoId];
       };
 
     } catch (error: any) {
