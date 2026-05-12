@@ -352,7 +352,7 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
       }
       window.duration = d;
       window.remotion_duration = d;
-      window.remotion_totalFrames = Math.ceil(d * 30);
+      window.remotion_totalFrames = Math.ceil(d * 24);
       window.__hf.duration = d;
       window.__hf.getDuration = function() { return d; };
       window.__hf.seek = function(t) { 
