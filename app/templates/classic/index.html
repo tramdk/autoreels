@@ -208,6 +208,8 @@
     window.__timelines["root"] = mainTl;
 
     var currentTime = 0;
+    var CROSSFADE = 0.5; // 0.5s overlap between scenes for smooth crossfade
+
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
       var duration = sceneDurations[i] || 5;
@@ -233,12 +235,29 @@
       sceneEl.innerHTML = html;
       document.getElementById('main-content').appendChild(sceneEl);
 
+      var inDur = 0.6;
+      var outDur = 0.5;
+
       var tl = gsap.timeline();
-      tl.from(sceneEl, { opacity: 0, scale: 0.95, duration: 0.8, ease: "power4.out" }).to(sceneEl, { opacity: 0, scale: 1.05, duration: 0.8, ease: "power4.in" }, (duration - 0.8)
-      );
+      // Smooth entrance
+      tl.from(sceneEl, { 
+        opacity: 0, y: 40, scale: 0.95, 
+        duration: inDur, ease: "power3.out" 
+      });
+      // Smooth exit
+      tl.to(sceneEl, { 
+        opacity: 0, y: -30, scale: 1.03, 
+        duration: outDur, ease: "power2.in" 
+      }, duration - outDur);
       
       mainTl.add(tl, currentTime);
-      currentTime += duration;
+      
+      // Crossfade: next scene starts 0.5s before this one fully exits
+      if (i < scenes.length - 1) {
+        currentTime += duration - CROSSFADE;
+      } else {
+        currentTime += duration;
+      }
     }
 
     var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;

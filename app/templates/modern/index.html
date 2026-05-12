@@ -325,6 +325,7 @@
 
     var container = document.getElementById('scenes-container');
     var currentTime = 0;
+    var CROSSFADE = 0.5;
 
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
@@ -337,29 +338,34 @@
       var progBar = unit.querySelector('.scene-progress-bar');
       var spans = buildTypingContent(titleEl, (scene.text || scene.bodyText || ''));
 
+      var inDur = 0.5;
+      var outDur = 0.4;
       var tl = gsap.timeline();
 
       // Modern slick animation
-      tl.from(unit, { opacity: 0, duration: 0.6, ease: "power2.inOut" }, 0)
-        .fromTo(bgImg, { scale: 1.2 }, { scale: 1, duration: dur, ease: "none" }, 0)
-        .from(unit.querySelector('.scene-content'), { y: 40, opacity: 0, duration: 0.8, ease: "expo.out" }, 0.2);
+      tl.from(unit, { opacity: 0, duration: inDur, ease: "power2.inOut" }, 0)
+        .fromTo(bgImg, { scale: 1.15 }, { scale: 1, duration: dur, ease: "none" }, 0)
+        .from(unit.querySelector('.scene-content'), { y: 30, opacity: 0, duration: 0.6, ease: "expo.out" }, 0.15);
 
       var staggerTime = Math.min(0.03, (dur * 0.6) / (spans.length || 1));
-      tl.to(spans, { opacity: 1, duration: 0.05, stagger: staggerTime, ease: 'none' }, 0.4);
+      tl.to(spans, { opacity: 1, duration: 0.05, stagger: staggerTime, ease: 'none' }, 0.3);
       
       // Progress bar animation
       tl.to(progBar, { width: "100%", duration: dur, ease: "none" }, 0);
 
       // Smooth exit
-      var outDur = 0.5;
       if (i < scenes.length - 1) {
-        tl.to(unit, { opacity: 0, scale: 1.05, duration: outDur, ease: "power2.in" }, dur - outDur);
+        tl.to(unit, { opacity: 0, scale: 1.03, duration: outDur, ease: "power2.in" }, dur - outDur);
       } else {
         tl.to(unit, { opacity: 0, duration: outDur }, dur - outDur);
       }
 
       mainTl.add(tl, currentTime);
-      currentTime += dur;
+      if (i < scenes.length - 1) {
+        currentTime += dur - CROSSFADE;
+      } else {
+        currentTime += dur;
+      }
     }
 
     var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;

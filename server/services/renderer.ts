@@ -405,8 +405,8 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
       reject(new Error(`Rendering timed out after ${RENDER_TIMEOUT/1000} seconds`));
     }, RENDER_TIMEOUT);
 
-    // Increase delay to 1s to ensure everything is ready
-    await new Promise(r => setTimeout(r, 1000));
+    // Brief delay to ensure file I/O is flushed (reduced from 1s → 200ms)
+    await new Promise(r => setTimeout(r, 200));
 
     const tempVideoPath = path.join(workDir, 'no_audio.mp4');
     let hyperError = '';
@@ -414,8 +414,9 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
     const child = spawn(hyperframesBin, [
       'render', absoluteWorkDir,
       '-o', tempVideoPath,
-      '-f', '30',
-      '-q', 'standard'
+      '-f', '24',              // 24fps: 20% fewer frames vs 30fps, negligible quality loss for text
+      '-q', 'fast',            // Fast encoding: prioritize speed over compression ratio
+      '--max-workers', '2'     // Limit concurrent Chrome tabs to prevent CPU saturation
     ], {
       env: { ...env, PUPPETEER_HEADLESS: 'old' },
       cwd: process.cwd(),
@@ -444,10 +445,9 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
         if (options.bgmPath && fs.existsSync(options.bgmPath)) {
           const bgmVol = Math.max(0, Math.min(1, options.bgmVolume ?? 0.15));
           console.log(`[Renderer] Mixing BGM at volume ${bgmVol}: ${options.bgmPath}`);
-          // Added aresample to ensure sampling rates match before amix
-          mergeCmd = `"${actualFfmpegPath}" -y ${threadOpt} -i "${tempVideoPath}" -i "${audioPath}" -stream_loop -1 -i "${options.bgmPath}" -filter_complex "[1:a]aresample=async=1[v_rs];[2:a]aresample=async=1,volume=${bgmVol}[bgm_rs];[v_rs][bgm_rs]amix=inputs=2:duration=first:dropout_transition=2[aout]" -map 0:v:0 -map "[aout]" -c:v copy -c:a aac -b:a 192k -shortest "${outputPath}"`;
+          mergeCmd = `"${actualFfmpegPath}" -y ${threadOpt} -i "${tempVideoPath}" -i "${audioPath}" -stream_loop -1 -i "${options.bgmPath}" -filter_complex "[1:a]aresample=async=1[v_rs];[2:a]aresample=async=1,volume=${bgmVol}[bgm_rs];[v_rs][bgm_rs]amix=inputs=2:duration=first:dropout_transition=2[aout]" -map 0:v:0 -map "[aout]" -c:v copy -c:a aac -b:a 128k -shortest "${outputPath}"`;
         } else {
-          mergeCmd = `"${actualFfmpegPath}" -y ${threadOpt} -i "${tempVideoPath}" -i "${audioPath}" -c:v copy -c:a aac -b:a 192k -map 0:v:0 -map 1:a:0 -shortest "${outputPath}"`;
+          mergeCmd = `"${actualFfmpegPath}" -y ${threadOpt} -i "${tempVideoPath}" -i "${audioPath}" -c:v copy -c:a aac -b:a 128k -map 0:v:0 -map 1:a:0 -shortest "${outputPath}"`;
         }
 
         console.log(`[Renderer] Executing merge: ${mergeCmd}`);

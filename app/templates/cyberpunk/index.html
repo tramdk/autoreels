@@ -298,6 +298,8 @@
     window.__timelines["root"] = mainTl;
 
     var currentTime = 0;
+    var CROSSFADE = 0.5;
+
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
       var duration = sceneDurations[i] || 5;
@@ -307,7 +309,6 @@
       sceneEl.id = sceneId;
       sceneEl.className = 'scene-box type-' + scene.type;
 
-      // HyperFrames native visibility control
       sceneEl.setAttribute('data-start', currentTime.toFixed(3));
       sceneEl.setAttribute('data-duration', duration.toFixed(3));
       sceneEl.setAttribute('data-track-index', "1");
@@ -315,12 +316,18 @@
       sceneEl.innerHTML = '<div class="scene-text">' + (scene.text || scene.bodyText || '') + '</div>';
       document.getElementById('main-content').appendChild(sceneEl);
 
+      var inDur = 0.6;
+      var outDur = 0.5;
       var tl = gsap.timeline();
-      tl.from(sceneEl, { opacity: 0, x: 100, skewX: -20, duration: 0.8, ease: "expo.out" }).to(sceneEl, { opacity: 0, x: -100, skewX: 20, duration: 0.6, ease: "expo.in" }, (duration - 0.6)
-      );
+      tl.from(sceneEl, { opacity: 0, x: 80, skewX: -15, duration: inDur, ease: "expo.out" });
+      tl.to(sceneEl, { opacity: 0, x: -60, skewX: 10, duration: outDur, ease: "expo.in" }, duration - outDur);
 
       mainTl.add(tl, currentTime);
-      currentTime += duration;
+      if (i < scenes.length - 1) {
+        currentTime += duration - CROSSFADE;
+      } else {
+        currentTime += duration;
+      }
     }
 
     var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;

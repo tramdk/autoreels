@@ -88,13 +88,13 @@ export const generateBulk = async (req: Request, res: Response) => {
 
     console.log(`🚀 [API] Received bulk-generate request for ${items.length} items from source: ${items[0]?.source || 'unknown'}`);
 
+    // Get global default template ONCE before loop
+    const globalTpl = await prisma.setting.findUnique({ where: { key: 'global_default_template' } });
+    const defaultTplId = globalTpl?.value || 'classic';
+
     const results = [];
     for (const item of items) {
       const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, ratio, content, script, title, imageUrl, source } = item;
-
-      // Get global default template if not specified
-      const globalTpl = await prisma.setting.findUnique({ where: { key: 'global_default_template' } });
-      const defaultTplId = globalTpl?.value || 'classic';
 
       // Create a persistent task in the database
       const task = await prisma.videoTask.create({
@@ -117,7 +117,7 @@ export const generateBulk = async (req: Request, res: Response) => {
 
       console.log(`📝 [API] Task created: ${task.id} (Status: pending)`);
       
-      // CRITICAL: Update article status to 'generating' immediately so UI knows it's in progress
+      // Update article status to 'generating' immediately so UI knows it's in progress
       if (articleId) {
         await prisma.article.update({
           where: { id: articleId },
@@ -176,12 +176,10 @@ export const getBulkStatus = async (req: Request, res: Response, next: NextFunct
         let videoUrl = undefined;
 
         if (status === 'completed') {
-          // Get the final URL from Video table before deleting the task
+          // Get the final URL from Video table
           const video = await prisma.video.findUnique({ where: { id } });
           videoUrl = video?.videoUrl;
-
-          // Cleanup: Delete the task now that it's completed and status is being returned
-          await prisma.videoTask.delete({ where: { id } }).catch(() => { });
+          // Task cleanup is handled by cleanupOldTasks in videoWorker
         }
 
         return {
@@ -381,10 +379,21 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
       const localTmpDir = path.join(process.cwd(), 'render_cache');
       if (!fs.existsSync(localTmpDir)) fs.mkdirSync(localTmpDir, { recursive: true });
 
-      // === BGM DOWNLOAD (if selected) ===
-      if (bgmAssetId && bgmAssetId !== 'none') {
+      // === PARALLEL: TTS + BGM Download ===
+      // Run both concurrently since they're independent I/O operations
+      const SEPARATOR = '... ';
+      const validScenes = scenes.map(s => ({ ...s, voiceText: s.voiceText || '' }));
+      const fullText = validScenes.map(s => s.voiceText).join(SEPARATOR);
+
+      console.log(`[PIPELINE] STEP 1: Starting TTS (${fullText.length} chars) + BGM download in parallel...`);
+      videoProgress.set(videoId, 10);
+
+      const ttsStartTime = Date.now();
+
+      // BGM download task (runs in parallel with TTS)
+      const bgmTask = (async () => {
+        if (!bgmAssetId || bgmAssetId === 'none') return;
         try {
-          // Check if it's a preset BGM (starts with 'preset:')
           if (bgmAssetId.startsWith('preset:')) {
             const presetName = bgmAssetId.replace('preset:', '');
             const presetPath = path.join(process.cwd(), 'public', 'bgm', presetName);
@@ -393,7 +402,6 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
               console.log(`[RENDER] Using preset BGM: ${presetName}`);
             }
           } else {
-            // It's an asset ID — look up from DB
             const bgmAsset = await prisma.asset.findUnique({ where: { id: bgmAssetId } });
             if (bgmAsset && bgmAsset.url) {
               const extension = bgmAsset.url.split('.').pop()?.split('?')[0] || 'mp3';
@@ -406,23 +414,18 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
           console.error('[RENDER] BGM download failed, continuing without BGM:', bgmErr);
           bgmTempPath = undefined;
         }
-      }
+      })();
 
-      // === AUDIO GENERATION ===
-      const SEPARATOR = '... ';
-      const validScenes = scenes.map(s => ({ ...s, voiceText: s.voiceText || '' }));
-      const fullText = validScenes.map(s => s.voiceText).join(SEPARATOR);
-
-      console.log(`[PIPELINE] STEP 1: Generating audio for entire script (${fullText.length} chars)...`);
-      videoProgress.set(videoId, 10); 
-
-      const ttsStartTime = Date.now();
-      const ttsRes = await generateAudio(fullText, templateId, {
+      // TTS generation task (runs in parallel with BGM)
+      const ttsTask = generateAudio(fullText, templateId, {
         provider: ttsProvider,
         voiceId: ttsVoiceId,
       });
+
+      // Wait for both to complete
+      const [, ttsRes] = await Promise.all([bgmTask, ttsTask]);
       const ttsDuration = (Date.now() - ttsStartTime) / 1000;
-      console.log(`[PIPELINE] TTS COMPLETE: Duration ${ttsRes.durationSeconds}s, Provider ${ttsRes.provider}, Buffer ${ttsRes.buffer.length} bytes`);
+      console.log(`[PIPELINE] TTS+BGM COMPLETE in ${ttsDuration.toFixed(1)}s: Audio ${ttsRes.durationSeconds}s, Buffer ${ttsRes.buffer.length} bytes`);
 
       // Use a timestamped filename to avoid any OS-level file caching
       const audioPath = path.join(localTmpDir, `${videoId}_${Date.now()}_audio.${ttsRes.ext}`);
@@ -508,6 +511,9 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
 
       videoProgress.set(videoId, 100);
 
+      // Cleanup progress map after 5 minutes to prevent memory leak
+      setTimeout(() => videoProgress.delete(videoId), 5 * 60 * 1000);
+
       // === CLEANUP ===
       // Cleanup temp audio file (TTS)
       try { if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath); } catch (_) { }
@@ -534,6 +540,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
     }
   } catch (err: any) {
     console.error('[PIPELINE FATAL ERROR]', err);
+    throw err; // Re-throw so videoWorker can update task status to 'error'
   }
 };
 

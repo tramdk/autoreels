@@ -151,6 +151,8 @@
     window.__timelines["root"] = mainTl;
 
     var currentTime = 0;
+    var CROSSFADE = 0.5;
+
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
       var duration = sceneDurations[i] || 5;
@@ -160,7 +162,6 @@
       sceneEl.id = sceneId;
       sceneEl.className = 'scene-box type-' + scene.type;
       
-      // HyperFrames native visibility control
       sceneEl.setAttribute('data-start', currentTime.toFixed(3));
       sceneEl.setAttribute('data-duration', duration.toFixed(3));
       sceneEl.setAttribute('data-track-index', "1");
@@ -172,12 +173,18 @@
       sceneEl.innerHTML = '<div class="scene-title" style="font-size: calc(var(--cqmin) * ' + fontSizeKey + ' / 720); color: ' + fontColorKey + '; transform: ' + skew + '">' + (scene.text || scene.bodyText || '') + '</div>';
       document.getElementById('main-content').appendChild(sceneEl);
 
+      var inDur = 0.5;
+      var outDur = 0.4;
       var tl = gsap.timeline();
-      tl.from(sceneEl, { opacity: 0, x: -100, skewX: 10, duration: 0.6, ease: "power4.out" }).to(sceneEl, { opacity: 0, x: 50, duration: 0.4, ease: "power4.in" }, (duration - 0.4)
-      );
+      tl.from(sceneEl, { opacity: 0, x: -80, skewX: 8, duration: inDur, ease: "power3.out" });
+      tl.to(sceneEl, { opacity: 0, x: 40, duration: outDur, ease: "power2.in" }, duration - outDur);
       
       mainTl.add(tl, currentTime);
-      currentTime += duration;
+      if (i < scenes.length - 1) {
+        currentTime += duration - CROSSFADE;
+      } else {
+        currentTime += duration;
+      }
     }
 
     var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;

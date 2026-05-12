@@ -25,14 +25,24 @@ async function processNextTask() {
   
   try {
     // CRITICAL: Double check if any other task is ALREADY processing in DB
-    // This handles cases where local state might be out of sync or race conditions
     const activeTask = await prisma.videoTask.findFirst({
       where: { status: 'processing' }
     });
 
     if (activeTask) {
-      console.log(`⏳ [VIDEO WORKER] Task ${activeTask.id} is already in progress. Queueing current request.`);
-      return; 
+      // Check if it's been stuck too long (orphaned from a previous crash)
+      const taskAge = Date.now() - new Date(activeTask.updatedAt).getTime();
+      if (taskAge > MAX_TASK_DURATION) {
+        console.warn(`⚠️ [VIDEO WORKER] Resetting orphaned task ${activeTask.id} (stuck for ${Math.round(taskAge/60000)}min).`);
+        await prisma.videoTask.update({
+          where: { id: activeTask.id },
+          data: { status: 'error', error: 'Task timed out (orphaned)' }
+        });
+      } else {
+        console.log(`⏳ [VIDEO WORKER] Task ${activeTask.id} is already in progress. Waiting...`);
+        isWorking = false;
+        return;
+      }
     }
 
     const task = await prisma.videoTask.findFirst({
@@ -61,8 +71,10 @@ async function processNextTask() {
     lastTaskStartTime = Date.now();
     console.log(`🎬 [VIDEO WORKER] Starting Task ${task.id}...`);
 
-    // Notify Manager: Processing started
-    await eb.publish('REEL_PROCESSING', { reelId: task.id });
+    // Notify Manager: Processing started (only for external tasks)
+    if (task.source !== 'internal') {
+      await eb.publish('REEL_PROCESSING', { reelId: task.id });
+    }
 
     try {
       await runVideoGenerationPipeline(task.articleId || '', {
@@ -87,11 +99,13 @@ async function processNextTask() {
         data: { status: 'completed' }
       });
 
-      // Notify Manager: Completion
-      await eb.publish('REEL_COMPLETED', { 
-        reelId: task.id, 
-        videoUrl: finishedVideo?.videoUrl || '' 
-      });
+      // Notify Manager: Completion (only for external tasks)
+      if (task.source !== 'internal') {
+        await eb.publish('REEL_COMPLETED', { 
+          reelId: task.id, 
+          videoUrl: finishedVideo?.videoUrl || '' 
+        });
+      }
 
       console.log(`✅ [VIDEO WORKER] Task ${task.id} finished.`);
     } catch (err: any) {
@@ -101,11 +115,13 @@ async function processNextTask() {
         data: { status: 'error', error: err.message || 'Unknown error' }
       });
 
-      // Notify Manager: Failure
-      await eb.publish('REEL_FAILED', { 
-        reelId: task.id, 
-        error: err.message || 'Unknown error' 
-      });
+      // Notify Manager: Failure (only for external tasks)
+      if (task.source !== 'internal') {
+        await eb.publish('REEL_FAILED', { 
+          reelId: task.id, 
+          error: err.message || 'Unknown error' 
+        });
+      }
     } finally {
       isWorking = false;
       lastTaskStartTime = null;
@@ -149,16 +165,22 @@ export async function startVideoWorker() {
   await recoverStuckTasks();
   processNextTask();
 
+  // Safety net: Check for stuck tasks and pick up missed triggers every 60s
+  // Primary wake mechanism is triggerWorker() called by API/EventBus — this is just a fallback
   setInterval(async () => {
     if (isWorking && lastTaskStartTime && (Date.now() - lastTaskStartTime > MAX_TASK_DURATION)) {
-      console.warn('⚠️ [VIDEO WORKER] Task taking too long. Attempting to reset state...');
-      // Note: We don't have a direct handle to kill the renderer here yet, 
-      // but setting isWorking to false allows the next task to try.
-      isWorking = false; 
+      console.warn('⚠️ [VIDEO WORKER] Task exceeded MAX_TASK_DURATION. Marking as error...');
+      try {
+        await prisma.videoTask.updateMany({
+          where: { status: 'processing' },
+          data: { status: 'error', error: 'Task timed out after 20 minutes' }
+        });
+      } catch (e) { console.error('[VIDEO WORKER] Failed to reset timed-out task:', e); }
+      isWorking = false;
       lastTaskStartTime = null;
     }
     if (!isWorking) processNextTask();
-  }, 10000);
+  }, 60000); // 60s instead of 10s — triggerWorker() handles immediate wake
 
   // Run cleanup every 24 hours
   setInterval(cleanupOldTasks, 24 * 60 * 60 * 1000);

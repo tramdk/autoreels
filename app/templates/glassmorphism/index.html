@@ -303,6 +303,7 @@
     window._tl = mainTl; // Critical for HyperFrames seeking
 
     var currentTime = 0;
+    var CROSSFADE = 0.5; // 0.5s overlap between scenes for smooth crossfade
 
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
@@ -322,8 +323,8 @@
                           '<div class="scene-progress-container"><div class="scene-progress-bar"></div></div>';
       document.getElementById('main-content').appendChild(sceneEl);
 
-      var inDur = 1.2;
-      var outDur = 0.8;
+      var inDur = 0.8;  // Faster entrance for snappier feel
+      var outDur = 0.6;  // Slightly faster exit
 
       var progBar = sceneEl.querySelector('.scene-progress-bar');
       var tl = gsap.timeline();
@@ -332,45 +333,55 @@
         tl.to(progBar, { width: "100%", duration: duration, ease: "none" }, 0);
       }
 
+      // Scene entrance — starts at t=0 of this scene's timeline
       tl.from(sceneEl, { 
         opacity: 0, 
-        y: 120, 
-        scale: 0.8, 
-        rotationX: isRendering ? 0 : 45,
-        rotationY: isRendering ? 0 : -10,
-        z: isRendering ? 0 : -200,
+        y: 80,
+        scale: 0.9, 
+        rotationX: isRendering ? 0 : 15,
+        rotationY: isRendering ? 0 : -5,
+        z: isRendering ? 0 : -100,
         duration: inDur, 
-        ease: "power4.out" 
+        ease: "power3.out" 
       }, 0);
 
-      // Subtle floating effect - Simplified for render
+      // Gentle floating during hold
       var floatDur = Math.max(0.1, duration - inDur - outDur);
       tl.to(sceneEl, {
-        rotationX: isRendering ? 0 : -5,
-        rotationY: isRendering ? 0 : 5,
-        y: "-=20",
+        rotationX: isRendering ? 0 : -3,
+        rotationY: isRendering ? 0 : 3,
+        y: "-=15",
         duration: floatDur,
         ease: "sine.inOut"
       }, inDur);
 
+      // Scene exit
       if (i < scenes.length - 1) {
         tl.to(sceneEl, { 
           opacity: 0, 
-          scale: 1.05, 
-          y: -40,
+          scale: 1.03, 
+          y: -30,
           duration: outDur, 
           ease: "power2.in" 
         }, duration - outDur);
       } else {
+        // Last scene — gentle fade out
         tl.to(sceneEl, { 
           opacity: 0, 
-          scale: 1.05, 
+          scale: 1.03, 
           duration: outDur 
         }, Math.max(inDur, duration - outDur));
       }
       
       mainTl.add(tl, currentTime);
-      currentTime += duration;
+      
+      // Advance timeline: subtract CROSSFADE to create overlap with next scene
+      // (next scene starts 0.5s before this scene fully exits)
+      if (i < scenes.length - 1) {
+        currentTime += duration - CROSSFADE;
+      } else {
+        currentTime += duration;
+      }
     }
 
     var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;

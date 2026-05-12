@@ -324,6 +324,7 @@
 
     var container = document.getElementById('scenes-container');
     var currentTime = 0;
+    var CROSSFADE = 0.5;
 
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
@@ -336,10 +337,12 @@
       var progBar = unit.querySelector('.scene-progress-bar');
       var spans = buildTypingContent(titleEl, (scene.text || scene.bodyText || ''));
 
+      var inDur = 0.4;
+      var outDur = 0.4;
       var tl = gsap.timeline();
 
-      // Entrance animation (using gsap.from as per best practices)
-      tl.from(unit, { opacity: 0, duration: 0.5, ease: "power2.out" }, 0)
+      // Entrance animation
+      tl.from(unit, { opacity: 0, duration: inDur, ease: "power2.out" }, 0)
         .fromTo(bgImg, { scale: 1.1 }, { scale: 1, duration: dur, ease: "none" }, 0);
 
       // Text animation
@@ -351,17 +354,15 @@
         tl.to(progBar, { width: "100%", duration: dur, ease: "none" }, 0);
       }
 
-      // Exit animation (only if it's the last scene, or use a transition)
-      // For multi-scene cinematic, we do a quick fade out to transition smoothly
-      var outDur = 0.4;
-      if (i < scenes.length - 1) {
-        tl.to(unit, { opacity: 0, duration: outDur }, dur - outDur);
-      } else {
-        tl.to(unit, { opacity: 0, duration: outDur }, dur - outDur);
-      }
+      // Exit animation
+      tl.to(unit, { opacity: 0, duration: outDur }, dur - outDur);
 
       mainTl.add(tl, currentTime);
-      currentTime += dur;
+      if (i < scenes.length - 1) {
+        currentTime += dur - CROSSFADE;
+      } else {
+        currentTime += dur;
+      }
     }
 
     var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;

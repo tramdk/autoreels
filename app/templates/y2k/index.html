@@ -271,6 +271,8 @@
     window.__timelines["root"] = mainTl;
 
     var currentTime = 0;
+    var CROSSFADE = 0.5;
+
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
       var duration = sceneDurations[i] || 5;
@@ -303,14 +305,17 @@
       var tl = gsap.timeline();
       var progBar = unit.querySelector('.scene-progress-bar');
 
+      var inDur = 0.5;
+      var outDur = 0.4;
+
       // Glitchy Y2K entry
       tl.from(unit, { 
         opacity: 0, 
-        scale: 0.5, 
-        x: i % 2 === 0 ? -100 : 100, 
-        rotate: i % 2 === 0 ? -10 : 10,
-        duration: 0.6, 
-        ease: "back.out(2)" 
+        scale: 0.6, 
+        x: i % 2 === 0 ? -80 : 80, 
+        rotate: i % 2 === 0 ? -8 : 8,
+        duration: inDur, 
+        ease: "back.out(1.5)" 
       });
 
       if (progBar) {
@@ -320,14 +325,17 @@
       // Exit
       tl.to(unit, { 
         opacity: 0, 
-        scale: 1.2, 
-        filter: "blur(20px)",
-        duration: 0.4, 
+        scale: 1.1, 
+        duration: outDur, 
         ease: "power2.in" 
-      }, duration - 0.4);
+      }, duration - outDur);
       
       mainTl.add(tl, currentTime);
-      currentTime += duration;
+      if (i < scenes.length - 1) {
+        currentTime += duration - CROSSFADE;
+      } else {
+        currentTime += duration;
+      }
     }
 
     var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;
