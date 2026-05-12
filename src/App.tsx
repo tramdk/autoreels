@@ -127,7 +127,8 @@ export default function App() {
             } />
             <Route path="/sources" element={
               <SourcesView 
-                sources={sources} 
+                sources={sources}
+                loading={loading}
                 onAdd={handleAddSource}
                 onUpdate={handleUpdateSource}
                 onDelete={handleDeleteSource}
@@ -156,6 +157,7 @@ export default function App() {
             <Route path="/voices" element={
               <VoicesView 
                 voices={voices}
+                loading={loading}
                 onAdd={handleAddVoice}
                 onUpdate={handleUpdateVoice}
                 onDelete={handleDeleteVoice}

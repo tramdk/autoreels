@@ -6,12 +6,46 @@ import { useLanguage } from '../../contexts/LanguageContext';
 
 interface VoicesViewProps {
   voices: Voice[];
+  loading: boolean;
   onAdd: (data: { voiceId: string, name: string, provider: string }) => void;
   onUpdate: (id: string, data: { voiceId: string, name: string, provider: string }) => void;
   onDelete: (id: string) => void;
 }
 
-export const VoicesView: React.FC<VoicesViewProps> = ({ voices, onAdd, onUpdate, onDelete }) => {
+const VoiceRowSkeleton = () => (
+  <tr>
+    <td className="px-8 py-6">
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 rounded-xl skeleton-item" />
+        <div className="w-32 h-5 skeleton-item" />
+      </div>
+    </td>
+    <td className="px-8 py-6"><div className="w-20 h-6 skeleton-item" /></td>
+    <td className="px-8 py-6"><div className="w-48 h-6 skeleton-item" /></td>
+    <td className="px-8 py-6"><div className="w-20 h-8 skeleton-item ml-auto" /></td>
+  </tr>
+);
+
+const VoiceCardSkeleton = () => (
+  <div className="glass p-6 rounded-3xl border border-white/5">
+    <div className="flex items-center gap-4 mb-6">
+      <div className="w-12 h-12 rounded-2xl skeleton-item" />
+      <div className="space-y-2 flex-1">
+        <div className="w-28 h-5 skeleton-item" />
+        <div className="w-16 h-4 skeleton-item" />
+      </div>
+    </div>
+    <div className="pt-6 border-t border-white/5 flex items-center justify-between">
+      <div className="w-32 h-4 skeleton-item" />
+      <div className="flex gap-2">
+        <div className="w-8 h-8 rounded-xl skeleton-item" />
+        <div className="w-8 h-8 rounded-xl skeleton-item" />
+      </div>
+    </div>
+  </div>
+);
+
+export const VoicesView: React.FC<VoicesViewProps> = ({ voices, loading, onAdd, onUpdate, onDelete }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVoice, setEditingVoice] = useState<Voice | null>(null);
   const [formData, setFormData] = useState({ voiceId: '', name: '', provider: 'ohfree' });
@@ -40,6 +74,8 @@ export const VoicesView: React.FC<VoicesViewProps> = ({ voices, onAdd, onUpdate,
     }
     setIsModalOpen(false);
   };
+
+  const isLoading = loading && voices.length === 0;
 
   return (
     <div className="flex flex-col">
@@ -75,7 +111,10 @@ export const VoicesView: React.FC<VoicesViewProps> = ({ voices, onAdd, onUpdate,
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {voices.map(voice => (
+                {isLoading ? (
+                  Array(4).fill(0).map((_, i) => <VoiceRowSkeleton key={i} />)
+                ) : (
+                  voices.map(voice => (
                   <tr key={voice.id} className="group hover:bg-white/[0.02] transition-colors">
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
@@ -92,14 +131,18 @@ export const VoicesView: React.FC<VoicesViewProps> = ({ voices, onAdd, onUpdate,
                       </div>
                     </td>
                   </tr>
-                ))}
+                )))
+                }
               </tbody>
             </table>
           </div>
 
           {/* Mobile Grid */}
           <div className="grid grid-cols-1 md:hidden gap-4">
-            {voices.map(voice => (
+            {isLoading ? (
+              Array(3).fill(0).map((_, i) => <VoiceCardSkeleton key={i} />)
+            ) : (
+              voices.map(voice => (
               <div key={voice.id} className="glass p-6 rounded-3xl border border-white/5">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="p-3 bg-primary/10 text-primary rounded-2xl"><Mic className="w-6 h-6" /></div>
@@ -116,10 +159,11 @@ export const VoicesView: React.FC<VoicesViewProps> = ({ voices, onAdd, onUpdate,
                   </div>
                 </div>
               </div>
-            ))}
+            )))
+            }
           </div>
 
-          {voices.length === 0 && (
+          {!isLoading && voices.length === 0 && (
             <div className="py-40 flex flex-col items-center justify-center text-slate-700 bg-slate-900/10 border-2 border-dashed border-slate-800 rounded-[44px]">
               <Mic className="w-16 h-16 mb-4 opacity-10" />
               <p className="font-bold uppercase tracking-widest text-sm">Chưa có giọng đọc nào được lưu</p>

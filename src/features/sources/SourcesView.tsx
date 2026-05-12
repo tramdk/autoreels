@@ -6,12 +6,26 @@ import { useLanguage } from '../../contexts/LanguageContext';
 
 interface SourcesViewProps {
   sources: Source[];
+  loading: boolean;
   onAdd: (data: { name: string, url: string, type: string }) => void;
   onUpdate: (id: string, data: { name: string, url: string, type: string }) => void;
   onDelete: (id: string) => void;
 }
 
-export const SourcesView: React.FC<SourcesViewProps> = ({ sources, onAdd, onUpdate, onDelete }) => {
+const SourceCardSkeleton = () => (
+  <div className="glass p-6 rounded-[32px] border border-white/5 flex flex-col">
+    <div className="flex items-center gap-4 mb-8">
+      <div className="w-14 h-14 rounded-2xl skeleton-item" />
+      <div className="space-y-2 flex-1">
+        <div className="w-32 h-5 skeleton-item" />
+        <div className="w-16 h-4 skeleton-item" />
+      </div>
+    </div>
+    <div className="mt-auto px-4 py-4 rounded-2xl skeleton-item h-12" />
+  </div>
+);
+
+export const SourcesView: React.FC<SourcesViewProps> = ({ sources, loading, onAdd, onUpdate, onDelete }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSource, setEditingSource] = useState<Source | null>(null);
   const [formData, setFormData] = useState({ name: '', url: '', type: 'rss' });
@@ -39,6 +53,8 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ sources, onAdd, onUpda
     setIsModalOpen(false);
   };
 
+  const isLoading = loading && sources.length === 0;
+
   return (
     <div className="flex flex-col">
       {/* Sticky Header */}
@@ -61,7 +77,10 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ sources, onAdd, onUpda
       {/* Main Content Area */}
       <div className="px-6 py-8 md:px-12 md:py-10">
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sources.map(source => (
+          {isLoading ? (
+            Array(6).fill(0).map((_, i) => <SourceCardSkeleton key={i} />)
+          ) : (
+            sources.map(source => (
             <div key={source.id} className="glass group p-6 rounded-[32px] border border-white/5 hover:border-primary/20 transition-all flex flex-col relative overflow-hidden">
               <div className="absolute top-4 right-4 flex gap-1.5 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity z-10">
                 <button onClick={() => openEdit(source)} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-slate-400 hover:text-white transition-all border border-white/5"><Edit3 className="w-4 h-4" /></button>
@@ -81,7 +100,8 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ sources, onAdd, onUpda
                 <p className="text-[10px] text-slate-400 truncate font-mono">{source.url}</p>
               </div>
             </div>
-          ))}
+          ))
+          )}
         </div>
       </div>
 
