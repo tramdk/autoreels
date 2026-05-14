@@ -17,7 +17,15 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     }
 
     const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
-    res.cookie('token', token, { httpOnly: true, secure: config.isProd });
+    
+    // Improved cookie setting: use path '/' and only secure if request is secure
+    res.cookie('token', token, { 
+      httpOnly: true, 
+      secure: req.secure || config.isProd, 
+      path: '/',
+      sameSite: 'lax'
+    });
+    
     res.json({ user: { id: user.id, username: user.username, mustChangePassword: user.mustChangePassword } });
   } catch (err) {
     next(err);
@@ -38,7 +46,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 };
 
 export const logout = (req: Request, res: Response) => {
-  res.clearCookie('token');
+  res.clearCookie('token', { path: '/' });
   res.json({ success: true });
 };
 
@@ -47,11 +55,45 @@ export const getMe = async (req: Request, res: Response, next: NextFunction) => 
     const token = req.cookies.token;
     if (!token) return res.status(401).json({ error: 'Not logged in' });
     
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (e) {
+      return res.status(401).json({ error: 'Invalid session' });
+    }
+
     const user = await prisma.user.findUnique({ where: { id: decoded.id } });
     
     if (!user) return res.status(401).json({ error: 'User not found' });
     res.json({ user: { id: user.id, username: user.username, mustChangePassword: user.mustChangePassword } });
+  } catch (err) {
+    console.error('[getMe Error]', err);
+    res.status(500).json({ error: 'Internal server error during auth check' });
+  }
+};
+
+export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ error: 'Not logged in' });
+
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: decoded.id },
+      data: { 
+        password: hashedPassword,
+        mustChangePassword: false
+      }
+    });
+
+    res.json({ success: true });
   } catch (err) {
     res.status(401).json({ error: 'Invalid session' });
   }

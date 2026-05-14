@@ -14,8 +14,10 @@ export async function createApp() {
   // Standard Middlewares
   app.use(express.json());
   app.use(cookieParser());
-  app.use(cors());
-  app.use(cookieParser());
+  app.use(cors({
+    origin: true, // Allow all origins with credentials
+    credentials: true
+  }));
 
   // Static files for video renders
   app.use('/render_cache', express.static(path.join(process.cwd(), 'render_cache')));
