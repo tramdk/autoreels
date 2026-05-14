@@ -83,28 +83,31 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLog
           <div className="mt-8 pt-4 border-t border-white/5 px-4">
              <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-4">Active Tasks</p>
              <div className="space-y-5">
-               {activeJobs.map(([id, data]) => (
-                 <div key={id} className="space-y-2 group/task">
-                   <div className="flex flex-col gap-1">
-                     <div className="flex justify-between items-start">
-                       <span className="text-[11px] font-bold text-white truncate max-w-[140px]">
-                         {data.title || 'Rendering Video'}
+               {activeJobs.map(([id, rawData]) => {
+                 const data = rawData as { progress: number, phase?: string, title?: string };
+                 return (
+                   <div key={id} className="space-y-2 group/task">
+                     <div className="flex flex-col gap-1">
+                       <div className="flex justify-between items-start">
+                         <span className="text-[11px] font-bold text-white truncate max-w-[140px]">
+                           {data.title || 'Rendering Video'}
+                         </span>
+                         <span className="text-[10px] font-black text-primary">{data.progress}%</span>
+                       </div>
+                       <span className="text-[9px] font-medium text-slate-500 italic">
+                         {data.phase || 'Processing...'}
                        </span>
-                       <span className="text-[10px] font-black text-primary">{data.progress}%</span>
                      </div>
-                     <span className="text-[9px] font-medium text-slate-500 italic">
-                       {data.phase || 'Processing...'}
-                     </span>
+                     <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                       <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${data.progress}%` }}
+                          className="h-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]"
+                       />
+                     </div>
                    </div>
-                   <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                     <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${data.progress}%` }}
-                        className="h-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]"
-                     />
-                   </div>
-                 </div>
-               ))}
+                 );
+               })}
              </div>
           </div>
         )}

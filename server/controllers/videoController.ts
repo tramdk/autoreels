@@ -52,6 +52,8 @@ export const getVideos = async (req: Request, res: Response, next: NextFunction)
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
     const user = (req as any).user;
+    const status = req.query.status as string;
+    const skip = (page - 1) * limit;
     const where: any = status ? { status } : {};
     
     // Role-based filtering: Users only see their own videos, Admins see all
@@ -307,6 +309,8 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
   } = settings;
 
   const videoId = existingVideoId || `v_${articleId}_${Date.now()}`;
+  let script: any = { scenes: [] };
+  let title = settingsTitle || 'Untitled Video';
 
   console.log(`🎬 [RENDER START] Beginning pipeline for Video ID: ${videoId}`);
   console.log(`🔍 [RENDER INFO] ArticleID: ${articleId || 'None'}, Source: ${source || 'internal'}`);
@@ -316,8 +320,6 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
     videoProgress.set(videoId, { progress: 5, phase: 'Initializing...', title });
 
   try {
-    let script: any = { scenes: [] };
-    let title = settingsTitle || 'Untitled Video';
     
     // 1. Load script from customScript or customContent (Snapshot)
     const scriptSource = customScript || customContent;
@@ -563,10 +565,10 @@ export const getProgress = (req: Request, res: Response) => {
   const videoId = req.params.id;
 
   const sendProgress = () => {
-    const progress = videoProgress.get(videoId) || 0;
-    res.write(`data: ${JSON.stringify({ progress })}\n\n`);
+    const statusObj = videoProgress.get(videoId) || { progress: 0, phase: 'Pending' };
+    res.write(`data: ${JSON.stringify(statusObj)}\n\n`);
 
-    if (progress === 100 || progress === -1) {
+    if (statusObj.progress === 100 || statusObj.progress === -1) {
       clearInterval(interval);
       res.end();
     }
