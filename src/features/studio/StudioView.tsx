@@ -113,8 +113,8 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
     loadTemplate();
   }, [selectedStyle]);
 
-  const fetchHistory = async (page: number = 1) => {
-    setLoadingArticles(true);
+  const fetchHistory = async (page: number = 1, silent: boolean = false) => {
+    if (!silent) setLoadingArticles(true);
     try {
       const res = await api.getArticles(page, 20);
       setArticles(res.items || []);
@@ -123,7 +123,7 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
     } catch (err) {
       console.error('Failed to fetch history', err);
     } finally {
-      setLoadingArticles(false);
+      if (!silent) setLoadingArticles(false);
     }
   };
 
@@ -203,9 +203,31 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
     e.stopPropagation();
     const tid = toast.loading('Đang khởi tạo kịch bản AI...');
     try {
-      await api.summarize(articleId);
+      const language = localStorage.getItem('autoreels_language') || 'Vietnamese';
+      await api.summarize(articleId, language);
       toast.success('Đã tạo kịch bản thành công!', { id: tid });
-      fetchHistory(currentPage);
+      
+      // Refresh history list silently to avoid flickering
+      await fetchHistory(currentPage, true);
+      
+      // Automatically load the newly generated script into the editor
+      const updatedArticle = await api.getArticle(articleId);
+      if (updatedArticle) {
+        setTitle(updatedArticle.title);
+        if (updatedArticle.script) {
+          let parsed = typeof updatedArticle.script === 'string' ? JSON.parse(updatedArticle.script) : updatedArticle.script;
+          let scenes: any[] = [];
+          if (parsed) {
+            if (Array.isArray(parsed.scenes)) scenes = parsed.scenes;
+            else if (parsed.scenes && typeof parsed.scenes === 'object') scenes = Object.values(parsed.scenes);
+            else if (Array.isArray(parsed)) scenes = parsed;
+          }
+          setScript({ scenes });
+        }
+        setLastSavedArticleId(updatedArticle.id);
+        setIsDirty(false);
+        setActivePreviewIdx(0);
+      }
     } catch (err) {
       console.error(err);
       toast.error('Lỗi khi tạo kịch bản', { id: tid });
