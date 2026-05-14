@@ -27,7 +27,7 @@ export const useAppLogic = () => {
   const [videosTotalPages, setVideosTotalPages] = useState(1);
 
   const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(false);
   const [isTikTokConnected, setIsTikTokConnected] = useState(false);
   
   // Auth state

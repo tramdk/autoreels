@@ -18,12 +18,13 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
     
-    // Improved cookie setting: use path '/' and only secure if request is secure
+    // Support for iframes (HF Spaces) requires SameSite=None and Secure
+    const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https' || config.isProd;
     res.cookie('token', token, { 
       httpOnly: true, 
-      secure: req.secure || config.isProd, 
+      secure: isSecure, 
       path: '/',
-      sameSite: 'lax'
+      sameSite: isSecure ? 'none' : 'lax'
     });
     
     res.json({ user: { id: user.id, username: user.username, mustChangePassword: user.mustChangePassword } });
@@ -106,7 +107,14 @@ export const getTikTokAuthUrl = (req: Request, res: Response) => {
     .replace(/\//g, '_')
     .replace(/=+$/, '');
 
-  res.cookie('tiktok_code_verifier', codeVerifier, { httpOnly: true, maxAge: 600000 });
+  const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https' || config.isProd;
+  res.cookie('tiktok_code_verifier', codeVerifier, { 
+    httpOnly: true, 
+    maxAge: 600000,
+    secure: isSecure,
+    sameSite: isSecure ? 'none' : 'lax',
+    path: '/'
+  });
 
   const protocol = req.headers['x-forwarded-proto'] || req.protocol;
   const host = req.get('host');
