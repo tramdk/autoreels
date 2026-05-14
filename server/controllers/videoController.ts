@@ -381,7 +381,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
 
       // === PARALLEL: TTS + BGM Download ===
       // Run both concurrently since they're independent I/O operations
-      const SEPARATOR = '... ';
+      const SEPARATOR = ' . . . ';
       const validScenes = scenes.map(s => ({ ...s, voiceText: s.voiceText || '' }));
       const fullText = validScenes.map(s => s.voiceText).join(SEPARATOR);
 
@@ -445,11 +445,14 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
 
       videoProgress.set(videoId, 20); // TTS Fully finished and analyzed
 
-      // Distribute durations
       const totalChars = validScenes.reduce((sum, s) => sum + (s.voiceText?.length || 0), 0);
-      const sceneDurations = validScenes.map((s) => {
+      const CROSSFADE = 0.6; // Synchronize with template's CROSSFADE constant
+      const sceneDurations = validScenes.map((s, idx) => {
         const charCount = s.voiceText?.length || 1;
-        return (charCount / totalChars) * totalDuration;
+        const baseDuration = (charCount / totalChars) * totalDuration;
+        // Compensate for crossfade: every scene except the last one must be extended 
+        // by the CROSSFADE duration because it will be overlapped by the next scene.
+        return idx < validScenes.length - 1 ? baseDuration + CROSSFADE : baseDuration;
       });
 
       console.log(`[PIPELINE] Proportional Scene Durations: ${sceneDurations.map(d => d.toFixed(2)).join(', ')} (Total: ${totalDuration.toFixed(2)}s)`);
