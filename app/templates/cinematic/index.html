@@ -245,6 +245,7 @@
     console.log("[Template] Cinematic script starting...");
     var scenes = SCENES_DATA;
     var sceneDurations = SCENE_DURATIONS;
+    var container = document.getElementById('scenes-container');
 
     // --- DOUBLE SAFETY NET (CLIENT-SIDE FALLBACK) ---
     var totalDuration = parseFloat("{{ DURATION }}") || 15;
@@ -270,7 +271,8 @@
       
       // HyperFrames native visibility control via data attributes
       unit.setAttribute('data-start', start.toFixed(3));
-      unit.setAttribute('data-duration', duration.toFixed(3));
+      var hfDuration = (i < scenes.length - 1) ? (duration + 0.2) : duration;
+      unit.setAttribute('data-duration', hfDuration.toFixed(3));
       unit.setAttribute('data-track-index', "1");
       
       unit.style.zIndex = 100 + i;

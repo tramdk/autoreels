@@ -282,7 +282,8 @@
       unit.id = sceneId;
       unit.className = 'win-window type-' + (scene.type || 'body');
       unit.setAttribute('data-start', currentTime.toFixed(3));
-      unit.setAttribute('data-duration', duration.toFixed(3));
+      var hfDuration = (i < scenes.length - 1) ? (duration + 0.2) : duration;
+      unit.setAttribute('data-duration', hfDuration.toFixed(3));
       unit.setAttribute('data-track-index', "1");
       unit.style.zIndex = 100 + i; // Ensure newer scenes are always on top
 

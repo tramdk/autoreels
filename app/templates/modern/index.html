@@ -254,6 +254,7 @@
   <script>
     var scenes = SCENES_DATA;
     var sceneDurations = SCENE_DURATIONS;
+    var container = document.getElementById('scenes-container');
 
     var totalDuration = parseFloat("{{ DURATION }}") || 15;
     if (!sceneDurations || sceneDurations.length === 0) {
@@ -277,7 +278,8 @@
       unit.className = 'scene-unit ' + (isHook ? 'type-hook' : 'type-body');
       
       unit.setAttribute('data-start', start.toFixed(3));
-      unit.setAttribute('data-duration', duration.toFixed(3));
+      var hfDuration = (i < scenes.length - 1) ? (duration + 0.2) : duration;
+      unit.setAttribute('data-duration', hfDuration.toFixed(3));
       unit.setAttribute('data-track-index', "1");
       
       unit.style.zIndex = 100 + i;

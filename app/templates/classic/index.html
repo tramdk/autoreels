@@ -221,7 +221,8 @@
       
       // HyperFrames native visibility control
       sceneEl.setAttribute('data-start', currentTime.toFixed(3));
-      sceneEl.setAttribute('data-duration', duration.toFixed(3));
+      var hfDuration = (i < scenes.length - 1) ? (duration + 0.2) : duration;
+      sceneEl.setAttribute('data-duration', hfDuration.toFixed(3));
       sceneEl.setAttribute('data-track-index', "1");
       sceneEl.style.zIndex = 100 + i;
 
