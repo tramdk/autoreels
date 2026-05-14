@@ -355,15 +355,13 @@
         tl.to(progBar, { width: "100%", duration: dur, ease: "none" }, 0);
       }
 
-      // Exit animation only for the final scene
-      if (i === scenes.length - 1) {
-        tl.to(unit, { 
-          opacity: 0, 
-          duration: outDur, 
-          ease: "power2.in",
-          force3D: true
-        }, dur - outDur);
-      }
+      // Smooth exit for all scenes to ensure clean transitions
+      tl.to(unit, { 
+        opacity: 0, 
+        duration: outDur, 
+        ease: "power2.in",
+        force3D: true
+      }, dur - outDur);
 
       mainTl.add(tl, currentTime);
       if (i < scenes.length - 1) {

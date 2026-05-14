@@ -7,7 +7,7 @@ import { renderWithHyperFrames, findFfmpegPath, getAudioDuration } from '../serv
 import { publishToTikTok } from '../services/tiktok';
 import { uploadVideo, downloadFile, deleteRemoteFile } from '../services/storage';
 
-export const videoProgress = new Map<string, number>();
+export const videoProgress = new Map<string, { progress: number, phase: string, title?: string }>();
 
 /**
  * Helper to split plain text into structured scenes for the rendering pipeline.
@@ -51,10 +51,13 @@ export const getVideos = async (req: Request, res: Response, next: NextFunction)
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
-    const status = req.query.status as string;
-    const skip = (page - 1) * limit;
-
-    const where = status ? { status } : {};
+    const user = (req as any).user;
+    const where: any = status ? { status } : {};
+    
+    // Role-based filtering: Users only see their own videos, Admins see all
+    if (user && user.role !== 'admin') {
+      where.userId = user.id;
+    }
 
     const [videos, total] = await Promise.all([
       prisma.video.findMany({
@@ -111,6 +114,7 @@ export const generateBulk = async (req: Request, res: Response) => {
           bgmVolume: typeof bgmVolume === 'number' ? bgmVolume : 0.15,
           ratio: ratio || '9:16',
           status: 'pending',
+          userId: (req as any).user.id,
           source: source || 'internal'
         }
       });
@@ -164,9 +168,9 @@ export const getBulkStatus = async (req: Request, res: Response, next: NextFunct
 
     const results = await Promise.all(ids.map(async (id) => {
       // 1. Check if in progress (memory) - Most active state
-      const progress = videoProgress.get(id);
-      if (progress !== undefined) {
-        return { id, status: 'processing', progress };
+      const statusObj = videoProgress.get(id);
+      if (statusObj) {
+        return { id, status: 'processing', ...statusObj };
       }
 
       // 2. Check Task table for queue status
@@ -269,7 +273,8 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
         bgmAssetId: bgmAssetId || null,
         bgmVolume: typeof bgmVolume === 'number' ? bgmVolume : 0.15,
         ratio: ratio || '9:16',
-        status: 'pending'
+        status: 'pending',
+        userId: (req as any).user.id
       }
     });
 
@@ -295,7 +300,7 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
 };
 
 
-export const runVideoGenerationPipeline = async (articleId: string, settings: any, existingVideoId?: string) => {
+export const runVideoGenerationPipeline = async (articleId: string, settings: any, existingVideoId?: string, userId?: string) => {
   const {
     templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, ratio,
     customContent, customScript, customImageUrl, source, title: settingsTitle
@@ -307,8 +312,8 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
   console.log(`🔍 [RENDER INFO] ArticleID: ${articleId || 'None'}, Source: ${source || 'internal'}`);
   console.log(`📝 [RENDER DATA] hasContent: ${!!customContent}, hasScript: ${!!customScript}`);
 
-  // Set initial progress
-  videoProgress.set(videoId, 5);
+    // Set initial progress
+    videoProgress.set(videoId, { progress: 5, phase: 'Initializing...', title });
 
   try {
     let script: any = { scenes: [] };
@@ -386,7 +391,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
       const fullText = validScenes.map(s => s.voiceText).join(SEPARATOR);
 
       console.log(`[PIPELINE] STEP 1: Starting TTS (${fullText.length} chars) + BGM download in parallel...`);
-      videoProgress.set(videoId, 10);
+      videoProgress.set(videoId, { progress: 10, phase: 'Generating AI Audio...', title });
 
       const ttsStartTime = Date.now();
 
@@ -443,7 +448,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
       totalDuration = Math.max(totalDuration, 1.0);
       console.log(`[PIPELINE] Final Audio Master Duration: ${totalDuration.toFixed(2)}s`);
 
-      videoProgress.set(videoId, 20); // TTS Fully finished and analyzed
+      videoProgress.set(videoId, { progress: 20, phase: 'Preparing Assets...', title }); // TTS Fully finished and analyzed
 
       const totalChars = validScenes.reduce((sum, s) => sum + (s.voiceText?.length || 0), 0);
       const CROSSFADE = 0.6; // Synchronize with template's CROSSFADE constant
@@ -475,13 +480,13 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
         settings: customSettings || undefined, // PASS CUSTOM SETTINGS TO RENDERER
         onProgress: (p) => {
           const scaledProgress = 20 + (p * 0.75); // 20% to 95%
-          videoProgress.set(videoId, Math.round(scaledProgress));
+          videoProgress.set(videoId, { progress: Math.round(scaledProgress), phase: 'Rendering Frames...', title });
         }
       });
 
       // === CLOUD UPLOAD ===
       console.log(`[RENDER] Uploading results to Cloudinary for persistence...`);
-      videoProgress.set(videoId, 96);
+      videoProgress.set(videoId, { progress: 96, phase: 'Uploading results...', title });
 
       // Upload video and audio to Cloudinary
       const [videoCloudUrl, audioCloudUrl] = await Promise.all([
@@ -497,6 +502,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
           videoUrl: videoCloudUrl,
           audioUrl: audioCloudUrl,
           status: 'ready',
+          userId: userId || null,
           source: source || 'internal'
         }
       });
@@ -512,7 +518,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
         });
       }
 
-      videoProgress.set(videoId, 100);
+      videoProgress.set(videoId, { progress: 100, phase: 'Finished', title });
 
       // Cleanup progress map after 5 minutes to prevent memory leak
       setTimeout(() => videoProgress.delete(videoId), 5 * 60 * 1000);
@@ -527,7 +533,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
       }
     } catch (err: any) {
       console.error('[VIDEO GEN ERROR]', err);
-      videoProgress.set(videoId, -1);
+      videoProgress.set(videoId, { progress: -1, phase: 'Error occurred', title });
 
       if (bgmTempPath && settings.bgmAssetId && !settings.bgmAssetId.startsWith('preset:')) {
         try { fs.unlinkSync(bgmTempPath); } catch (_) { }
@@ -579,6 +585,11 @@ export const deleteVideo = async (req: Request, res: Response, next: NextFunctio
   try {
     const video = await prisma.video.findUnique({ where: { id: req.params.id } });
     if (!video) throw new Error('Video not found');
+
+    const user = (req as any).user;
+    if (user.role !== 'admin' && video.userId !== user.id) {
+      return res.status(403).json({ error: 'You do not have permission to delete this video' });
+    }
 
     // 1. Delete from Cloudinary (if it's a cloud URL)
     if (video.videoUrl && video.videoUrl.startsWith('http')) {
@@ -632,6 +643,27 @@ export const playVideo = async (req: Request, res: Response) => {
   }
 };
 
+export const getActiveTasks = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = (req as any).user;
+    const where: any = { 
+      status: { in: ['pending', 'processing'] }
+    };
+    
+    if (user && user.role !== 'admin') {
+      where.userId = user.id;
+    }
+
+    const tasks = await prisma.videoTask.findMany({
+      where,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.json(tasks);
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const getTikTokStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {

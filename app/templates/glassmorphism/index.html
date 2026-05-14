@@ -361,15 +361,14 @@
       }, inDur);
 
       // Scene exit only for the final scene
-      if (i === scenes.length - 1) {
-        tl.to(sceneEl, { 
-          opacity: 0, 
-          scale: 1.03, 
-          duration: outDur,
-          ease: "power2.in",
-          force3D: true
-        }, Math.max(inDur, duration - outDur));
-      }
+      // Smooth exit for all scenes to ensure clean transitions
+      tl.to(sceneEl, { 
+        opacity: 0, 
+        scale: 1.03, 
+        duration: outDur,
+        ease: "power2.in",
+        force3D: true
+      }, Math.max(inDur, duration - outDur));
       
       mainTl.add(tl, currentTime);
       

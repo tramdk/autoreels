@@ -51,6 +51,7 @@ router.get('/', authenticate, videoController.getVideos);
 router.post('/bulk-generate', authenticate, videoController.generateBulk);
 router.post('/bulk-status', authenticate, videoController.getBulkStatus);
 router.post('/generate', authenticate, videoController.generateVideo);
+router.get('/active-tasks', authenticate, videoController.getActiveTasks);
 router.get('/progress/:id', videoController.getProgress);
 router.get('/:id', authenticate, videoController.getVideoById);
 router.delete('/:id', authenticate, videoController.deleteVideo);

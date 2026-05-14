@@ -98,6 +98,11 @@ const en: Translations = {
     ready: "Ready",
     posted: "Published",
     failed: "Failed"
+  },
+  toast: {
+    generatingVideo: "System is creating your video. We will notify you when done.",
+    videoSuccess: "Video Rendered Successfully! Click to view.",
+    videoFailed: "Video generation failed."
   }
 };
 
@@ -194,6 +199,11 @@ const vi: Translations = {
     ready: "Sẵn sàng",
     posted: "Đã đăng",
     failed: "Lỗi"
+  },
+  toast: {
+    generatingVideo: "Hệ thống đang tạo video. Chúng tôi sẽ thông báo khi hoàn tất.",
+    videoSuccess: "Tạo video thành công! Click để xem.",
+    videoFailed: "Tạo video thất bại."
   }
 };
 

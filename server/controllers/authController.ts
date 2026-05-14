@@ -16,7 +16,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
     
     // Support for iframes (HF Spaces) requires SameSite=None and Secure
     const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https' || config.isProd;
@@ -27,7 +27,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       sameSite: isSecure ? 'none' : 'lax'
     });
     
-    res.json({ user: { id: user.id, username: user.username, mustChangePassword: user.mustChangePassword } });
+    res.json({ user: { id: user.id, username: user.username, role: user.role, mustChangePassword: user.mustChangePassword } });
   } catch (err) {
     next(err);
   }
@@ -66,7 +66,7 @@ export const getMe = async (req: Request, res: Response, next: NextFunction) => 
     const user = await prisma.user.findUnique({ where: { id: decoded.id } });
     
     if (!user) return res.status(401).json({ error: 'User not found' });
-    res.json({ user: { id: user.id, username: user.username, mustChangePassword: user.mustChangePassword } });
+    res.json({ user: { id: user.id, username: user.username, role: user.role, mustChangePassword: user.mustChangePassword } });
   } catch (err) {
     console.error('[getMe Error]', err);
     res.status(500).json({ error: 'Internal server error during auth check' });

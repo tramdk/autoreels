@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../services/api';
 import { Source, Article, VideoItem, TabType, Voice } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 export const useAppLogic = () => {
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -13,6 +15,9 @@ export const useAppLogic = () => {
   // Derive activeTab from URL path
   const activeTab = (location.pathname.split('/')[1] || 'dashboard') as TabType;
   const setActiveTab = (tab: TabType) => navigate(`/${tab}`);
+
+  const [renderingVideos, setRenderingVideos] = useState<Record<string, { progress: number, phase?: string, title?: string }>>({});
+  const activeEventSources = useRef<Record<string, EventSource>>({});
 
   const [sources, setSources] = useState<Source[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
@@ -63,7 +68,7 @@ export const useAppLogic = () => {
   useEffect(() => {
     if (!isAuthenticated) return;
     setInitialLoading(true);
-    Promise.all([fetchStats(), fetchSources()]).finally(() => {
+    Promise.all([fetchStats(), fetchSources(), fetchActiveTasks()]).finally(() => {
       setInitialLoading(false);
     });
   }, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -212,8 +217,76 @@ export const useAppLogic = () => {
     setLoading(false);
   };
 
-  const [renderingVideos, setRenderingVideos] = useState<Record<string, number>>({});
-  const activeEventSources = useRef<Record<string, EventSource>>({});
+  const startProgressTracking = useCallback((videoId: string, initialProgress: number = 5, articleId?: string | null) => {
+    if (activeEventSources.current[videoId]) return;
+
+    const progressKey = articleId ? `v_${articleId}_${videoId}` : `v_${videoId}`;
+    setRenderingVideos(prev => ({ ...prev, [progressKey]: { progress: initialProgress, phase: 'Initializing...' } }));
+
+    const eventSource = new EventSource(api.getVideoProgressUrl(videoId));
+    activeEventSources.current[videoId] = eventSource;
+    
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const { progress } = data;
+      
+      if (progress === -1) {
+        toast.error(t('toast.videoFailed'));
+        eventSource.close();
+        delete activeEventSources.current[videoId];
+        setRenderingVideos(prev => {
+          const next = { ...prev };
+          delete next[progressKey];
+          return next;
+        });
+        return;
+      }
+
+      setRenderingVideos(prev => ({ ...prev, [progressKey]: data }));
+
+      if (progress >= 100) {
+        eventSource.close();
+        delete activeEventSources.current[videoId];
+        
+        // Final success notification
+        toast.success((tj) => (
+          <div onClick={() => { setActiveTab('videos'); toast.dismiss(tj.id); }} className="cursor-pointer">
+            {t('toast.videoSuccess')}
+          </div>
+        ), { duration: 8000 });
+        reloadCurrentView();
+        
+        setTimeout(() => {
+          setRenderingVideos(prev => {
+            const next = { ...prev };
+            delete next[progressKey];
+            return next;
+          });
+        }, 5000);
+      }
+    };
+
+    eventSource.onerror = (err) => {
+      console.error(`SSE Error for video ${videoId}:`, err);
+      eventSource.close();
+      delete activeEventSources.current[videoId];
+      // Don't remove from UI yet, maybe server is just restarting
+    };
+  }, [t, reloadCurrentView, setActiveTab]);
+
+  const fetchActiveTasks = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const tasks = await api.getActiveTasks();
+      tasks.forEach((task: any) => {
+        if (task.status === 'processing' || task.status === 'pending') {
+          startProgressTracking(task.id, 5, task.articleId);
+        }
+      });
+    } catch (error) {
+      console.error('[useAppLogic] Failed to fetch active tasks:', error);
+    }
+  }, [isAuthenticated, startProgressTracking]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cleanup on unmount
   useEffect(() => {
@@ -233,60 +306,14 @@ export const useAppLogic = () => {
       if (!videoId) throw new Error('No videoId returned from server');
 
       // Unblock the UI immediately after the job starts!
-      // Unblock the UI immediately after the job starts!
       setLoading(false);
-      const progressKey = `v_${id}_${videoId}`;
-      setRenderingVideos(prev => ({ ...prev, [progressKey]: 5 }));
       reloadCurrentView();
-
-      // Start listening for progress via SSE
-      const eventSource = new EventSource(api.getVideoProgressUrl(videoId));
-      activeEventSources.current[videoId] = eventSource;
       
-      const toastId = toast.loading(`Rendering video: 5%`, { duration: Infinity });
-
-      eventSource.onmessage = (event) => {
-        const { progress } = JSON.parse(event.data);
-        
-        if (progress === -1) {
-          toast.error('Video generation failed.', { id: toastId });
-          eventSource.close();
-          delete activeEventSources.current[videoId];
-          setRenderingVideos(prev => {
-            const next = { ...prev };
-            delete next[progressKey];
-            return next;
-          });
-          return;
-        }
-
-        setRenderingVideos(prev => ({ ...prev, [progressKey]: progress }));
-        toast.loading(`Rendering video: ${progress}%`, { id: toastId });
-
-        if (progress >= 100) {
-          eventSource.close();
-          delete activeEventSources.current[videoId];
-          toast.success((t) => (
-            <div onClick={() => { setActiveTab('videos'); toast.dismiss(t.id); }} className="cursor-pointer">
-              Video Rendered! Click to view.
-            </div>
-          ), { id: toastId, duration: 5000 });
-          reloadCurrentView();
-          
-          setTimeout(() => {
-            setRenderingVideos(prev => {
-              const next = { ...prev };
-              delete next[progressKey];
-              return next;
-            });
-          }, 3000);
-        }
-      };
-
-      eventSource.onerror = () => {
-        eventSource.close();
-        delete activeEventSources.current[videoId];
-      };
+      // Start tracking progress
+      startProgressTracking(videoId, 5, id);
+      
+      // Show a brief notification that rendering has started
+      toast.success(t('toast.generatingVideo'), { duration: 4000 });
 
     } catch (error: any) {
       toast.error('Video generation failed: ' + error.message);

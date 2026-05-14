@@ -93,6 +93,7 @@ export default function App() {
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
         onLogout={handleLogout}
+        renderingVideos={renderingVideos}
       />
 
       <main className="flex-1 min-w-0 bg-background overflow-y-auto h-screen custom-scrollbar pb-24 lg:pb-0 relative">

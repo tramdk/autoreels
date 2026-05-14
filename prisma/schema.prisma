@@ -14,9 +14,13 @@ model User {
   id                 String   @id @default(uuid())
   username           String   @unique
   password           String
+  role               String   @default("user") // "admin" or "user"
   mustChangePassword Boolean  @default(true)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+  articles           Article[]
+  videos             Video[]
+  tasks              VideoTask[]
 }
 
 model Account {
@@ -47,9 +51,11 @@ model Article {
   script         Json?     // Native JSON support for better performance and flexibility
   imageUrl       String?
   videoId        String?
+  userId         String?
   sourceId       String?
   source         Source?  @relation(fields: [sourceId], references: [id])
   video          Video?   @relation(fields: [videoId], references: [id])
+  user           User?    @relation(fields: [userId], references: [id])
   createdAt      DateTime @default(now())
 }
 
@@ -62,9 +68,11 @@ model Video {
   source      String    @default("internal") // internal, manager
   publishId   String?
   platforms   String?   // comma-separated
+  userId      String?
   createdAt   DateTime  @default(now())
   postedAt    DateTime?
   articles    Article[]
+  user        User?     @relation(fields: [userId], references: [id])
 }
 
 model Setting {
@@ -109,9 +117,11 @@ model VideoTask {
   ratio       String   @default("9:16")
   status      String   @default("pending") // pending, processing, completed, error
   source      String   @default("internal") // internal, manager
+  userId      String?
   error       String?  @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  user        User?     @relation(fields: [userId], references: [id])
   
   @@index([status, createdAt])
 }

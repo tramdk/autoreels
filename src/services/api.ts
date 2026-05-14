@@ -72,6 +72,7 @@ export const api = {
       body: JSON.stringify(body) 
     }).then(r => r.json());
   },
+  getActiveTasks: () => fetchWithAuth('/api/videos/active-tasks').then(r => r.json() as Promise<any[]>),
   getVideoProgressUrl: (id: string) => `/api/videos/progress/${id}`, // For EventSource
   
   deleteVideo: (id: string) => fetchWithAuth(`/api/videos/${id}`, { method: 'DELETE' }).then(r => r.json()),

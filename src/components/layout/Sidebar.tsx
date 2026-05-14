@@ -47,10 +47,13 @@ interface SidebarProps {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
   onLogout: () => void;
+  renderingVideos?: Record<string, { progress: number, phase?: string, title?: string }>;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLogout }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLogout, renderingVideos = {} }) => {
   const { t, language, setLanguage } = useLanguage();
+
+  const activeJobs = Object.entries(renderingVideos);
 
   return (
     <aside className="hidden lg:flex w-80 glass border-r border-white/5 flex-col sticky top-0 h-screen z-50">
@@ -65,16 +68,47 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLog
           </motion.div>
           AutoReels
         </div>
-        
       </div>
       
-      <nav className="flex-1 px-6 space-y-2">
+      <nav className="flex-1 px-6 space-y-2 overflow-y-auto custom-scrollbar">
         <NavItem icon={<LayoutDashboard />} label={t('sidebar.dashboard')} active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
         <NavItem icon={<Clapperboard />} label={t('sidebar.studio')} active={activeTab === 'studio'} onClick={() => setActiveTab('studio')} />
         <NavItem icon={<Rss />} label={t('sidebar.sources')} active={activeTab === 'sources'} onClick={() => setActiveTab('sources')} />
         <NavItem icon={<Video />} label={t('sidebar.videos')} active={activeTab === 'videos'} onClick={() => setActiveTab('videos')} />
         <NavItem icon={<Share2 />} label={t('sidebar.social')} active={activeTab === 'social'} onClick={() => setActiveTab('social')} />
         <NavItem icon={<Mic />} label="Voices" active={activeTab === 'voices'} onClick={() => setActiveTab('voices')} />
+        
+        {/* Active Tasks Section */}
+        {activeJobs.length > 0 && (
+          <div className="mt-8 pt-4 border-t border-white/5 px-4">
+             <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-4">Active Tasks</p>
+             <div className="space-y-5">
+               {activeJobs.map(([id, data]) => (
+                 <div key={id} className="space-y-2 group/task">
+                   <div className="flex flex-col gap-1">
+                     <div className="flex justify-between items-start">
+                       <span className="text-[11px] font-bold text-white truncate max-w-[140px]">
+                         {data.title || 'Rendering Video'}
+                       </span>
+                       <span className="text-[10px] font-black text-primary">{data.progress}%</span>
+                     </div>
+                     <span className="text-[9px] font-medium text-slate-500 italic">
+                       {data.phase || 'Processing...'}
+                     </span>
+                   </div>
+                   <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                     <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${data.progress}%` }}
+                        className="h-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]"
+                     />
+                   </div>
+                 </div>
+               ))}
+             </div>
+          </div>
+        )}
+
         <div className="mt-10 mb-4 px-4 flex justify-between items-center">
            <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">{t('sidebar.config')}</p>
         </div>

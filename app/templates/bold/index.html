@@ -180,11 +180,10 @@
       var outDur = 0.6;
       var tl = gsap.timeline();
       tl.from(sceneEl, { opacity: 0, x: -80, skewX: 8, duration: inDur, ease: "expo.out", force3D: true }, 0);
-      if (i === scenes.length - 1) {
-        tl.to(sceneEl, { 
-          opacity: 0, x: 40, duration: outDur, ease: "power2.in", force3D: true
-        }, duration - outDur);
-      }
+      // Smooth exit for all scenes to ensure clean transitions
+      tl.to(sceneEl, { 
+        opacity: 0, x: 40, duration: outDur, ease: "power2.in", force3D: true
+      }, duration - outDur);
       
       mainTl.add(tl, currentTime);
       if (i < scenes.length - 1) {
