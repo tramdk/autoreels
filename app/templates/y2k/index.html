@@ -271,7 +271,7 @@
     window.__timelines["root"] = mainTl;
 
     var currentTime = 0;
-    var CROSSFADE = 0.5;
+    var CROSSFADE = 0.6; // Match transition duration exactly
 
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
@@ -281,6 +281,8 @@
       var unit = document.createElement('div');
       unit.id = sceneId;
       unit.className = 'win-window type-' + (scene.type || 'body');
+      unit.style.zIndex = 100 + i; // Ensure newer scenes are always on top
+      unit.style.visibility = 'hidden'; // Hide initially
       
       unit.setAttribute('data-start', currentTime.toFixed(3));
       unit.setAttribute('data-duration', duration.toFixed(3));
@@ -305,18 +307,20 @@
       var tl = gsap.timeline();
       var progBar = unit.querySelector('.scene-progress-bar');
 
-      var inDur = 0.5;
-      var outDur = 0.8;
+      var inDur = 0.6;
+      var outDur = 0.6;
 
       // Glitchy Y2K entry
+      tl.set(unit, { visibility: 'visible' }, 0); // Show right when animation starts
       tl.from(unit, { 
         opacity: 0, 
         scale: 0.6, 
         x: i % 2 === 0 ? -80 : 80, 
         rotate: i % 2 === 0 ? -8 : 8,
         duration: inDur, 
-        ease: "back.out(1.5)" 
-      });
+        ease: "back.out(1.5)",
+        force3D: true
+      }, 0);
 
       if (progBar) {
         tl.to(progBar, { width: "100%", duration: duration, ease: "none" }, 0);
@@ -327,7 +331,9 @@
         opacity: 0, 
         scale: 1.1, 
         duration: outDur, 
-        ease: "power2.in" 
+        ease: "power2.in",
+        force3D: true,
+        onComplete: function() { this.targets()[0].style.visibility = 'hidden'; }
       }, duration - outDur);
       
       mainTl.add(tl, currentTime);

@@ -274,6 +274,7 @@
       unit.setAttribute('data-track-index', "1");
       
       unit.style.zIndex = 100 + i;
+      unit.style.visibility = 'hidden';
 
       if (scene.imageUrl) globalLastImage = scene.imageUrl;
       var imgUrl = globalLastImage;
@@ -322,9 +323,8 @@
       return spans;
     }
 
-    var container = document.getElementById('scenes-container');
     var currentTime = 0;
-    var CROSSFADE = 0.5;
+    var CROSSFADE = 0.6;
 
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
@@ -337,17 +337,18 @@
       var progBar = unit.querySelector('.scene-progress-bar');
       var spans = buildTypingContent(titleEl, (scene.text || scene.bodyText || ''));
 
-      var inDur = 0.4;
-      var outDur = 0.8;
+      var inDur = 0.6;
+      var outDur = 0.6;
       var tl = gsap.timeline();
 
       // Entrance animation
-      tl.from(unit, { opacity: 0, duration: inDur, ease: "power2.out" }, 0)
-        .fromTo(bgImg, { scale: 1.1 }, { scale: 1, duration: dur, ease: "none" }, 0);
+      tl.set(unit, { visibility: 'visible' }, 0);
+      tl.from(unit, { opacity: 0, duration: inDur, ease: "power2.out", force3D: true }, 0)
+        .fromTo(bgImg, { scale: 1.1 }, { scale: 1, duration: dur, ease: "none", force3D: true }, 0);
 
       // Text animation
       var staggerTime = Math.min(0.04, (dur * 0.7) / (spans.length || 1));
-      tl.to(spans, { opacity: 1, duration: 0.05, stagger: staggerTime, ease: 'none' }, 0.2);
+      tl.to(spans, { opacity: 1, duration: 0.05, stagger: staggerTime, ease: 'none', force3D: true }, 0.2);
       
       // Progress bar animation
       if (progBar) {
@@ -355,7 +356,12 @@
       }
 
       // Exit animation
-      tl.to(unit, { opacity: 0, duration: outDur }, dur - outDur);
+      tl.to(unit, { 
+        opacity: 0, 
+        duration: outDur, 
+        force3D: true,
+        onComplete: function() { this.targets()[0].style.visibility = 'hidden'; } 
+      }, dur - outDur);
 
       mainTl.add(tl, currentTime);
       if (i < scenes.length - 1) {

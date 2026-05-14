@@ -303,7 +303,7 @@
     window._tl = mainTl; // Critical for HyperFrames seeking
 
     var currentTime = 0;
-    var CROSSFADE = 0.5; // 0.5s overlap between scenes for smooth crossfade
+    var CROSSFADE = 0.6; // Match transition duration exactly
 
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
@@ -314,17 +314,19 @@
       sceneEl.id = sceneId;
       sceneEl.className = 'scene-card type-' + (scene.type || 'body');
       
-      sceneEl.setAttribute('data-start', currentTime.toFixed(3));
       sceneEl.setAttribute('data-duration', duration.toFixed(3));
       sceneEl.setAttribute('data-track-index', "1");
+      
+      sceneEl.style.zIndex = 100 + i;
+      sceneEl.style.visibility = 'hidden';
       
       sceneEl.innerHTML = '<div class="scene-text">' + (scene.text || scene.bodyText || '') + '</div>' + 
                           '<div class="divider-line"></div>' +
                           '<div class="scene-progress-container"><div class="scene-progress-bar"></div></div>';
       document.getElementById('main-content').appendChild(sceneEl);
 
-      var inDur = 0.8;  // Faster entrance for snappier feel
-      var outDur = 0.9;  // Exit longer than CROSSFADE for clean 24fps transition
+      var inDur = 0.6; 
+      var outDur = 0.6; 
 
       var progBar = sceneEl.querySelector('.scene-progress-bar');
       var tl = gsap.timeline();
@@ -334,6 +336,7 @@
       }
 
       // Scene entrance — starts at t=0 of this scene's timeline
+      tl.set(sceneEl, { visibility: 'visible' }, 0);
       tl.from(sceneEl, { 
         opacity: 0, 
         y: 80,
@@ -342,7 +345,8 @@
         rotationY: isRendering ? 0 : -5,
         z: isRendering ? 0 : -100,
         duration: inDur, 
-        ease: "power3.out" 
+        ease: "power3.out",
+        force3D: true
       }, 0);
 
       // Gentle floating during hold
@@ -352,7 +356,8 @@
         rotationY: isRendering ? 0 : 3,
         y: "-=15",
         duration: floatDur,
-        ease: "sine.inOut"
+        ease: "sine.inOut",
+        force3D: true
       }, inDur);
 
       // Scene exit
@@ -362,14 +367,18 @@
           scale: 1.03, 
           y: -30,
           duration: outDur, 
-          ease: "power2.in" 
+          ease: "power2.in",
+          force3D: true,
+          onComplete: function() { this.targets()[0].style.visibility = 'hidden'; }
         }, duration - outDur);
       } else {
         // Last scene — gentle fade out
         tl.to(sceneEl, { 
           opacity: 0, 
           scale: 1.03, 
-          duration: outDur 
+          duration: outDur,
+          force3D: true,
+          onComplete: function() { this.targets()[0].style.visibility = 'hidden'; }
         }, Math.max(inDur, duration - outDur));
       }
       

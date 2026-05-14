@@ -208,7 +208,7 @@
     window.__timelines["root"] = mainTl;
 
     var currentTime = 0;
-    var CROSSFADE = 0.5; // 0.5s overlap between scenes for smooth crossfade
+    var CROSSFADE = 0.6; // Synchronized transition duration
 
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
@@ -220,9 +220,10 @@
       sceneEl.className = 'scene-box type-' + scene.type;
       
       // HyperFrames native visibility control
-      sceneEl.setAttribute('data-start', currentTime.toFixed(3));
       sceneEl.setAttribute('data-duration', duration.toFixed(3));
       sceneEl.setAttribute('data-track-index', "1");
+      sceneEl.style.zIndex = 100 + i;
+      sceneEl.style.visibility = 'hidden';
 
       var html = '';
       if (scene.type === 'hook') {
@@ -236,18 +237,22 @@
       document.getElementById('main-content').appendChild(sceneEl);
 
       var inDur = 0.6;
-      var outDur = 0.8;
+      var outDur = 0.6;
 
       var tl = gsap.timeline();
       // Smooth entrance
+      tl.set(sceneEl, { visibility: 'visible' }, 0);
       tl.from(sceneEl, { 
         opacity: 0, y: 40, scale: 0.95, 
-        duration: inDur, ease: "power3.out" 
-      });
+        duration: inDur, ease: "power3.out",
+        force3D: true
+      }, 0);
       // Smooth exit
       tl.to(sceneEl, { 
         opacity: 0, y: -30, scale: 1.03, 
-        duration: outDur, ease: "power2.in" 
+        duration: outDur, ease: "power2.in",
+        force3D: true,
+        onComplete: function() { this.targets()[0].style.visibility = 'hidden'; }
       }, duration - outDur);
       
       mainTl.add(tl, currentTime);
