@@ -29,6 +29,7 @@ export async function createApp() {
   app.use('/assets', express.static(path.join(process.cwd(), 'app', 'templates', 'assets')));
 
   // API Routes
+  app.get('/health', (req, res) => res.status(200).send('OK'));
   app.use('/api', routes);
 
   // Vite or Static Assets handling
