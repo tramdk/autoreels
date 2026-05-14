@@ -1,10 +1,9 @@
 # Sử dụng Node.js bản đầy đủ để có sẵn các thư viện hệ thống
 FROM node:20
 
-# Cài đặt FFmpeg và Chromium
+# Cài đặt FFmpeg và các thư viện cần thiết
 RUN apt-get update && apt-get install -y \
     ffmpeg \
-    chromium \
     wget \
     fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
     --no-install-recommends \
@@ -16,6 +15,7 @@ WORKDIR /app
 # Copy package files và cài đặt dependencies
 COPY package*.json ./
 RUN npm install
+RUN npx playwright install --with-deps chromium
 COPY prisma ./prisma/
 RUN npx prisma generate
 
