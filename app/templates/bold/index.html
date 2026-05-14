@@ -131,7 +131,7 @@
 </head>
 
 <body>
-  <div id="root" data-composition-id="root" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" style="--v-bg-brightness: {{ BG_BRIGHTNESS }};">
+  <div id="root" data-composition-id="root" data-start="0" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" style="--v-bg-brightness: {{ BG_BRIGHTNESS }};">
     <img id="bg-image" class="bg-layer" src="{{ BG_IMAGE_URL }}" alt="" onerror="this.style.display='none'">
     <div id="bg-overlay"></div>
 
@@ -162,11 +162,11 @@
       sceneEl.id = sceneId;
       sceneEl.className = 'scene-box type-' + scene.type;
       
+      sceneEl.setAttribute('data-start', currentTime.toFixed(3));
       sceneEl.setAttribute('data-duration', duration.toFixed(3));
       sceneEl.setAttribute('data-track-index', "1");
       
       sceneEl.style.zIndex = 100 + i;
-      sceneEl.style.visibility = 'hidden';
       
       var skew = scene.type === 'hook' ? 'skewX(-5deg)' : 'none';
       var fontSizeKey = (scene.type === 'hook' ? '{{ HOOK_SIZE }}' : '{{ BODY_SIZE }}');
@@ -178,12 +178,12 @@
       var inDur = 0.6;
       var outDur = 0.6;
       var tl = gsap.timeline();
-      tl.set(sceneEl, { visibility: 'visible' }, 0);
-      tl.from(sceneEl, { opacity: 0, x: -80, skewX: 8, duration: inDur, ease: "power3.out", force3D: true }, 0);
-      tl.to(sceneEl, { 
-        opacity: 0, x: 40, duration: outDur, ease: "power2.in", force3D: true,
-        onComplete: function() { this.targets()[0].style.visibility = 'hidden'; } 
-      }, duration - outDur);
+      tl.from(sceneEl, { opacity: 0, x: -80, skewX: 8, duration: inDur, ease: "expo.out", force3D: true }, 0);
+      if (i === scenes.length - 1) {
+        tl.to(sceneEl, { 
+          opacity: 0, x: 40, duration: outDur, ease: "power2.in", force3D: true
+        }, duration - outDur);
+      }
       
       mainTl.add(tl, currentTime);
       if (i < scenes.length - 1) {

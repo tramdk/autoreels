@@ -218,7 +218,7 @@
 </head>
 
 <body>
-  <div id="root" data-composition-id="root" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}"
+  <div id="root" data-composition-id="root" data-start="0" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}"
     data-height="{{ HEIGHT }}">
     <div id="scenes-container"></div>
     <div class="film-grain"></div>
@@ -274,7 +274,6 @@
       unit.setAttribute('data-track-index', "1");
       
       unit.style.zIndex = 100 + i;
-      unit.style.visibility = 'hidden';
 
       if (scene.imageUrl) globalLastImage = scene.imageUrl;
       var imgUrl = globalLastImage;
@@ -342,9 +341,8 @@
       var tl = gsap.timeline();
 
       // Entrance animation
-      tl.set(unit, { visibility: 'visible' }, 0);
-      tl.from(unit, { opacity: 0, duration: inDur, ease: "power2.out", force3D: true }, 0)
-        .fromTo(bgImg, { scale: 1.1 }, { scale: 1, duration: dur, ease: "none", force3D: true }, 0);
+      tl.from(unit, { opacity: 0, duration: inDur, ease: "power3.out", force3D: true }, 0)
+        .fromTo(bgImg, { scale: 1.15 }, { scale: 1, duration: dur, ease: "sine.inOut", force3D: true }, 0);
 
       // Text animation
       var staggerTime = Math.min(0.04, (dur * 0.7) / (spans.length || 1));
@@ -355,13 +353,15 @@
         tl.to(progBar, { width: "100%", duration: dur, ease: "none" }, 0);
       }
 
-      // Exit animation
-      tl.to(unit, { 
-        opacity: 0, 
-        duration: outDur, 
-        force3D: true,
-        onComplete: function() { this.targets()[0].style.visibility = 'hidden'; } 
-      }, dur - outDur);
+      // Exit animation only for the final scene
+      if (i === scenes.length - 1) {
+        tl.to(unit, { 
+          opacity: 0, 
+          duration: outDur, 
+          ease: "power2.in",
+          force3D: true
+        }, dur - outDur);
+      }
 
       mainTl.add(tl, currentTime);
       if (i < scenes.length - 1) {

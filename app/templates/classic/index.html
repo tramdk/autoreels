@@ -181,7 +181,7 @@
 </head>
 
 <body>
-  <div id="root" data-composition-id="root" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" style="--v-bg-brightness: {{ BG_BRIGHTNESS }};">
+  <div id="root" data-composition-id="root" data-start="0" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" style="--v-bg-brightness: {{ BG_BRIGHTNESS }};">
     <img id="bg-image" class="bg-layer" src="{{ BG_IMAGE_URL }}" alt="" onerror="this.style.display='none'">
     <div id="bg-overlay"></div>
 
@@ -220,10 +220,10 @@
       sceneEl.className = 'scene-box type-' + scene.type;
       
       // HyperFrames native visibility control
+      sceneEl.setAttribute('data-start', currentTime.toFixed(3));
       sceneEl.setAttribute('data-duration', duration.toFixed(3));
       sceneEl.setAttribute('data-track-index', "1");
       sceneEl.style.zIndex = 100 + i;
-      sceneEl.style.visibility = 'hidden';
 
       var html = '';
       if (scene.type === 'hook') {
@@ -241,19 +241,20 @@
 
       var tl = gsap.timeline();
       // Smooth entrance
-      tl.set(sceneEl, { visibility: 'visible' }, 0);
       tl.from(sceneEl, { 
         opacity: 0, y: 40, scale: 0.95, 
-        duration: inDur, ease: "power3.out",
+        duration: inDur, ease: "back.out(1.7)",
         force3D: true
       }, 0);
       // Smooth exit
-      tl.to(sceneEl, { 
-        opacity: 0, y: -30, scale: 1.03, 
-        duration: outDur, ease: "power2.in",
-        force3D: true,
-        onComplete: function() { this.targets()[0].style.visibility = 'hidden'; }
-      }, duration - outDur);
+      // Smooth exit only for final scene
+      if (i === scenes.length - 1) {
+        tl.to(sceneEl, { 
+          opacity: 0, y: -30, scale: 1.03, 
+          duration: outDur, ease: "power2.in",
+          force3D: true
+        }, duration - outDur);
+      }
       
       mainTl.add(tl, currentTime);
       

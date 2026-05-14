@@ -246,7 +246,7 @@
 </head>
 
 <body>
-  <div id="root" data-composition-id="root" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}">
+  <div id="root" data-composition-id="root" data-start="0" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}">
     <img id="bg-image" class="bg-layer" src="{{ BG_IMAGE_URL }}" alt="">
     <div id="bg-overlay"></div>
     <div class="cyber-grid"></div>
@@ -281,12 +281,10 @@
       var unit = document.createElement('div');
       unit.id = sceneId;
       unit.className = 'win-window type-' + (scene.type || 'body');
-      unit.style.zIndex = 100 + i; // Ensure newer scenes are always on top
-      unit.style.visibility = 'hidden'; // Hide initially
-      
       unit.setAttribute('data-start', currentTime.toFixed(3));
       unit.setAttribute('data-duration', duration.toFixed(3));
       unit.setAttribute('data-track-index', "1");
+      unit.style.zIndex = 100 + i; // Ensure newer scenes are always on top
 
       unit.innerHTML = `
         <div class="win-header">
@@ -311,7 +309,6 @@
       var outDur = 0.6;
 
       // Glitchy Y2K entry
-      tl.set(unit, { visibility: 'visible' }, 0); // Show right when animation starts
       tl.from(unit, { 
         opacity: 0, 
         scale: 0.6, 
@@ -326,15 +323,16 @@
         tl.to(progBar, { width: "100%", duration: duration, ease: "none" }, 0);
       }
 
-      // Exit
-      tl.to(unit, { 
-        opacity: 0, 
-        scale: 1.1, 
-        duration: outDur, 
-        ease: "power2.in",
-        force3D: true,
-        onComplete: function() { this.targets()[0].style.visibility = 'hidden'; }
-      }, duration - outDur);
+      // Exit only for final scene
+      if (i === scenes.length - 1) {
+        tl.to(unit, { 
+          opacity: 0, 
+          scale: 1.1, 
+          duration: outDur, 
+          ease: "power2.in",
+          force3D: true
+        }, duration - outDur);
+      }
       
       mainTl.add(tl, currentTime);
       if (i < scenes.length - 1) {
@@ -347,13 +345,16 @@
     var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;
     window.duration = finalDur;
 
-    // Background animation
-    mainTl.add(gsap.to(".cyber-grid", { backgroundPosition: "0px 100px", duration: 10, repeat: -1, ease: "none" }), 0);
+    // Background animation - deterministic
+    var gridRepeat = Math.ceil(finalDur / 10.0) - 1;
+    mainTl.add(gsap.to(".cyber-grid", { backgroundPosition: "0px 100px", duration: 10, repeat: gridRepeat, ease: "none" }), 0);
+    
+    var starRepeat = Math.ceil(finalDur / 3.0) - 1;
     mainTl.add(gsap.to(".y2k-star", { 
       rotation: 360, 
       scale: 1.2, 
       duration: 3, 
-      repeat: -1, 
+      repeat: starRepeat, 
       yoyo: true, 
       ease: "sine.inOut" 
     }), 0);

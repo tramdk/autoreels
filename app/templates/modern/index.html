@@ -229,7 +229,7 @@
 </head>
 
 <body>
-  <div id="root" data-composition-id="root" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}"
+  <div id="root" data-composition-id="root" data-start="0" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}"
     data-height="{{ HEIGHT }}">
     <div id="scenes-container"></div>
     <div class="geometric-accent"></div>
@@ -276,11 +276,11 @@
       unit.id = 'unit-' + i;
       unit.className = 'scene-unit ' + (isHook ? 'type-hook' : 'type-body');
       
+      unit.setAttribute('data-start', start.toFixed(3));
       unit.setAttribute('data-duration', duration.toFixed(3));
       unit.setAttribute('data-track-index', "1");
       
       unit.style.zIndex = 100 + i;
-      unit.style.visibility = 'hidden';
 
       if (scene.imageUrl) globalLastImage = scene.imageUrl;
       var imgUrl = globalLastImage;
@@ -344,8 +344,7 @@
       var tl = gsap.timeline();
 
       // Modern slick animation
-      tl.set(unit, { visibility: 'visible' }, 0);
-      tl.from(unit, { opacity: 0, duration: inDur, ease: "power2.inOut", force3D: true }, 0)
+      tl.from(unit, { opacity: 0, duration: inDur, ease: "power3.inOut", force3D: true }, 0)
         .fromTo(bgImg, { scale: 1.15 }, { scale: 1, duration: dur, ease: "none", force3D: true }, 0)
         .from(unit.querySelector('.scene-content'), { y: 30, opacity: 0, duration: 0.6, ease: "expo.out", force3D: true }, 0.15);
 
@@ -355,16 +354,10 @@
       // Progress bar animation
       tl.to(progBar, { width: "100%", duration: dur, ease: "none" }, 0);
 
-      // Smooth exit
-      if (i < scenes.length - 1) {
+      // Smooth exit only for final scene
+      if (i === scenes.length - 1) {
         tl.to(unit, { 
-          opacity: 0, scale: 1.03, duration: outDur, ease: "power2.in", force3D: true,
-          onComplete: function() { this.targets()[0].style.visibility = 'hidden'; } 
-        }, dur - outDur);
-      } else {
-        tl.to(unit, { 
-          opacity: 0, duration: outDur, force3D: true,
-          onComplete: function() { this.targets()[0].style.visibility = 'hidden'; }
+          opacity: 0, duration: outDur, ease: "power2.in", force3D: true
         }, dur - outDur);
       }
 

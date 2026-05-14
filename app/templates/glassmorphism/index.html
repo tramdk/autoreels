@@ -266,7 +266,7 @@
 </head>
 
 <body>
-  <div id="root" data-composition-id="root" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" style="--v-bg-brightness: {{ BG_BRIGHTNESS }};">
+  <div id="root" data-composition-id="root" data-start="0" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" style="--v-bg-brightness: {{ BG_BRIGHTNESS }};">
     <img id="bg-image" class="bg-layer" src="{{ BG_IMAGE_URL }}" alt="" onerror="this.style.display='none'">
     <div id="bg-overlay"></div>
     <div class="grain"></div>
@@ -314,11 +314,11 @@
       sceneEl.id = sceneId;
       sceneEl.className = 'scene-card type-' + (scene.type || 'body');
       
+      sceneEl.setAttribute('data-start', currentTime.toFixed(3));
       sceneEl.setAttribute('data-duration', duration.toFixed(3));
       sceneEl.setAttribute('data-track-index', "1");
       
       sceneEl.style.zIndex = 100 + i;
-      sceneEl.style.visibility = 'hidden';
       
       sceneEl.innerHTML = '<div class="scene-text">' + (scene.text || scene.bodyText || '') + '</div>' + 
                           '<div class="divider-line"></div>' +
@@ -336,7 +336,6 @@
       }
 
       // Scene entrance — starts at t=0 of this scene's timeline
-      tl.set(sceneEl, { visibility: 'visible' }, 0);
       tl.from(sceneEl, { 
         opacity: 0, 
         y: 80,
@@ -360,25 +359,14 @@
         force3D: true
       }, inDur);
 
-      // Scene exit
-      if (i < scenes.length - 1) {
-        tl.to(sceneEl, { 
-          opacity: 0, 
-          scale: 1.03, 
-          y: -30,
-          duration: outDur, 
-          ease: "power2.in",
-          force3D: true,
-          onComplete: function() { this.targets()[0].style.visibility = 'hidden'; }
-        }, duration - outDur);
-      } else {
-        // Last scene — gentle fade out
+      // Scene exit only for the final scene
+      if (i === scenes.length - 1) {
         tl.to(sceneEl, { 
           opacity: 0, 
           scale: 1.03, 
           duration: outDur,
-          force3D: true,
-          onComplete: function() { this.targets()[0].style.visibility = 'hidden'; }
+          ease: "power2.in",
+          force3D: true
         }, Math.max(inDur, duration - outDur));
       }
       
@@ -396,15 +384,17 @@
     var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;
     window.duration = finalDur;
 
-    // Premium floating orbs animation
-    var orbRepeat = -1; 
-    gsap.to(".orb", {
-      x: "random(-100, 100)",
-      y: "random(-100, 100)",
-      duration: "random(8, 12)",
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut"
+    // Premium floating orbs animation - deterministic
+    var orbRepeat = Math.ceil(finalDur / 10.0) - 1; 
+    document.querySelectorAll(".orb").forEach(function(orb, idx) {
+      mainTl.add(gsap.to(orb, {
+        x: (idx % 2 === 0 ? 100 : -100),
+        y: (idx % 3 === 0 ? 50 : -50),
+        duration: 8 + idx,
+        repeat: orbRepeat,
+        yoyo: true,
+        ease: "sine.inOut"
+      }), 0);
     });
 
     mainTl.time(0);
