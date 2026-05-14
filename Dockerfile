@@ -5,9 +5,16 @@ FROM node:20
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     wget \
+    fontconfig \
     fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
+
+# Tải và cài đặt các font chữ cần thiết cho HyperFrames (Playfair Display, Inter)
+RUN mkdir -p /usr/share/fonts/truetype/google-fonts && \
+    wget -q -O /usr/share/fonts/truetype/google-fonts/PlayfairDisplay.ttf "https://github.com/google/fonts/raw/main/ofl/playfairdisplay/PlayfairDisplay%5Bwght%5D.ttf" && \
+    wget -q -O /usr/share/fonts/truetype/google-fonts/Inter.ttf "https://github.com/google/fonts/raw/main/ofl/inter/Inter%5Bslnt%2Cwght%5D.ttf" && \
+    fc-cache -f -v
 
 # Thiết lập thư mục làm việc
 WORKDIR /app
