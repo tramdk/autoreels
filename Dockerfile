@@ -12,8 +12,8 @@ RUN apt-get update && apt-get install -y \
 
 # Tải và cài đặt các font chữ cần thiết cho HyperFrames (Playfair Display, Inter)
 RUN mkdir -p /usr/share/fonts/truetype/google-fonts && \
-    wget -q -O /usr/share/fonts/truetype/google-fonts/PlayfairDisplay.ttf "https://github.com/google/fonts/raw/main/ofl/playfairdisplay/PlayfairDisplay%5Bwght%5D.ttf" && \
-    wget -q -O /usr/share/fonts/truetype/google-fonts/Inter.ttf "https://github.com/google/fonts/raw/main/ofl/inter/Inter%5Bslnt%2Cwght%5D.ttf" && \
+    wget -q -O /usr/share/fonts/truetype/google-fonts/PlayfairDisplay.ttf "https://raw.githubusercontent.com/google/fonts/main/ofl/playfairdisplay/PlayfairDisplay%5Bwght%5D.ttf" && \
+    wget -q -O /usr/share/fonts/truetype/google-fonts/Inter.ttf "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf" && \
     fc-cache -f -v
 
 # Thiết lập thư mục làm việc
