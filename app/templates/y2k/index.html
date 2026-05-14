@@ -282,8 +282,7 @@
       unit.id = sceneId;
       unit.className = 'win-window type-' + (scene.type || 'body');
       unit.setAttribute('data-start', currentTime.toFixed(3));
-      var hfDuration = (i < scenes.length - 1) ? (duration + 0.2) : duration;
-      unit.setAttribute('data-duration', hfDuration.toFixed(3));
+      unit.setAttribute('data-duration', duration.toFixed(3));
       unit.setAttribute('data-track-index', "1");
       unit.style.zIndex = 100 + i; // Ensure newer scenes are always on top
 
@@ -307,9 +306,8 @@
       var progBar = unit.querySelector('.scene-progress-bar');
 
       var inDur = 0.6;
-      var outDur = 0.6;
 
-      // Glitchy Y2K entry
+      // Glitchy Y2K entry - Fade in ONLY (Stacking Crossfade)
       tl.from(unit, { 
         opacity: 0, 
         scale: 0.6, 
@@ -324,14 +322,7 @@
         tl.to(progBar, { width: "100%", duration: duration, ease: "none" }, 0);
       }
 
-      // Smooth exit for all scenes to ensure clean transitions
-      tl.to(unit, { 
-        opacity: 0, 
-        scale: 1.1, 
-        duration: outDur, 
-        ease: "power2.in",
-        force3D: true
-      }, duration - outDur);
+      // NO EXIT FADE! The next scene will cover this one.
       
       mainTl.add(tl, currentTime);
       if (i < scenes.length - 1) {

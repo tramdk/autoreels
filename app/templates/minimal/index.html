@@ -171,27 +171,19 @@
       sceneEl.className = 'scene-box type-' + scene.type;
       
       sceneEl.setAttribute('data-start', currentTime.toFixed(3));
-      var hfDuration = (i < scenes.length - 1) ? (duration + 0.2) : duration;
-      sceneEl.setAttribute('data-duration', hfDuration.toFixed(3));
+      sceneEl.setAttribute('data-duration', duration.toFixed(3));
       sceneEl.setAttribute('data-track-index', "1");
       
       sceneEl.style.zIndex = 100 + i;
-
+      
       var fontSizeKey = (scene.type === 'hook' ? '{{ HOOK_SIZE }}' : '{{ BODY_SIZE }}');
       sceneEl.innerHTML = '<div class="scene-title" style="font-size: calc(var(--cqmin) * ' + fontSizeKey + ' / 720)">' + (scene.text || scene.bodyText || '') + '</div>';
       document.getElementById('main-content').appendChild(sceneEl);
 
       var inDur = 0.6;
-      var outDur = 0.6;
       var tl = gsap.timeline();
+      // Stacking crossfade: Fade in only
       tl.from(sceneEl, { opacity: 0, y: 15, duration: inDur, ease: "power3.out", force3D: true }, 0);
-      // Smooth exit for all scenes to ensure clean transitions
-      tl.to(sceneEl, { 
-        opacity: 0, 
-        duration: outDur, 
-        ease: "power2.in", 
-        force3D: true
-      }, duration - outDur);
       
       mainTl.add(tl, currentTime);
       if (i < scenes.length - 1) {

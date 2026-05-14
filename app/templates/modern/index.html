@@ -342,11 +342,10 @@
       var spans = buildTypingContent(titleEl, (scene.text || scene.bodyText || ''));
 
       var inDur = 0.6;
-      var outDur = 0.6;
       var tl = gsap.timeline();
 
-      // Modern slick animation
-      tl.from(unit, { opacity: 0, duration: inDur, ease: "power3.inOut", force3D: true }, 0)
+      // Modern slick animation - Fade in ONLY (Stacking Crossfade)
+      tl.from(unit, { opacity: 0, duration: inDur, ease: "power2.inOut", force3D: true }, 0)
         .fromTo(bgImg, { scale: 1.15 }, { scale: 1, duration: dur, ease: "none", force3D: true }, 0)
         .from(unit.querySelector('.scene-content'), { y: 30, opacity: 0, duration: 0.6, ease: "expo.out", force3D: true }, 0.15);
 
@@ -356,11 +355,8 @@
       // Progress bar animation
       tl.to(progBar, { width: "100%", duration: dur, ease: "none" }, 0);
 
-      // Smooth exit for all scenes to ensure clean transitions
-      tl.to(unit, { 
-        opacity: 0, duration: outDur, ease: "power2.in", force3D: true
-      }, dur - outDur);
-
+      // NO EXIT FADE! The next scene will cover this one.
+      
       mainTl.add(tl, currentTime);
       if (i < scenes.length - 1) {
         currentTime += dur - CROSSFADE;
