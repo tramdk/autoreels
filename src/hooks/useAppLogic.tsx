@@ -203,12 +203,12 @@ export const useAppLogic = () => {
     setLoading(false);
   };
 
-  const handleSummarize = async (id: string) => {
+  const handleSummarize = async (id: string, tone: string = 'News') => {
     const loadingToast = toast.loading('AI is reading and summarizing...');
     setLoading(true);
     try {
       const language = localStorage.getItem('autoreels_language') || 'Vietnamese';
-      await api.summarize(id, language);
+      await api.summarize(id, language, tone);
       await reloadCurrentView();
       toast.success('Script generated successfully!', { id: loadingToast });
     } catch (error: any) {

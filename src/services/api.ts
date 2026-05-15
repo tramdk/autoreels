@@ -60,7 +60,8 @@ export const api = {
     fetchWithAuth(`/api/sources/${id}`, { method: 'DELETE' }).then(r => r.json()),
 
   scrape: () => fetchWithAuth('/api/articles/scrape', { method: 'POST' }).then(r => r.json()),
-  summarize: (id: string, language: string = 'Vietnamese') => fetchWithAuth(`/api/articles/summarize/${id}`, { method: 'POST', body: JSON.stringify({ language }) }).then(r => r.json()),
+  summarize: (id: string, language: string = 'Vietnamese', tone: string = 'News') => 
+    fetchWithAuth(`/api/articles/summarize/${id}`, { method: 'POST', body: JSON.stringify({ language, tone }) }).then(r => r.json()),
   updateScript: (id: string, script: any) => 
     fetchWithAuth(`/api/articles/${id}/script`, { method: 'PUT', body: JSON.stringify({ script }) }).then(r => r.json()),
   

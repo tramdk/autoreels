@@ -30,6 +30,7 @@ import {
 import { useLanguage } from '../../contexts/LanguageContext';
 import { AssetPicker } from '../../components/ui/AssetPicker';
 import { GenerateVideoAction } from '../../components/ui/GenerateVideoAction';
+import { SummarizeAction } from '../../components/ui/SummarizeAction';
 import { api } from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { cn } from '../../utils/cn';
@@ -199,40 +200,14 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
     toast.success('Đã khởi tạo kịch bản mới');
   };
 
-  const handleSummarize = async (e: React.MouseEvent, articleId: string) => {
-    e.stopPropagation();
-    const tid = toast.loading('Đang khởi tạo kịch bản AI...');
-    try {
-      const language = localStorage.getItem('autoreels_language') || 'Vietnamese';
-      await api.summarize(articleId, language);
-      toast.success('Đã tạo kịch bản thành công!', { id: tid });
-      
-      // Refresh history list silently to avoid flickering
-      await fetchHistory(currentPage, true);
-      
-      // Automatically load the newly generated script into the editor
-      const updatedArticle = await api.getArticle(articleId);
-      if (updatedArticle) {
-        setTitle(updatedArticle.title);
-        if (updatedArticle.script) {
-          let parsed = typeof updatedArticle.script === 'string' ? JSON.parse(updatedArticle.script) : updatedArticle.script;
-          let scenes: any[] = [];
-          if (parsed) {
-            if (Array.isArray(parsed.scenes)) scenes = parsed.scenes;
-            else if (parsed.scenes && typeof parsed.scenes === 'object') scenes = Object.values(parsed.scenes);
-            else if (Array.isArray(parsed)) scenes = parsed;
-          }
-          setScript({ scenes });
-        }
-        setLastSavedArticleId(updatedArticle.id);
-        setIsDirty(false);
-        setActivePreviewIdx(0);
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Lỗi khi tạo kịch bản', { id: tid });
-    }
-  };
+  const [selectedTone, setSelectedTone] = React.useState('News');
+
+  const TONES = [
+    { id: 'News', name: 'Tin tức', icon: FileText },
+    { id: 'Dramatic', name: 'Kịch tính', icon: Zap },
+    { id: 'Humorous', name: 'Hài hước', icon: Sparkles },
+    { id: 'Inspirational', name: 'Cảm hứng', icon: Wand2 },
+  ];
 
   const loadArticle = (article: any) => {
     if (isDirty && !window.confirm('Kịch bản chưa lưu sẽ bị mất. Bạn có chắc muốn tải kịch bản này?')) {
@@ -346,6 +321,27 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
               onChange={e => handleFieldChange(() => setTitle(e.target.value))}
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-bold focus:border-primary/50 focus:outline-none transition-all"
             />
+
+            <div className="flex flex-col gap-2">
+              <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest ml-1">Tông giọng AI Script</span>
+              <div className="grid grid-cols-4 gap-1.5 p-1 bg-white/5 border border-white/10 rounded-xl">
+                {TONES.map(tone => (
+                  <button
+                    key={tone.id}
+                    onClick={() => setSelectedTone(tone.id)}
+                    className={cn(
+                      "flex flex-col items-center justify-center py-2 rounded-lg transition-all gap-1 border",
+                      selectedTone === tone.id 
+                        ? "bg-primary/20 border-primary/40 text-primary shadow-lg glow-primary/10" 
+                        : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-white/5"
+                    )}
+                  >
+                    <tone.icon className="w-3.5 h-3.5" />
+                    <span className="text-[8px] font-bold uppercase tracking-tighter">{tone.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -525,13 +521,18 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
                           {JSON.parse(typeof article.script === 'string' ? article.script : JSON.stringify(article.script)).scenes?.length || 0} Scenes
                         </div>
                       ) : (
-                        <button
-                          onClick={(e) => handleSummarize(e, article.id)}
-                          className="px-3 py-1.5 bg-primary/20 border border-primary/40 rounded-xl text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-2 hover:bg-primary/30 transition-all shadow-lg glow-primary/20 group/btn"
-                        >
-                          <Wand2 className="w-3.5 h-3.5 animate-wiggle" />
-                          AI Script
-                        </button>
+                        <SummarizeAction 
+                          articleId={article.id} 
+                          tone={selectedTone} 
+                          onSuccess={async () => {
+                            await fetchHistory(currentPage, true);
+                            // Optionally load it automatically
+                            const updated = await api.getArticle(article.id);
+                            loadArticle(updated);
+                          }}
+                          className="px-3 py-1.5"
+                          label="AI Script"
+                        />
                       )}
                     </div>
                   </div>

@@ -83,6 +83,7 @@ router.post('/manual-script', authenticate, async (req, res) => {
 });
 
 router.post('/summarize/:id', authenticate, async (req, res) => {
+  const { tone } = req.body;
   const resolvedAI = getAIClient(genAI);
 
   if (!resolvedAI) {
@@ -92,12 +93,25 @@ router.post('/summarize/:id', authenticate, async (req, res) => {
   const article = await prisma.article.findUnique({ where: { id: req.params.id } });
   if (!article) return res.status(404).json({ error: 'Article not found' });
 
+  // Define tone-specific instructions
+  const toneMap: Record<string, string> = {
+    'Dramatic': 'Tông giọng kịch tính, sâu sắc, hồi hộp, dùng nhiều từ ngữ mạnh mẽ, khơi gợi cảm xúc mạnh.',
+    'Humorous': 'Tông giọng hài hước, vui vẻ, châm biếm nhẹ nhàng, dùng ngôn ngữ trẻ trung, năng động, phá cách.',
+    'News': 'Tông giọng tin tức, chuyên nghiệp, khách quan, ngắn gọn, súc tích, tập trung vào sự thật.',
+    'Inspirational': 'Tông giọng truyền cảm hứng, tích cực, sâu lắng, truyền động lực, dùng từ ngữ mang tính khích lệ.'
+  };
+
+  const selectedTone = toneMap[tone] || toneMap['News'];
+
   try {
     const model = resolvedAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const prompt = `
 Bạn là chuyên gia viết kịch bản video TikTok viral bằng tiếng Việt.
 
 Hãy tóm tắt bài báo dưới đây thành một kịch bản video dạng cảnh (scene-based), phù hợp để đọc voice-over bằng TTS (Text-to-Speech).
+
+=== YÊU CẦU VỀ TÔNG GIỌNG (TONE OF VOICE) ===
+${selectedTone}
 
 === CẤU TRÚC KỊCH BẢN ===
 - Tổng số từ toàn bộ voiceText: khoảng 175-300 từ (tương đương 55-75 giây đọc tốc độ bình thường).
