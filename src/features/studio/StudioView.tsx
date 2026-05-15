@@ -200,15 +200,6 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
     toast.success('Đã khởi tạo kịch bản mới');
   };
 
-  const [selectedTone, setSelectedTone] = React.useState('News');
-
-  const TONES = [
-    { id: 'News', name: 'Tin tức', icon: FileText },
-    { id: 'Dramatic', name: 'Kịch tính', icon: Zap },
-    { id: 'Humorous', name: 'Hài hước', icon: Sparkles },
-    { id: 'Inspirational', name: 'Cảm hứng', icon: Wand2 },
-  ];
-
   const loadArticle = (article: any) => {
     if (isDirty && !window.confirm('Kịch bản chưa lưu sẽ bị mất. Bạn có chắc muốn tải kịch bản này?')) {
       return;
@@ -321,27 +312,6 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
               onChange={e => handleFieldChange(() => setTitle(e.target.value))}
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-bold focus:border-primary/50 focus:outline-none transition-all"
             />
-
-            <div className="flex flex-col gap-2">
-              <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest ml-1">Tông giọng AI Script</span>
-              <div className="grid grid-cols-4 gap-1.5 p-1 bg-white/5 border border-white/10 rounded-xl">
-                {TONES.map(tone => (
-                  <button
-                    key={tone.id}
-                    onClick={() => setSelectedTone(tone.id)}
-                    className={cn(
-                      "flex flex-col items-center justify-center py-2 rounded-lg transition-all gap-1 border",
-                      selectedTone === tone.id 
-                        ? "bg-primary/20 border-primary/40 text-primary shadow-lg glow-primary/10" 
-                        : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-white/5"
-                    )}
-                  >
-                    <tone.icon className="w-3.5 h-3.5" />
-                    <span className="text-[8px] font-bold uppercase tracking-tighter">{tone.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
 
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -523,7 +493,6 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
                       ) : (
                         <SummarizeAction 
                           articleId={article.id} 
-                          tone={selectedTone} 
                           onSuccess={async () => {
                             await fetchHistory(currentPage, true);
                             // Optionally load it automatically

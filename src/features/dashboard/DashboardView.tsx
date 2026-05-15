@@ -48,13 +48,6 @@ interface DashboardViewProps {
   totalPages: number;
 }
 
-const TONES = [
-  { id: 'News', name: 'Tin tức', icon: FileText },
-  { id: 'Dramatic', name: 'Kịch tính', icon: Zap },
-  { id: 'Humorous', name: 'Hài hước', icon: Sparkles },
-  { id: 'Inspirational', name: 'Cảm hứng', icon: Wand2 },
-];
-
 const ArticleSkeleton = () => (
   <div className="flex flex-col p-4 sm:p-6 rounded-[24px] bg-slate-800/20 border border-white/5 gap-4">
     <div className="flex items-center justify-between">
@@ -91,7 +84,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [isAddingManual, setIsAddingManual] = useState(false);
   const [manualData, setManualData] = useState<any>({ title: '', content: '' });
   const [showAssetPicker, setShowAssetPicker] = useState<{ active: boolean; index: number | null }>({ active: false, index: null });
-  const [selectedTone, setSelectedTone] = useState('News');
 
   const startEditing = (article: Article) => {
     setEditingArticle(article);
@@ -155,47 +147,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white mb-1">{t('dashboard.title')}</h1>
             <p className="text-[10px] sm:text-xs text-slate-500 font-bold uppercase tracking-[0.2em]">{t('dashboard.subtitle')}</p>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <div className="hidden lg:flex items-center gap-1.5 p-1 bg-white/5 border border-white/10 rounded-2xl">
-              {TONES.map(tone => (
-                <button
-                  key={tone.id}
-                  onClick={() => setSelectedTone(tone.id)}
-                  title={tone.name}
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-2 rounded-xl transition-all border",
-                    selectedTone === tone.id 
-                      ? "bg-primary/20 border-primary/40 text-primary shadow-lg" 
-                      : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-white/5"
-                  )}
-                >
-                  <tone.icon className="w-3.5 h-3.5" />
-                  <span className="text-[9px] font-black uppercase tracking-widest hidden xl:inline">{tone.name}</span>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <motion.button 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setIsAddingManual(true)}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-800 text-white px-5 py-3.5 rounded-2xl font-bold border border-white/10 hover:bg-slate-700 transition-all text-[11px] uppercase tracking-widest min-w-0"
-              >
-                <Plus className="w-4 h-4 shrink-0" /> 
-                <span className="truncate">{t('articles.manualBtn')}</span>
-              </motion.button>
-              <motion.button 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onScrape}
-                disabled={loading}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary text-white px-6 py-3.5 rounded-2xl font-black shadow-lg glow-primary disabled:opacity-50 transition-all text-[11px] uppercase tracking-[0.2em] min-w-0"
-              >
-                <RefreshCw className={`w-4 h-4 shrink-0 ${loading ? 'animate-spin' : ''}`} /> 
-                <span className="truncate">{t('dashboard.runPipeline')}</span>
-              </motion.button>
-            </div>
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setIsAddingManual(true)}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-800 text-white px-5 py-3.5 rounded-2xl font-bold border border-white/10 hover:bg-slate-700 transition-all text-[11px] uppercase tracking-widest min-w-0"
+            >
+              <Plus className="w-4 h-4 shrink-0" /> 
+              <span className="truncate">{t('articles.manualBtn')}</span>
+            </motion.button>
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onScrape}
+              disabled={loading}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary text-white px-6 py-3.5 rounded-2xl font-black shadow-lg glow-primary disabled:opacity-50 transition-all text-[11px] uppercase tracking-[0.2em] min-w-0"
+            >
+              <RefreshCw className={`w-4 h-4 shrink-0 ${loading ? 'animate-spin' : ''}`} /> 
+              <span className="truncate">{t('dashboard.runPipeline')}</span>
+            </motion.button>
           </div>
         </div>
       </div>
@@ -259,7 +230,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             {article.status === 'scraped' && (
                               <SummarizeAction 
                                 articleId={article.id} 
-                                tone={selectedTone} 
                                 onSuccess={() => setPage(page)} // Trigger refresh
                               />
                             )}
