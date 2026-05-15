@@ -37,6 +37,8 @@ interface DashboardViewProps {
   loading: boolean;
   onScrape: () => void;
   onSummarize: (id: string, tone?: string) => void;
+  onRefresh?: () => void;
+  onUpdateArticle?: (article: Article) => void;
   onGenerateVideo: (id: string, templateId?: string, options?: any) => void;
   onUpdateScript: (id: string, script: any) => void;
   onCreateManualArticle: (data: { title: string, content: string }) => void;
@@ -67,6 +69,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   loading,
   onScrape,
   onSummarize,
+  onRefresh,
+  onUpdateArticle,
   onGenerateVideo,
   onUpdateScript,
   onCreateManualArticle,
@@ -230,7 +234,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             {article.status === 'scraped' && (
                               <SummarizeAction 
                                 articleId={article.id} 
-                                onSuccess={() => setPage(page)} // Trigger refresh
+                                onSuccess={(updated) => {
+                                  if (onUpdateArticle) onUpdateArticle(updated);
+                                  if (onRefresh) onRefresh();
+                                }} 
                               />
                             )}
                             {article.status === 'summarized' && (

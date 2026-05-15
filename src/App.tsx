@@ -57,7 +57,8 @@ export default function App() {
     voices,
     handleAddVoice,
     handleUpdateVoice,
-    handleDeleteVoice
+    handleDeleteVoice,
+    updateArticle
   } = useAppLogic();
 
   if (authChecking) {
@@ -108,6 +109,8 @@ export default function App() {
                 loading={loading}
                 onScrape={handleScrape}
                 onSummarize={handleSummarize}
+                onRefresh={reloadCurrentView}
+                onUpdateArticle={updateArticle}
                 onGenerateVideo={handleGenerateVideo}
                 onUpdateScript={handleUpdateScript}
                 onCreateManualArticle={handleCreateManualArticle}

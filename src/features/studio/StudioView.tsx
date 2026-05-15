@@ -493,10 +493,14 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
                       ) : (
                         <SummarizeAction 
                           articleId={article.id} 
-                          onSuccess={async () => {
-                            await fetchHistory(currentPage, true);
-                            // Optionally load it automatically
-                            const updated = await api.getArticle(article.id);
+                          onSuccess={async (updated) => {
+                            // Update local articles state immediately
+                            setArticles(prev => prev.map(a => a.id === updated.id ? updated : a));
+                            
+                            // Refresh history in background
+                            fetchHistory(currentPage, true);
+                            
+                            // Load the updated article into editor
                             loadArticle(updated);
                           }}
                           className="px-3 py-1.5"

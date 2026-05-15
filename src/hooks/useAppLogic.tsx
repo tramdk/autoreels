@@ -515,6 +515,10 @@ export const useAppLogic = () => {
     setLoading(false);
   };
 
+  const updateArticle = (updatedArticle: Article) => {
+    setArticles(prev => prev.map(a => a.id === updatedArticle.id ? updatedArticle : a));
+  };
+
   return {
     activeTab,
     setActiveTab,
@@ -557,6 +561,7 @@ export const useAppLogic = () => {
     voices,
     handleAddVoice,
     handleUpdateVoice,
-    handleDeleteVoice
+    handleDeleteVoice,
+    updateArticle
   };
 };
