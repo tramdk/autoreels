@@ -16,7 +16,8 @@ import {
   X,
   Save,
   Image as ImageIcon,
-  History as HistoryIcon
+  History as HistoryIcon,
+  Sparkles
 } from 'lucide-react';
 import { StatCard } from '../../components/ui/StatCard';
 import { StatusBadge } from '../../components/ui/StatusBadge';
@@ -27,6 +28,7 @@ import { GenerateVideoAction } from '../../components/ui/GenerateVideoAction';
 import { api } from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { SummarizeAction } from '../../components/ui/SummarizeAction';
+import { cn } from '../../utils/cn';
 
 interface DashboardViewProps {
   sources: Source[];
