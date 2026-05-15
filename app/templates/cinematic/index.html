@@ -67,6 +67,7 @@
       background-color: #000;
       z-index: 10;
       overflow: hidden;
+      will-change: opacity, transform;
     }
 
     .scene-bg-container {
@@ -85,6 +86,7 @@
       height: 100%;
       object-fit: cover;
       transform: scale(1.1);
+      will-change: transform;
       /* Prevent white edges during blur */
     }
 
@@ -124,6 +126,11 @@
       border-radius: 4px;
       text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       max-width: 95%;
+    }
+
+    .hook-title {
+      font-family: 'Playfair Display', serif !important;
+      text-transform: none !important;
     }
 
     .film-grain {
@@ -295,7 +302,7 @@
 
       var contentHtml = isHook ? 
         '<div class="scene-label" style="font-family: inter; font-weight: 400; font-size: calc(var(--cqmin) * 20 / 720); letter-spacing: 0.3em; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; margin-bottom: 20px;">CINEMATIC HOOK</div>' +
-        '<div class="scene-title hook-title" style="font-family: \'Playfair Display\'; font-size: calc(var(--cqmin) * ' + fontSize + ' / 720); color: ' + color + '; line-height: 1.2; text-shadow: 0 10px 30px rgba(0,0,0,0.5); word-break: break-word;">' + (scene.text || scene.bodyText || '') + '</div>' +
+        '<div class="scene-title hook-title" style="font-size: calc(var(--cqmin) * ' + fontSize + ' / 720); color: ' + color + '; line-height: 1.2; text-shadow: 0 10px 30px rgba(0,0,0,0.5); word-break: break-word;">' + (scene.text || scene.bodyText || '') + '</div>' +
         '<div class="scene-accent" style="width: 100px; height: 1px; background: rgba(255,255,255,0.8); margin-top: 40px; opacity: 0;"></div>' :
         '<div class="scene-title" style="font-size: calc(var(--cqmin) * ' + fontSize + ' / 720); color: ' + color + ';">' + (scene.text || scene.bodyText || '') + '</div>';
 
@@ -380,7 +387,11 @@
       }
       
       mainTl.add(tl, currentTime);
+      
+      // Cleanup: Hide this unit after the next scene has fully covered it
+      // This prevents overdraw and flickering from stacking dozens of layers
       if (i < scenes.length - 1) {
+        mainTl.add(gsap.set(unit, { visibility: 'hidden' }), currentTime + dur);
         currentTime += dur - CROSSFADE;
       } else {
         currentTime += dur;

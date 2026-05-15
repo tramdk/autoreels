@@ -227,7 +227,8 @@
       padding: 50px 60px;
       width: 100%;
       box-shadow: 15px 0 50px rgba(0, 0, 0, 0.6);
-
+      will-change: transform, opacity;
+      
       text-align: {{ MAIN_CSS_TEXT_ALIGN }};
       backdrop-filter: blur(var(--blur-amount));
       display: flex;
@@ -342,7 +343,10 @@
       }
       
       mainTl.add(tl, currentTime);
+
+      // Cleanup: Hide old scene to prevent GPU overdraw
       if (i < scenes.length - 1) {
+        mainTl.add(gsap.set(sceneEl, { visibility: 'hidden' }), currentTime + duration);
         currentTime += duration - CROSSFADE;
       } else {
         currentTime += duration;

@@ -32,6 +32,7 @@
       overflow: hidden;
       background-color: #000;
       font-family: inter;
+      will-change: transform, opacity;
     }
 
     #root {
@@ -200,7 +201,10 @@
       }
       
       mainTl.add(tl, currentTime);
+      
+      // Cleanup: Hide scene after crossfade
       if (i < scenes.length - 1) {
+        mainTl.add(gsap.set(sceneEl, { visibility: 'hidden' }), currentTime + duration);
         currentTime += duration - CROSSFADE;
       } else {
         currentTime += duration;
