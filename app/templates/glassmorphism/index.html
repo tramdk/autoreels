@@ -335,7 +335,6 @@
 
       // Scene entrance — fades in ON TOP of the previous scene
       tl.from(sceneEl, { 
-        opacity: 0, 
         y: 80,
         scale: 0.9, 
         rotationX: isRendering ? 0 : 15,
@@ -345,6 +344,7 @@
         ease: "power2.out",
         force3D: true
       }, 0);
+      tl.from(sceneEl, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0);
 
       // Gentle floating during hold
       var floatDur = Math.max(0.1, duration - inDur - CROSSFADE);

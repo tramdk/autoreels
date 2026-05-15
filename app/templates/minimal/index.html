@@ -185,7 +185,8 @@
       var tl = gsap.timeline();
       
       // Entrance (Minimal style)
-      tl.from(sceneEl, { opacity: 0, y: 15, duration: inDur, ease: "power3.out", force3D: true }, 0);
+      tl.from(sceneEl, { y: 15, duration: inDur, ease: "power3.out", force3D: true }, 0);
+      tl.from(sceneEl, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0);
       
       // Exit (synchronized with crossfade)
       if (i < scenes.length - 1) {

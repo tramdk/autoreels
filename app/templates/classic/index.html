@@ -242,10 +242,11 @@
       
       // Entrance animation
       tl.from(sceneEl, { 
-        opacity: 0, y: 40, scale: 0.95, 
+        y: 40, scale: 0.95, 
         duration: inDur, ease: "back.out(1.7)",
         force3D: true
       }, 0);
+      tl.from(sceneEl, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0);
       
       // Synchronized Exit animation (except for the last scene)
       // The rule says "The transition IS the exit", but for manual div-stacking, 

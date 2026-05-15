@@ -343,7 +343,7 @@
       var tl = gsap.timeline();
 
       // Entrance animation - Fade in
-      tl.from(unit, { opacity: 0, duration: inDur, ease: "power2.out", force3D: true }, 0)
+      tl.from(unit, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0)
         .fromTo(bgImg, { scale: 1.15 }, { scale: 1, duration: dur, ease: "sine.inOut", force3D: true }, 0);
 
       // Text animation

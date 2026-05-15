@@ -323,7 +323,8 @@
       var tl = gsap.timeline();
       
       // Entrance
-      tl.from(sceneEl, { opacity: 0, x: 80, skewX: -15, duration: inDur, ease: "expo.out", force3D: true }, 0);
+      tl.from(sceneEl, { x: 80, skewX: -15, duration: inDur, ease: "expo.out", force3D: true }, 0);
+      tl.from(sceneEl, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0);
       
       // Exit - ONLY fade the text to avoid background flickering
       if (i < scenes.length - 1) {

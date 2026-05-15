@@ -180,7 +180,8 @@
       var tl = gsap.timeline();
       
       // Entrance
-      tl.from(sceneEl, { opacity: 0, x: -80, skewX: 8, duration: inDur, ease: "expo.out", force3D: true }, 0);
+      tl.from(sceneEl, { x: -80, skewX: 8, duration: inDur, ease: "expo.out", force3D: true }, 0);
+      tl.from(sceneEl, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0);
       
       // Exit (synchronized with crossfade)
       if (i < scenes.length - 1) {

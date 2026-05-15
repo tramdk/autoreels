@@ -346,7 +346,7 @@
       var tl = gsap.timeline();
 
       // Modern slick animation - Fade in
-      tl.from(unit, { opacity: 0, duration: inDur, ease: "power2.inOut", force3D: true }, 0)
+      tl.from(unit, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0)
         .fromTo(bgImg, { scale: 1.15 }, { scale: 1, duration: dur, ease: "none", force3D: true }, 0)
         .from(unit.querySelector('.scene-content'), { y: 30, opacity: 0, duration: 0.6, ease: "expo.out", force3D: true }, 0.15);
 

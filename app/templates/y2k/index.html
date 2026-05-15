@@ -310,7 +310,6 @@
 
       // Glitchy Y2K entry - Fade in
       tl.from(unit, { 
-        opacity: 0, 
         scale: 0.6, 
         x: i % 2 === 0 ? -80 : 80, 
         rotate: i % 2 === 0 ? -8 : 8,
@@ -318,6 +317,7 @@
         ease: "back.out(1.5)",
         force3D: true
       }, 0);
+      tl.from(unit, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0);
 
       // Synchronized Exit fade
       // Since background is shared at root, fading the window (unit) is safe
