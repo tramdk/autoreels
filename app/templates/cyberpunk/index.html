@@ -24,10 +24,13 @@
   <style>
     :root {
       --cqmin: min({{ WIDTH }} * 1px, {{ HEIGHT }} * 1px);
+      --accent-color: {{ LOGO_COLOR }};
+      --secondary-color: {{ DIVIDER_COLOR }};
+      --blur-amount: 8px;
+    }
 
-    --accent-color: {{ LOGO_COLOR }};
-
-    --secondary-color: {{ DIVIDER_COLOR }};
+    body.is-rendering {
+      --blur-amount: 2px;
     }
 
     * {
@@ -183,7 +186,7 @@
       color: var(--accent-color);
       border-left: 4px solid var(--secondary-color);
       padding: 8px 24px;
-      font-family: 'jetbrains-mono';
+      font-family: 'JetBrains Mono';
 
       font-size: calc(var(--cqmin) * {{ TAG_SIZE }}
 
@@ -191,7 +194,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 3px;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(var(--blur-amount));
     }
 
     #main-content {
@@ -226,7 +229,7 @@
       box-shadow: 15px 0 50px rgba(0, 0, 0, 0.6);
 
       text-align: {{ MAIN_CSS_TEXT_ALIGN }};
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(var(--blur-amount));
       display: flex;
       flex-direction: column;
 
@@ -358,6 +361,11 @@
     mainTl.add(gsap.fromTo(".status-dot", { opacity: 1 }, { opacity: 0.4, duration: 0.5, repeat: pulseRepeat * 2, yoyo: true, ease: "sine.inOut" }), 0);
 
     mainTl.time(0);
+    var isRendering = window.__hf && (window.__hf.active || window.__hf.duration);
+    if (isRendering) {
+      document.body.classList.add('is-rendering');
+    }
+
     if (!window.__hf) {
       setTimeout(function() { mainTl.play(); }, 500);
     }

@@ -43,7 +43,7 @@ interface DashboardViewProps {
   onUpdateScript: (id: string, script: any) => void;
   onCreateManualArticle: (data: { title: string, content: string }) => void;
   onCreateManualScript: (data: { title: string, script: any }) => void;
-  renderingVideos: Record<string, number>;
+  renderingVideos: Record<string, { progress: number, phase?: string, title?: string }>;
   stats: { sources: number, articles: number, videos: number, postedVideos: number };
   page: number;
   setPage: (page: number) => void;
@@ -216,9 +216,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       <div className="flex items-center gap-3 shrink-0">
                         {getArticleProgress(article.id) !== null ? (
                           <div className="flex flex-col items-end gap-1 min-w-[120px]">
-                            <span className="text-[9px] font-black text-primary uppercase tracking-widest animate-pulse">RENDERING {getArticleProgress(article.id)}%</span>
+                            <span className="text-[9px] font-black text-primary uppercase tracking-widest animate-pulse">RENDERING {getArticleProgress(article.id)?.progress || 0}%</span>
                             <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                              <div className="h-full bg-primary" style={{ width: `${getArticleProgress(article.id)}%` }} />
+                              <div className="h-full bg-primary" style={{ width: `${getArticleProgress(article.id)?.progress || 0}%` }} />
                             </div>
                           </div>
                         ) : (

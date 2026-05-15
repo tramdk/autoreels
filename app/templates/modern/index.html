@@ -15,6 +15,11 @@
     :root {
       --cqmin: min(calc(var(--v-width) * 1px), calc(var(--v-height) * 1px));
       --accent: var(--v-divider-color);
+      --blur-amount: 12px;
+    }
+
+    body.is-rendering {
+      --blur-amount: 4px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -378,6 +383,11 @@
     window.duration = finalDur;
 
     mainTl.time(0);
+    var isRendering = window.__hf && (window.__hf.active || window.__hf.duration);
+    if (isRendering) {
+      document.body.classList.add('is-rendering');
+    }
+
     if (!window.__hf) {
       setTimeout(function() { mainTl.play(); }, 500);
     }

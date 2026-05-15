@@ -17,6 +17,16 @@
     :root {
       --v-bg-brightness: {{ BG_BRIGHTNESS }};
       --cqmin: min(calc(var(--v-width) * 1px), calc(var(--v-height) * 1px));
+      --blur-amount: 10px;
+    }
+
+    body.is-rendering {
+      --blur-amount: 3px;
+    }
+
+    body.is-rendering .film-grain {
+      opacity: 0.05 !important;
+      mix-blend-mode: normal !important;
     }
 
     * {
@@ -109,8 +119,8 @@
       color: #ffffff;
       padding: 15px 30px;
       background: rgba(0, 0, 0, 0.45);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(var(--blur-amount));
+      -webkit-backdrop-filter: blur(var(--blur-amount));
       border-radius: 4px;
       text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       max-width: 95%;
@@ -156,7 +166,7 @@
     }
 
     .letterbox-logo {
-      font-family: 'jetbrains-mono';
+      font-family: 'JetBrains Mono';
       font-weight: 700;
       letter-spacing: 0.3em;
       text-transform: uppercase;
@@ -168,7 +178,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      font-family: 'jetbrains-mono';
+      font-family: 'JetBrains Mono';
       font-size: calc(var(--cqmin) * 18 / 720);
       color: rgba(255, 255, 255, 0.7);
     }
@@ -188,7 +198,7 @@
       background: var(--v-tag-bg);
       color: var(--v-tag-color);
       padding: 8px 24px;
-      font-family: 'jetbrains-mono';
+      font-family: 'JetBrains Mono';
       font-size: calc(var(--cqmin) * 20 / 720);
       font-weight: 700;
       text-transform: uppercase;
@@ -285,7 +295,7 @@
 
       var contentHtml = isHook ? 
         '<div class="scene-label" style="font-family: inter; font-weight: 400; font-size: calc(var(--cqmin) * 20 / 720); letter-spacing: 0.3em; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; margin-bottom: 20px;">CINEMATIC HOOK</div>' +
-        '<div class="scene-title hook-title" style="font-family: \'playfair-display\'; font-size: calc(var(--cqmin) * ' + fontSize + ' / 720); color: ' + color + '; line-height: 1.2; text-shadow: 0 10px 30px rgba(0,0,0,0.5); word-break: break-word;">' + (scene.text || scene.bodyText || '') + '</div>' +
+        '<div class="scene-title hook-title" style="font-family: \'Playfair Display\'; font-size: calc(var(--cqmin) * ' + fontSize + ' / 720); color: ' + color + '; line-height: 1.2; text-shadow: 0 10px 30px rgba(0,0,0,0.5); word-break: break-word;">' + (scene.text || scene.bodyText || '') + '</div>' +
         '<div class="scene-accent" style="width: 100px; height: 1px; background: rgba(255,255,255,0.8); margin-top: 40px; opacity: 0;"></div>' :
         '<div class="scene-title" style="font-size: calc(var(--cqmin) * ' + fontSize + ' / 720); color: ' + color + ';">' + (scene.text || scene.bodyText || '') + '</div>';
 
@@ -387,6 +397,11 @@
     // Initial state trigger
     mainTl.time(0);
     
+    var isRendering = window.__hf && (window.__hf.active || window.__hf.duration);
+    if (isRendering) {
+      document.body.classList.add('is-rendering');
+    }
+
     if (!window.__hf) {
       setTimeout(function() { mainTl.play(); }, 500);
     }
