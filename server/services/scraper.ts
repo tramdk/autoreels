@@ -8,17 +8,21 @@ const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 const parser = new Parser({
   headers: {
     'User-Agent': USER_AGENT,
-    'Accept': 'application/rss+xml, application/xml, text/xml, */*',
-    'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Accept': '*/*',
+    'Referer': 'https://vnexpress.net/',
+    'Cache-Control': 'no-cache',
   },
-  timeout: 10000,
+  timeout: 20000,
 });
 
 export async function extractMainImage(url: string): Promise<string | null> {
   try {
     const { data } = await axios.get(url, { 
-      timeout: 10000, 
-      headers: { 'User-Agent': USER_AGENT } 
+      timeout: 20000, 
+      headers: { 
+        'User-Agent': USER_AGENT,
+        'Referer': 'https://vnexpress.net/'
+      } 
     });
     const $ = cheerio.load(data);
     const imageUrl = $('meta[property="og:image"]').attr('content') || 
@@ -47,15 +51,31 @@ export async function scrapeRssSources() {
 
   for (const source of currentSources) {
     if (source.type === 'rss') {
-      try {
-        console.log(`Scraping source: ${source.name}...`);
-        const feed = await parser.parseURL(source.url);
+      let retryCount = 0;
+      const maxRetries = 2;
+      let feed = null;
+
+      while (retryCount <= maxRetries && !feed) {
+        try {
+          console.log(`Scraping source: ${source.name} (Attempt ${retryCount + 1})...`);
+          feed = await parser.parseURL(source.url);
+        } catch (sourceError) {
+          retryCount++;
+          if (retryCount > maxRetries) {
+            console.error(`Error scraping source ${source.name} after ${maxRetries + 1} attempts:`, sourceError);
+          } else {
+            console.log(`Retry ${retryCount} for ${source.name}...`);
+            await delay(2000 * retryCount);
+          }
+        }
+      }
+
+      if (feed) {
         const topItems = feed.items.slice(0, 3);
-        
         for (const item of topItems) {
           const existing = await prisma.article.findUnique({ where: { link: item.link } });
           if (!existing) {
-            await delay(500); // Small delay between image extraction requests
+            await delay(500);
             const imageUrl = item.link ? await extractMainImage(item.link) : null;
             const art = await prisma.article.create({
               data: {
@@ -71,9 +91,7 @@ export async function scrapeRssSources() {
             newArticles.push(art);
           }
         }
-        await delay(1000); // Delay between different sources
-      } catch (sourceError) {
-        console.error(`Error scraping source ${source.name}:`, sourceError);
+        await delay(1000);
       }
     }
   }
