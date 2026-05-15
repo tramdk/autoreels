@@ -304,7 +304,13 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
     'MAIN_CSS_TRANSFORM': getTransform(tpl.mainAlign || 'center', tpl.mainPlacement || 'center'),
     'MAIN_CSS_ALIGN': getAlignItems(tpl.mainAlign || 'center'),
     'MAIN_CSS_TEXT_ALIGN': tpl.mainAlign || 'center',
-    'FONT_FAMILY': (tpl.fontFamily || 'Inter').replace(/playfair display/i, 'playfair-display'),
+    'FONT_FAMILY': (tpl.fontFamily || 'Inter')
+      .toLowerCase()
+      .replace(/playfair display/g, 'playfair-display')
+      .replace(/jetbrains mono/g, 'jetbrains-mono')
+      .replace(/archivo black/g, 'archivo-black')
+      .replace(/open sans/g, 'open-sans')
+      .replace(/ibm plex mono/g, 'ibm-plex-mono'),
     'LINE_HEIGHT': String(tpl.lineHeight || 1.1),
     'SHOW_PROGRESS_BAR': tpl.showProgressBar !== false ? 'block' : 'none',
     'LOGO_IMAGE': tpl.logoImage || '',
