@@ -176,9 +176,23 @@
       document.getElementById('main-content').appendChild(sceneEl);
 
       var inDur = 0.6;
+      var outDur = CROSSFADE;
       var tl = gsap.timeline();
-      // Stacking crossfade: Fade in only
+      
+      // Entrance
       tl.from(sceneEl, { opacity: 0, x: -80, skewX: 8, duration: inDur, ease: "expo.out", force3D: true }, 0);
+      
+      // Exit (synchronized with crossfade)
+      if (i < scenes.length - 1) {
+        tl.to(sceneEl, { 
+          opacity: 0, 
+          x: 80, 
+          skewX: -8, 
+          duration: outDur, 
+          ease: "expo.in", 
+          force3D: true 
+        }, duration - outDur);
+      }
       
       mainTl.add(tl, currentTime);
       if (i < scenes.length - 1) {

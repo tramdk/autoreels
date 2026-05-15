@@ -181,9 +181,22 @@
       document.getElementById('main-content').appendChild(sceneEl);
 
       var inDur = 0.6;
+      var outDur = CROSSFADE;
       var tl = gsap.timeline();
-      // Stacking crossfade: Fade in only
+      
+      // Entrance (Minimal style)
       tl.from(sceneEl, { opacity: 0, y: 15, duration: inDur, ease: "power3.out", force3D: true }, 0);
+      
+      // Exit (synchronized with crossfade)
+      if (i < scenes.length - 1) {
+        tl.to(sceneEl, { 
+          opacity: 0, 
+          y: -15, 
+          duration: outDur, 
+          ease: "power3.in", 
+          force3D: true 
+        }, duration - outDur);
+      }
       
       mainTl.add(tl, currentTime);
       if (i < scenes.length - 1) {

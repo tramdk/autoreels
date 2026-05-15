@@ -347,7 +347,7 @@
       }, 0);
 
       // Gentle floating during hold
-      var floatDur = Math.max(0.1, duration - inDur);
+      var floatDur = Math.max(0.1, duration - inDur - CROSSFADE);
       tl.to(sceneEl, {
         rotationX: isRendering ? 0 : -3,
         rotationY: isRendering ? 0 : 3,
@@ -357,9 +357,18 @@
         force3D: true
       }, inDur);
 
-      // NO EXIT FADE! The next scene will cover this one.
-      // HyperFrames will remove this unit automatically at 'duration'
-      
+      // Exit fade (synchronized with crossfade)
+      // We only fade the card (sceneEl), NOT the whole background/unit
+      if (i < scenes.length - 1) {
+        tl.to(sceneEl, { 
+          opacity: 0, 
+          scale: 0.95,
+          z: -50,
+          duration: CROSSFADE, 
+          ease: "power2.in", 
+          force3D: true 
+        }, duration - CROSSFADE);
+      }
       mainTl.add(tl, currentTime);
       
       if (i < scenes.length - 1) {

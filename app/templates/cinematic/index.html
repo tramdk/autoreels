@@ -339,10 +339,10 @@
       var spans = buildTypingContent(titleEl, (scene.text || scene.bodyText || ''));
 
       var inDur = 0.6;
+      var outDur = CROSSFADE;
       var tl = gsap.timeline();
 
-      // Entrance animation - Fade in ONLY
-      // This scene fades in ON TOP of the previous one which is still solid
+      // Entrance animation - Fade in
       tl.from(unit, { opacity: 0, duration: inDur, ease: "power2.out", force3D: true }, 0)
         .fromTo(bgImg, { scale: 1.15 }, { scale: 1, duration: dur, ease: "sine.inOut", force3D: true }, 0);
 
@@ -355,8 +355,19 @@
         tl.to(progBar, { width: "100%", duration: dur, ease: "none" }, 0);
       }
 
-      // NO EXIT FADE! The next scene will cover this one.
-      // HyperFrames will remove this unit automatically at 'dur'
+      // Exit fade - ONLY fade the content/text, NOT the background/unit
+      // This prevents the black background from 'flashing' through during crossfade
+      if (i < scenes.length - 1) {
+        var content = unit.querySelector('.scene-content');
+        var progress = unit.querySelector('.scene-progress-container');
+        tl.to([content, progress], { 
+          opacity: 0, 
+          y: -20,
+          duration: outDur, 
+          ease: "power2.inOut", 
+          force3D: true 
+        }, dur - outDur);
+      }
       
       mainTl.add(tl, currentTime);
       if (i < scenes.length - 1) {

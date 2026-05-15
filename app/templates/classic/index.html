@@ -237,13 +237,28 @@
       document.getElementById('main-content').appendChild(sceneEl);
 
       var inDur = 0.6;
+      var outDur = CROSSFADE;
       var tl = gsap.timeline();
-      // Stacking crossfade: Fade in only
+      
+      // Entrance animation
       tl.from(sceneEl, { 
         opacity: 0, y: 40, scale: 0.95, 
         duration: inDur, ease: "back.out(1.7)",
         force3D: true
       }, 0);
+      
+      // Synchronized Exit animation (except for the last scene)
+      // The rule says "The transition IS the exit", but for manual div-stacking, 
+      // we need this to avoid text ghosting over the shared background.
+      if (i < scenes.length - 1) {
+        tl.to(sceneEl, {
+          opacity: 0,
+          y: -20,
+          duration: outDur,
+          ease: "power2.inOut",
+          force3D: true
+        }, duration - outDur);
+      }
       
       mainTl.add(tl, currentTime);
       

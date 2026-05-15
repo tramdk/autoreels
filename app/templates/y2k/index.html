@@ -306,8 +306,9 @@
       var progBar = unit.querySelector('.scene-progress-bar');
 
       var inDur = 0.6;
+      var outDur = CROSSFADE;
 
-      // Glitchy Y2K entry - Fade in ONLY (Stacking Crossfade)
+      // Glitchy Y2K entry - Fade in
       tl.from(unit, { 
         opacity: 0, 
         scale: 0.6, 
@@ -318,12 +319,21 @@
         force3D: true
       }, 0);
 
+      // Synchronized Exit fade
+      // Since background is shared at root, fading the window (unit) is safe
+      if (i < scenes.length - 1) {
+        tl.to(unit, {
+          opacity: 0,
+          scale: 0.8,
+          duration: outDur,
+          ease: "power2.in",
+          force3D: true
+        }, duration - outDur);
+      }
+
       if (progBar) {
         tl.to(progBar, { width: "100%", duration: duration, ease: "none" }, 0);
       }
-
-      // NO EXIT FADE! The next scene will cover this one.
-      
       mainTl.add(tl, currentTime);
       if (i < scenes.length - 1) {
         currentTime += duration - CROSSFADE;

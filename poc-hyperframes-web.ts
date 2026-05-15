@@ -161,13 +161,23 @@ async function main() {
       const overlayWrapper = slide.querySelector('.overlay-wrapper');
       
       // HIỆU ỨNG HOÀN THIỆN: VELOCITY SYNC + MOTION BLUR
-      if (i > 0) {
-        // Slide mới hiện ra với Motion Blur giả lập
-        tl.fromTo(slide, 
-          { opacity: 0, scale: 1.15, filter: "blur(15px)" },
-          { opacity: 1, scale: 1.0, filter: "blur(0px)", duration: 1.2, ease: "power2.inOut" }, 
-          start
-        );
+      // Entrance
+      tl.fromTo(slide, 
+        { opacity: 0, scale: 1.15, filter: "blur(15px)" },
+        { opacity: 1, scale: 1.0, filter: "blur(0px)", duration: 1.2, ease: "power2.inOut" }, 
+        start
+      );
+
+      // Exit (synchronized with next slide)
+      // We ONLY fade the overlay (text) to avoid ghosting.
+      // We keep the slide container (background) solid to avoid flickering.
+      if (i < slides.length - 1) {
+        tl.to(overlayWrapper, {
+          opacity: 0,
+          y: -30,
+          duration: 0.8,
+          ease: "power2.in"
+        }, start + dur - 0.8);
       }
       
       // KEN BURNS ĐỐI NGHỊCH: Slide 1 zoom ra, Slide 2 zoom vào (hoặc ngược lại)
