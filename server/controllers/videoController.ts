@@ -309,71 +309,130 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
  * a 100% custom visual layout, styling, and GSAP timeline specifically tailored 
  * to the emotions, theme, and rhythm of the script.
  */
-async function generateAiDynamicHtml(scenes: any[], customSettings: any): Promise<string> {
+async function generateAiDynamicHtml(title: string, scenes: any[], customSettings: any): Promise<string> {
   const resolvedAI = getAIClient(genAI);
   if (!resolvedAI) {
     console.warn('[AI HTML] AI not configured. Returning empty string.');
     return '';
   }
 
-  const scriptText = scenes.map(s => `[Cảnh ${s.id} - ${s.type}]: ${s.voiceText || s.bodyText || ''}`).join('\n');
+  // Pass ONLY the title and a single representative mock structure to force the AI to write a generic loop
+  const sampleScene = scenes[0] || { id: 1, type: 'hook', voiceText: 'Nội dung mẫu cảnh mở đầu' };
   
   const prompt = `
-Bạn là chuyên gia thiết kế đồ họa chuyển động đỉnh cao (motion designer & creative director) chuyên làm video ngắn triệu view cho TikTok/Reels (giống phong cách YourClassVN, retro cyberpunk, modern brutalism, sang trọng glassmorphism).
+Bạn là nhà thiết kế đồ họa chuyển động đỉnh cao (creative director & senior frontend motion developer) chuyên phát triển các video ngắn dạng đứng (9:16) chất lượng cao cho TikTok/Reels (giống YourClassVN, bento grid brutalism, glassmorphism cao cấp).
 
-Dưới đây là kịch bản video dạng cảnh (scene-based) bằng tiếng Việt:
-=== KỊCH BẢN ===
-\${scriptText}
+Dưới đây là thông tin về kịch bản video:
+=== THÔNG TIN KỊCH BẢN ===
+- Tiêu đề video: "${title}"
+- Cấu trúc dữ liệu của 1 cảnh mẫu: ${JSON.stringify(sampleScene)}
 
-Nhiệm vụ của bạn là: Thiết kế và lập trình ra MỘT TRANG index.html hoàn toàn mới, standalone, hoàn chỉnh nhất để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. Trang này phải được thiết kế thủ công 100% độc bản, tùy biến cấu trúc giao diện và chuyển động (animations) dựa trên tông giọng, chủ đề của kịch bản này!
+Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html hoàn toàn mới, standalone, hoàn chỉnh 100% để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. Trang này phải có giao diện độc bản thiết kế riêng dựa trên chủ đề và tiêu đề của kịch bản trên!
 
-=== CẤU TRÚC HTML & QUY TẮC PHỐI CẢNH (BẮT BUỘC) ===
-1. Toàn bộ file index.html phải là 1 chuỗi HTML đầy đủ gồm <!DOCTYPE html>, <html>, <head>, <body>, và thẻ <script> chứa code GSAP.
-2. Thẻ <head> phải import các Google Fonts phù hợp với kịch bản (ví dụ: Outfit, Inter, Montserrat, Playfair Display, Anton...).
-3. Trong <body>, thẻ container chính bắt buộc phải là:
-   <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0" data-duration="{{ DURATION }}">
-   (Tuyệt đối KHÔNG bọc trong thẻ <template>).
-4. Phải xây dựng một hệ thống layout hoàn mỹ, bao gồm:
-   - Các layer background (như hình nền chính {{ BG_IMAGE_URL }} và hiệu ứng overlays mờ/glowing/gradients/grid mắt cáo chuyển động).
-   - Thẻ card bọc nội dung văn bản (sử dụng CSS Flexbox, box-sizing, padding lớn, border-radius mềm mại, bóng đổ cao cấp hoặc phong cách Brutalism viền đen đậm).
-   - Logo thương hiệu (sử dụng placeholder {{ LOGO_TEXT }}).
-   - Badge chủ đề (sử dụng placeholder {{ TAG_TEXT }}) và ngày giờ {{ DATETIME }}.
-   - Thanh tiến trình chạy video ở cạnh dưới màn hình (ProgressBar).
-5. Phải sinh ra các thẻ HTML cho các Cảnh (scenes) ở trong JS hoặc tĩnh trong HTML để GSAP animate. Cách tốt nhất: xây dựng DOM tĩnh trong #scene-container hoặc render động từ JS dựa trên biến SCENES_DATA.
+=== CẢNH BÁO CỰC KỲ QUAN TRỌNG (BẮT BUỘC TUÂN THỦ 100%) ===
+Bạn chỉ biết tiêu đề và cấu trúc của 1 cảnh mẫu. Số lượng cảnh thực tế của video là ĐỘNG (có thể là 3 cảnh, 6 cảnh, hoặc 10 cảnh) và được nạp tự động qua biến SCENES_DATA ở runtime.
+Do đó:
+1. Bạn TUYỆT ĐỐI KHÔNG ĐƯỢC phép hardcode bất kỳ thẻ HTML nào đại diện cho cảnh (ví dụ: cấm viết trực tiếp các thẻ như <div class="scene" id="scene1">...</div> hay hardcode bất kỳ nội dung chữ nào của kịch bản vào HTML body).
+2. Thẻ body của bạn chỉ chứa các phần tử tĩnh như hình nền, logo, ngày giờ, progress-bar rỗng, và một container rỗng duy nhất: <div id="scene-container"></div> hoặc <div id="main-content"></div>.
+3. Bạn BẮT BUỘC phải viết mã JavaScript ở cuối file sử dụng đúng khung cấu trúc vòng lặp dưới đây để sinh DOM động và dựng timeline GSAP seekable hoàn mỹ.
 
-=== QUY TẮC HIỆU ỨNG CHUYỂN ĐỘNG (GSAP TIMELINE CONTRACT) ===
-1. Khởi tạo timeline chính bắt buộc phải như sau:
-   window._tl = gsap.timeline({ paused: true });
-   window.__timelines = window.__timelines || {};
-   window.__timelines["main"] = window._tl;
-2. Bạn phải đăng ký cơ chế seek của HyperFrames ở cuối file:
-   window.__hf = { duration: TOTAL_DURATION, seek: function (t) { if (window._tl) window._tl.pause().seek(t); } };
-3. QUY TẮC CHUYỂN CẢNH (Transition Rules - Bắt buộc tuân thủ 100%):
-   - Cảnh 1 và tất cả cảnh kế tiếp phải có Entrance Animation bằng gsap.from() cho toàn bộ các phần tử (title, subtitle, card background, tag badge...). Tuyệt đối không cho phần tử nào xuất hiện tĩnh không có chuyển động. Sử dụng easing đa dạng (như "back.out(1.7)", "power4.out", "expo.out", "elastic.out").
-   - Các cảnh không được có Exit Animation (không dùng gsap.to để ẩn hoặc làm mờ cảnh trước khi kết thúc). 
-   - Thay vào đó, hãy làm hiệu ứng chuyển cảnh đè (Stacking Transition): Cảnh tiếp theo sẽ xuất hiện (trượt lên, zoom ra, hoặc mờ chồng) đè lên cảnh trước đó, tạo cảm giác chuyển tiếp mượt mà, không bị gián đoạn.
-   - Chỉ duy nhất cảnh cuối cùng (outro) mới được dùng gsap.to() để fade-out toàn bộ màn hình về đen ở cuối video.
-4. Mọi chuyển động phải là DETERMINISTIC (không dùng Math.random(), không dùng Date.now() hay vòng lặp vô chậm repeat: -1). Để làm các hiệu ứng lơ lửng vô tận (floating), hãy tính toán số lần repeat dựa trên tổng thời lượng video (ví dụ: repeat: Math.ceil(TOTAL_DURATION / 6.0) - 1).
+=== KHUNG LẬP TRÌNH DỰNG DOM & GSAP TIMELINE ĐỘNG (BẮT BUỘC) ===
+Bạn phải viết mã JavaScript ở cuối file sử dụng đúng cấu trúc sau:
 
-=== CÁC BIẾN CÚ PHÁP PLACEHOLDER CỦA BACKEND RENDERER ===
-Bạn hãy sử dụng nguyên văn các chuỗi placeholder sau ở các vị trí tương ứng trong mã nguồn HTML/JS của bạn để backend tự động thay thế và bảo mật ký tự:
-- '{{ SCENES_JSON }}' -> Chuỗi JSON chứa mảng các Cảnh (Ví dụ: var SCENES_DATA = JSON.parse('{{ SCENES_JSON }}');).
-- '{{ SCENE_DURATIONS_JSON }}' -> Chuỗi JSON chứa mảng thời lượng các Cảnh (Ví dụ: var SCENE_DURATIONS = JSON.parse('{{ SCENE_DURATIONS_JSON }}');).
-- '{{ DURATION }}' -> Tổng thời lượng video dạng số thực (Ví dụ: var TOTAL_DURATION = parseFloat("{{ DURATION }}") || 15;).
-- '{{ BG_IMAGE_URL }}' -> URL ảnh nền mặc định.
-- '{{ BG_BRIGHTNESS }}' -> Độ sáng nền (thường từ 0.3 đến 0.5).
-- '{{ LOGO_TEXT }}' -> Chữ của logo.
-- '{{ TAG_TEXT }}' -> Nhãn tag badge.
-- '{{ DATETIME }}' -> Ngày giờ hiển thị.
+\`\`\`javascript
+var SCENES_DATA = JSON.parse('{{ SCENES_JSON }}');
+var SCENE_DURATIONS = JSON.parse('{{ SCENE_DURATIONS_JSON }}');
+var TOTAL_DURATION = parseFloat("{{ DURATION }}") || 15;
 
-=== PHONG CÁCH THIẾT KẾ ĐỘC BẢN DÀNG RIÊNG CHO KỊCH BẢN NÀY ===
-Dựa vào nội dung kịch bản sau đây, hãy thiết kế ra phong cách tối ưu nhất:
-- Nếu kịch bản nói về công nghệ/tài chính: Hãy dùng màu tối, neon accents (cyan/purple), phông chữ không chân hiện đại (Outfit/Montserrat), card bóng mờ glassmorphism tinh xảo.
-- Nếu kịch bản nói về cuộc sống/nghệ thuật/lịch sử: Hãy dùng màu ấm pastel, phông chữ có chân sang trọng (Playfair Display/Georgia), layout tối giản, sạch sẽ.
-- Nếu kịch bản mang tính giáo dục/chia sẻ kiến thức mạnh mẽ (giống YourClassVN): Hãy dùng typography siêu nổi bật (Anton/Montserrat), card tương phản cao hoặc bento grid đẹp mắt, màu thương hiệu cực mạnh, dividers cá tính.
+var mainTl = gsap.timeline({ paused: true });
+window.__timelines = { "main": mainTl };
+window._tl = mainTl;
+
+var currentTime = 0;
+var CROSSFADE = 0.6; // Thời gian chồng chéo cảnh tiếp theo đè lên cảnh trước
+
+for (var i = 0; i < SCENES_DATA.length; i++) {
+  var scene = SCENES_DATA[i];
+  var duration = SCENE_DURATIONS[i] || 5;
+  var sceneId = 'scene-' + i;
+
+  // 1. Tạo phần tử DOM động dựa trên cấu trúc Layout độc bản bạn thiết kế
+  var sceneEl = document.createElement('div');
+  sceneEl.id = sceneId;
+  sceneEl.className = 'scene-card type-' + (scene.type || 'body');
+  
+  // Bạn hãy thiết kế innerHTML cực kỳ đẹp mắt, chia cấu trúc tiêu đề, thẻ bento, icon SVG trang trí...
+  // CHÚ Ý: Thay vì dùng hình ảnh làm background cho toàn video (gây rối mắt, khó đọc chữ), hãy hiển thị
+  // hình ảnh ở trong cảnh hook (cảnh đầu tiên i === 0 hoặc scene.type === 'hook') sử dụng thẻ <img> chứa scene.imageUrl.
+  var htmlContent = '';
+  if ((i === 0 || scene.type === 'hook') && scene.imageUrl) {
+    htmlContent += '<div class="hook-image-container"><img class="hook-image" src="' + scene.imageUrl + '" /></div>';
+  }
+  htmlContent += '<div class="scene-text">' + (scene.bodyText || scene.voiceText || '') + '</div>';
+  sceneEl.innerHTML = htmlContent;
+  
+  document.getElementById('scene-container').appendChild(sceneEl);
+
+  // 2. Tạo sub-timeline riêng cho cảnh này
+  var tl = gsap.timeline();
+  
+  // 3. Entrance Animation: Bạn hãy tùy biến sáng tạo hoạt ảnh xuất hiện của thẻ cảnh
+  // (ví dụ: gsap.from cho scale, y, rotation, opacity, elastic spring...) để có chuyển động siêu mượt
+  tl.from(sceneEl, { 
+    opacity: 0,
+    y: 80,
+    scale: 0.95,
+    duration: 0.6,
+    ease: "power2.out"
+  }, 0);
+
+  // 4. Exit Animation: Đồng bộ chồng chéo với cảnh tiếp theo (nếu chưa phải cảnh cuối)
+  if (i < SCENES_DATA.length - 1) {
+    tl.to(sceneEl, { 
+      opacity: 0,
+      scale: 0.95,
+      z: -50,
+      duration: CROSSFADE,
+      ease: "power2.in"
+    }, duration - CROSSFADE);
+  }
+
+  // 5. Thêm sub-timeline vào main timeline
+  mainTl.add(tl, currentTime);
+
+  // 6. Dọn dẹp ẩn cảnh sau khi cảnh tiếp theo đã che phủ hoàn toàn để tránh lag trình duyệt
+  if (i < SCENES_DATA.length - 1) {
+    mainTl.add(gsap.set(sceneEl, { visibility: 'hidden' }), currentTime + duration);
+    currentTime += duration - CROSSFADE;
+  } else {
+    currentTime += duration;
+  }
+}
+
+// 7. Animate ProgressBar chạy từ 0% đến 100% suốt toàn bộ video (Bắt buộc phải add trực tiếp vào mainTl ở giây 0 để seek được)
+mainTl.to("#progressBar", { width: "100%", duration: TOTAL_DURATION, ease: "none" }, 0);
+
+// 8. Outro fade mượt toàn bộ màn hình về đen ở cuối video
+mainTl.to("#root", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, TOTAL_DURATION - 0.5);
+
+// Đăng ký HyperFrames seeker contract
+window.__hf = {
+  duration: TOTAL_DURATION,
+  seek: function(t) { if (window._tl) window._tl.pause().seek(t); }
+};
+\`\`\`
+
+=== PHONG CÁCH THIẾT KẾ ĐỘC BẢN DÀNG RIÊNG CHO TIÊU ĐỀ NÀY ===
+Bạn hãy sáng tạo ra giao diện CSS độc bản, hiện đại đỉnh cao tùy thuộc vào tông kịch bản:
+- NỀN BACKGROUND: Tuyệt đối không dùng ảnh làm hình nền bao phủ toàn bộ #root. Thay vào đó, đặt background cho #root là các dải màu trơn, các lớp gradient radial tối cực kỳ sang trọng (ví dụ: radial-gradient(circle, #1a1a1a, #0d0d0d) hoặc họa tiết lưới grid/brutalism chìm) giúp tôn chữ và hình ảnh lên nổi bật nhất, đảm bảo tính dễ đọc tuyệt đối của TikTok!
+- HIỂN THỊ HÌNH ẢNH HOOK: Thiết kế CSS cho lớp \`.hook-image-container\` và \`.hook-image\` để ảnh cảnh Hook hiện ra cực kỳ đẹp mắt, sắc nét (ví dụ: bo tròn góc 20px, có viền mỏng neon phát sáng, đổ bóng mịn màng, hoặc chia bố cục 2 cột trái-phải giữa ảnh và văn bản để tối ưu không gian chiều dọc của màn hình di động).
+- KIỂU DÁNG CỤ THỂ THEO CHỦ ĐỀ:
+  * Nếu kịch bản nói về công nghệ/tài chính/bảo mật: Giao diện dark mode, màu neon chủ đạo (cyan/purple/green), phông chữ không chân (Outfit/Montserrat), card glassmorphism có bóng mờ tinh xảo, đường viền mảnh phát sáng.
+  * Nếu kịch bản nói về cuộc sống/nghệ thuật/lịch sử/triết lý: Giao diện màu ấm pastel thanh lịch, phông chữ serif sang trọng (Playfair Display/Georgia), layout tối giản tinh tế.
+  * Giao diện mang tính giáo dục chia sẻ kiến thức mạnh mẽ/tin tức nổi bật (giống YourClassVN): Typography cực dày và to (Anton/Montserrat), phối màu tương phản cao (vàng neon/đen brutalism), thẻ Bento Grid phân bổ thông tin cá tính.
 
 === YÊU CẦU ĐẦU RA ===
-Trả về duy nhất mã nguồn index.html hoàn chỉnh nhất bên trong khối code markdown \\\`\\\`\\\`html. Tuyệt đối không giải thích thêm hay viết lời mở đầu/kết thúc nào cả.
+Trả về duy nhất mã nguồn index.html hoàn chỉnh nhất bên trong khối code markdown \`\`\`html. Tuyệt đối không giải thích thêm hay viết lời mở đầu/kết thúc nào cả.
 `;
 
   try {
@@ -553,7 +612,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
     if (templateId === 'dynamic') {
       try {
         console.log(`[PIPELINE] Selected DYNAMIC TEMPLATE. Invoking AI to design custom HTML structure...`);
-        customHtml = await generateAiDynamicHtml(script.scenes || [], customSettings || {});
+        customHtml = await generateAiDynamicHtml(title, script.scenes || [], customSettings || {});
         console.log(`[PIPELINE] Dynamic HTML designed successfully (length: ${customHtml?.length || 0} chars).`);
       } catch (err) {
         console.error(`[PIPELINE] Failed to generate AI custom HTML, falling back to defaults:`, err);
