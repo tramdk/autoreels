@@ -426,13 +426,34 @@ window.__hf = {
 \`\`\`
 
 === PHONG CÁCH THIẾT KẾ ĐỘC BẢN DÀNG RIÊNG CHO TIÊU ĐỀ NÀY ===
-Bạn hãy sáng tạo ra giao diện CSS độc bản, hiện đại đỉnh cao tùy thuộc vào tông kịch bản:
-- NỀN BACKGROUND: Tuyệt đối không dùng ảnh làm hình nền bao phủ toàn bộ #root. Thay vào đó, đặt background cho #root là các dải màu trơn, các lớp gradient radial tối cực kỳ sang trọng (ví dụ: radial-gradient(circle, #1a1a1a, #0d0d0d) hoặc họa tiết lưới grid/brutalism chìm) giúp tôn chữ và hình ảnh lên nổi bật nhất, đảm bảo tính dễ đọc tuyệt đối của TikTok!
-- HIỂN THỊ HÌNH ẢNH HOOK: Thiết kế CSS cho lớp \`.hook-image-container\` và \`.hook-image\` để ảnh cảnh Hook hiện ra cực kỳ đẹp mắt, sắc nét (ví dụ: bo tròn góc 20px, có viền mỏng neon phát sáng, đổ bóng mịn màng, hoặc chia bố cục 2 cột trái-phải giữa ảnh và văn bản để tối ưu không gian chiều dọc của màn hình di động).
-- KIỂU DÁNG CỤ THỂ THEO CHỦ ĐỀ:
-  * Nếu kịch bản nói về công nghệ/tài chính/bảo mật: Giao diện dark mode, màu neon chủ đạo (cyan/purple/green), phông chữ không chân (Outfit/Montserrat), card glassmorphism có bóng mờ tinh xảo, đường viền mảnh phát sáng.
-  * Nếu kịch bản nói về cuộc sống/nghệ thuật/lịch sử/triết lý: Giao diện màu ấm pastel thanh lịch, phông chữ serif sang trọng (Playfair Display/Georgia), layout tối giản tinh tế.
-  * Giao diện mang tính giáo dục chia sẻ kiến thức mạnh mẽ/tin tức nổi bật (giống YourClassVN): Typography cực dày và to (Anton/Montserrat), phối màu tương phản cao (vàng neon/đen brutalism), thẻ Bento Grid phân bổ thông tin cá tính.
+Bạn phải thiết kế giao diện theo phong cách Neubrutalism Bento Grid cao cấp, cực kỳ nổi bật và trực quan giống hệt YourClassVN để tối ưu lượt xem trên TikTok/Reels:
+
+1. TYPOGRAPHY CỰC ĐẬM:
+   - Nhập font chữ hiển thị siêu dày từ Google Fonts: 'Anton' hoặc 'Montserrat' (weight 900) cho tiêu đề/văn bản chính, và 'Plus Jakarta Sans' hoặc 'Inter' (weight 700) cho văn bản phụ.
+   - Tiêu đề chính phải có cỡ chữ cực lớn (ít nhất 32px đến 48px trên màn hình đứng), viết hoa hoàn toàn (uppercase) để tạo cú hích thị giác tức thì.
+
+2. CẤU TRÚC BENTO GRID & NEOBRUTALISM:
+   - Nền toàn màn hình (#root): Màu tối sâu thẳm (#0a0a0c) kết hợp hiệu ứng đường lưới grid chìm hoặc chấm tròn dotted (ví dụ: 'background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 0); background-size: 30px 30px;').
+   - Thẻ Card (scene-card): Thiết kế dạng các ô Bento Grid phân bố không gian độc lập.
+   - Đường viền cực dày: Mọi thẻ card, khung ảnh đều phải có viền đen dày dặn ('border: 4px solid #000;' hoặc 'border: 4px solid var(--accent);').
+   - Đổ bóng phẳng (Solid Offset Shadow - Bắt buộc): Không dùng shadow mờ (blur). Hãy dùng đổ bóng phẳng, lệch góc 100% độ đục để tạo chiều sâu 3D brutalism độc đáo:
+     'box-shadow: 8px 8px 0px #000000;' hoặc 'box-shadow: 10px 10px 0px var(--accent-shadow);'
+
+3. MÀU SẮC ĐỘ HỘI TỤ CAO (HIGH CONTRAST NEON):
+   - Đảm bảo tính dễ đọc tuyệt đối bằng cách phối các nền thẻ card rực rỡ với văn bản chữ đen tuyền siêu đậm:
+     * Thẻ nội dung chính: Nền màu vàng Neon rực rỡ ('#f1f509' / '#e2ff3b') với chữ đen ('color: #000;').
+     * Thẻ tiêu đề phụ/badge: Nền màu xanh Neon Cyan ('#00f5ff') hoặc đỏ Neon Pink với chữ đen.
+     * Thẻ chứa hình ảnh: Bo góc dày ('border-radius: 16px'), viền đen dày, bóng đổ phẳng 3D sắc sảo.
+
+4. HIỂN THỊ HÌNH ẢNH HOOK THÔNG MINH:
+   - Trong cảnh Hook (cảnh đầu tiên), chia layout thành 2 ô Bento Grid xếp chồng:
+     * Ô phía trên là khung ảnh '.hook-image-container' viền đen 4px, đổ bóng phẳng 8px, chứa ảnh hiển thị sắc nét.
+     * Ô phía dưới là thẻ chữ '.scene-text' nền vàng neon viền đen, chữ đen tuyền cực đậm.
+   - Các cảnh tiếp theo (Body/Outro) chuyển thành thẻ Bento chữ to bản chiếm trọn không gian để tăng khả năng tương tác và tập trung nội dung.
+
+5. HIỆU ỨNG HOẠT ẢNH SPRING (ĐÀN HỒI):
+   - Chuyển động xuất hiện của các thẻ Bento Grid phải mang cảm giác đàn hồi, giật nẩy cực kỳ năng động:
+     Sử dụng 'ease: "back.out(1.6)"' hoặc 'ease: "elastic.out(1, 0.75)"' kết hợp xoay nhẹ thẻ ('rotation: 2' hoặc '-2') và tăng tỷ lệ scale để hoạt ảnh cuốn hút như đồ họa motion chuyên nghiệp.
 
 === YÊU CẦU ĐẦU RA ===
 Trả về duy nhất mã nguồn index.html hoàn chỉnh nhất bên trong khối code markdown \`\`\`html. Tuyệt đối không giải thích thêm hay viết lời mở đầu/kết thúc nào cả.

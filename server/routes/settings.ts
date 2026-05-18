@@ -25,6 +25,20 @@ const DEFAULT_SETTINGS: Record<string, string> = {
     cardBorderTop: 0, cardBorderBottom: 0, cardBorderLeft: 0, cardBorderRight: 0, cardBorderRadius: 0,
     showLogo: true, showTag: true, showDatetime: true, showCard: true
   }),
+  video_template_dynamic: JSON.stringify({
+    logoText: 'AUTOREELS', logoColor: '#ffffff', logoTop: 100, logoLeft: 0, logoAnim: 'slide-down', logoSize: 60,
+    hookColor: '#ffffff', hookAnim: 'slide-up', hookSize: 120,
+    bodyColor: 'rgba(255, 255, 255, 0.95)', bodyAnim: 'slide-up', bodySize: 48,
+    dividerColor: '#00f2ff', dividerWidth: 200,
+    mainTop: 600, mainLeft: 100, contentGap: 40,
+    tagText: 'TRENDING', tagBg: '#fff000', tagColor: '#000000', tagTop: 1600, tagLeft: 0, tagAnim: 'slide-right', tagSize: 32,
+    backgroundBrightness: 0.45, backgroundImage: '',
+    bgGradientStart: 'rgba(139, 169, 239, 0.4)', bgGradientEnd: 'rgba(178, 215, 93, 0.7)',
+    cardBgColor: 'rgba(8, 12, 24, 0.72)', cardBorderColor: 'rgba(255, 255, 255, 0.08)',
+    cardBorderTop: 1, cardBorderBottom: 1, cardBorderLeft: 1, cardBorderRight: 1, cardBorderRadius: 32,
+    showLogo: true, showTag: true, showDatetime: true, showCard: true,
+    accentColor: '#00f2ff', secondaryColor: '#f43f5e', fontFamily: 'Plus Jakarta Sans', showProgressBar: true
+  }),
   video_template_classic: JSON.stringify({
     logoText: 'AUTOREELS', logoColor: '#ffffff', logoTop: 100, logoLeft: 0,
     hookColor: '#ffffff', hookSize: 120,

@@ -255,13 +255,14 @@ export const SettingsView: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [editingTemplateId, setEditingTemplateId] = useState('classic');
+  const [editingTemplateId, setEditingTemplateId] = useState('dynamic');
   const [selectedRatio, setSelectedRatio] = useState<'9:16' | '1:1' | '16:9'>('9:16');
   const [showAssetPicker, setShowAssetPicker] = useState(false);
   const [activeTab, setActiveTab] = useState<'visual' | 'layout' | 'audio' | 'advanced'>('visual');
   const previewRef = useRef<HTMLDivElement>(null);
 
   const templates = [
+    { id: 'dynamic', name: 'Dynamic' },
     { id: 'classic', name: 'Classic' },
     { id: 'modern', name: 'Modern' },
     { id: 'cinematic', name: 'Cinematic' },
