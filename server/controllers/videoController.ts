@@ -320,7 +320,7 @@ async function generateAiDynamicHtml(title: string, scenes: any[], customSetting
   const sampleScene = scenes[0] || { id: 1, type: 'hook', voiceText: 'Nội dung mẫu cảnh mở đầu' };
   
   const prompt = `
-Bạn là nhà thiết kế đồ họa chuyển động đỉnh cao (creative director & senior frontend motion developer) chuyên phát triển các video ngắn dạng đứng (9:16) chất lượng cao cho TikTok/Reels (phong cách Neubrutalism Bento Grid nguyên bản, độc bản và vô cùng cuốn hút).
+Bạn là giám đốc nghệ thuật kiêm nhà phát triển frontend motion đỉnh cao (creative director & senior motion designer) chuyên phát triển các video ngắn dọc (9:16) chất lượng điện ảnh hàng đầu cho TikTok/Reels/Shorts.
 
 Dưới đây là thông tin về kịch bản video:
 === THÔNG TIN KỊCH BẢN ===
@@ -339,45 +339,53 @@ Do đó:
 3. Bên trong container #root trên, bạn chỉ đặt các phần tử tĩnh như logo, ngày giờ, progress-bar rỗng, và một container rỗng duy nhất để đổ cảnh: <div id="scene-container"></div>.
 4. Bạn BẮT BUỘC phải viết mã JavaScript ở cuối file sử dụng đúng khung cấu trúc vòng lặp dưới đây để sinh DOM động và dựng timeline GSAP seekable hoàn mỹ.
 
-=== HƯỚNG DẪN THIẾT KẾ PHONG CÁCH NEUBRUTALISM BENTO GRID CAO CẤP ===
-Bạn phải thiết kế giao diện theo phong cách Neubrutalism Bento Grid nguyên bản, cực kỳ nổi bật, trực quan và tối ưu hiển thị để đạt hàng triệu view trên TikTok/Reels:
+=== HƯỚNG DẪN THIẾT KẾ PHONG CÁCH NEUBRUTALISM BENTO GRID SIÊU PREMIUM ===
+Bạn phải thiết kế giao diện theo phong cách Neubrutalism Bento Grid nguyên bản, cực kỳ cuốn hút, rực rỡ, trực quan và tối ưu hiển thị để người dùng lướt qua phải dừng lại xem:
 
-1. KHẮC PHỤC LỖI FONT TIẾNG VIỆT (BẮT BUỘC):
-   - TUYỆT ĐỐI KHÔNG dùng font 'Anton', 'Impact' hay các font display sans-serif cơ bản (chúng không hỗ trợ đầy đủ ký tự tiếng Việt có dấu và sẽ gây ra lỗi fallback font thanh mảnh cực kỳ mất thẩm mỹ ở các chữ như Â, Ê, Đ, Ằ, Ể, Ả, Ế, Ị, Á, Ố).
+1. TRÁNH LỖI PHÂN RÃ CHỮ & TRÀN VIỀN (TUYỆT ĐỐI KHÔNG BỊ CẮT):
+   - Để tránh kịch bản quá dài bị tràn viền trái/phải hoặc cắt cạnh dưới:
+     * Toàn bộ chữ phụ đề '.scene-text' BẮT BUỘC phải bọc trong các thẻ block có thuộc tính: 'white-space: normal; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; text-align: center; display: block; width: 100%;'
+     * Mỗi từ '.word-wrapper' bên trong phải dùng style 'display: inline-block; vertical-align: middle; margin-right: 0.22em;' và lớp chữ '.word' bên trong dùng 'display: inline-block;'.
+     * Đặt thẻ cha '#scene-container' ở vùng an toàn tuyệt đối của màn hình dọc:
+       'position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 140px 45px; box-sizing: border-box; z-index: 50; overflow: hidden;'
+     * Mỗi thẻ '.scene-card' có style:
+       'position: absolute; display: none; flex-direction: column; width: 100%; height: 100%; justify-content: center; align-items: center; gap: 25px; box-sizing: border-box;'
+
+2. KHẮC PHỤC TRIỆT ĐỂ LỖI FONT TIẾNG VIỆT:
+   - TUYỆT ĐỐI KHÔNG dùng font 'Anton', 'Impact' hay các font display sans-serif cơ bản không đầy đủ tiếng Việt (sẽ gây lỗi font thanh mảnh cực kỳ mất thẩm mỹ ở các chữ như Â, Ê, Đ, Ằ, Ể, Ả, Ế, Ị, Á, Ố).
    - Hãy sử dụng font 'Lexend Mega' (weight 900) hoặc 'Montserrat' (weight 900) hoặc 'Syne' (weight 800) được nhập trực tiếp từ Google Fonts.
    - Nhập font ở thẻ head:
      <link href="https://fonts.googleapis.com/css2?family=Lexend+Mega:wght@900&family=Montserrat:wght@900&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
-   - Áp dụng font chữ: 'Lexend Mega', 'Montserrat', sans-serif cho tiêu đề và các ô văn bản chính.
+   - Áp dụng font chữ: 'Lexend Mega', 'Montserrat', sans-serif cho các thẻ văn bản.
 
-2. CẤU TRÚC CONTAINER & CHỐNG CẮT CẠNH (CENTRALIZATION & SAFE ZONE):
-   - Tránh việc thẻ scene-card trôi tự do xuống đáy màn hình và bị cắt ở viền dưới do nội dung dài.
-   - Thiết lập thẻ cha '#scene-container' là một flex container căn giữa hoàn đối:
-     'position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 130px 50px; overflow: hidden; box-sizing: border-box; z-index: 50;'
-   - Mỗi thẻ '.scene-card' sẽ hiển thị ở giữa màn hình bên trong container này:
-     'position: absolute; display: none; flex-direction: column; width: 100%; max-height: 82%; gap: 30px; align-items: center; justify-content: center; box-sizing: border-box; opacity: 0; will-change: transform, opacity;'
+3. HỆ THỐNG PHỐI MÀU NEON CAO CẤP & BENTO GRID 2 KHỐI ĐỘC LẬP:
+   - Định nghĩa các biến màu Neon rực rỡ ở :root:
+     * '--accent-yellow': '#e2ff3b' (vàng neon sáng chói)
+     * '--accent-cyan': '#00f5ff' (cyan neon mát lạnh)
+     * '--accent-pink': '#ff007f' (hồng neon cực đại)
+     * '--accent-purple': '#7d2eff' (tím neon bí ẩn)
+     * '--black': '#000000'
+     * '--white': '#ffffff'
+   - Giao diện Bento Card cho từng Cảnh:
+     * Cảnh CÓ HÌNH ẢNH ('scene.imageUrl'):
+       + Khối trên là '.scene-image-card' (chiếm tỉ lệ thích hợp ví dụ aspect-ratio 16/10, viền đen dày 6px, bo góc tròn 24px, đổ bóng phẳng lệch góc 12px không nhòe: 'box-shadow: 12px 12px 0px #000000; overflow: hidden;'). Ảnh bên trong dùng 'object-fit: cover; width: 100%; height: 100%; will-change: transform;'.
+       + Khối dưới là '.scene-text-card' chứa phụ đề (chữ đen, màu nền card sẽ tự động luân phiên đổi màu neon theo chu kỳ index của cảnh để tránh nhàm chán: cảnh 0 nền vàng, cảnh 1 nền cyan, cảnh 2 nền hồng, cảnh 3 nền tím... viền đen dày 6px, bo góc 20px, đổ bóng phẳng lệch góc 12px: 'box-shadow: 12px 12px 0px #000000; padding: 25px 20px; position: relative;').
+     * Cảnh KHÔNG CÓ HÌNH ẢNH:
+       + Khối '.scene-text-card' tự động mở rộng to bản toàn diện ('full-size'), căn giữa hoàn mỹ, sử dụng cỡ chữ khổng lồ (từ 44px đến 50px) để tạo cú hit thị giác đỉnh cao!
 
-3. QUY TẮC HIỂN THỊ HÌNH ẢNH THÔNG MINH CHO TẤT CẢ CÁC CẢNH:
-   - KHÔNG chỉ hiển thị hình ảnh ở cảnh đầu tiên. Bất kỳ cảnh nào có 'scene.imageUrl' đều phải hiển thị hình ảnh!
-   - Nếu cảnh có hình ảnh ('scene.imageUrl'):
-     * Thiết kế layout Bento 2 ô xếp chồng đứng:
-       + Ô phía trên là khung chứa ảnh '.hook-image-container' (có: 'aspect-ratio: 16/10; width: 100%; overflow: hidden; border: 6px solid #000000; border-radius: 20px; box-shadow: 10px 10px 0px #000000;'). Ảnh bên trong phải dùng 'object-fit: cover; width: 100%; height: 100%;'.
-       + Ô phía dưới là thẻ chữ '.scene-text' nền vàng neon viền đen 6px, bóng đổ phẳng 10px, chữ đen tuyền cực đậm.
-   - Nếu cảnh KHÔNG có hình ảnh ('scene.imageUrl' là rỗng):
-     * Thẻ chữ '.scene-text' sẽ tự động mở rộng chiếm trọn thẻ card, căn giữa hoàn hảo theo cả chiều dọc và chiều ngang, không để lại khoảng trống màu đen thừa thãi!
+4. NỀN NGHỆ THUẬT & TRANG TRÍ HẠT NEON CHUYỂN ĐỘNG (BACKGROUND POLISH):
+   - Nền toàn màn hình (#root): Nền tối sâu thẳm '#060709' kết hợp lưới chấm ô vuông trắng chìm nổi bật: 'background-image: radial-gradient(rgba(255,255,255,0.15) 2px, transparent 2px); background-size: 32px 32px; position: relative;'
+   - Thêm các khối vector trang trí bay lơ lửng tựa các hạt vũ trụ chuyển động chậm ở background (ví dụ tạo các thẻ span '.floater-star', '.floater-cross' tuyệt đẹp quay xoay lắc lư liên tục bằng CSS keyframes '@keyframes floatAnim').
+   - Logo Pill & Badge (CSS-Only): Thiết kế một logo pill ở góc trên bằng CSS tuyệt đẹp, viền đen dày chữ trắng đậm 'AUTOREELS.AI' nghiêng nhẹ 2 độ, không dùng thẻ img logo để tránh bị lỗi broken image!
 
-4. CHI TIẾT ĐỒ HỌA NEUBRUTALISM ĐÚNG CHUẨN ĐẬM ĐÀ:
-   - Đường viền cực dày (Thick Black Borders): Mọi thẻ card, badge, khung ảnh đều phải có viền đen dày dặn: 'border: 6px solid #000000;' hoặc 'border: 8px solid #000000;'.
-   - Đổ bóng phẳng (Solid Offset Shadow - Bắt buộc): Cấm dùng shadow mờ (blur). Hãy dùng đổ bóng phẳng, lệch góc 100% độ đục để tạo chiều sâu 3D brutalism độc đáo:
-     'box-shadow: 10px 10px 0px #000000;' hoặc 'box-shadow: 14px 14px 0px #000000;'.
-   - Phối màu High Contrast Neon:
-     * Thẻ nội dung chính: Nền màu vàng Neon rực rỡ ('#f1f509' / '#e2ff3b') với chữ đen ('color: #000; font-weight: 900;').
-     * Thẻ tiêu đề phụ/badge: Nền màu xanh Neon Cyan ('#00f5ff') hoặc đỏ Neon Pink ('#ff5722') viền đen dày, chữ đen.
-   - Nền toàn màn hình (#root): Nền tối sâu thẳm ('#0a0a0c') kết hợp hiệu ứng lưới ô vuông grid chìm hoặc chấm tròn dotted (ví dụ: 'background-image: radial-gradient(rgba(255,255,255,0.06) 1.5px, transparent 1.5px); background-size: 35px 35px;').
+5. HIỆU ỨNG ÂM THANH TRỰC QUAN (AUDIO-REACTIVE EQUALIZER):
+   - Bên trong mỗi '.scene-text-card', tích hợp một cụm cột sóng equalizer âm thanh nhảy múa đầy nghệ thuật ở góc:
+     Một container '.equalizer-container' chứa 5 thanh đứng '.equalizer-bar' tự động co giãn chiều cao nhịp nhàng bằng keyframes để video có cảm giác cực kỳ 'sống động' và giữ chân khán giả!
 
-5. HOẠT ẢNH SPRING (ĐÀN HỒI) & STAGGER WORD SLIDE-UP:
-   - Chuyển động xuất hiện của các thẻ Bento Grid phải mang cảm giác đàn hồi, giật nẩy cực kỳ năng động:
-     Sử dụng 'ease: "back.out(1.5)"' kết hợp xoay nhẹ thẻ ('rotation: -2' hoặc '2') và scale từ '0.9' lên '1.0' để hoạt ảnh cuốn hút như đồ họa motion chuyên nghiệp.
-   - Đối với phần văn bản bên trong '.scene-text', hãy viết mã JS để tách nội dung chữ thành các từ riêng lẻ (split words), bọc mỗi từ trong một thẻ span có overflow ẩn, rồi dùng GSAP stagger để các chữ chạy nhảy lên lần lượt từ dưới lên (stagger word slide-up) cực kỳ mượt mà!
+6. HOẠT ẢNH SPRING GIẬT NẢY & KINETIC WORD STAGGER:
+   - Thẻ Bento Card xuất hiện giật nẩy cực kỳ năng động: sử dụng 'ease: "back.out(1.5)"' kết hợp xoay nhẹ ngẫu nhiên (rotation angle) và scale từ '0.9' lên '1.0'.
+   - Hiệu ứng Ken Burns cho hình ảnh: GSAP zoom từ '1.0' lên '1.15' chậm rãi xuyên suốt toàn bộ thời lượng cảnh để hình ảnh luôn động!
+   - Word stagger slide-up: Subtitle xuất hiện lần lượt từ dưới lên theo từng chữ (stagger: 0.035 giây) vô cùng chuyên nghiệp.
 
 === KHUNG LẬP TRÌNH DỰNG DOM & GSAP TIMELINE ĐỘNG (BẮT BUỘC) ===
 Bạn phải viết mã JavaScript ở cuối file sử dụng đúng cấu trúc sau:
@@ -411,16 +419,41 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   // 1. Tạo phần tử DOM động dựa trên cấu trúc Layout độc bản bạn thiết kế
   var sceneEl = document.createElement('div');
   sceneEl.id = sceneId;
-  sceneEl.className = 'scene-card type-' + (scene.type || 'body');
+  sceneEl.className = 'scene-card';
+  sceneEl.style.display = 'none';
+  
+  // Chu kỳ màu sắc cho từng bento card
+  var bgColors = ['--accent-yellow', '--accent-cyan', '--accent-pink', '--accent-purple'];
+  var currentBgVar = bgColors[i % bgColors.length];
   
   var htmlContent = '';
   // Hiển thị hình ảnh ở bất cứ cảnh nào có scene.imageUrl (Bento grid 2 ô xếp chồng)
   if (scene.imageUrl) {
-    htmlContent += '<div class="hook-image-container"><img class="hook-image" src="' + scene.imageUrl + '" /></div>';
-    htmlContent += '<div class="scene-text highlight-text">' + splitTextToSpans(scene.bodyText || scene.voiceText || '') + '</div>';
+    htmlContent += '<div class="scene-image-card">';
+    htmlContent += '  <img class="scene-image" src="' + scene.imageUrl + '" />';
+    htmlContent += '</div>';
+    htmlContent += '<div class="scene-text-card" style="background-color: var(' + currentBgVar + ');">';
+    htmlContent += '  <div class="scene-text highlight-text">' + splitTextToSpans(scene.bodyText || scene.voiceText || '') + '</div>';
+    htmlContent += '  <div class="equalizer-container">';
+    htmlContent += '    <div class="equalizer-bar bar-1"></div>';
+    htmlContent += '    <div class="equalizer-bar bar-2"></div>';
+    htmlContent += '    <div class="equalizer-bar bar-3"></div>';
+    htmlContent += '    <div class="equalizer-bar bar-4"></div>';
+    htmlContent += '    <div class="equalizer-bar bar-5"></div>';
+    htmlContent += '  </div>';
+    htmlContent += '</div>';
   } else {
     // Không có ảnh thì thẻ chữ căn giữa to bản chiếm trọn không gian thẻ card
-    htmlContent += '<div class="scene-text centered-text">' + splitTextToSpans(scene.bodyText || scene.voiceText || '') + '</div>';
+    htmlContent += '<div class="scene-text-card full-size" style="background-color: var(' + currentBgVar + ');">';
+    htmlContent += '  <div class="scene-text centered-text">' + splitTextToSpans(scene.bodyText || scene.voiceText || '') + '</div>';
+    htmlContent += '  <div class="equalizer-container">';
+    htmlContent += '    <div class="equalizer-bar bar-1"></div>';
+    htmlContent += '    <div class="equalizer-bar bar-2"></div>';
+    htmlContent += '    <div class="equalizer-bar bar-3"></div>';
+    htmlContent += '    <div class="equalizer-bar bar-4"></div>';
+    htmlContent += '    <div class="equalizer-bar bar-5"></div>';
+    htmlContent += '  </div>';
+    htmlContent += '</div>';
   }
   sceneEl.innerHTML = htmlContent;
   
@@ -430,13 +463,23 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   var tl = gsap.timeline();
   
   // 3. Entrance Animation: Bento Card giật nảy Spring + Xoay nhẹ
-  var rotationAngle = i % 2 === 0 ? 1.5 : -1.5;
+  var rotationAngle = i % 2 === 0 ? 1.8 : -1.8;
   tl.set(sceneEl, { display: 'flex', zIndex: 50 + i }, 0);
   tl.fromTo(sceneEl, 
-    { opacity: 0, y: 70, scale: 0.92, rotation: rotationAngle },
+    { opacity: 0, y: 80, scale: 0.9, rotation: rotationAngle },
     { opacity: 1, y: 0, scale: 1, rotation: 0, duration: 0.75, ease: "back.out(1.5)" }, 
     0
   );
+
+  // Ken Burns zoom chậm ảnh B-roll
+  var imgEl = sceneEl.querySelector('.scene-image');
+  if (imgEl) {
+    tl.fromTo(imgEl, 
+      { scale: 1.0 }, 
+      { scale: 1.15, duration: duration, ease: "none" }, 
+      0
+    );
+  }
 
   // Word stagger slide-up
   var words = sceneEl.querySelectorAll('.word');
@@ -454,8 +497,9 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   if (i < SCENES_DATA.length - 1) {
     tl.to(sceneEl, { 
       opacity: 0,
-      y: -50,
+      y: -60,
       scale: 0.95,
+      rotation: -rotationAngle / 2,
       duration: CROSSFADE,
       ease: "power2.in"
     }, duration - CROSSFADE);
@@ -491,7 +535,6 @@ window.__hf = {
 === YÊU CẦU ĐẦU RA ===
 Trả về duy nhất mã nguồn index.html hoàn chỉnh nhất bên trong khối code markdown \`\`\`html. Tuyệt đối không giải thích thêm hay viết lời mở đầu/kết thúc nào cả.
 `;
-
   try {
     const model = resolvedAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
     const result = await model.generateContent(prompt);
