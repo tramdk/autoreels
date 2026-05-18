@@ -360,7 +360,16 @@ async function resolvePriority(templateId?: string): Promise<{ priority: string[
     if (priority === defaultPriority) {
       const globalSetting = await prisma.setting.findUnique({ where: { key: 'tts_priority' } });
       if (globalSetting?.value) {
-        priority = globalSetting.value.split(',').map(p => p.trim());
+        try {
+          const parsed = JSON.parse(globalSetting.value);
+          if (Array.isArray(parsed)) {
+            priority = parsed;
+          } else {
+            priority = String(globalSetting.value).split(',').map(p => p.trim());
+          }
+        } catch (e) {
+          priority = String(globalSetting.value).split(',').map(p => p.trim());
+        }
       }
     }
   } catch (e) {
