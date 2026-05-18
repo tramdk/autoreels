@@ -333,9 +333,25 @@ Dưới đây là thông tin chi tiết về kịch bản video để bạn phâ
 
 Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html hoàn toàn mới, standalone, hoàn chỉnh 100% để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. Trang này phải có giao diện ĐỘC BẢN, thiết kế đo ni đóng giày phù hợp hoàn hảo với chủ đề và nội dung của kịch bản trên!
 
-=== CẢNH BÁO CỰC KỲ QUAN TRỌNG (BẮT BUỘC TUÂN THỦ 100%) ===
-Bạn chỉ biết tiêu đề và cấu trúc của 1 cảnh mẫu. Số lượng cảnh thực tế của video là ĐỘNG (có thể là 3 cảnh, 6 cảnh, hoặc 10 cảnh) và được nạp tự động qua biến SCENES_DATA ở runtime.
-Do đó:
+=== CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES (BẮT BUỘC TUÂN THỦ 100%) ===
+Trình biên dịch của HyperFrames phân tích font chữ tĩnh (static compilation) nên có những giới hạn cực kỳ khắt khe sau:
+1. TUYỆT ĐỐI KHÔNG ĐƯỢC phép sử dụng biến CSS để khai báo font-family (ví dụ: CẤM VIẾT 'font-family: var(--font-family)' hay 'font-family: var(...)'). Bạn BẮT BUỘC phải viết trực tiếp tên font chữ dưới dạng chuỗi literal trong thuộc tính CSS (ví dụ: 'font-family: "montserrat", sans-serif;' hoặc 'font-family: "inter", sans-serif;').
+2. CHỈ ĐƯỢC PHÉP sử dụng các font nằm trong danh sách được ánh xạ chính thức của HyperFrames dưới đây:
+   - 'inter' (chữ thường, sans-serif)
+   - 'montserrat' (chữ thường, sans-serif)
+   - 'jetbrains mono' (chữ thường, monospace)
+   - 'playfair display' (chữ thường, serif)
+   - 'outfit' (chữ thường, sans-serif)
+   - 'nunito' (chữ thường, sans-serif)
+   - 'eb garamond' (chữ thường, serif)
+3. Hãy áp dụng font chữ phù hợp chính xác theo phong cách chủ đề dưới đây (nhập Google Fonts ở head tương ứng):
+   - Finance/Business & Vlogs/News/General: Sử dụng font 'montserrat' hoặc 'inter'.
+   - Tech/AI/Future: Sử dụng font 'jetbrains mono'.
+   - YourClassVN Slideshow: Sử dụng font 'montserrat' hoặc 'inter' cực kỳ sạch đẹp, sắc nét.
+   - Love/Emotional/Life: Sử dụng font 'outfit' hoặc 'nunito'.
+   - Mystery/History/Horror: Sử dụng font 'playfair display' hoặc 'eb garamond'.
+
+=== CẢNH BÁO CẤU TRÚC CONTAINER & QUY TẮC RENDER (BẮT BUỘC TUÂN THỦ 100%) ===
 1. Bạn TUYỆT ĐỐI KHÔNG ĐƯỢC phép hardcode bất kỳ thẻ HTML nào đại diện cho cảnh (ví dụ: cấm viết trực tiếp các thẻ như <div class="scene" id="scene1">...</div> hay hardcode bất kỳ nội dung chữ nào của kịch bản vào HTML body).
 2. Thẻ body của bạn BẮT BUỘC phải bọc toàn bộ nội dung trong một container chính duy nhất có cấu trúc chính xác như sau:
    <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0" data-duration="{{ DURATION }}">
@@ -350,18 +366,16 @@ Bạn hãy đọc kỹ Tiêu đề video và Nội dung tóm tắt kịch bản 
    - Nền: Navy tối sâu thẳm sang trọng (#090e1a). Lưới chấm tròn màu xanh ngọc nhạt.
    - Bảng màu Neon: Xanh lục Neon phát lộc (#00ff66) làm chủ đạo, vàng Gold (#ffd700) làm điểm nhấn, chữ đen tuyền trên thẻ chữ.
    - Hạt trang trí lơ lửng ở nền (Background floaters): Các biểu tượng ký tự tiền tệ $, €, hoặc các mũi tên đi lên (growth arrows) hoặc biểu đồ hình cột bay lơ lửng tự xoay cực chậm bằng CSS keyframes.
-   - Typography: Font 'Lexend Mega' (weight 900) cực kỳ vững chãi và quyền lực.
    - Thẻ Bento: Bo góc sắc sảo vừa phải (radius 20px), viền đen dày 7px.
 
 2. CHỦ ĐỀ CÔNG NGHỆ / AI / TƯƠNG LAI / GAME (Tech/AI/Future):
    - Nền: Tím thẫm Cyberpunk vũ trụ (#0b021c). Mạng lưới grid điện tử ô vuông mờ ảo phát sáng.
    - Bảng màu Neon: Xanh Cyan Neon cực lạnh (#00f5ff), hồng Neon rực lửa (#ff007f), tím Cyber (#7d2eff).
    - Hạt trang trí lơ lửng ở nền: Các ký tự lập trình như {}, <>, số nhị phân 0, 1 hoặc các điểm nút mạch điện tử phát sáng lơ lửng quay chậm.
-   - Typography: Font 'JetBrains Mono' (weight 700) hoặc 'Share Tech Mono' kết hợp 'Montserrat' mang hơi thở tương lai.
    - Thẻ Bento: Bo góc công nghệ sắc bén (radius 12px) kèm đường viền kép neon glow phát sáng nhẹ.
 
 3. CHỦ ĐỀ TRÌNH CHIẾU GIÁO DỤC / SLIDESHOW THÔNG TIN (YourClassVN Slide Presentation Style):
-   - Phù hợp: Khi kịch bản mang tính giảng giải kiến thức, so sánh khái niệm, giải thích cấu trúc, hoặc hướng dẫn từng bước 1-2-3 (ví dụ: so sánh standard RAG vs GraphRAG).
+   - Phù hợp: Khi kịch bản mang tính giảng giải kiến thức, so sánh khái niệm, giải thích cấu trúc, hoặc hướng dẫn từng bước 1-2-3.
    - Nền: Màu đen thạch anh tối giản sâu thẳm (#06080F). Ở trung tâm màn hình, thiết kế một quả cầu ánh sáng nền (ambient backlight glow) màu xanh khói hoặc tím mờ ảo cực kỳ sang trọng bằng CSS radial-gradient phát sáng từ giữa tỏa ra. Overlay một lưới tọa độ mỏng mảnh hoặc các đường node mạng (network node connections) mờ ảo trôi nổi chậm ở background.
    - Bảng màu thẻ Slide: Thẻ Bento thiết kế dạng Slide phẳng, tối giản nhưng cực kỳ tinh tế. Khung viền siêu mỏng chỉ 1.5px có ánh hào quang neon nhẹ (glow) tương ứng với màu viền. Nền thẻ sử dụng màu xám tối bán trong suốt cao cấp (rgba(18, 22, 36, 0.8)).
    - Quy tắc tô màu chữ (Semantic Highlight): Chia đoạn văn bản thành các câu ngắn gọn xếp chồng. Các từ quan trọng hoặc kỹ thuật được tự động làm nổi bật trong các thẻ span có class riêng:
@@ -371,27 +385,23 @@ Bạn hãy đọc kỹ Tiêu đề video và Nội dung tóm tắt kịch bản 
      * Chữ thường dùng màu trắng hoặc bạc mờ (#B0B3B8).
    - Thiết kế Layout đặc chủng: Cho phép hiển thị dạng song song (2 card Bento cạnh nhau để so sánh hai khái niệm) hoặc dạng danh sách xếp chồng tuyệt đẹp.
    - Hoạt ảnh trình chiếu (Slide Transitions): Thay vì chỉ xuất hiện, các thẻ slide sẽ trượt ngang mượt mà từ phải qua trái (x: '100%' về 0%) hoặc trượt dọc từ dưới lên khi chuyển cảnh. Chữ bên trong xuất hiện tuần tự (fade in up) cực kỳ chuyên nghiệp như slide trình chiếu cao cấp của Apple Keynote.
-   - Typography: Font 'Montserrat' hoặc 'Inter' (weight 800) cực kỳ sạch sẽ, rõ ràng và hiện đại.
 
 4. CHỦ ĐỀ TÌNH YÊU / TÂM SỰ / CẢM XÚC / CUỘC SỐNG (Love/Emotional/Life):
    - Nền: Màu mận chín sâu lắng hoặc tím thạch anh thẫm (#1c010a).
    - Bảng màu Neon: Hot Pink rực cháy (#ff3366), đỏ quyến rũ (#ff2a2a), trắng kem ấm áp.
    - Hạt trang trí lơ lửng ở nền: Hình trái tim đập nhịp nhàng, các hạt lấp lánh (sparkles) nở ra rồi co lại trôi nổi lãng mạn.
-   - Typography: Font 'Plus Jakarta Sans' (weight 800) hoặc 'Quicksand' bo góc tròn trịa, truyền tải cảm xúc ấm áp.
    - Thẻ Bento: Bo góc cực kỳ mềm mại, tròn trịa đẫm chất tình cảm (radius 35px) với viền thanh thoát hơn.
 
 5. CHỦ ĐỀ KỲ BÍ / LỊCH SỬ / KINH DỊ / KHÁM PHÁ (Mystery/History/Horror):
    - Nền: Đen bụi than tối tăm huyền bí (#050505) kết hợp bụi khói lờ lững mờ ảo.
    - Bảng màu Neon: Đỏ máu thẫm (#b30000), vàng đồng cổ kính rỉ sét (#c59b27), trắng bạc ma mị.
    - Hạt trang trí lơ lửng ở nền: Các biểu tượng rune cổ xưa, hoặc các hạt bụi khói lơ lửng xoay chuyển mờ ảo.
-   - Typography: Font 'Cinzel' hoặc 'Playfair Display' kết hợp 'Syne' mang lại nét cổ kính thần bí.
    - Thẻ Bento: Góc vuông vắn cổ điển (radius 8px), các chi tiết nứt nẻ hoặc đường viền thô mộc.
 
 6. CHỦ ĐỀ ĐỜI SỐNG / VLOGS / TIN TỨC / CHỦ ĐỀ KHÁC (Vlogs/News/General):
    - Nền: Tối nguyên bản Neubrutalism (#060709) kèm lưới ô vuông chấm tròn tương phản cao.
    - Bảng màu Neon: Vàng Neon chói lọi (#e2ff3b), Cam Neon cá tính (#ff6b00), Xanh lá Neon.
    - Hạt trang trí lơ lửng ở nền: Các ngôi sao 4 cánh Neubrutalism đặc trưng, các chấm tròn to nhỏ xoay chuyển.
-   - Typography: Font 'Lexend Mega' hoặc 'Montserrat' (weight 900) thời thượng.
    - Thẻ Bento: Phong cách Neubrutalism cổ điển viền đen siêu dày 8px, đổ bóng phẳng lệch góc 14px thô mộc.
 
 === YÊU CẦU CHI TIẾT VỀ GIAO DIỆN & TIÊU CHUẨN KỸ THUẬT (BẮT BUỘC) ===
@@ -483,9 +493,6 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   // 3. Entrance Animation: Bento Card giật nảy Spring + Xoay nhẹ
   var rotationAngle = i % 2 === 0 ? 1.8 : -1.8;
   tl.set(sceneEl, { display: 'flex', zIndex: 50 + i }, 0);
-  
-  // NẾU LÀ CHỦ ĐỀ SLIDESHOW GIÁO DỤC: Thực hiện trượt ngang từ phải sang trái mượt mà (x: '100%' về 0) hoặc trượt dọc từ dưới lên
-  // Bạn có thể thiết lập GSAP timeline chuyển cảnh thích hợp tại đây dựa trên class hoặc cấu trúc layout!
   tl.fromTo(sceneEl, 
     { opacity: 0, y: 80, scale: 0.9, rotation: rotationAngle },
     { opacity: 1, y: 0, scale: 1, rotation: 0, duration: 0.75, ease: "back.out(1.5)" }, 
