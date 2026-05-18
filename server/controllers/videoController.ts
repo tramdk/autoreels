@@ -360,21 +360,34 @@ Bạn hãy đọc kỹ Tiêu đề video và Nội dung tóm tắt kịch bản 
    - Typography: Font 'JetBrains Mono' (weight 700) hoặc 'Share Tech Mono' kết hợp 'Montserrat' mang hơi thở tương lai.
    - Thẻ Bento: Bo góc công nghệ sắc bén (radius 12px) kèm đường viền kép neon glow phát sáng nhẹ.
 
-3. CHỦ ĐỀ TÌNH YÊU / TÂM SỰ / CẢM XÚC / CUỘC SỐNG (Love/Emotional/Life):
+3. CHỦ ĐỀ TRÌNH CHIẾU GIÁO DỤC / SLIDESHOW THÔNG TIN (YourClassVN Slide Presentation Style):
+   - Phù hợp: Khi kịch bản mang tính giảng giải kiến thức, so sánh khái niệm, giải thích cấu trúc, hoặc hướng dẫn từng bước 1-2-3 (ví dụ: so sánh standard RAG vs GraphRAG).
+   - Nền: Màu đen thạch anh tối giản sâu thẳm (#06080F). Ở trung tâm màn hình, thiết kế một quả cầu ánh sáng nền (ambient backlight glow) màu xanh khói hoặc tím mờ ảo cực kỳ sang trọng bằng CSS radial-gradient phát sáng từ giữa tỏa ra. Overlay một lưới tọa độ mỏng mảnh hoặc các đường node mạng (network node connections) mờ ảo trôi nổi chậm ở background.
+   - Bảng màu thẻ Slide: Thẻ Bento thiết kế dạng Slide phẳng, tối giản nhưng cực kỳ tinh tế. Khung viền siêu mỏng chỉ 1.5px có ánh hào quang neon nhẹ (glow) tương ứng với màu viền. Nền thẻ sử dụng màu xám tối bán trong suốt cao cấp (rgba(18, 22, 36, 0.8)).
+   - Quy tắc tô màu chữ (Semantic Highlight): Chia đoạn văn bản thành các câu ngắn gọn xếp chồng. Các từ quan trọng hoặc kỹ thuật được tự động làm nổi bật trong các thẻ span có class riêng:
+     * Xanh Mint (#4AE3B5): Cho ưu điểm, công nghệ vượt trội, số liệu ấn tượng.
+     * Đỏ San Hô (#FF6B6B): Cho cảnh báo, hạn chế, nhược điểm hoặc vấn đề cần giải quyết.
+     * Vàng Canary (#FFD166): Cho tiêu đề phụ, các từ khóa dẫn dắt hoặc câu hỏi.
+     * Chữ thường dùng màu trắng hoặc bạc mờ (#B0B3B8).
+   - Thiết kế Layout đặc chủng: Cho phép hiển thị dạng song song (2 card Bento cạnh nhau để so sánh hai khái niệm) hoặc dạng danh sách xếp chồng tuyệt đẹp.
+   - Hoạt ảnh trình chiếu (Slide Transitions): Thay vì chỉ xuất hiện, các thẻ slide sẽ trượt ngang mượt mà từ phải qua trái (x: '100%' về 0%) hoặc trượt dọc từ dưới lên khi chuyển cảnh. Chữ bên trong xuất hiện tuần tự (fade in up) cực kỳ chuyên nghiệp như slide trình chiếu cao cấp của Apple Keynote.
+   - Typography: Font 'Montserrat' hoặc 'Inter' (weight 800) cực kỳ sạch sẽ, rõ ràng và hiện đại.
+
+4. CHỦ ĐỀ TÌNH YÊU / TÂM SỰ / CẢM XÚC / CUỘC SỐNG (Love/Emotional/Life):
    - Nền: Màu mận chín sâu lắng hoặc tím thạch anh thẫm (#1c010a).
    - Bảng màu Neon: Hot Pink rực cháy (#ff3366), đỏ quyến rũ (#ff2a2a), trắng kem ấm áp.
    - Hạt trang trí lơ lửng ở nền: Hình trái tim đập nhịp nhàng, các hạt lấp lánh (sparkles) nở ra rồi co lại trôi nổi lãng mạn.
    - Typography: Font 'Plus Jakarta Sans' (weight 800) hoặc 'Quicksand' bo góc tròn trịa, truyền tải cảm xúc ấm áp.
    - Thẻ Bento: Bo góc cực kỳ mềm mại, tròn trịa đẫm chất tình cảm (radius 35px) với viền thanh thoát hơn.
 
-4. CHỦ ĐỀ KỲ BÍ / LỊCH SỬ / KINH DỊ / KHÁM PHÁ (Mystery/History/Horror):
+5. CHỦ ĐỀ KỲ BÍ / LỊCH SỬ / KINH DỊ / KHÁM PHÁ (Mystery/History/Horror):
    - Nền: Đen bụi than tối tăm huyền bí (#050505) kết hợp bụi khói lờ lững mờ ảo.
    - Bảng màu Neon: Đỏ máu thẫm (#b30000), vàng đồng cổ kính rỉ sét (#c59b27), trắng bạc ma mị.
    - Hạt trang trí lơ lửng ở nền: Các biểu tượng rune cổ xưa, hoặc các hạt bụi khói lơ lửng xoay chuyển mờ ảo.
    - Typography: Font 'Cinzel' hoặc 'Playfair Display' kết hợp 'Syne' mang lại nét cổ kính thần bí.
    - Thẻ Bento: Góc vuông vắn cổ điển (radius 8px), các chi tiết nứt nẻ hoặc đường viền thô mộc.
 
-5. CHỦ ĐỀ ĐỜI SỐNG / VLOGS / TIN TỨC / CHỦ ĐỀ KHÁC (Vlogs/News/General):
+6. CHỦ ĐỀ ĐỜI SỐNG / VLOGS / TIN TỨC / CHỦ ĐỀ KHÁC (Vlogs/News/General):
    - Nền: Tối nguyên bản Neubrutalism (#060709) kèm lưới ô vuông chấm tròn tương phản cao.
    - Bảng màu Neon: Vàng Neon chói lọi (#e2ff3b), Cam Neon cá tính (#ff6b00), Xanh lá Neon.
    - Hạt trang trí lơ lửng ở nền: Các ngôi sao 4 cánh Neubrutalism đặc trưng, các chấm tròn to nhỏ xoay chuyển.
@@ -470,6 +483,9 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   // 3. Entrance Animation: Bento Card giật nảy Spring + Xoay nhẹ
   var rotationAngle = i % 2 === 0 ? 1.8 : -1.8;
   tl.set(sceneEl, { display: 'flex', zIndex: 50 + i }, 0);
+  
+  // NẾU LÀ CHỦ ĐỀ SLIDESHOW GIÁO DỤC: Thực hiện trượt ngang từ phải sang trái mượt mà (x: '100%' về 0) hoặc trượt dọc từ dưới lên
+  // Bạn có thể thiết lập GSAP timeline chuyển cảnh thích hợp tại đây dựa trên class hoặc cấu trúc layout!
   tl.fromTo(sceneEl, 
     { opacity: 0, y: 80, scale: 0.9, rotation: rotationAngle },
     { opacity: 1, y: 0, scale: 1, rotation: 0, duration: 0.75, ease: "back.out(1.5)" }, 
