@@ -419,6 +419,29 @@ ${ratioLayoutRules}
 3. AUDIO-REACTIVE EQUALIZER: Bên trong mỗi '.scene-text-card', tích hợp một cụm cột sóng equalizer âm thanh 5 thanh đứng '.equalizer-bar' tự động co giãn chiều cao nhịp nhàng bằng keyframes để tăng độ sống động.
 4. LOGO PILL BADGE & PROGRESSBAR NEON: Thiết kế logo pill chữ đậm cách điệu ở góc trên bằng CSS. Thanh tiến trình chạy suốt thời lượng video ở đáy màn hình viền đen dày ruột neon rực rỡ.
 
+=== TRIẾT LÝ TRỰC QUAN HÓA THÔNG TIN (INFORMATION VISUALIZATION PHILOSOPHY) ===
+Nhiệm vụ tối thượng của bạn là đảm bảo **nội dung kịch bản phải được cấu trúc và trực quan hóa xuất sắc cho người dùng**. Tuyệt đối KHÔNG hiển thị các phân cảnh dưới dạng những khối văn bản thô ráp dài dòng chạy chữ một cách nhàm chán.
+Hãy đọc kỹ ngữ nghĩa kịch bản và tự do sáng tạo để chọn lựa cấu trúc hiển thị trực quan thông minh nhất (Không cần sao chép y hệt, hãy tự do thiết kế định dạng phù hợp nhất):
+
+1. NẾU MANG TÍNH ĐỐI CHIẾU / SO SÁNH (Before vs After, Pros vs Cons, Lỗ vs Lãi, Đúng vs Sai):
+   - Thiết kế các cột hoặc thẻ so sánh song song đối trực diện.
+   - Thẻ tiêu cực/thất bại: Có viền mờ màu đỏ san hô và icon phủ định nổi bật.
+   - Thẻ tích cực/thành công: Có viền neon rực rỡ màu xanh ngọc/xanh lá và icon khẳng định rực rỡ.
+   - Dùng GSAP để khi nói đến thẻ nào thì thẻ đó phóng to nhẹ, sáng rực rỡ lên, còn thẻ kia mờ đi để dẫn dắt mắt người xem.
+
+2. NẾU MANG TÍNH DANH SÁCH / BÀI HỌC / THÔNG TIN PHÂN PHỐI (Bento Grid Points):
+   - Lập trình cấu trúc Bento Grid dạng lưới các ô thẻ độc lập với kích thước lệch nhau tinh tế (Bento Grid).
+   - Mỗi ô thẻ đại diện cho 1 điểm hoặc 1 bài học, có tiêu đề to rõ, icon tương ứng ở góc và đoạn mô tả ngắn gọn.
+   - Dùng GSAP để các ô Bento trượt lên (slide up stagger) lần lượt khi giọng đọc giải thích đến từng điểm một, tạo hiệu ứng chuyển động vô cùng chuyên nghiệp.
+
+3. NẾU MANG TÍNH QUY TRÌNH / TỪNG BƯỚC / LỘ TRÌNH (Steps / Process / Steps 1-2-3):
+   - Thiết kế các khối bước nối tiếp nhau (ví dụ: Bước 1 -> Bước 2 -> Bước 3) theo chiều ngang (16:9) hoặc xếp dọc (9:16).
+   - Dùng GSAP để vẽ một đường nối (hoặc mũi tên chỉ hướng) phát sáng chạy qua các thẻ bước lần lượt khi giọng nói tiến triển qua từng bước.
+
+4. NẾU MANG TÍNH ĐỐC KẾT / BÀI HỌC ĐẮT GIÁ (Takeaway / Key Lesson):
+   - Thiết kế một thẻ đúc rút (takeaway box) cực kỳ trang trọng ở đáy hoặc trung tâm màn hình, có bo góc mềm mại, đường viền neon lấp lánh nhẹ và icon đại diện (bóng đèn sáng 💡, chìa khóa 🔑, ngôi sao ⭐).
+   - Thẻ này sẽ được GSAP kích hoạt làm sáng bừng rực rỡ ở cảnh cuối cùng của video như một cú kết đầy ấn tượng.
+
 === QUY TRÌNH THIẾT KẾ ĐO NI ĐÓNG GIÀY THEO CHỦ ĐỀ KỊCH BẢN (THEME DESIGN) ===
 Bạn hãy đọc kỹ Tiêu đề video và Nội dung kịch bản để chọn chính xác 1 trong các hướng thiết kế nghệ thuật sau đây:
 
