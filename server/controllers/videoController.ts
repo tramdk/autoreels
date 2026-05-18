@@ -568,7 +568,17 @@ Trả về duy nhất mã nguồn index.html hoàn chỉnh nhất bên trong kh�
     const result = await model.generateContent(prompt);
     const text = result.response.text();
     const cleanHtml = text.replace(/```html/g, '').replace(/```/g, '').trim();
-    return cleanHtml;
+    
+    // HỆ THỐNG PHÒNG THỦ & CHUẨN HÓA FONT CHỮ CHO HYPERFRAMES (POST-PROCESSING SANITIZER)
+    let sanitizedHtml = cleanHtml;
+    sanitizedHtml = sanitizedHtml.replace(/font-family\\s*:\\s*var\\([^)]+\\)/gi, "font-family: 'montserrat', sans-serif");
+    sanitizedHtml = sanitizedHtml.replace(/font-family\\s*:\\s*[^;}]+var\\([^)]+\\)[^;}]*/gi, "font-family: 'montserrat', sans-serif");
+    sanitizedHtml = sanitizedHtml.replace(/var\\(--font-family\\)/gi, "'montserrat'");
+    sanitizedHtml = sanitizedHtml.replace(/var\\(--primary-font\\)/gi, "'montserrat'");
+    sanitizedHtml = sanitizedHtml.replace(/var\\(--body-font\\)/gi, "'inter'");
+    sanitizedHtml = sanitizedHtml.replace(/var\\(--title-font\\)/gi, "'montserrat'");
+    
+    return sanitizedHtml;
   } catch (error) {
     console.error('[AI HTML] Error generating custom dynamic HTML template:', error);
     return '';
