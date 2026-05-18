@@ -309,7 +309,7 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
  * a 100% custom visual layout, styling, and GSAP timeline specifically tailored 
  * to the emotions, theme, and rhythm of the script.
  */
-async function generateAiDynamicHtml(title: string, scenes: any[], customSettings: any): Promise<string> {
+async function generateAiDynamicHtml(title: string, scenes: any[], customSettings: any, ratio: string = '9:16'): Promise<string> {
   const resolvedAI = getAIClient(genAI);
   if (!resolvedAI) {
     console.warn('[AI HTML] AI not configured. Returning empty string.');
@@ -321,8 +321,54 @@ async function generateAiDynamicHtml(title: string, scenes: any[], customSetting
   // Tổng hợp tóm tắt toàn bộ kịch bản để AI phân tích chủ đề sâu sắc
   const scriptSummary = scenes.map((s, idx) => `Cảnh ${idx + 1}: ${s.voiceText || s.bodyText || ''}`).join('\n');
 
+  // ĐỊNH HƯỚNG BỐ CỤC THEO KHUNG HÌNH (DYNAMIC ASPECT RATIO RESPONSIVE RULES)
+  let ratioLayoutRules = "";
+  if (ratio === '16:9') {
+    ratioLayoutRules = `
+=== QUY TẮC BỐ CỤC KHUNG HÌNH NGANG (16:9 LANDSCAPE WIDESCREEN) ===
+Bạn đang thiết kế cho màn hình ngang (16:9) chuẩn máy tính/TV/Youtube.
+1. CONTAINER GỐC #root: Bắt buộc khai báo: <div id="root" data-composition-id="main" data-width="1920" data-height="1080" data-start="0" data-duration="{{ DURATION }}">
+2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card): Toàn bộ các thẻ cảnh '.scene-card' BẮT BUỘC phải sử dụng thuộc tính CSS định vị absolute chồng lên nhau để crossfade hoàn hảo:
+   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 40px; box-sizing: border-box; padding: 120px 80px;'
+3. CHIA ĐÔI SONG SONG TRÁI-PHẢI (HORIZONTAL SIDE-BY-SIDE SPLIT):
+   - Màn hình 16:9 cực kỳ rộng rãi theo chiều ngang. Nếu cảnh CÓ hình ảnh (scene.imageUrl):
+     * Khối ảnh '.scene-image-card' nằm bên TRÁI, chiếm khoảng 46% chiều rộng và 100% chiều cao của khu vực hiển thị.
+     * Khối chữ '.scene-text-card' nằm bên PHẢI, chiếm khoảng 46% chiều rộng và 100% chiều cao của khu vực hiển thị.
+     * Hai khối này nằm cân đối cạnh nhau theo chiều ngang. Ảnh '.scene-image' phải có 'width: 100%; height: 100%; object-fit: cover; border-radius: 16px;'.
+   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' tự động chiếm trọn vẹn 100% không gian bề ngang và nằm ở vị trí trung tâm.
+`;
+  } else if (ratio === '1:1') {
+    ratioLayoutRules = `
+=== QUY TẮC BỐ CỤC KHUNG HÌNH VUÔNG (1:1 SQUARE INSTAGRAM) ===
+Bạn đang thiết kế cho màn hình vuông (1:1).
+1. CONTAINER GỐC #root: Bắt buộc khai báo: <div id="root" data-composition-id="main" data-width="1080" data-height="1080" data-start="0" data-duration="{{ DURATION }}">
+2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card): Toàn bộ các thẻ cảnh '.scene-card' BẮT BUỘC phải sử dụng thuộc tính CSS định vị absolute chồng lên nhau để crossfade hoàn hảo:
+   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 30px; box-sizing: border-box; padding: 80px 45px;'
+3. BỐ CỤC XẾP CHỒNG DỌC CÂN ĐỐI (VERTICAL BALANCED STACK):
+   - Nếu cảnh CÓ hình ảnh (scene.imageUrl):
+     * Khối ảnh '.scene-image-card' nằm ở trên, chiếm khoảng 44% chiều cao và 100% chiều rộng.
+     * Khối chữ '.scene-text-card' nằm ở dưới, chiếm khoảng 44% chiều cao và 100% chiều rộng.
+   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' tự động mở rộng chiếm 80% không gian vuông ở trung tâm.
+`;
+  } else {
+    // 9:16 vertical
+    ratioLayoutRules = `
+=== QUY TẮC BỐ CỤC KHUNG HÌNH DỌC (9:16 VERTICAL MOBILE TIKTOK/REELS) ===
+Bạn đang thiết kế cho màn hình đứng (9:16) chuẩn di động.
+1. CONTAINER GỐC #root: Bắt buộc khai báo: <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-start="0" data-duration="{{ DURATION }}">
+2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card): Toàn bộ các thẻ cảnh '.scene-card' BẮT BUỘC phải sử dụng thuộc tính CSS định vị absolute chồng lên nhau để crossfade hoàn hảo:
+   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 35px; box-sizing: border-box; padding: 160px 45px;'
+3. BỐ CỤC XẾP CHỒNG DỌC TUYỆT ĐỐI (NO HORIZONTAL COLUMNS):
+   - Cấm hoàn toàn việc chia đôi màn hình theo chiều ngang (flex-direction: row) vì chiều rộng video đứng 9:16 cực kỳ hẹp.
+   - Nếu cảnh CÓ hình ảnh (scene.imageUrl): Thiết kế dạng 2 khối bento xếp chồng dọc:
+     * Khối ảnh '.scene-image-card' nằm ở trên, chiếm khoảng 43% chiều cao, chiều rộng 100% full viền bo góc. Ảnh '.scene-image' phải có 'width: 100%; height: 100%; object-fit: cover; border-radius: 16px;'.
+     * Khối chữ '.scene-text-card' nằm ở dưới, chiếm khoảng 43% chiều cao, chiều rộng 100%, bên trong hiển thị phụ đề.
+   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' tự động mở rộng chiếm trọn vẹn khu vực trung tâm (width: 100%; height: 80%;) với cỡ chữ khổng lồ bắt mắt.
+`;
+  }
+
   const prompt = `
-Bạn là giám đốc nghệ thuật kiêm nhà phát triển frontend motion cao cấp (creative director & senior motion designer) chuyên thiết kế các video đứng dạng đứng (9:16) chất lượng điện ảnh chuyên nghiệp hàng đầu cho TikTok/Reels/Shorts.
+Bạn là giám đốc nghệ thuật kiêm nhà phát triển frontend motion cao cấp (creative director & senior motion designer) chuyên thiết kế các video chất lượng điện ảnh chuyên nghiệp hàng đầu cho các nền tảng mạng xã hội.
 
 Dưới đây là thông tin chi tiết về kịch bản video để bạn phân tích chủ đề:
 === THÔNG TIN KỊCH BẢN ===
@@ -330,6 +376,7 @@ Dưới đây là thông tin chi tiết về kịch bản video để bạn phâ
 - Nội dung kịch bản để phân tích chủ đề:
 "${scriptSummary}"
 - Cấu trúc dữ liệu của 1 cảnh mẫu: ${JSON.stringify(sampleScene)}
+- Tỷ lệ khung hình video hiện tại: ${ratio}
 
 Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html hoàn toàn mới, standalone, hoàn chỉnh 100% để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. Trang này phải có giao diện ĐỘC BẢN, thiết kế đo ni đóng giày phù hợp hoàn hảo với chủ đề và nội dung của kịch bản trên!
 
@@ -351,7 +398,9 @@ Trình biên dịch của HyperFrames phân tích font chữ tĩnh (static compi
    - Love/Emotional/Life: Sử dụng font 'outfit' hoặc 'nunito'.
    - Mystery/History/Horror: Sử dụng font 'playfair display' hoặc 'eb garamond'.
 
-=== CẢNH BÁO CẤU TRÚC CONTAINER & QUY TẮC RENDER (BẮT BUỘC TUÂN THỦ 100%) ===
+${ratioLayoutRules}
+
+=== CẢNH BÁO BẮT BUỘC KHÁC VỀ THẺ CHỮ & BỐ CỤC CHUNG ===
 1. Bạn TUYỆT ĐỐI KHÔNG ĐƯỢC phép hardcode bất kỳ thẻ HTML nào đại diện cho cảnh (ví dụ: cấm viết trực tiếp các thẻ như <div class="scene" id="scene1">...</div> hay hardcode bất kỳ nội dung chữ nào của kịch bản vào HTML body).
 2. Thẻ body của bạn BẮT BUỘC phải bọc toàn bộ nội dung trong một container chính duy nhất có cấu trúc chính xác như sau:
    <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0" data-duration="{{ DURATION }}">
@@ -359,20 +408,29 @@ Trình biên dịch của HyperFrames phân tích font chữ tĩnh (static compi
 3. Bên trong container #root trên, bạn chỉ đặt các phần tử tĩnh như logo, ngày giờ, progress-bar rỗng, và một container rỗng duy nhất để đổ cảnh: <div id="scene-container"></div>.
 4. Bạn BẮT BUỘC phải viết mã JavaScript ở cuối file sử dụng đúng khung cấu trúc vòng lặp dưới đây để sinh DOM động và dựng timeline GSAP seekable hoàn mỹ.
 
-=== QUY TRÌNH THIẾT KẾ ĐO NI ĐÓNG GIÀY THEO CHỦ ĐỀ KỊCH BẢN (THEME ANALYSIS) ===
-Bạn hãy đọc kỹ Tiêu đề video và Nội dung tóm tắt kịch bản để chọn chính xác 1 trong các hướng thiết kế nghệ thuật sau đây. Bạn BẮT BUỘC phải tạo ra bộ CSS variables, Fonts, Background và Decorator Floater đặc chủng tương ứng:
+=== YÊU CẦU THIẾT KẾ ĐẸP MẮT & TƯƠNG PHẢN ĐỘC ĐÁO ===
+1. PHÌ HỢP TƯƠNG PHẢN & NỀN TRANSLUCENT DASHBOARD CAO CẤP:
+   - Tất cả các thẻ chữ '.scene-text-card' BẮT BUỘC phải dùng màu nền tối thẫm bán trong suốt sang trọng: 'background: rgba(10, 12, 22, 0.82); backdrop-filter: blur(12px); border: 1.5px solid var(--accent-neon); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);'
+   - Tuyệt đối CẤM sử dụng màu nền solid chói sáng (như vàng neon hay xanh neon nguyên khối) để làm nền thẻ, vì chữ trắng trên nền sáng sẽ cực kỳ nhạt nhòa, không thể đọc nổi.
+   - Các màu Neon rực rỡ (xanh ngọc, cam, vàng, hồng) chỉ dùng để sơn viền card mỏng mảnh, hiệu ứng bóng mờ (box-shadow) và highlight chữ quan trọng.
+2. KHẮC PHỤC CHỮ TRÀN & NGẮT CÂU TRỰC QUAN:
+   - Subtitle '.scene-text' phải bọc trong các thẻ block có thuộc tính: 'white-space: normal; word-wrap: break-word; overflow-wrap: break-word; word-break: keep-all; text-align: center; display: block; width: 100%; font-size: 38px; line-height: 1.35;'
+   - Từng từ bọc trong '.word-wrapper' có style 'display: inline-block; vertical-align: middle; margin-right: 0.22em;' và lớp chữ '.word' bên trong dùng 'display: inline-block;'.
+3. AUDIO-REACTIVE EQUALIZER: Bên trong mỗi '.scene-text-card', tích hợp một cụm cột sóng equalizer âm thanh 5 thanh đứng '.equalizer-bar' tự động co giãn chiều cao nhịp nhàng bằng keyframes để tăng độ sống động.
+4. LOGO PILL BADGE & PROGRESSBAR NEON: Thiết kế logo pill chữ đậm cách điệu ở góc trên bằng CSS. Thanh tiến trình chạy suốt thời lượng video ở đáy màn hình viền đen dày ruột neon rực rỡ.
+
+=== QUY TRÌNH THIẾT KẾ ĐO NI ĐÓNG GIÀY THEO CHỦ ĐỀ KỊCH BẢN (THEME DESIGN) ===
+Bạn hãy đọc kỹ Tiêu đề video và Nội dung kịch bản để chọn chính xác 1 trong các hướng thiết kế nghệ thuật sau đây:
 
 1. CHỦ ĐỀ TÀI CHÍNH / KINH DOANH / ĐẦU TƯ / LÀM GIÀU (Finance/Business):
    - Nền: Navy tối sâu thẳm sang trọng (#090e1a). Lưới chấm tròn màu xanh ngọc nhạt.
-   - Bảng màu Neon: Xanh lục Neon phát lộc (#00ff66) làm chủ đạo, vàng Gold (#ffd700) làm điểm nhấn, chữ đen tuyền trên thẻ chữ.
-   - Hạt trang trí lơ lửng ở nền (Background floaters): Các biểu tượng ký tự tiền tệ $, €, hoặc các mũi tên đi lên (growth arrows) hoặc biểu đồ hình cột bay lơ lửng tự xoay cực chậm bằng CSS keyframes.
-   - Thẻ Bento: Bo góc sắc sảo vừa phải (radius 20px), viền đen dày 7px.
+   - Viền Neon: Xanh lục phát lộc (#00ff66) hoặc vàng Gold (#ffd700).
+   - Hạt trang trí lơ lửng ở nền: Ký tự $, €, biểu đồ đi lên bay cực chậm và mờ ảo (opacity: 0.15).
 
 2. CHỦ ĐỀ CÔNG NGHỆ / AI / TƯƠNG LAI / GAME (Tech/AI/Future):
    - Nền: Tím thẫm Cyberpunk vũ trụ (#0b021c). Mạng lưới grid điện tử ô vuông mờ ảo phát sáng.
-   - Bảng màu Neon: Xanh Cyan Neon cực lạnh (#00f5ff), hồng Neon rực lửa (#ff007f), tím Cyber (#7d2eff).
-   - Hạt trang trí lơ lửng ở nền: Các ký tự lập trình như {}, <>, số nhị phân 0, 1 hoặc các điểm nút mạch điện tử phát sáng lơ lửng quay chậm.
-   - Thẻ Bento: Bo góc công nghệ sắc bén (radius 12px) kèm đường viền kép neon glow phát sáng nhẹ.
+   - Viền Neon: Xanh Cyan Neon cực lạnh (#00f5ff) hoặc hồng Neon rực lửa (#ff007f).
+   - Hạt trang trí lơ lửng ở nền: Ký tự {}, <>, số nhị phân 0, 1 bay lơ lửng rất to rõ hơn chút và mờ ảo (opacity: 0.12).
 
 3. CHỦ ĐỀ TRÌNH CHIẾU GIÁO DỤC / SLIDESHOW THÔNG TIN (YourClassVN Slide Presentation Style):
    - Phù hợp: Khi kịch bản mang tính giảng giải kiến thức, so sánh khái niệm, giải thích cấu trúc, hoặc hướng dẫn từng bước 1-2-3.
@@ -383,38 +441,22 @@ Bạn hãy đọc kỹ Tiêu đề video và Nội dung tóm tắt kịch bản 
      * Đỏ San Hô (#FF6B6B): Cho cảnh báo, hạn chế, nhược điểm hoặc vấn đề cần giải quyết.
      * Vàng Canary (#FFD166): Cho tiêu đề phụ, các từ khóa dẫn dắt hoặc câu hỏi.
      * Chữ thường dùng màu trắng hoặc bạc mờ (#B0B3B8).
-   - Thiết kế Layout đặc chủng: Cho phép hiển thị dạng song song (2 card Bento cạnh nhau để so sánh hai khái niệm) hoặc dạng danh sách xếp chồng tuyệt đẹp.
-   - Hoạt ảnh trình chiếu (Slide Transitions): Thay vì chỉ xuất hiện, các thẻ slide sẽ trượt ngang mượt mà từ phải qua trái (x: '100%' về 0%) hoặc trượt dọc từ dưới lên khi chuyển cảnh. Chữ bên trong xuất hiện tuần tự (fade in up) cực kỳ chuyên nghiệp như slide trình chiếu cao cấp của Apple Keynote.
+   - Hoạt ảnh trình chiếu (Slide Transitions): Các thẻ slide trượt ngang mượt mà từ phải qua trái (x: '100%' về 0%) hoặc trượt dọc từ dưới lên khi chuyển cảnh. Chữ bên trong xuất hiện tuần tự (fade in up) cực kỳ chuyên nghiệp như slide trình chiếu cao cấp của Apple Keynote.
 
 4. CHỦ ĐỀ TÌNH YÊU / TÂM SỰ / CẢM XÚC / CUỘC SỐNG (Love/Emotional/Life):
    - Nền: Màu mận chín sâu lắng hoặc tím thạch anh thẫm (#1c010a).
-   - Bảng màu Neon: Hot Pink rực cháy (#ff3366), đỏ quyến rũ (#ff2a2a), trắng kem ấm áp.
-   - Hạt trang trí lơ lửng ở nền: Hình trái tim đập nhịp nhàng, các hạt lấp lánh (sparkles) nở ra rồi co lại trôi nổi lãng mạn.
-   - Thẻ Bento: Bo góc cực kỳ mềm mại, tròn trịa đẫm chất tình cảm (radius 35px) với viền thanh thoát hơn.
+   - Viền Neon: Hot Pink rực cháy (#ff3366) hoặc đỏ quyến rũ (#ff2a2a).
+   - Hạt trang trí lơ lửng ở nền: Hình trái tim đập nhịp nhàng, các hạt lấp lánh (sparkles) trôi nổi lãng mạn.
 
 5. CHỦ ĐỀ KỲ BÍ / LỊCH SỬ / KINH DỊ / KHÁM PHÁ (Mystery/History/Horror):
    - Nền: Đen bụi than tối tăm huyền bí (#050505) kết hợp bụi khói lờ lững mờ ảo.
-   - Bảng màu Neon: Đỏ máu thẫm (#b30000), vàng đồng cổ kính rỉ sét (#c59b27), trắng bạc ma mị.
-   - Hạt trang trí lơ lửng ở nền: Các biểu tượng rune cổ xưa, hoặc các hạt bụi khói lơ lửng xoay chuyển mờ ảo.
-   - Thẻ Bento: Góc vuông vắn cổ điển (radius 8px), các chi tiết nứt nẻ hoặc đường viền thô mộc.
+   - Viền Neon: Đỏ máu thẫm (#b30000) hoặc vàng đồng cổ kính rỉ sét (#c59b27).
+   - Hạt trang trí lơ lửng ở nền: Biểu tượng rune cổ xưa, hoặc hạt bụi khói lơ lửng xoay chuyển.
 
 6. CHỦ ĐỀ ĐỜI SỐNG / VLOGS / TIN TỨC / CHỦ ĐỀ KHÁC (Vlogs/News/General):
    - Nền: Tối nguyên bản Neubrutalism (#060709) kèm lưới ô vuông chấm tròn tương phản cao.
-   - Bảng màu Neon: Vàng Neon chói lọi (#e2ff3b), Cam Neon cá tính (#ff6b00), Xanh lá Neon.
-   - Hạt trang trí lơ lửng ở nền: Các ngôi sao 4 cánh Neubrutalism đặc trưng, các chấm tròn to nhỏ xoay chuyển.
-   - Thẻ Bento: Phong cách Neubrutalism cổ điển viền đen siêu dày 8px, đổ bóng phẳng lệch góc 14px thô mộc.
-
-=== YÊU CẦU CHI TIẾT VỀ GIAO DIỆN & TIÊU CHUẨN KỸ THUẬT (BẮT BUỘC) ===
-- TRÁNH LỖI PHÂN RÃ CHỮ & TRÀN VIỀN:
-  * Toàn bộ chữ phụ đề '.scene-text' BẮT BUỘC phải bọc trong các thẻ block có thuộc tính: 'white-space: normal; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; text-align: center; display: block; width: 100%;'
-  * Mỗi từ '.word-wrapper' bên trong phải dùng style 'display: inline-block; vertical-align: middle; margin-right: 0.22em;' và lớp chữ '.word' bên trong dùng 'display: inline-block;'.
-  * Đặt thẻ cha '#scene-container' ở vùng an toàn tuyệt đối của màn hình dọc:
-    'position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 140px 45px; box-sizing: border-box; z-index: 50; overflow: hidden;'
-- BENTO GRID 2 KHỐI ĐỘC LẬP CHO CẢNH CÓ ẢNH:
-  * Nếu Cảnh CÓ HÌNH ẢNH ('scene.imageUrl'): Hiển thị một khối ảnh phía trên '.scene-image-card' và khối chữ phụ đề phía dưới '.scene-text-card' viền dày bóng đổ phẳng lệch góc.
-  * Nếu Cảnh KHÔNG CÓ HÌNH ẢNH: Khối '.scene-text-card' tự động mở rộng to bản toàn diện ('full-size'), căn giữa hoàn mỹ, sử dụng cỡ chữ khổng lồ (từ 44px đến 50px) để tạo cú hit thị giác đỉnh cao!
-- AUDIO-REACTIVE EQUALIZER: Bên trong mỗi '.scene-text-card', tích hợp một cụm cột sóng equalizer âm thanh 5 thanh đứng '.equalizer-bar' tự động co giãn chiều cao nhịp nhàng bằng keyframes để tăng độ sống động.
-- LOGO PILL BADGE & PROGRESSBAR NEON: Thiết kế logo pill chữ đậm cách điệu ở góc trên bằng CSS, tránh dùng img logo. Thanh tiến trình chạy suốt thời lượng video ở đáy màn hình viền đen dày ruột neon rực rỡ.
+   - Viền Neon: Vàng Neon chói lọi (#e2ff3b) hoặc Cam Neon cá tính (#ff6b00).
+   - Hạt trang trí lơ lửng ở nền: Ngôi sao 4 cánh Neubrutalism đặc trưng, chấm tròn to nhỏ.
 
 === KHUNG LẬP TRÌNH DỰNG DOM & GSAP TIMELINE ĐỘNG (BẮT BUỘC) ===
 Bạn phải viết mã JavaScript ở cuối file sử dụng đúng cấu trúc sau (Lưu ý: Bắt buộc viết mã này bên trong khối code javascript):
@@ -439,6 +481,9 @@ function splitTextToSpans(text) {
   }).join(' ');
 }
 
+// Xóa sạch container trước khi nạp
+document.getElementById('scene-container').innerHTML = '';
+
 for (var i = 0; i < SCENES_DATA.length; i++) {
   var scene = SCENES_DATA[i];
   var duration = SCENE_DURATIONS[i] || 5;
@@ -450,17 +495,13 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   sceneEl.className = 'scene-card';
   sceneEl.style.display = 'none';
   
-  // Chu kỳ màu sắc cho từng bento card
-  var bgColors = ['--accent-yellow', '--accent-cyan', '--accent-pink', '--accent-purple'];
-  var currentBgVar = bgColors[i % bgColors.length];
-  
   var htmlContent = '';
-  // Hiển thị hình ảnh ở bất cứ cảnh nào có scene.imageUrl (Bento grid 2 ô xếp chồng)
+  // Hiển thị hình ảnh ở bất cứ cảnh nào có scene.imageUrl (Bento grid xếp chồng dọc hoặc song song ngang tùy CSS)
   if (scene.imageUrl) {
     htmlContent += '<div class="scene-image-card">';
     htmlContent += '  <img class="scene-image" src="' + scene.imageUrl + '" />';
     htmlContent += '</div>';
-    htmlContent += '<div class="scene-text-card" style="background-color: var(' + currentBgVar + ');">';
+    htmlContent += '<div class="scene-text-card">';
     htmlContent += '  <div class="scene-text highlight-text">' + splitTextToSpans(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '  <div class="equalizer-container">';
     htmlContent += '    <div class="equalizer-bar bar-1"></div>';
@@ -471,8 +512,8 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     htmlContent += '  </div>';
     htmlContent += '</div>';
   } else {
-    // Không có ảnh thì thẻ chữ căn giữa to bản chiếm trọn không gian thẻ card
-    htmlContent += '<div class="scene-text-card full-size" style="background-color: var(' + currentBgVar + ');">';
+    // Không có ảnh thì thẻ chữ căn giữa to bản chiếm trọn không gian
+    htmlContent += '<div class="scene-text-card full-size">';
     htmlContent += '  <div class="scene-text centered-text">' + splitTextToSpans(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '  <div class="equalizer-container">';
     htmlContent += '    <div class="equalizer-bar bar-1"></div>';
@@ -490,12 +531,14 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   // 2. Tạo sub-timeline riêng cho cảnh này
   var tl = gsap.timeline();
   
-  // 3. Entrance Animation: Bento Card giật nảy Spring + Xoay nhẹ
-  var rotationAngle = i % 2 === 0 ? 1.8 : -1.8;
-  tl.set(sceneEl, { display: 'flex', zIndex: 50 + i }, 0);
+  // 3. Entrance Animation: Trượt ngang slide mượt mà từ phải sang trái hoặc từ dưới lên tùy chủ đề
+  var rotationAngle = i % 2 === 0 ? 1.5 : -1.5;
+  tl.set(sceneEl, { display: 'flex', visibility: 'visible', zIndex: 50 + i }, 0);
+  
+  // Hiệu ứng di chuyển Keynote Slide mượt mà không đẩy ép nhau nhờ position absolute
   tl.fromTo(sceneEl, 
-    { opacity: 0, y: 80, scale: 0.9, rotation: rotationAngle },
-    { opacity: 1, y: 0, scale: 1, rotation: 0, duration: 0.75, ease: "back.out(1.5)" }, 
+    { opacity: 0, x: '100%', rotation: rotationAngle },
+    { opacity: 1, x: '0%', rotation: 0, duration: 0.8, ease: "power2.out" }, 
     0
   );
 
@@ -518,16 +561,15 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
       duration: 0.55,
       stagger: 0.035,
       ease: "power3.out"
-    }, 0.12);
+    }, 0.15);
   }
 
-  // 4. Exit Animation: Đồng bộ chồng chéo với cảnh tiếp theo (nếu chưa phải cảnh cuối)
+  // 4. Exit Animation: Slide trượt qua bên trái để nhường chỗ cho cảnh sau
   if (i < SCENES_DATA.length - 1) {
     tl.to(sceneEl, { 
       opacity: 0,
-      y: -60,
-      scale: 0.95,
-      rotation: -rotationAngle / 2,
+      x: '-100%',
+      rotation: -rotationAngle,
       duration: CROSSFADE,
       ease: "power2.in"
     }, duration - CROSSFADE);
@@ -536,9 +578,9 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   // 5. Thêm sub-timeline vào main timeline
   mainTl.add(tl, currentTime);
 
-  // 6. Dọn dẹp ẩn cảnh sau khi cảnh tiếp theo đã che phủ hoàn toàn để tránh lag trình duyệt
+  // 6. Dọn dẹp ẩn cảnh triệt để bằng cách tắt hoàn toàn display và visibility sau khi kết thúc để tránh che chắn các nút khác
   if (i < SCENES_DATA.length - 1) {
-    mainTl.add(gsap.set(sceneEl, { visibility: 'hidden' }), currentTime + duration);
+    mainTl.add(gsap.set(sceneEl, { display: 'none', visibility: 'hidden' }), currentTime + duration);
     currentTime += duration - CROSSFADE;
   } else {
     currentTime += duration;
@@ -750,7 +792,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
     if (templateId === 'dynamic') {
       try {
         console.log(`[PIPELINE] Selected DYNAMIC TEMPLATE. Invoking AI to design custom HTML structure...`);
-        customHtml = await generateAiDynamicHtml(title, script.scenes || [], customSettings || {});
+        customHtml = await generateAiDynamicHtml(title, script.scenes || [], customSettings || {}, ratio || '9:16');
         console.log(`[PIPELINE] Dynamic HTML designed successfully (length: ${customHtml?.length || 0} chars).`);
       } catch (err) {
         console.error(`[PIPELINE] Failed to generate AI custom HTML, falling back to defaults:`, err);
