@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="vi"
-  style="--v-width: {{ WIDTH }}; --v-height: {{ HEIGHT }}; --v-logo-size: {{ LOGO_SIZE }}; --v-logo-color: {{ LOGO_COLOR }}; --v-logo-top: {{ LOGO_CSS_TOP }}; --v-logo-left: {{ LOGO_CSS_LEFT }}; --v-logo-transform: {{ LOGO_CSS_TRANSFORM }}; --v-tag-size: {{ TAG_SIZE }}; --v-tag-color: {{ TAG_COLOR }}; --v-tag-top: {{ TAG_CSS_TOP }}; --v-tag-left: {{ TAG_CSS_LEFT }}; --v-tag-transform: {{ TAG_CSS_TRANSFORM }}; --v-body-size: {{ BODY_SIZE }}; --v-body-color: {{ BODY_COLOR }}; --v-hook-size: {{ HOOK_SIZE }}; --v-hook-color: {{ HOOK_COLOR }}; --v-main-top: {{ MAIN_CSS_TOP }}; --v-main-left: {{ MAIN_CSS_LEFT }}; --v-main-transform: {{ MAIN_CSS_TRANSFORM }}; --v-main-align: {{ MAIN_CSS_ALIGN }}; --v-divider-color: {{ DIVIDER_COLOR }}; --v-content-gap: {{ CONTENT_GAP }};">
+  style="--v-width: {{ WIDTH }}; --v-height: {{ HEIGHT }}; --v-logo-size: {{ LOGO_SIZE }}; --v-logo-color: {{ LOGO_COLOR }}; --v-logo-top: {{ LOGO_CSS_TOP }}; --v-logo-left: {{ LOGO_CSS_LEFT }}; --v-logo-transform: {{ LOGO_CSS_TRANSFORM }}; --v-tag-size: {{ TAG_SIZE }}; --v-tag-color: {{ TAG_COLOR }}; --v-tag-bg: {{ TAG_BG }}; --v-tag-top: {{ TAG_CSS_TOP }}; --v-tag-left: {{ TAG_CSS_LEFT }}; --v-tag-transform: {{ TAG_CSS_TRANSFORM }}; --v-body-size: {{ BODY_SIZE }}; --v-body-color: {{ BODY_COLOR }}; --v-hook-size: {{ HOOK_SIZE }}; --v-hook-color: {{ HOOK_COLOR }}; --v-main-top: {{ MAIN_CSS_TOP }}; --v-main-left: {{ MAIN_CSS_LEFT }}; --v-main-transform: {{ MAIN_CSS_TRANSFORM }}; --v-main-align: {{ MAIN_CSS_ALIGN }}; --v-divider-color: {{ DIVIDER_COLOR }}; --v-content-gap: {{ CONTENT_GAP }};">
 
 <head>
   <script>
-    var TOTAL_DURATION = {{ DURATION }};
-    var SCENES_DATA = {{ SCENES_JSON }};
-    var SCENE_DURATIONS = {{ SCENE_DURATIONS_JSON }};
-    var BG_BRIGHTNESS = {{ BG_BRIGHTNESS }};
-    var DEFAULT_BG = {{ BG_IMAGE_URL_JS }};
-    var LOGO_TEXT = {{ LOGO_TEXT_JS }};
-    var DATETIME = {{ DATETIME_JS }};
+    var TOTAL_DURATION = parseFloat("{{ DURATION }}") || 15;
+    var SCENES_DATA = JSON.parse('{{ SCENES_JSON }}');
+    var SCENE_DURATIONS = JSON.parse('{{ SCENE_DURATIONS_JSON }}');
+    var BG_BRIGHTNESS = parseFloat("{{ BG_BRIGHTNESS }}") || 0.45;
+    var DEFAULT_BG = "{{ BG_IMAGE_URL }}";
+    var LOGO_TEXT = "{{ LOGO_TEXT }}";
+    var DATETIME = "{{ DATETIME }}";
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width={{ WIDTH }}, user-scalable=no">
@@ -101,8 +101,8 @@
     }
 
     .tag-badge {
-      background: {{ TAG_BG }};
-      color: {{ TAG_COLOR }};
+      background: var(--v-tag-bg);
+      color: var(--v-tag-color);
       padding: 10px 40px;
       font-weight: 900;
       text-transform: uppercase;

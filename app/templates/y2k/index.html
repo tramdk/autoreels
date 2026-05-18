@@ -4,13 +4,13 @@
 
 <head>
   <script>
-    var TOTAL_DURATION = {{ DURATION }};
-    var SCENES_DATA = {{ SCENES_JSON }};
-    var SCENE_DURATIONS = {{ SCENE_DURATIONS_JSON }};
-    var BG_BRIGHTNESS = {{ BG_BRIGHTNESS }};
-    var DEFAULT_BG = {{ BG_IMAGE_URL_JS }};
-    var LOGO_TEXT = {{ LOGO_TEXT_JS }};
-    var DATETIME = {{ DATETIME_JS }};
+    var TOTAL_DURATION = parseFloat("{{ DURATION }}") || 15;
+    var SCENES_DATA = JSON.parse('{{ SCENES_JSON }}');
+    var SCENE_DURATIONS = JSON.parse('{{ SCENE_DURATIONS_JSON }}');
+    var BG_BRIGHTNESS = parseFloat("{{ BG_BRIGHTNESS }}") || 0.45;
+    var DEFAULT_BG = "{{ BG_IMAGE_URL }}";
+    var LOGO_TEXT = "{{ LOGO_TEXT }}";
+    var DATETIME = "{{ DATETIME }}";
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width={{ WIDTH }}, user-scalable=no">

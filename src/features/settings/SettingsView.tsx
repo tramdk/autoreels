@@ -404,7 +404,7 @@ export const SettingsView: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-8">
           <div className="space-y-1">
-            <h1 className="text-4xl font-black tracking-tight uppercase bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Settings</h1>
+            <h1 className="text-4xl font-black tracking-tight uppercase text-white">Settings</h1>
             <p className="text-white/40 font-medium uppercase text-[10px] tracking-[0.2em]">Production Pipeline Master Control</p>
           </div>
           <div className="flex items-center gap-4">
@@ -470,7 +470,7 @@ export const SettingsView: React.FC = () => {
                                   onClick={() => setShowAssetPicker(true)} 
                                   className="w-20 h-20 rounded-xl border border-dashed border-white/20 hover:border-primary/50 transition-all bg-white/5 flex items-center justify-center overflow-hidden"
                                 >
-                                  {template.logoImage ? <img src={template.logoImage} className="w-full h-full object-contain" /> : <ImageIcon className="text-white/20 w-4 h-4" />}
+                                  {template.logoImage ? <img src={template.logoImage} alt="Logo" className="w-full h-full object-contain" /> : <ImageIcon className="text-white/20 w-4 h-4" />}
                                 </button>
                                 {template.logoImage && (
                                   <button onClick={() => setTemplate({ ...template, logoImage: '' })} className="text-[8px] font-black uppercase text-red-500/50 hover:text-red-500">Remove Icon</button>
@@ -576,7 +576,7 @@ export const SettingsView: React.FC = () => {
                           <div className="space-y-2">
                             <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Custom Background Asset</label>
                             <button onClick={() => setShowAssetPicker(true)} className="w-full h-24 rounded-2xl border border-dashed border-white/20 hover:border-primary/50 transition-all bg-white/5 flex flex-col items-center justify-center gap-2 overflow-hidden">
-                              {template.backgroundImage ? <img src={template.backgroundImage} className="w-full h-full object-cover" /> : <><ImageIcon className="text-white/20" /> <span className="text-[9px] font-bold text-white/20">SELECT ASSET</span></>}
+                              {template.backgroundImage ? <img src={template.backgroundImage} alt="Background asset" className="w-full h-full object-cover" /> : <><ImageIcon className="text-white/20" /> <span className="text-[9px] font-bold text-white/20">SELECT ASSET</span></>}
                             </button>
                           </div>
                         </div>

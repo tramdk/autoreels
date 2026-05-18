@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Monitor, Film, Zap, Sparkles, Dna } from 'lucide-react';
+import { Layout, Monitor, Film, Zap, Sparkles, Dna, Wand2 } from 'lucide-react';
 
 interface TemplateGridProps {
   selected: string;
@@ -8,6 +8,7 @@ interface TemplateGridProps {
 
 export const TemplateGrid: React.FC<TemplateGridProps> = ({ selected, onSelect }) => {
   const templates = [
+    { id: 'dynamic', label: 'Dynamic', icon: <Wand2 className="w-4 h-4" />, desc: 'AI Tự Động' },
     { id: 'classic', label: 'Classic', icon: <Layout className="w-4 h-4" />, desc: 'Truyền thống' },
     { id: 'modern', label: 'Modern', icon: <Monitor className="w-4 h-4" />, desc: 'Chuyên nghiệp' },
     { id: 'cinematic', label: 'Cinematic', icon: <Film className="w-4 h-4" />, desc: 'Điện ảnh' },

@@ -82,7 +82,7 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
   const [isDirty, setIsDirty] = React.useState(false);
   const [activePreviewIdx, setActivePreviewIdx] = React.useState(0);
   const [selectedRatio, setSelectedRatio] = React.useState<Ratio>("9:16");
-  const [templateSettings, setTemplateSettings] = React.useState<any>(null);
+  const templateSettingsRef = React.useRef<any>(null);
 
   // History state
   const [articles, setArticles] = React.useState<any[]>([]);
@@ -105,7 +105,7 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
         const tplKey = `video_template_${selectedStyle}`;
         const tplVal = res[tplKey] || res['video_template'];
         if (tplVal) {
-          setTemplateSettings(typeof tplVal === 'string' ? JSON.parse(tplVal) : tplVal);
+          templateSettingsRef.current = typeof tplVal === 'string' ? JSON.parse(tplVal) : tplVal;
         }
       } catch (err) {
         console.error('Failed to load template settings in Studio', err);

@@ -254,7 +254,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ templateId, templateDa
         {renderedHtml ? (
           <div 
             ref={containerRef}
-            className="relative rounded-3xl border-8 border-slate-800 shadow-2xl overflow-hidden bg-black select-none pointer-events-none"
+            className="relative rounded-3xl border-8 border-slate-800 shadow-2xl overflow-hidden bg-slate-950 select-none pointer-events-none"
             style={{ 
               width: ratio === '16:9' ? '450px' : ratio === '1:1' ? '300px' : ratio === '4:3' ? '360px' : '220px',
               aspectRatio: ratio.replace(':', '/'),

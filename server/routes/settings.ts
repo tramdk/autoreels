@@ -197,7 +197,11 @@ router.post('/', authenticate, async (req, res) => {
 // Get raw template HTML for preview
 router.get('/templates/:id/raw', authenticate, async (req, res) => {
   const { id } = req.params;
-  const templatePath = path.join(process.cwd(), 'app', 'templates', id, 'index.html');
+  let templatePath = path.join(process.cwd(), 'app', 'templates', id, 'index.html');
+  
+  if (id === 'dynamic') {
+    templatePath = path.join(process.cwd(), 'app', 'video-template', 'index.html');
+  }
   
   try {
     if (!fs.existsSync(templatePath)) {

@@ -147,7 +147,7 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({ onSelect, onClose }) =
                    >
                      <div className="aspect-square rounded-3xl bg-white/5 border border-white/5 overflow-hidden relative shadow-lg group-hover:shadow-pink-500/10 group-hover:border-pink-500/30 transition-all">
                         {asset.type === 'image' ? (
-                          <img src={asset.url} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" />
+                          <img src={asset.url} alt={asset.name} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-slate-800">
                              <ImageIcon className="w-8 h-8 text-slate-600" />

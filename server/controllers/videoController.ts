@@ -6,6 +6,7 @@ import { generateAudio } from '../services/tts';
 import { renderWithHyperFrames, findFfmpegPath, getAudioDuration } from '../services/renderer';
 import { publishToTikTok } from '../services/tiktok';
 import { uploadVideo, downloadFile, deleteRemoteFile } from '../services/storage';
+import { genAI, getAIClient } from '../lib/ai';
 
 export const videoProgress = new Map<string, { progress: number, phase: string, title?: string }>();
 
@@ -302,6 +303,90 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
 };
 
 
+/**
+ * Dynamic Template AI generator: uses Gemini Flash to analyze the script content
+ * and output tailored CSS/HTML template parameters matching the theme/tone.
+ */
+async function generateAiTemplateSettings(scenes: any[]): Promise<any> {
+  const resolvedAI = getAIClient(genAI);
+  if (!resolvedAI) {
+    console.warn('[AI Template] AI not configured. Returning empty settings.');
+    return {};
+  }
+
+  const scriptText = scenes.map(s => `[Cảnh ${s.id} - ${s.type}]: ${s.voiceText || s.bodyText || ''}`).join('\n');
+  const prompt = `
+Bạn là chuyên gia thiết kế đồ họa chuyển động (motion designer) và đạo diễn nghệ thuật (art director) cho video ngắn trên TikTok/Reels.
+
+Dưới đây là kịch bản video dạng cảnh (scene-based) bằng tiếng Việt:
+=== KỊCH BẢN ===
+${scriptText}
+
+Nhiệm vụ của bạn là phân tích tông giọng, chủ đề, cảm xúc và cấu trúc của kịch bản này để thiết kế ra một bộ thông số giao diện (template settings) hoàn hảo nhất, thu hút người xem từ 3 giây đầu tiên và giữ chân họ xuyên suốt video.
+
+=== QUY TẮC PHÂN TÍCH TÔNG GIỌNG (TONE & THEME) ===
+Hãy xác định chủ đề chủ đạo của video (ví dụ: Công nghệ, Tin tức giật gân, Tài chính/Kinh doanh, Lịch sử kịch tính, Động lực cuộc sống, Hài hước/Giải trí...) và chọn:
+1. Palette màu phối hợp (màu logo, màu hook, màu tag badge, màu nền, màu divider, màu thẻ card, màu chữ body). Hãy dùng các màu sắc nổi bật, độ bão hòa tốt cho video dọc.
+2. Phông chữ (fontFamily) phù hợp với cảm xúc chủ đạo:
+   - "Anton" hoặc "Inter" cho tin tức mạnh mẽ, giật gân, kịch tính, công nghệ.
+   - "Outfit" hoặc "Inter" cho hiện đại, tối giản, sang trọng, khoa học.
+   - "Playfair Display" hoặc "Georgia" cho chiều sâu nghệ thuật, lịch sử cổ điển.
+   - "Montserrat" cho truyền cảm hứng, thể thao, năng động.
+3. Hoạt ảnh chuyển động (Animations) cho từng khối văn bản:
+   - Các hoạt ảnh hỗ trợ: "slide-up", "slide-down", "slide-left", "slide-right", "fade-in", "scale-in", "rotate-in", "bounce-in".
+
+=== CÁC PHÍM THÔNG SỐ BẮT BUỘC TRONG JSON TRẢ VỀ ===
+Hãy chọn các giá trị cho các trường thuộc tính dưới đây:
+- "logoText": Một nhãn ngắn gọn đại diện cho chủ đề (tối đa 12 chữ viết hoa, ví dụ: "TIN NÓNG", "SỨC KHỎE", "AI TECH", "SỰ THẬT").
+- "logoColor": Màu hex của logo (ví dụ: "#EF4444", "#10B981").
+- "logoAlign": Vị trí căn lề logo: "center", "left", "right".
+- "logoPlacement": Vị trí đặt logo theo chiều dọc: "top", "center", "bottom".
+- "logoAnim": Hoạt ảnh logo: "slide-down", "fade-in", "scale-in", v.v.
+- "logoSize": Kích thước chữ logo (số nguyên từ 36 đến 56).
+- "hookColor": Màu chữ tiêu đề cảnh mở đầu (Hook) (màu sáng rõ, nổi bật, ví dụ: "#FBBF24", "#FFFFFF").
+- "hookAnim": Hoạt ảnh xuất hiện chữ tiêu đề: "rotate-in", "scale-in", "slide-up", "fade-in", v.v.
+- "hookSize": Kích thước chữ tiêu đề cảnh mở đầu (Hook) (số nguyên từ 72 đến 96).
+- "bodyColor": Màu chữ nội dung chính (ví dụ: "#FFFFFF" hoặc màu sữa "rgba(255,255,255,0.95)").
+- "bodyAnim": Hoạt ảnh nội dung chính: "slide-up", "fade-in", "slide-left", v.v.
+- "bodySize": Kích thước chữ nội dung (số nguyên từ 38 đến 48).
+- "dividerColor": Màu sắc thanh phân tách (ví dụ: trùng tông với logoColor).
+- "dividerWidth": Chiều rộng thanh divider (số nguyên từ 100 đến 250).
+- "mainAlign": Căn lề khối chữ chính: "center", "left", "right".
+- "mainPlacement": Vị trí đặt khối chữ chính theo chiều dọc: "center", "top", "bottom".
+- "tagText": Nhãn tiêu đề phụ nổi bật (ví dụ: "XU HƯỚNG", "KỸ NĂNG", "BÍ MẬT").
+- "tagBg": Màu nền của tag badge (ví dụ: màu tương phản nổi bật như xanh dương "#3B82F6", đỏ "#EF4444").
+- "tagColor": Màu chữ của tag badge (thường là "#ffffff" hoặc "#000000").
+- "tagAlign": Căn lề của tag badge: "center", "left", "right".
+- "tagPlacement": Vị trí đặt tag badge theo chiều dọc: "bottom", "top", "center".
+- "tagAnim": Hoạt ảnh tag badge: "slide-right", "slide-left", "fade-in", "scale-in".
+- "tagSize": Kích thước chữ tag badge (số nguyên từ 24 đến 32).
+- "backgroundBrightness": Độ sáng hình nền (số thực từ 0.3 đến 0.5 để đảm bảo độ tương phản chữ đọc tốt).
+- "showCard": Hiển thị khung thẻ bọc nội dung hay không (boolean: true hoặc false. Dùng true nếu muốn phong cách glassmorphism hiện đại).
+- "cardBgColor": Màu nền thẻ card (ví dụ: "rgba(0,0,0,0.3)" hoặc "rgba(255,255,255,0.05)" hoặc "rgba(0,0,0,0)" nếu không muốn dùng).
+- "cardBorderColor": Màu viền thẻ card (ví dụ: "rgba(255,255,255,0.1)").
+- "cardBorderRadius": Độ bo góc thẻ card (số nguyên từ 0 đến 32).
+- "fontFamily": Tên font chữ được chọn (một trong các font: "Inter", "Anton", "Montserrat", "Outfit", "Georgia").
+- "showLogo": Có hiển thị logo hay không (boolean: true).
+- "showTag": Có hiển thị tag badge hay không (boolean: true).
+- "showDatetime": Có hiển thị ngày giờ hay không (boolean: true).
+- "showProgressBar": Có hiển thị thanh chạy tiến trình hay không (boolean: true).
+
+=== YÊU CẦU ĐẦU RA ===
+Trả về duy nhất 1 JSON object hợp lệ chứa đầy đủ các khóa trên, tuyệt đối không giải thích thêm hay bọc trong khối code markdown gì cả.
+`;
+
+  try {
+    const model = resolvedAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(cleanJson);
+  } catch (error) {
+    console.error('[AI Template] Error generating settings:', error);
+    return {};
+  }
+}
+
 export const runVideoGenerationPipeline = async (articleId: string, settings: any, existingVideoId?: string, userId?: string) => {
   const {
     templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, ratio,
@@ -375,6 +460,18 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
 
     if (!script || !script.scenes || script.scenes.length === 0) {
       throw new Error('No valid script found for rendering');
+    }
+
+    // Process AI dynamic template settings if templateId is 'dynamic'
+    if (templateId === 'dynamic') {
+      try {
+        console.log(`[PIPELINE] Selected DYNAMIC TEMPLATE. Invoking AI to customize visual parameters...`);
+        const aiSettings = await generateAiTemplateSettings(script.scenes || []);
+        customSettings = { ...aiSettings, ...(customSettings || {}) };
+        console.log(`[PIPELINE] Dynamic template settings generated successfully:`, JSON.stringify(customSettings));
+      } catch (err) {
+        console.error(`[PIPELINE] Failed to generate AI template settings, falling back to defaults:`, err);
+      }
     }
 
     // Process video generation asynchronously

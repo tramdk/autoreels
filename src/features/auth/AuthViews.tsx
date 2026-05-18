@@ -41,7 +41,13 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLogin, loading }) => {
           >
             <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity rounded-[28px]" />
             <Play size={40} className="text-white fill-current ml-1" />
-            <Sparkles className="absolute -top-2 -right-2 text-yellow-400 w-6 h-6 animate-bounce" />
+            <motion.div
+              animate={{ y: [0, -4, 0] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+              className="absolute -top-2 -right-2"
+            >
+              <Sparkles className="text-yellow-400 w-6 h-6" />
+            </motion.div>
           </motion.div>
           
           <h1 className="text-4xl font-black tracking-tighter text-white mb-2 uppercase">Auto<span className="text-primary">Reels</span> AI</h1>

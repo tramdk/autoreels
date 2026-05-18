@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi"
+  style="--v-width: {{ WIDTH }}; --v-height: {{ HEIGHT }}; --v-logo-top: {{ LOGO_TOP }}; --v-logo-left: {{ LOGO_LEFT }}; --v-logo-size: {{ LOGO_SIZE }}; --v-logo-color: {{ LOGO_COLOR }}; --v-logo-show: {{ SHOW_LOGO }}; --v-tag-top: {{ TAG_TOP }}; --v-tag-left: {{ TAG_LEFT }}; --v-tag-size: {{ TAG_SIZE }}; --v-tag-color: {{ TAG_COLOR }}; --v-tag-bg: {{ TAG_BG }}; --v-tag-show: {{ SHOW_TAG }}; --v-show-datetime: {{ SHOW_DATETIME }}; --v-main-top: {{ MAIN_TOP }}; --v-main-left: {{ MAIN_LEFT }}; --v-content-gap: {{ CONTENT_GAP }}; --v-card-bg-color: {{ CARD_BG_COLOR }}; --v-card-border-top: {{ CARD_BORDER_TOP }}; --v-card-border-bottom: {{ CARD_BORDER_BOTTOM }}; --v-card-border-left: {{ CARD_BORDER_LEFT }}; --v-card-border-right: {{ CARD_BORDER_RIGHT }}; --v-card-border-color: {{ CARD_BORDER_COLOR }}; --v-card-border-radius: {{ CARD_BORDER_RADIUS }}; --v-divider-color: {{ DIVIDER_COLOR }}; --v-hook-size: {{ HOOK_SIZE }}; --v-hook-color: {{ HOOK_COLOR }}; --v-body-size: {{ BODY_SIZE }}; --v-body-color: {{ BODY_COLOR }};">
 
 <head>
   <meta charset="UTF-8">
@@ -19,45 +20,17 @@
 
     body,
     html {
-      width: {
-          {
-          WIDTH
-        }
-      }
-
-      px;
-
-      height: {
-          {
-          HEIGHT
-        }
-      }
-
-      px;
+      width: calc(var(--v-width) * 1px);
+      height: calc(var(--v-height) * 1px);
       overflow: hidden;
       background-color: #0F172A;
-      font-family: 'Plus Jakarta Sans',
-      sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
     #root {
       position: relative;
-
-      width: {
-          {
-          WIDTH
-        }
-      }
-
-      px;
-
-      height: {
-          {
-          HEIGHT
-        }
-      }
-
-      px;
+      width: 100%;
+      height: 100%;
       background-color: #0F172A;
       color: white;
       overflow: hidden;
@@ -92,126 +65,44 @@
 
     /* Brand */
     #brand-header {
-      top: {
-          {
-          LOGO_TOP
-        }
-      }
-
-      px;
+      top: calc(var(--v-logo-top) * 1px);
       left: 50%;
-
-      display: {
-          {
-          SHOW_LOGO
-        }
-      }
-
-      ;
+      display: var(--v-logo-show);
     }
 
     #brand-logo {
       font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 800;
-
-      font-size: {
-          {
-          LOGO_SIZE
-        }
-      }
-
-      px;
+      font-size: calc(var(--v-logo-size) * 1px);
       letter-spacing: 5px;
       text-transform: uppercase;
-
-      color: {
-          {
-          LOGO_COLOR
-        }
-      }
-
-      ;
-
-      text-shadow: 0 0 30px {
-          {
-          LOGO_COLOR
-        }
-      }
-
-      88;
+      color: var(--v-logo-color);
+      text-shadow: 0 0 30px var(--v-logo-color);
       white-space: nowrap;
-
-      transform: translateX(-50%) translateX({
-          {
-          LOGO_LEFT
-        }
-      }
-
-      px);
+      transform: translateX(-50%) translateX(calc(var(--v-logo-left) * 1px));
     }
 
     /* Bottom info / Tag */
     #bottom-info {
-      top: {
-          {
-          TAG_TOP
-        }
-      }
-
-      px;
+      top: calc(var(--v-tag-top) * 1px);
       left: 50%;
       display: flex;
       flex-direction: column;
       align-items: center;
-
-      transform: translateX(-50%) translateX({
-          {
-          TAG_LEFT
-        }
-      }
-
-      px);
+      transform: translateX(-50%) translateX(calc(var(--v-tag-left) * 1px));
     }
 
     #tag-badge {
       padding: 12px 30px;
       font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 700;
-
-      font-size: {
-          {
-          TAG_SIZE
-        }
-      }
-
-      px;
+      font-size: calc(var(--v-tag-size) * 1px);
       text-transform: uppercase;
-
-      background-color: {
-          {
-          TAG_BG
-        }
-      }
-
-      ;
-
-      color: {
-          {
-          TAG_COLOR
-        }
-      }
-
-      ;
+      background-color: var(--v-tag-bg);
+      color: var(--v-tag-color);
       border-radius: 8px;
       letter-spacing: 1px;
-
-      display: {
-          {
-          SHOW_TAG
-        }
-      }
-
-      ;
+      display: var(--v-tag-show);
       white-space: nowrap;
     }
 
@@ -221,14 +112,7 @@
       font-weight: 700;
       letter-spacing: 2px;
       margin-top: 15px;
-
-      display: {
-          {
-          SHOW_DATETIME
-        }
-      }
-
-      ;
+      display: var(--v-show-datetime);
     }
 
     /* Scene cards */
@@ -243,107 +127,20 @@
 
     .scene-card {
       position: absolute;
-
-      top: {
-          {
-          MAIN_TOP
-        }
-      }
-
-      px;
+      top: calc(var(--v-main-top) * 1px);
       left: 0;
       width: 100%;
-
-      padding: 60px {
-          {
-          MAIN_LEFT
-        }
-      }
-
-      px;
+      padding: 60px calc(var(--v-main-left) * 1px);
       display: none;
       flex-direction: column;
-
-      gap: {
-          {
-          CONTENT_GAP
-        }
-      }
-
-      px;
+      gap: calc(var(--v-content-gap) * 1px);
       opacity: 0;
-
-      background-color: {
-          {
-          CARD_BG_COLOR
-        }
-      }
-
-      ;
-
-      border-top: {
-          {
-          CARD_BORDER_TOP
-        }
-      }
-
-      px solid {
-          {
-          CARD_BORDER_COLOR
-        }
-      }
-
-      ;
-
-      border-bottom: {
-          {
-          CARD_BORDER_BOTTOM
-        }
-      }
-
-      px solid {
-          {
-          CARD_BORDER_COLOR
-        }
-      }
-
-      ;
-
-      border-left: {
-          {
-          CARD_BORDER_LEFT
-        }
-      }
-
-      px solid {
-          {
-          CARD_BORDER_COLOR
-        }
-      }
-
-      ;
-
-      border-right: {
-          {
-          CARD_BORDER_RIGHT
-        }
-      }
-
-      px solid {
-          {
-          CARD_BORDER_COLOR
-        }
-      }
-
-      ;
-
-      border-radius: {
-          {
-          CARD_BORDER_RADIUS
-        }
-      }
-
-      px;
+      background-color: var(--v-card-bg-color);
+      border-top: calc(var(--v-card-border-top) * 1px) solid var(--v-card-border-color);
+      border-bottom: calc(var(--v-card-border-bottom) * 1px) solid var(--v-card-border-color);
+      border-left: calc(var(--v-card-border-left) * 1px) solid var(--v-card-border-color);
+      border-right: calc(var(--v-card-border-right) * 1px) solid var(--v-card-border-color);
+      border-radius: calc(var(--v-card-border-radius) * 1px);
     }
 
     /* Scene text styles */
@@ -352,14 +149,7 @@
       font-weight: 800;
       font-size: 28px;
       letter-spacing: 4px;
-
-      color: {
-          {
-          DIVIDER_COLOR
-        }
-      }
-
-      ;
+      color: var(--v-divider-color);
       text-transform: uppercase;
       margin-bottom: 10px;
     }
@@ -367,24 +157,10 @@
     .scene-card.type-hook .scene-text {
       font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 800;
-
-      font-size: {
-          {
-          HOOK_SIZE
-        }
-      }
-
-      px;
+      font-size: calc(var(--v-hook-size) * 1px);
       line-height: 1.1;
       text-transform: uppercase;
-
-      color: {
-          {
-          HOOK_COLOR
-        }
-      }
-
-      ;
+      color: var(--v-hook-color);
       text-shadow: 0 4px 40px rgba(0, 0, 0, 0.6);
     }
 
@@ -392,35 +168,15 @@
       width: 120px;
       height: 6px;
       border-radius: 4px;
-
-      background: {
-          {
-          DIVIDER_COLOR
-        }
-      }
-
-      ;
+      background: var(--v-divider-color);
       margin-top: 20px;
     }
 
     .scene-card.type-body .scene-text {
-      font-size: {
-          {
-          BODY_SIZE
-        }
-      }
-
-      px;
+      font-size: calc(var(--v-body-size) * 1px);
       font-weight: 700;
       line-height: 1.35;
-
-      color: {
-          {
-          BODY_COLOR
-        }
-      }
-
-      ;
+      color: var(--v-body-color);
       text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
     }
 
@@ -428,14 +184,7 @@
       width: 60px;
       height: 5px;
       border-radius: 3px;
-
-      background: {
-          {
-          DIVIDER_COLOR
-        }
-      }
-
-      ;
+      background: var(--v-divider-color);
       margin-bottom: 15px;
     }
 
@@ -444,36 +193,16 @@
       font-weight: 800;
       font-size: 32px;
       letter-spacing: 6px;
-
-      color: {
-          {
-          TAG_BG
-        }
-      }
-
-      ;
+      color: var(--v-tag-bg);
       text-transform: uppercase;
       margin-bottom: 24px;
     }
 
     .scene-card.type-outro .scene-text {
-      font-size: {
-          {
-          BODY_SIZE
-        }
-      }
-
-      px;
+      font-size: calc(var(--v-body-size) * 1px);
       font-weight: 700;
       line-height: 1.35;
-
-      color: {
-          {
-          BODY_COLOR
-        }
-      }
-
-      ;
+      color: var(--v-body-color);
     }
 
     .main-align-center {
@@ -527,12 +256,12 @@
   </div>
 
   <script>
-    var SCENES_DATA = {{ SCENES_JSON }};
-    var SCENE_DURATIONS = {{ SCENE_DURATIONS_JSON }};
-    var TOTAL_DURATION = {{ DURATION }};
+    var SCENES_DATA = JSON.parse('{{ SCENES_JSON }}');
+    var SCENE_DURATIONS = JSON.parse('{{ SCENE_DURATIONS_JSON }}');
+    var TOTAL_DURATION = parseFloat("{{ DURATION }}") || 15;
     var MAIN_ALIGN = '{{MAIN_ALIGN}}';
     var DEFAULT_BG = '{{BG_IMAGE_URL}}';
-    var BG_BRIGHTNESS = {{ BG_BRIGHTNESS }};
+    var BG_BRIGHTNESS = parseFloat("{{ BG_BRIGHTNESS }}") || 0.45;
     var SHOW_CARD = '{{SHOW_CARD}}';
 
     // Preload images to avoid flickering during scene transitions
@@ -559,7 +288,8 @@
       var hasDurations = SCENE_DURATIONS && SCENE_DURATIONS.length === n;
 
       window._tl = gsap.timeline({ paused: true });
-      window.__timelines = { 'main': window._tl };
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = window._tl;
 
       window._tl.from('#brand-header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' }, 0);
       window._tl.from('#bottom-info', { y: 40, opacity: 0, duration: 0.6, ease: 'power3.out' }, 0.1);

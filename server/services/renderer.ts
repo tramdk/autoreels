@@ -333,11 +333,10 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
 
   let rendered = templateHtml;
 
-  // Process all replacements
-
+  // Process all replacements (robust regex matches standard {{KEY}} and formatted split versions)
   Object.entries(replacements).forEach(([key, val]) => {
     const stringVal = String(val ?? '');
-    const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+    const regex = new RegExp(`\\{\\s*[\\r\\n]*\\s*\\{\\s*[\\r\\n]*\\s*${key}\\s*[\\r\\n]*\\s*\\}\\s*[\\r\\n]*\\s*\\}`, 'g');
     rendered = rendered.replace(regex, () => stringVal);
   });
 

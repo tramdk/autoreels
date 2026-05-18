@@ -128,7 +128,7 @@ export function CyberpunkFrame(props: FrameProps) {
             padding: '0 60px'
           }}
         >
-          <div className="backdrop-blur-md bg-black/60 border-l-4 p-4 pr-10 shadow-[4px_0_15px_rgba(217,70,239,0.3)] w-full" style={{ borderLeftColor: secondaryColor }}>
+          <div className="backdrop-blur-md bg-black/60 border-l-2 p-4 pr-10 shadow-[4px_0_15px_rgba(217,70,239,0.3)] w-full" style={{ borderLeftColor: secondaryColor }}>
             <h2 
               className="text-white font-black tracking-wider uppercase drop-shadow-md leading-tight w-full" 
               style={{ 

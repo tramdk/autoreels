@@ -254,9 +254,9 @@
     </div>
   </div>
   <script>
-    var SCENES_DATA = {{ SCENES_JSON }};
-    var SCENE_DURATIONS = {{ SCENE_DURATIONS_JSON }};
-    var DEFAULT_BG = {{ BG_IMAGE_URL_JS }};
+    var SCENES_DATA = JSON.parse('{{ SCENES_JSON }}');
+    var SCENE_DURATIONS = JSON.parse('{{ SCENE_DURATIONS_JSON }}');
+    var DEFAULT_BG = "{{ BG_IMAGE_URL }}";
   </script>
   <script>
     console.log("[Template] Cinematic script starting...");

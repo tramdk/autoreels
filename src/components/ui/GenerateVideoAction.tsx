@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Video as VideoIcon, RefreshCw, X, Music } from 'lucide-react';
@@ -42,7 +42,7 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
   const [bgmPresets, setBgmPresets] = useState<any[]>([]);
   const [selectedBgmId, setSelectedBgmId] = useState<string>('none');
   const [bgmVolume, setBgmVolume] = useState(0.15);
-  const [previewAudio, setPreviewAudio] = useState<HTMLAudioElement | null>(null);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
   const [isUploadingBgm, setIsUploadingBgm] = useState(false);
 
@@ -122,9 +122,9 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
     fetchData();
 
     return () => {
-      if (previewAudio) {
-        previewAudio.pause();
-        setPreviewAudio(null);
+      if (previewAudioRef.current) {
+        previewAudioRef.current.pause();
+        previewAudioRef.current = null;
         setIsPreviewPlaying(false);
       }
     };
@@ -132,28 +132,28 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
 
   // Audio Handlers (Memoized)
   const stopPreview = useCallback(() => {
-    if (previewAudio) {
-      previewAudio.pause();
-      setPreviewAudio(null);
+    if (previewAudioRef.current) {
+      previewAudioRef.current.pause();
+      previewAudioRef.current = null;
       setIsPreviewPlaying(false);
     }
-  }, [previewAudio]);
+  }, []);
 
   const handlePreviewBgm = useCallback((url: string) => {
-    if (previewAudio) previewAudio.pause();
+    if (previewAudioRef.current) previewAudioRef.current.pause();
     const audio = new Audio(url);
     audio.volume = bgmVolume * 3; // Preview boost
     audio.loop = true;
     audio.play();
-    setPreviewAudio(audio);
+    previewAudioRef.current = audio;
     setIsPreviewPlaying(true);
     audio.onended = () => setIsPreviewPlaying(false);
-  }, [bgmVolume, previewAudio]);
+  }, [bgmVolume]);
 
   // Sync volume
   useEffect(() => {
-    if (previewAudio) previewAudio.volume = Math.min(1, bgmVolume * 3);
-  }, [bgmVolume, previewAudio]);
+    if (previewAudioRef.current) previewAudioRef.current.volume = Math.min(1, bgmVolume * 3);
+  }, [bgmVolume]);
 
   const handleUploadBGM = async (file: File) => {
     setIsUploadingBgm(true);

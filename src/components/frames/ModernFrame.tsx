@@ -60,7 +60,7 @@ export function ModernFrame(props: FrameProps) {
            <motion.div 
              initial={{ x: -20, opacity: 0 }}
              animate={{ x: 0, opacity: 1 }}
-             className="px-4 py-1.5 bg-primary/20 border-l-4 border-primary text-[2cqmin] font-black tracking-[0.3em] text-primary uppercase mb-2"
+             className="px-4 py-1.5 bg-primary/20 border-l-2 border-primary text-[2cqmin] font-black tracking-[0.3em] text-primary uppercase mb-2"
            >
              TRENDING NOW
            </motion.div>
