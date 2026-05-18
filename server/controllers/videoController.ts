@@ -316,18 +316,22 @@ async function generateAiDynamicHtml(title: string, scenes: any[], customSetting
     return '';
   }
 
-  // Pass ONLY the title and a single representative mock structure to force the AI to write a generic loop
   const sampleScene = scenes[0] || { id: 1, type: 'hook', voiceText: 'Nội dung mẫu cảnh mở đầu' };
   
-  const prompt = `
-Bạn là giám đốc nghệ thuật kiêm nhà phát triển frontend motion đỉnh cao (creative director & senior motion designer) chuyên phát triển các video ngắn dọc (9:16) chất lượng điện ảnh hàng đầu cho TikTok/Reels/Shorts.
+  // Tổng hợp tóm tắt toàn bộ kịch bản để AI phân tích chủ đề sâu sắc
+  const scriptSummary = scenes.map((s, idx) => `Cảnh ${idx + 1}: ${s.voiceText || s.bodyText || ''}`).join('\n');
 
-Dưới đây là thông tin về kịch bản video:
+  const prompt = `
+Bạn là giám đốc nghệ thuật kiêm nhà phát triển frontend motion cao cấp (creative director & senior motion designer) chuyên thiết kế các video đứng dạng đứng (9:16) chất lượng điện ảnh chuyên nghiệp hàng đầu cho TikTok/Reels/Shorts.
+
+Dưới đây là thông tin chi tiết về kịch bản video để bạn phân tích chủ đề:
 === THÔNG TIN KỊCH BẢN ===
 - Tiêu đề video: "${title}"
+- Nội dung kịch bản để phân tích chủ đề:
+"${scriptSummary}"
 - Cấu trúc dữ liệu của 1 cảnh mẫu: ${JSON.stringify(sampleScene)}
 
-Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html hoàn toàn mới, standalone, hoàn chỉnh 100% để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. Trang này phải có giao diện độc bản thiết kế riêng dựa trên chủ đề và tiêu đề của kịch bản trên!
+Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html hoàn toàn mới, standalone, hoàn chỉnh 100% để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. Trang này phải có giao diện ĐỘC BẢN, thiết kế đo ni đóng giày phù hợp hoàn hảo với chủ đề và nội dung của kịch bản trên!
 
 === CẢNH BÁO CỰC KỲ QUAN TRỌNG (BẮT BUỘC TUÂN THỦ 100%) ===
 Bạn chỉ biết tiêu đề và cấu trúc của 1 cảnh mẫu. Số lượng cảnh thực tế của video là ĐỘNG (có thể là 3 cảnh, 6 cảnh, hoặc 10 cảnh) và được nạp tự động qua biến SCENES_DATA ở runtime.
@@ -339,58 +343,59 @@ Do đó:
 3. Bên trong container #root trên, bạn chỉ đặt các phần tử tĩnh như logo, ngày giờ, progress-bar rỗng, và một container rỗng duy nhất để đổ cảnh: <div id="scene-container"></div>.
 4. Bạn BẮT BUỘC phải viết mã JavaScript ở cuối file sử dụng đúng khung cấu trúc vòng lặp dưới đây để sinh DOM động và dựng timeline GSAP seekable hoàn mỹ.
 
-=== HƯỚNG DẪN THIẾT KẾ PHONG CÁCH NEUBRUTALISM BENTO GRID SIÊU PREMIUM ===
-Bạn phải thiết kế giao diện theo phong cách Neubrutalism Bento Grid nguyên bản, cực kỳ cuốn hút, rực rỡ, trực quan và tối ưu hiển thị để người dùng lướt qua phải dừng lại xem:
+=== QUY TRÌNH THIẾT KẾ ĐO NI ĐÓNG GIÀY THEO CHỦ ĐỀ KỊCH BẢN (THEME ANALYSIS) ===
+Bạn hãy đọc kỹ Tiêu đề video và Nội dung tóm tắt kịch bản để chọn chính xác 1 trong các hướng thiết kế nghệ thuật sau đây. Bạn BẮT BUỘC phải tạo ra bộ CSS variables, Fonts, Background và Decorator Floater đặc chủng tương ứng:
 
-1. TRÁNH LỖI PHÂN RÃ CHỮ & TRÀN VIỀN (TUYỆT ĐỐI KHÔNG BỊ CẮT):
-   - Để tránh kịch bản quá dài bị tràn viền trái/phải hoặc cắt cạnh dưới:
-     * Toàn bộ chữ phụ đề '.scene-text' BẮT BUỘC phải bọc trong các thẻ block có thuộc tính: 'white-space: normal; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; text-align: center; display: block; width: 100%;'
-     * Mỗi từ '.word-wrapper' bên trong phải dùng style 'display: inline-block; vertical-align: middle; margin-right: 0.22em;' và lớp chữ '.word' bên trong dùng 'display: inline-block;'.
-     * Đặt thẻ cha '#scene-container' ở vùng an toàn tuyệt đối của màn hình dọc:
-       'position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 140px 45px; box-sizing: border-box; z-index: 50; overflow: hidden;'
-     * Mỗi thẻ '.scene-card' có style:
-       'position: absolute; display: none; flex-direction: column; width: 100%; height: 100%; justify-content: center; align-items: center; gap: 25px; box-sizing: border-box;'
+1. CHỦ ĐỀ TÀI CHÍNH / KINH DOANH / ĐẦU TƯ / LÀM GIÀU (Finance/Business):
+   - Nền: Navy tối sâu thẳm sang trọng (#090e1a). Lưới chấm tròn màu xanh ngọc nhạt.
+   - Bảng màu Neon: Xanh lục Neon phát lộc (#00ff66) làm chủ đạo, vàng Gold (#ffd700) làm điểm nhấn, chữ đen tuyền trên thẻ chữ.
+   - Hạt trang trí lơ lửng ở nền (Background floaters): Các biểu tượng ký tự tiền tệ $, €, hoặc các mũi tên đi lên (growth arrows) hoặc biểu đồ hình cột bay lơ lửng tự xoay cực chậm bằng CSS keyframes.
+   - Typography: Font 'Lexend Mega' (weight 900) cực kỳ vững chãi và quyền lực.
+   - Thẻ Bento: Bo góc sắc sảo vừa phải (radius 20px), viền đen dày 7px.
 
-2. KHẮC PHỤC TRIỆT ĐỂ LỖI FONT TIẾNG VIỆT:
-   - TUYỆT ĐỐI KHÔNG dùng font 'Anton', 'Impact' hay các font display sans-serif cơ bản không đầy đủ tiếng Việt (sẽ gây lỗi font thanh mảnh cực kỳ mất thẩm mỹ ở các chữ như Â, Ê, Đ, Ằ, Ể, Ả, Ế, Ị, Á, Ố).
-   - Hãy sử dụng font 'Lexend Mega' (weight 900) hoặc 'Montserrat' (weight 900) hoặc 'Syne' (weight 800) được nhập trực tiếp từ Google Fonts.
-   - Nhập font ở thẻ head:
-     <link href="https://fonts.googleapis.com/css2?family=Lexend+Mega:wght@900&family=Montserrat:wght@900&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
-   - Áp dụng font chữ: 'Lexend Mega', 'Montserrat', sans-serif cho các thẻ văn bản.
+2. CHỦ ĐỀ CÔNG NGHỆ / AI / TƯƠNG LAI / GAME (Tech/AI/Future):
+   - Nền: Tím thẫm Cyberpunk vũ trụ (#0b021c). Mạng lưới grid điện tử ô vuông mờ ảo phát sáng.
+   - Bảng màu Neon: Xanh Cyan Neon cực lạnh (#00f5ff), hồng Neon rực lửa (#ff007f), tím Cyber (#7d2eff).
+   - Hạt trang trí lơ lửng ở nền: Các ký tự lập trình như {}, <>, số nhị phân 0, 1 hoặc các điểm nút mạch điện tử phát sáng lơ lửng quay chậm.
+   - Typography: Font 'JetBrains Mono' (weight 700) hoặc 'Share Tech Mono' kết hợp 'Montserrat' mang hơi thở tương lai.
+   - Thẻ Bento: Bo góc công nghệ sắc bén (radius 12px) kèm đường viền kép neon glow phát sáng nhẹ.
 
-3. HỆ THỐNG PHỐI MÀU NEON CAO CẤP & BENTO GRID 2 KHỐI ĐỘC LẬP:
-   - Định nghĩa các biến màu Neon rực rỡ ở :root:
-     * '--accent-yellow': '#e2ff3b' (vàng neon sáng chói)
-     * '--accent-cyan': '#00f5ff' (cyan neon mát lạnh)
-     * '--accent-pink': '#ff007f' (hồng neon cực đại)
-     * '--accent-purple': '#7d2eff' (tím neon bí ẩn)
-     * '--black': '#000000'
-     * '--white': '#ffffff'
-   - Giao diện Bento Card cho từng Cảnh:
-     * Cảnh CÓ HÌNH ẢNH ('scene.imageUrl'):
-       + Khối trên là '.scene-image-card' (chiếm tỉ lệ thích hợp ví dụ aspect-ratio 16/10, viền đen dày 6px, bo góc tròn 24px, đổ bóng phẳng lệch góc 12px không nhòe: 'box-shadow: 12px 12px 0px #000000; overflow: hidden;'). Ảnh bên trong dùng 'object-fit: cover; width: 100%; height: 100%; will-change: transform;'.
-       + Khối dưới là '.scene-text-card' chứa phụ đề (chữ đen, màu nền card sẽ tự động luân phiên đổi màu neon theo chu kỳ index của cảnh để tránh nhàm chán: cảnh 0 nền vàng, cảnh 1 nền cyan, cảnh 2 nền hồng, cảnh 3 nền tím... viền đen dày 6px, bo góc 20px, đổ bóng phẳng lệch góc 12px: 'box-shadow: 12px 12px 0px #000000; padding: 25px 20px; position: relative;').
-     * Cảnh KHÔNG CÓ HÌNH ẢNH:
-       + Khối '.scene-text-card' tự động mở rộng to bản toàn diện ('full-size'), căn giữa hoàn mỹ, sử dụng cỡ chữ khổng lồ (từ 44px đến 50px) để tạo cú hit thị giác đỉnh cao!
+3. CHỦ ĐỀ TÌNH YÊU / TÂM SỰ / CẢM XÚC / CUỘC SỐNG (Love/Emotional/Life):
+   - Nền: Màu mận chín sâu lắng hoặc tím thạch anh thẫm (#1c010a).
+   - Bảng màu Neon: Hot Pink rực cháy (#ff3366), đỏ quyến rũ (#ff2a2a), trắng kem ấm áp.
+   - Hạt trang trí lơ lửng ở nền: Hình trái tim đập nhịp nhàng, các hạt lấp lánh (sparkles) nở ra rồi co lại trôi nổi lãng mạn.
+   - Typography: Font 'Plus Jakarta Sans' (weight 800) hoặc 'Quicksand' bo góc tròn trịa, truyền tải cảm xúc ấm áp.
+   - Thẻ Bento: Bo góc cực kỳ mềm mại, tròn trịa đẫm chất tình cảm (radius 35px) với viền thanh thoát hơn.
 
-4. NỀN NGHỆ THUẬT & TRANG TRÍ HẠT NEON CHUYỂN ĐỘNG (BACKGROUND POLISH):
-   - Nền toàn màn hình (#root): Nền tối sâu thẳm '#060709' kết hợp lưới chấm ô vuông trắng chìm nổi bật: 'background-image: radial-gradient(rgba(255,255,255,0.15) 2px, transparent 2px); background-size: 32px 32px; position: relative;'
-   - Thêm các khối vector trang trí bay lơ lửng tựa các hạt vũ trụ chuyển động chậm ở background (ví dụ tạo các thẻ span '.floater-star', '.floater-cross' tuyệt đẹp quay xoay lắc lư liên tục bằng CSS keyframes '@keyframes floatAnim').
-   - Logo Pill & Badge (CSS-Only): Thiết kế một logo pill ở góc trên bằng CSS tuyệt đẹp, viền đen dày chữ trắng đậm 'AUTOREELS.AI' nghiêng nhẹ 2 độ, không dùng thẻ img logo để tránh bị lỗi broken image!
+4. CHỦ ĐỀ KỲ BÍ / LỊCH SỬ / KINH DỊ / KHÁM PHÁ (Mystery/History/Horror):
+   - Nền: Đen bụi than tối tăm huyền bí (#050505) kết hợp bụi khói lờ lững mờ ảo.
+   - Bảng màu Neon: Đỏ máu thẫm (#b30000), vàng đồng cổ kính rỉ sét (#c59b27), trắng bạc ma mị.
+   - Hạt trang trí lơ lửng ở nền: Các biểu tượng rune cổ xưa, hoặc các hạt bụi khói lơ lửng xoay chuyển mờ ảo.
+   - Typography: Font 'Cinzel' hoặc 'Playfair Display' kết hợp 'Syne' mang lại nét cổ kính thần bí.
+   - Thẻ Bento: Góc vuông vắn cổ điển (radius 8px), các chi tiết nứt nẻ hoặc đường viền thô mộc.
 
-5. HIỆU ỨNG ÂM THANH TRỰC QUAN (AUDIO-REACTIVE EQUALIZER):
-   - Bên trong mỗi '.scene-text-card', tích hợp một cụm cột sóng equalizer âm thanh nhảy múa đầy nghệ thuật ở góc:
-     Một container '.equalizer-container' chứa 5 thanh đứng '.equalizer-bar' tự động co giãn chiều cao nhịp nhàng bằng keyframes để video có cảm giác cực kỳ 'sống động' và giữ chân khán giả!
+5. CHỦ ĐỀ ĐỜI SỐNG / VLOGS / TIN TỨC / CHỦ ĐỀ KHÁC (Vlogs/News/General):
+   - Nền: Tối nguyên bản Neubrutalism (#060709) kèm lưới ô vuông chấm tròn tương phản cao.
+   - Bảng màu Neon: Vàng Neon chói lọi (#e2ff3b), Cam Neon cá tính (#ff6b00), Xanh lá Neon.
+   - Hạt trang trí lơ lửng ở nền: Các ngôi sao 4 cánh Neubrutalism đặc trưng, các chấm tròn to nhỏ xoay chuyển.
+   - Typography: Font 'Lexend Mega' hoặc 'Montserrat' (weight 900) thời thượng.
+   - Thẻ Bento: Phong cách Neubrutalism cổ điển viền đen siêu dày 8px, đổ bóng phẳng lệch góc 14px thô mộc.
 
-6. HOẠT ẢNH SPRING GIẬT NẢY & KINETIC WORD STAGGER:
-   - Thẻ Bento Card xuất hiện giật nẩy cực kỳ năng động: sử dụng 'ease: "back.out(1.5)"' kết hợp xoay nhẹ ngẫu nhiên (rotation angle) và scale từ '0.9' lên '1.0'.
-   - Hiệu ứng Ken Burns cho hình ảnh: GSAP zoom từ '1.0' lên '1.15' chậm rãi xuyên suốt toàn bộ thời lượng cảnh để hình ảnh luôn động!
-   - Word stagger slide-up: Subtitle xuất hiện lần lượt từ dưới lên theo từng chữ (stagger: 0.035 giây) vô cùng chuyên nghiệp.
+=== YÊU CẦU CHI TIẾT VỀ GIAO DIỆN & TIÊU CHUẨN KỸ THUẬT (BẮT BUỘC) ===
+- TRÁNH LỖI PHÂN RÃ CHỮ & TRÀN VIỀN:
+  * Toàn bộ chữ phụ đề '.scene-text' BẮT BUỘC phải bọc trong các thẻ block có thuộc tính: 'white-space: normal; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; text-align: center; display: block; width: 100%;'
+  * Mỗi từ '.word-wrapper' bên trong phải dùng style 'display: inline-block; vertical-align: middle; margin-right: 0.22em;' và lớp chữ '.word' bên trong dùng 'display: inline-block;'.
+  * Đặt thẻ cha '#scene-container' ở vùng an toàn tuyệt đối của màn hình dọc:
+    'position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 140px 45px; box-sizing: border-box; z-index: 50; overflow: hidden;'
+- BENTO GRID 2 KHỐI ĐỘC LẬP CHO CẢNH CÓ ẢNH:
+  * Nếu Cảnh CÓ HÌNH ẢNH ('scene.imageUrl'): Hiển thị một khối ảnh phía trên '.scene-image-card' và khối chữ phụ đề phía dưới '.scene-text-card' viền dày bóng đổ phẳng lệch góc.
+  * Nếu Cảnh KHÔNG CÓ HÌNH ẢNH: Khối '.scene-text-card' tự động mở rộng to bản toàn diện ('full-size'), căn giữa hoàn mỹ, sử dụng cỡ chữ khổng lồ (từ 44px đến 50px) để tạo cú hit thị giác đỉnh cao!
+- AUDIO-REACTIVE EQUALIZER: Bên trong mỗi '.scene-text-card', tích hợp một cụm cột sóng equalizer âm thanh 5 thanh đứng '.equalizer-bar' tự động co giãn chiều cao nhịp nhàng bằng keyframes để tăng độ sống động.
+- LOGO PILL BADGE & PROGRESSBAR NEON: Thiết kế logo pill chữ đậm cách điệu ở góc trên bằng CSS, tránh dùng img logo. Thanh tiến trình chạy suốt thời lượng video ở đáy màn hình viền đen dày ruột neon rực rỡ.
 
 === KHUNG LẬP TRÌNH DỰNG DOM & GSAP TIMELINE ĐỘNG (BẮT BUỘC) ===
-Bạn phải viết mã JavaScript ở cuối file sử dụng đúng cấu trúc sau:
+Bạn phải viết mã JavaScript ở cuối file sử dụng đúng cấu trúc sau (Lưu ý: Bắt buộc viết mã này bên trong khối code javascript):
 
-\`\`\`javascript
 var SCENES_DATA = JSON.parse('{{ SCENES_JSON }}');
 var SCENE_DURATIONS = JSON.parse('{{ SCENE_DURATIONS_JSON }}');
 var TOTAL_DURATION = parseFloat("{{ DURATION }}") || 15;
