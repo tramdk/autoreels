@@ -320,7 +320,7 @@ async function generateAiDynamicHtml(title: string, scenes: any[], customSetting
   const sampleScene = scenes[0] || { id: 1, type: 'hook', voiceText: 'Nội dung mẫu cảnh mở đầu' };
   
   const prompt = `
-Bạn là nhà thiết kế đồ họa chuyển động đỉnh cao (creative director & senior frontend motion developer) chuyên phát triển các video ngắn dạng đứng (9:16) chất lượng cao cho TikTok/Reels (giống YourClassVN, bento grid brutalism, glassmorphism cao cấp).
+Bạn là nhà thiết kế đồ họa chuyển động đỉnh cao (creative director & senior frontend motion developer) chuyên phát triển các video ngắn dạng đứng (9:16) chất lượng cao cho TikTok/Reels (phong cách Neubrutalism Bento Grid nguyên bản, độc bản và vô cùng cuốn hút).
 
 Dưới đây là thông tin về kịch bản video:
 === THÔNG TIN KỊCH BẢN ===
@@ -339,6 +339,46 @@ Do đó:
 3. Bên trong container #root trên, bạn chỉ đặt các phần tử tĩnh như logo, ngày giờ, progress-bar rỗng, và một container rỗng duy nhất để đổ cảnh: <div id="scene-container"></div>.
 4. Bạn BẮT BUỘC phải viết mã JavaScript ở cuối file sử dụng đúng khung cấu trúc vòng lặp dưới đây để sinh DOM động và dựng timeline GSAP seekable hoàn mỹ.
 
+=== HƯỚNG DẪN THIẾT KẾ PHONG CÁCH NEUBRUTALISM BENTO GRID CAO CẤP ===
+Bạn phải thiết kế giao diện theo phong cách Neubrutalism Bento Grid nguyên bản, cực kỳ nổi bật, trực quan và tối ưu hiển thị để đạt hàng triệu view trên TikTok/Reels:
+
+1. KHẮC PHỤC LỖI FONT TIẾNG VIỆT (BẮT BUỘC):
+   - TUYỆT ĐỐI KHÔNG dùng font 'Anton', 'Impact' hay các font display sans-serif cơ bản (chúng không hỗ trợ đầy đủ ký tự tiếng Việt có dấu và sẽ gây ra lỗi fallback font thanh mảnh cực kỳ mất thẩm mỹ ở các chữ như Â, Ê, Đ, Ằ, Ể, Ả, Ế, Ị, Á, Ố).
+   - Hãy sử dụng font 'Lexend Mega' (weight 900) hoặc 'Montserrat' (weight 900) hoặc 'Syne' (weight 800) được nhập trực tiếp từ Google Fonts.
+   - Nhập font ở thẻ head:
+     <link href="https://fonts.googleapis.com/css2?family=Lexend+Mega:wght@900&family=Montserrat:wght@900&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+   - Áp dụng font chữ: 'Lexend Mega', 'Montserrat', sans-serif cho tiêu đề và các ô văn bản chính.
+
+2. CẤU TRÚC CONTAINER & CHỐNG CẮT CẠNH (CENTRALIZATION & SAFE ZONE):
+   - Tránh việc thẻ scene-card trôi tự do xuống đáy màn hình và bị cắt ở viền dưới do nội dung dài.
+   - Thiết lập thẻ cha '#scene-container' là một flex container căn giữa hoàn đối:
+     'position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 130px 50px; overflow: hidden; box-sizing: border-box; z-index: 50;'
+   - Mỗi thẻ '.scene-card' sẽ hiển thị ở giữa màn hình bên trong container này:
+     'position: absolute; display: none; flex-direction: column; width: 100%; max-height: 82%; gap: 30px; align-items: center; justify-content: center; box-sizing: border-box; opacity: 0; will-change: transform, opacity;'
+
+3. QUY TẮC HIỂN THỊ HÌNH ẢNH THÔNG MINH CHO TẤT CẢ CÁC CẢNH:
+   - KHÔNG chỉ hiển thị hình ảnh ở cảnh đầu tiên. Bất kỳ cảnh nào có 'scene.imageUrl' đều phải hiển thị hình ảnh!
+   - Nếu cảnh có hình ảnh ('scene.imageUrl'):
+     * Thiết kế layout Bento 2 ô xếp chồng đứng:
+       + Ô phía trên là khung chứa ảnh '.hook-image-container' (có: 'aspect-ratio: 16/10; width: 100%; overflow: hidden; border: 6px solid #000000; border-radius: 20px; box-shadow: 10px 10px 0px #000000;'). Ảnh bên trong phải dùng 'object-fit: cover; width: 100%; height: 100%;'.
+       + Ô phía dưới là thẻ chữ '.scene-text' nền vàng neon viền đen 6px, bóng đổ phẳng 10px, chữ đen tuyền cực đậm.
+   - Nếu cảnh KHÔNG có hình ảnh ('scene.imageUrl' là rỗng):
+     * Thẻ chữ '.scene-text' sẽ tự động mở rộng chiếm trọn thẻ card, căn giữa hoàn hảo theo cả chiều dọc và chiều ngang, không để lại khoảng trống màu đen thừa thãi!
+
+4. CHI TIẾT ĐỒ HỌA NEUBRUTALISM ĐÚNG CHUẨN ĐẬM ĐÀ:
+   - Đường viền cực dày (Thick Black Borders): Mọi thẻ card, badge, khung ảnh đều phải có viền đen dày dặn: 'border: 6px solid #000000;' hoặc 'border: 8px solid #000000;'.
+   - Đổ bóng phẳng (Solid Offset Shadow - Bắt buộc): Cấm dùng shadow mờ (blur). Hãy dùng đổ bóng phẳng, lệch góc 100% độ đục để tạo chiều sâu 3D brutalism độc đáo:
+     'box-shadow: 10px 10px 0px #000000;' hoặc 'box-shadow: 14px 14px 0px #000000;'.
+   - Phối màu High Contrast Neon:
+     * Thẻ nội dung chính: Nền màu vàng Neon rực rỡ ('#f1f509' / '#e2ff3b') với chữ đen ('color: #000; font-weight: 900;').
+     * Thẻ tiêu đề phụ/badge: Nền màu xanh Neon Cyan ('#00f5ff') hoặc đỏ Neon Pink ('#ff5722') viền đen dày, chữ đen.
+   - Nền toàn màn hình (#root): Nền tối sâu thẳm ('#0a0a0c') kết hợp hiệu ứng lưới ô vuông grid chìm hoặc chấm tròn dotted (ví dụ: 'background-image: radial-gradient(rgba(255,255,255,0.06) 1.5px, transparent 1.5px); background-size: 35px 35px;').
+
+5. HOẠT ẢNH SPRING (ĐÀN HỒI) & STAGGER WORD SLIDE-UP:
+   - Chuyển động xuất hiện của các thẻ Bento Grid phải mang cảm giác đàn hồi, giật nẩy cực kỳ năng động:
+     Sử dụng 'ease: "back.out(1.5)"' kết hợp xoay nhẹ thẻ ('rotation: -2' hoặc '2') và scale từ '0.9' lên '1.0' để hoạt ảnh cuốn hút như đồ họa motion chuyên nghiệp.
+   - Đối với phần văn bản bên trong '.scene-text', hãy viết mã JS để tách nội dung chữ thành các từ riêng lẻ (split words), bọc mỗi từ trong một thẻ span có overflow ẩn, rồi dùng GSAP stagger để các chữ chạy nhảy lên lần lượt từ dưới lên (stagger word slide-up) cực kỳ mượt mà!
+
 === KHUNG LẬP TRÌNH DỰNG DOM & GSAP TIMELINE ĐỘNG (BẮT BUỘC) ===
 Bạn phải viết mã JavaScript ở cuối file sử dụng đúng cấu trúc sau:
 
@@ -354,6 +394,15 @@ window._tl = mainTl;
 var currentTime = 0;
 var CROSSFADE = 0.6; // Thời gian chồng chéo cảnh tiếp theo đè lên cảnh trước
 
+// Hàm tách từ để làm stagger word slide-up mượt mà
+function splitTextToSpans(text) {
+  if (!text) return '';
+  return text.split(' ').map(function(word) {
+    if (!word.trim()) return '';
+    return '<span class="word-wrapper" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.22em;"><span class="word" style="display:inline-block; transform:translateY(105%); opacity:0; will-change:transform, opacity;">' + word + '</span></span>';
+  }).join(' ');
+}
+
 for (var i = 0; i < SCENES_DATA.length; i++) {
   var scene = SCENES_DATA[i];
   var duration = SCENE_DURATIONS[i] || 5;
@@ -364,14 +413,15 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   sceneEl.id = sceneId;
   sceneEl.className = 'scene-card type-' + (scene.type || 'body');
   
-  // Bạn hãy thiết kế innerHTML cực kỳ đẹp mắt, chia cấu trúc tiêu đề, thẻ bento, icon SVG trang trí...
-  // CHÚ Ý: Thay vì dùng hình ảnh làm background cho toàn video (gây rối mắt, khó đọc chữ), hãy hiển thị
-  // hình ảnh ở trong cảnh hook (cảnh đầu tiên i === 0 hoặc scene.type === 'hook') sử dụng thẻ <img> chứa scene.imageUrl.
   var htmlContent = '';
-  if ((i === 0 || scene.type === 'hook') && scene.imageUrl) {
+  // Hiển thị hình ảnh ở bất cứ cảnh nào có scene.imageUrl (Bento grid 2 ô xếp chồng)
+  if (scene.imageUrl) {
     htmlContent += '<div class="hook-image-container"><img class="hook-image" src="' + scene.imageUrl + '" /></div>';
+    htmlContent += '<div class="scene-text highlight-text">' + splitTextToSpans(scene.bodyText || scene.voiceText || '') + '</div>';
+  } else {
+    // Không có ảnh thì thẻ chữ căn giữa to bản chiếm trọn không gian thẻ card
+    htmlContent += '<div class="scene-text centered-text">' + splitTextToSpans(scene.bodyText || scene.voiceText || '') + '</div>';
   }
-  htmlContent += '<div class="scene-text">' + (scene.bodyText || scene.voiceText || '') + '</div>';
   sceneEl.innerHTML = htmlContent;
   
   document.getElementById('scene-container').appendChild(sceneEl);
@@ -379,22 +429,33 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   // 2. Tạo sub-timeline riêng cho cảnh này
   var tl = gsap.timeline();
   
-  // 3. Entrance Animation: Bạn hãy tùy biến sáng tạo hoạt ảnh xuất hiện của thẻ cảnh
-  // (ví dụ: gsap.from cho scale, y, rotation, opacity, elastic spring...) để có chuyển động siêu mượt
-  tl.from(sceneEl, { 
-    opacity: 0,
-    y: 80,
-    scale: 0.95,
-    duration: 0.6,
-    ease: "power2.out"
-  }, 0);
+  // 3. Entrance Animation: Bento Card giật nảy Spring + Xoay nhẹ
+  var rotationAngle = i % 2 === 0 ? 1.5 : -1.5;
+  tl.set(sceneEl, { display: 'flex', zIndex: 50 + i }, 0);
+  tl.fromTo(sceneEl, 
+    { opacity: 0, y: 70, scale: 0.92, rotation: rotationAngle },
+    { opacity: 1, y: 0, scale: 1, rotation: 0, duration: 0.75, ease: "back.out(1.5)" }, 
+    0
+  );
+
+  // Word stagger slide-up
+  var words = sceneEl.querySelectorAll('.word');
+  if (words.length > 0) {
+    tl.to(words, {
+      y: '0%',
+      opacity: 1,
+      duration: 0.55,
+      stagger: 0.035,
+      ease: "power3.out"
+    }, 0.12);
+  }
 
   // 4. Exit Animation: Đồng bộ chồng chéo với cảnh tiếp theo (nếu chưa phải cảnh cuối)
   if (i < SCENES_DATA.length - 1) {
     tl.to(sceneEl, { 
       opacity: 0,
+      y: -50,
       scale: 0.95,
-      z: -50,
       duration: CROSSFADE,
       ease: "power2.in"
     }, duration - CROSSFADE);
@@ -413,7 +474,9 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
 }
 
 // 7. Animate ProgressBar chạy từ 0% đến 100% suốt toàn bộ video (Bắt buộc phải add trực tiếp vào mainTl ở giây 0 để seek được)
-mainTl.to("#progressBar", { width: "100%", duration: TOTAL_DURATION, ease: "none" }, 0);
+if (document.getElementById('progressBar')) {
+  mainTl.to("#progressBar", { width: "100%", duration: TOTAL_DURATION, ease: "none" }, 0);
+}
 
 // 8. Outro fade mượt toàn bộ màn hình về đen ở cuối video
 mainTl.to("#root", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, TOTAL_DURATION - 0.5);
@@ -424,36 +487,6 @@ window.__hf = {
   seek: function(t) { if (window._tl) window._tl.pause().seek(t); }
 };
 \`\`\`
-
-=== PHONG CÁCH THIẾT KẾ ĐỘC BẢN DÀNG RIÊNG CHO TIÊU ĐỀ NÀY ===
-Bạn phải thiết kế giao diện theo phong cách Neubrutalism Bento Grid cao cấp, cực kỳ nổi bật và trực quan giống hệt YourClassVN để tối ưu lượt xem trên TikTok/Reels:
-
-1. TYPOGRAPHY CỰC ĐẬM:
-   - Nhập font chữ hiển thị siêu dày từ Google Fonts: 'Anton' hoặc 'Montserrat' (weight 900) cho tiêu đề/văn bản chính, và 'Plus Jakarta Sans' hoặc 'Inter' (weight 700) cho văn bản phụ.
-   - Tiêu đề chính phải có cỡ chữ cực lớn (ít nhất 32px đến 48px trên màn hình đứng), viết hoa hoàn toàn (uppercase) để tạo cú hích thị giác tức thì.
-
-2. CẤU TRÚC BENTO GRID & NEOBRUTALISM:
-   - Nền toàn màn hình (#root): Màu tối sâu thẳm (#0a0a0c) kết hợp hiệu ứng đường lưới grid chìm hoặc chấm tròn dotted (ví dụ: 'background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 0); background-size: 30px 30px;').
-   - Thẻ Card (scene-card): Thiết kế dạng các ô Bento Grid phân bố không gian độc lập.
-   - Đường viền cực dày: Mọi thẻ card, khung ảnh đều phải có viền đen dày dặn ('border: 4px solid #000;' hoặc 'border: 4px solid var(--accent);').
-   - Đổ bóng phẳng (Solid Offset Shadow - Bắt buộc): Không dùng shadow mờ (blur). Hãy dùng đổ bóng phẳng, lệch góc 100% độ đục để tạo chiều sâu 3D brutalism độc đáo:
-     'box-shadow: 8px 8px 0px #000000;' hoặc 'box-shadow: 10px 10px 0px var(--accent-shadow);'
-
-3. MÀU SẮC ĐỘ HỘI TỤ CAO (HIGH CONTRAST NEON):
-   - Đảm bảo tính dễ đọc tuyệt đối bằng cách phối các nền thẻ card rực rỡ với văn bản chữ đen tuyền siêu đậm:
-     * Thẻ nội dung chính: Nền màu vàng Neon rực rỡ ('#f1f509' / '#e2ff3b') với chữ đen ('color: #000;').
-     * Thẻ tiêu đề phụ/badge: Nền màu xanh Neon Cyan ('#00f5ff') hoặc đỏ Neon Pink với chữ đen.
-     * Thẻ chứa hình ảnh: Bo góc dày ('border-radius: 16px'), viền đen dày, bóng đổ phẳng 3D sắc sảo.
-
-4. HIỂN THỊ HÌNH ẢNH HOOK THÔNG MINH:
-   - Trong cảnh Hook (cảnh đầu tiên), chia layout thành 2 ô Bento Grid xếp chồng:
-     * Ô phía trên là khung ảnh '.hook-image-container' viền đen 4px, đổ bóng phẳng 8px, chứa ảnh hiển thị sắc nét.
-     * Ô phía dưới là thẻ chữ '.scene-text' nền vàng neon viền đen, chữ đen tuyền cực đậm.
-   - Các cảnh tiếp theo (Body/Outro) chuyển thành thẻ Bento chữ to bản chiếm trọn không gian để tăng khả năng tương tác và tập trung nội dung.
-
-5. HIỆU ỨNG HOẠT ẢNH SPRING (ĐÀN HỒI):
-   - Chuyển động xuất hiện của các thẻ Bento Grid phải mang cảm giác đàn hồi, giật nẩy cực kỳ năng động:
-     Sử dụng 'ease: "back.out(1.6)"' hoặc 'ease: "elastic.out(1, 0.75)"' kết hợp xoay nhẹ thẻ ('rotation: 2' hoặc '-2') và tăng tỷ lệ scale để hoạt ảnh cuốn hút như đồ họa motion chuyên nghiệp.
 
 === YÊU CẦU ĐẦU RA ===
 Trả về duy nhất mã nguồn index.html hoàn chỉnh nhất bên trong khối code markdown \`\`\`html. Tuyệt đối không giải thích thêm hay viết lời mở đầu/kết thúc nào cả.
