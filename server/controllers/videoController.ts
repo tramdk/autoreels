@@ -303,6 +303,92 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
 };
 
 
+
+/**
+ * Standalone AI Custom HTML Template Generator: uses Gemini Flash to design 
+ * a 100% custom visual layout, styling, and GSAP timeline specifically tailored 
+ * to the emotions, theme, and rhythm of the script.
+ */
+async function generateAiDynamicHtml(scenes: any[], customSettings: any): Promise<string> {
+  const resolvedAI = getAIClient(genAI);
+  if (!resolvedAI) {
+    console.warn('[AI HTML] AI not configured. Returning empty string.');
+    return '';
+  }
+
+  const scriptText = scenes.map(s => `[Cảnh ${s.id} - ${s.type}]: ${s.voiceText || s.bodyText || ''}`).join('\n');
+  
+  const prompt = `
+Bạn là chuyên gia thiết kế đồ họa chuyển động đỉnh cao (motion designer & creative director) chuyên làm video ngắn triệu view cho TikTok/Reels (giống phong cách YourClassVN, retro cyberpunk, modern brutalism, sang trọng glassmorphism).
+
+Dưới đây là kịch bản video dạng cảnh (scene-based) bằng tiếng Việt:
+=== KỊCH BẢN ===
+\${scriptText}
+
+Nhiệm vụ của bạn là: Thiết kế và lập trình ra MỘT TRANG index.html hoàn toàn mới, standalone, hoàn chỉnh nhất để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. Trang này phải được thiết kế thủ công 100% độc bản, tùy biến cấu trúc giao diện và chuyển động (animations) dựa trên tông giọng, chủ đề của kịch bản này!
+
+=== CẤU TRÚC HTML & QUY TẮC PHỐI CẢNH (BẮT BUỘC) ===
+1. Toàn bộ file index.html phải là 1 chuỗi HTML đầy đủ gồm <!DOCTYPE html>, <html>, <head>, <body>, và thẻ <script> chứa code GSAP.
+2. Thẻ <head> phải import các Google Fonts phù hợp với kịch bản (ví dụ: Outfit, Inter, Montserrat, Playfair Display, Anton...).
+3. Trong <body>, thẻ container chính bắt buộc phải là:
+   <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0" data-duration="{{ DURATION }}">
+   (Tuyệt đối KHÔNG bọc trong thẻ <template>).
+4. Phải xây dựng một hệ thống layout hoàn mỹ, bao gồm:
+   - Các layer background (như hình nền chính {{ BG_IMAGE_URL }} và hiệu ứng overlays mờ/glowing/gradients/grid mắt cáo chuyển động).
+   - Thẻ card bọc nội dung văn bản (sử dụng CSS Flexbox, box-sizing, padding lớn, border-radius mềm mại, bóng đổ cao cấp hoặc phong cách Brutalism viền đen đậm).
+   - Logo thương hiệu (sử dụng placeholder {{ LOGO_TEXT }}).
+   - Badge chủ đề (sử dụng placeholder {{ TAG_TEXT }}) và ngày giờ {{ DATETIME }}.
+   - Thanh tiến trình chạy video ở cạnh dưới màn hình (ProgressBar).
+5. Phải sinh ra các thẻ HTML cho các Cảnh (scenes) ở trong JS hoặc tĩnh trong HTML để GSAP animate. Cách tốt nhất: xây dựng DOM tĩnh trong #scene-container hoặc render động từ JS dựa trên biến SCENES_DATA.
+
+=== QUY TẮC HIỆU ỨNG CHUYỂN ĐỘNG (GSAP TIMELINE CONTRACT) ===
+1. Khởi tạo timeline chính bắt buộc phải như sau:
+   window._tl = gsap.timeline({ paused: true });
+   window.__timelines = window.__timelines || {};
+   window.__timelines["main"] = window._tl;
+2. Bạn phải đăng ký cơ chế seek của HyperFrames ở cuối file:
+   window.__hf = { duration: TOTAL_DURATION, seek: function (t) { if (window._tl) window._tl.pause().seek(t); } };
+3. QUY TẮC CHUYỂN CẢNH (Transition Rules - Bắt buộc tuân thủ 100%):
+   - Cảnh 1 và tất cả cảnh kế tiếp phải có Entrance Animation bằng gsap.from() cho toàn bộ các phần tử (title, subtitle, card background, tag badge...). Tuyệt đối không cho phần tử nào xuất hiện tĩnh không có chuyển động. Sử dụng easing đa dạng (như "back.out(1.7)", "power4.out", "expo.out", "elastic.out").
+   - Các cảnh không được có Exit Animation (không dùng gsap.to để ẩn hoặc làm mờ cảnh trước khi kết thúc). 
+   - Thay vào đó, hãy làm hiệu ứng chuyển cảnh đè (Stacking Transition): Cảnh tiếp theo sẽ xuất hiện (trượt lên, zoom ra, hoặc mờ chồng) đè lên cảnh trước đó, tạo cảm giác chuyển tiếp mượt mà, không bị gián đoạn.
+   - Chỉ duy nhất cảnh cuối cùng (outro) mới được dùng gsap.to() để fade-out toàn bộ màn hình về đen ở cuối video.
+4. Mọi chuyển động phải là DETERMINISTIC (không dùng Math.random(), không dùng Date.now() hay vòng lặp vô chậm repeat: -1). Để làm các hiệu ứng lơ lửng vô tận (floating), hãy tính toán số lần repeat dựa trên tổng thời lượng video (ví dụ: repeat: Math.ceil(TOTAL_DURATION / 6.0) - 1).
+
+=== CÁC BIẾN CÚ PHÁP PLACEHOLDER CỦA BACKEND RENDERER ===
+Bạn hãy sử dụng nguyên văn các chuỗi placeholder sau ở các vị trí tương ứng trong mã nguồn HTML/JS của bạn để backend tự động thay thế và bảo mật ký tự:
+- '{{ SCENES_JSON }}' -> Chuỗi JSON chứa mảng các Cảnh (Ví dụ: var SCENES_DATA = JSON.parse('{{ SCENES_JSON }}');).
+- '{{ SCENE_DURATIONS_JSON }}' -> Chuỗi JSON chứa mảng thời lượng các Cảnh (Ví dụ: var SCENE_DURATIONS = JSON.parse('{{ SCENE_DURATIONS_JSON }}');).
+- '{{ DURATION }}' -> Tổng thời lượng video dạng số thực (Ví dụ: var TOTAL_DURATION = parseFloat("{{ DURATION }}") || 15;).
+- '{{ BG_IMAGE_URL }}' -> URL ảnh nền mặc định.
+- '{{ BG_BRIGHTNESS }}' -> Độ sáng nền (thường từ 0.3 đến 0.5).
+- '{{ LOGO_TEXT }}' -> Chữ của logo.
+- '{{ TAG_TEXT }}' -> Nhãn tag badge.
+- '{{ DATETIME }}' -> Ngày giờ hiển thị.
+
+=== PHONG CÁCH THIẾT KẾ ĐỘC BẢN DÀNG RIÊNG CHO KỊCH BẢN NÀY ===
+Dựa vào nội dung kịch bản sau đây, hãy thiết kế ra phong cách tối ưu nhất:
+- Nếu kịch bản nói về công nghệ/tài chính: Hãy dùng màu tối, neon accents (cyan/purple), phông chữ không chân hiện đại (Outfit/Montserrat), card bóng mờ glassmorphism tinh xảo.
+- Nếu kịch bản nói về cuộc sống/nghệ thuật/lịch sử: Hãy dùng màu ấm pastel, phông chữ có chân sang trọng (Playfair Display/Georgia), layout tối giản, sạch sẽ.
+- Nếu kịch bản mang tính giáo dục/chia sẻ kiến thức mạnh mẽ (giống YourClassVN): Hãy dùng typography siêu nổi bật (Anton/Montserrat), card tương phản cao hoặc bento grid đẹp mắt, màu thương hiệu cực mạnh, dividers cá tính.
+
+=== YÊU CẦU ĐẦU RA ===
+Trả về duy nhất mã nguồn index.html hoàn chỉnh nhất bên trong khối code markdown \\\`\\\`\\\`html. Tuyệt đối không giải thích thêm hay viết lời mở đầu/kết thúc nào cả.
+`;
+
+  try {
+    const model = resolvedAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const cleanHtml = text.replace(/```html/g, '').replace(/```/g, '').trim();
+    return cleanHtml;
+  } catch (error) {
+    console.error('[AI HTML] Error generating custom dynamic HTML template:', error);
+    return '';
+  }
+}
+
+
 /**
  * Dynamic Template AI generator: uses Gemini Flash to analyze the script content
  * and output tailored CSS/HTML template parameters matching the theme/tone.
@@ -463,14 +549,14 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
     }
 
     // Process AI dynamic template settings if templateId is 'dynamic'
+    let customHtml: string | undefined;
     if (templateId === 'dynamic') {
       try {
-        console.log(`[PIPELINE] Selected DYNAMIC TEMPLATE. Invoking AI to customize visual parameters...`);
-        const aiSettings = await generateAiTemplateSettings(script.scenes || []);
-        customSettings = { ...aiSettings, ...(customSettings || {}) };
-        console.log(`[PIPELINE] Dynamic template settings generated successfully:`, JSON.stringify(customSettings));
+        console.log(`[PIPELINE] Selected DYNAMIC TEMPLATE. Invoking AI to design custom HTML structure...`);
+        customHtml = await generateAiDynamicHtml(script.scenes || [], customSettings || {});
+        console.log(`[PIPELINE] Dynamic HTML designed successfully (length: ${customHtml?.length || 0} chars).`);
       } catch (err) {
-        console.error(`[PIPELINE] Failed to generate AI template settings, falling back to defaults:`, err);
+        console.error(`[PIPELINE] Failed to generate AI custom HTML, falling back to defaults:`, err);
       }
     }
 
@@ -577,6 +663,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
         bgmVolume: typeof bgmVolume === 'number' ? bgmVolume : 0.15,
         ratio: ratio || '9:16',
         settings: customSettings || undefined, // PASS CUSTOM SETTINGS TO RENDERER
+        customHtml, // PASS DYNAMIC CUSTOM HTML GENERATED BY AI
         onProgress: (p) => {
           const scaledProgress = 20 + (p * 0.75); // 20% to 95%
           videoProgress.set(videoId, { progress: Math.round(scaledProgress), phase: 'Rendering Frames...', title });
