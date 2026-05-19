@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Wand2, X, FileText, Zap, Sparkles, Star } from 'lucide-react';
+import { Wand2, X, FileText, Zap, Sparkles, Star, Code2 } from 'lucide-react';
 import { api } from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { cn } from '../../utils/cn';
@@ -17,6 +17,7 @@ const TONES = [
   { id: 'Dramatic', name: 'Kịch tính', description: 'Hồi hộp, cảm xúc mạnh', icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
   { id: 'Humorous', name: 'Hài hước', description: 'Vui vẻ, phá cách', icon: Sparkles, color: 'text-pink-400', bg: 'bg-pink-400/10' },
   { id: 'Inspirational', name: 'Cảm hứng', description: 'Truyền động lực, tích cực', icon: Star, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+  { id: 'AulaqAI', name: 'Tech Slide (Aulaq)', description: 'Slide lập trình, bento, tối giản', icon: Code2, color: 'text-orange-400', bg: 'bg-orange-400/10' },
 ];
 
 export const SummarizeAction: React.FC<SummarizeActionProps> = ({ 
