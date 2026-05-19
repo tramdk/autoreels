@@ -210,10 +210,10 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
         onClick={() => setShowPicker(true)}
         disabled={loading}
         title={t('dashboard.generate')}
-        className="h-9 sm:h-10 px-2 sm:px-4 rounded-xl bg-purple-600/10 text-purple-400 hover:bg-purple-600/20 border border-purple-500/20 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 whitespace-nowrap group relative overflow-hidden"
+        className="h-9 sm:h-10 px-2 sm:px-4 rounded-xl bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest btn-tactile flex items-center gap-2 whitespace-nowrap group relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-        <VideoIcon className="w-4 h-4 group-hover:rotate-12 transition-transform relative z-10 shrink-0" /> 
+        <VideoIcon data-icon="inline-start" className="size-4 group-hover:rotate-12 transition-transform relative z-10 shrink-0" /> 
         <span className={cn("relative z-10 line-clamp-1", compact ? "hidden md:inline" : "hidden sm:inline")}>{t('dashboard.generate')}</span>
       </button>
 
@@ -227,17 +227,20 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
               className="absolute inset-0 bg-black/90 backdrop-blur-xl"
             />
             
-            <motion.div
+             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 30 }} 
               animate={{ scale: 1, opacity: 1, y: 0 }} 
               exit={{ scale: 0.95, opacity: 0, y: 30 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="generate-dialog-title"
               className="w-full max-w-6xl bg-slate-900/60 rounded-[24px] sm:rounded-[40px] border border-white/10 shadow-2xl relative z-10 overflow-hidden flex flex-col h-[98vh] sm:h-[95vh] md:h-[85vh] max-h-[900px] backdrop-blur-3xl"
             >
               {/* Header */}
               <div className="px-6 sm:px-8 md:px-12 py-6 sm:py-8 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
                 <div className="space-y-1">
-                  <h2 className="text-xl sm:text-2xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
+                  <h2 id="generate-dialog-title" className="text-xl sm:text-2xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
                     <div className="w-1.5 sm:w-2 h-6 sm:h-8 bg-primary rounded-full shadow-[0_0_20px_rgba(236,72,153,0.5)]"></div>
                     Cấu hình <span className="text-primary">Studio</span>
                   </h2>
@@ -245,9 +248,9 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
                 </div>
                 <button
                   onClick={() => { stopPreview(); setShowPicker(false); }}
-                  className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-xl sm:rounded-2xl text-slate-400 hover:text-white transition-all border border-white/5 group"
+                  className="size-10 sm:size-12 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-xl sm:rounded-2xl text-slate-400 hover:text-white transition-all border border-white/5 group"
                 >
-                  <X className="w-5 h-5 sm:w-6 h-6 group-hover:rotate-90 transition-transform" />
+                  <X className="size-5 sm:size-6 group-hover:rotate-90 transition-transform" />
                 </button>
               </div>
 
@@ -330,9 +333,9 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
                   <button
                     onClick={handleConfirm}
                     disabled={loading || loadingData}
-                    className="flex-1 md:flex-none bg-primary text-white px-8 sm:px-16 py-4 rounded-[16px] sm:rounded-[24px] font-black uppercase text-xs sm:text-sm tracking-[0.2em] shadow-[0_15px_40px_rgba(236,72,153,0.3)] hover:shadow-[0_20px_50px_rgba(236,72,153,0.5)] hover:-translate-y-1 active:translate-y-0 transition-all flex items-center justify-center gap-3 sm:gap-4 disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none"
+                    className="flex-1 md:flex-none bg-primary text-on-primary px-8 sm:px-16 py-4 rounded-[16px] sm:rounded-[24px] font-black uppercase text-xs sm:text-sm tracking-[0.2em] shadow-[0_15px_30px_rgba(16,185,129,0.15)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.25)] hover:brightness-110 btn-tactile flex items-center justify-center gap-3 sm:gap-4 disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none"
                   >
-                    <span className="whitespace-nowrap">Bắt đầu Render</span> <RefreshCw className={`w-4 h-4 sm:w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                    <span className="whitespace-nowrap">Bắt đầu Render</span> <RefreshCw data-icon="inline-end" className={cn("size-4 sm:size-5", loading && "animate-spin")} />
                   </button>
                 </div>
               </div>

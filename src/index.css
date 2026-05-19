@@ -5,18 +5,18 @@
 @theme {
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 
-  /* Glassmorphism SaaS Palette */
-  --color-primary: #EC4899;
-  --color-on-primary: #FFFFFF;
-  --color-secondary: #DB2777;
-  --color-accent: #2563EB;
-  --color-background: #0F172A;
-  --color-surface: rgba(30, 41, 59, 0.6); /* Slate-800 translucent for glass */
-  --color-foreground: #FFFFFF;
-  --color-muted: #64748B; /* Slate-500 for better visibility */
-  --color-border: rgba(255, 255, 255, 0.1);
-  --color-destructive: #DC2626;
-  --color-ring: #EC4899;
+  /* Premium Quartz & Emerald SaaS Palette */
+  --color-primary: #10B981; /* Premium Emerald */
+  --color-on-primary: #09090B;
+  --color-secondary: #059669;
+  --color-accent: #3B82F6; /* Clean cobalt blue */
+  --color-background: #09090B; /* Deep Quartz Black */
+  --color-surface: rgba(20, 20, 23, 0.6); /* Translucent premium Zinc-900 */
+  --color-foreground: #F4F4F5;
+  --color-muted: #71717A; /* Zinc-500 */
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-destructive: #EF4444;
+  --color-ring: #10B981;
 }
 
 @layer base {
@@ -40,26 +40,44 @@ body {
 
 .glass {
   background: var(--color-surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-border);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 20px 40px -15px rgba(0, 0, 0, 0.5);
 }
 
 .glass-panel {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .glow-primary {
-  box-shadow: 0 0 20px rgba(225, 29, 72, 0.3);
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3) !important;
 }
 
 .glow-accent {
-  box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Tactile Spring Buttons */
+.btn-tactile {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-tactile:hover {
+  transform: translateY(-1px);
+}
+
+.btn-tactile:active {
+  transform: scale(0.97) translateY(0px);
 }
 
 /* Custom Scrollbar */
