@@ -502,10 +502,15 @@ var CROSSFADE = 0.6; // Thời gian chồng chéo cảnh tiếp theo đè lên c
 // Hàm tách từ để làm stagger word slide-up mượt mà
 function splitTextToSpans(text) {
   if (!text) return '';
-  return text.split(' ').map(function(word) {
-    if (!word.trim()) return '';
-    return '<span class="word-wrapper" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.22em;"><span class="word" style="display:inline-block; transform:translateY(105%); opacity:0; will-change:transform, opacity;">' + word + '</span></span>';
-  }).join(' ');
+  // Tách văn bản không phá vỡ thẻ HTML (<br>)
+  var fragments = text.split(/(<br\s*\/?>)/i);
+  return fragments.map(function(frag) {
+    if (frag.toLowerCase().indexOf('<br') === 0) return frag; // Giữ nguyên thẻ br
+    return frag.split(' ').map(function(word) {
+      if (!word.trim()) return '';
+      return '<span class="word-wrapper" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.22em;"><span class="word" style="display:inline-block; transform:translateY(105%); opacity:0; will-change:transform, opacity;">' + word + '</span></span>';
+    }).join(' ');
+  }).join('');
 }
 
 // Xóa sạch container trước khi nạp
