@@ -503,7 +503,7 @@ var CROSSFADE = 0.6; // Thời gian chồng chéo cảnh tiếp theo đè lên c
 function splitTextToSpans(text) {
   if (!text) return '';
   // Tách văn bản không phá vỡ thẻ HTML (<br>)
-  var fragments = text.split(/(<br\s*\/?>)/i);
+  var fragments = text.split(/(<br\\s*\\/?>)/i);
   return fragments.map(function(frag) {
     if (frag.toLowerCase().indexOf('<br') === 0) return frag; // Giữ nguyên thẻ br
     return frag.split(' ').map(function(word) {
