@@ -381,8 +381,18 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
   </script>
   `;
 
-  // Inject HyperFrames seeker script into <head> so it's available immediately
-  rendered = rendered.replace('<head>', `<head>\n${hfScript}`);
+  // Inject Google Fonts dynamic stylesheet to ensure perfect Unicode font loading for the chosen fontFamily
+  const selectedFont = tpl.fontFamily || 'Inter';
+  let fontLoaderScript = '';
+  // Avoid loading system fonts via Google Fonts API
+  const localFonts = ['arial', 'helvetica', 'sans-serif', 'serif', 'monospace', 'courier', 'segoe ui'];
+  if (!localFonts.includes(selectedFont.toLowerCase().trim())) {
+    const fontLinkName = selectedFont.trim().replace(/\s+/g, '+');
+    fontLoaderScript = `\n  <link rel="preconnect" href="https://fonts.googleapis.com">\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n  <link href="https://fonts.googleapis.com/css2?family=${fontLinkName}:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">`;
+  }
+
+  // Inject both Google Font link and seeker script into <head> so it's available immediately
+  rendered = rendered.replace('<head>', `<head>${fontLoaderScript}\n${hfScript}`);
 
   // FINAL VERIFICATION: Check if our unique placeholders were replaced
   if (rendered.includes('__SCENE_DURATIONS_INJECTED__')) {
