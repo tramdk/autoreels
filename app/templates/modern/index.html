@@ -5,21 +5,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width={{ WIDTH }}, user-scalable=no">
-  <title>Ultra Modern Template</title>
+  <title>Premium Editorial Modern Template</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Montserrat:wght@700;900&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
   <script src="/assets/js/gsap.min.js"></script>
   <style>
     :root {
       --cqmin: min(calc(var(--v-width) * 1px), calc(var(--v-height) * 1px));
-      --accent: var(--v-divider-color);
-      --blur-amount: 12px;
-    }
-
-    body.is-rendering {
-      --blur-amount: 4px;
+      --accent: #E07B3C;
+      --accent-clay: #C97A5C;
+      --stage-bg: #0B0F18;
+      --pad-top: clamp(140px, 10vh, 200px);
+      --pad-bottom: clamp(180px, 12vh, 260px);
+      --pad-x: clamp(40px, 6vw, 80px);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,24 +28,53 @@
       width: calc(var(--v-width) * 1px);
       height: calc(var(--v-height) * 1px);
       overflow: hidden;
-      background-color: #000;
-      font-family: {{ FONT_FAMILY }};
+      background-color: var(--stage-bg);
+      font-family: {{ FONT_FAMILY }}, sans-serif;
       will-change: transform, opacity;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     #root {
       position: relative;
       width: 100%;
       height: 100%;
-      background: #000;
-      color: white;
+      background: var(--stage-bg);
+      color: #E8E9F0;
       overflow: hidden;
+    }
+
+    /* Ambient breathing gradient glows */
+    #ambient {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      background: radial-gradient(circle at 15% 25%, rgba(224, 123, 60, 0.14) 0%, transparent 55%),
+                  radial-gradient(circle at 85% 75%, rgba(201, 122, 92, 0.11) 0%, transparent 60%);
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    /* Fine-grain noise overlay to eliminate banding */
+    #noise-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 500;
+      opacity: 0.045;
+      mix-blend-mode: overlay;
+      pointer-events: none;
     }
 
     #scenes-container {
       position: absolute;
       inset: 0;
       z-index: 10;
+      width: 100%;
+      height: 100%;
     }
 
     .scene-unit {
@@ -53,9 +82,14 @@
       inset: 0;
       width: 100%;
       height: 100%;
-      background-color: #000;
+      background: transparent;
       z-index: 10;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: var(--pad-top) var(--pad-x) var(--pad-bottom) var(--pad-x);
     }
 
     .scene-bg-container {
@@ -65,6 +99,7 @@
       height: 100%;
       z-index: 0;
       overflow: hidden;
+      pointer-events: none;
     }
 
     .scene-bg {
@@ -73,6 +108,8 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      opacity: 0.15;
+      filter: grayscale(30%) contrast(90%);
       will-change: transform;
     }
 
@@ -81,74 +118,312 @@
       inset: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%);
+      background: linear-gradient(180deg, rgba(11, 15, 24, 0.4) 0%, rgba(11, 15, 24, 0.85) 100%);
       z-index: 1;
       opacity: var(--v-bg-brightness);
     }
 
+    /* Core typography and alignments per layout */
     .scene-content {
-      position: absolute;
-      top: var(--v-main-top);
-      left: var(--v-main-left);
-      transform: var(--v-main-transform);
-      width: 88%;
+      position: relative;
       z-index: 50;
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       align-items: var(--v-main-align);
-      gap: 20px;
+      justify-content: center;
+      text-align: {{ MAIN_CSS_TEXT_ALIGN }};
+      gap: 24px;
     }
 
-    .modern-label-box {
+    /* 1. HERO SLAM (Intro) */
+    .hero-slam .scene-content {
+      justify-content: flex-start;
+      padding-top: clamp(20px, 4vh, 60px);
+      text-align: center;
+      align-items: center;
+    }
+
+    .hero-slam .overline {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: calc(var(--cqmin) * 24 / 720);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .hero-slam .hero-pre {
+      font-size: calc(var(--cqmin) * 48 / 720);
+      font-weight: 700;
+      color: #E8E9F0;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-slam .hero-word {
+      font-size: calc(var(--cqmin) * 110 / 720);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      background: linear-gradient(135deg, var(--accent), var(--accent-clay));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 0 50px rgba(224, 123, 60, 0.25)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+    }
+
+    .hero-slam .hero-caption {
+      margin-top: 16px;
+      padding: 10px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: calc(var(--cqmin) * 22 / 720);
+      font-weight: 600;
+      color: rgba(232, 233, 240, 0.85);
+      background: rgba(232, 233, 240, 0.05);
+      border: 1px solid rgba(232, 233, 240, 0.12);
+      border-radius: 100px;
+    }
+
+    /* 2. OVERSIZED FACT METRIC */
+    .metric-slam .scene-content {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .metric-slam .overline {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: calc(var(--cqmin) * 24 / 720);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .metric-slam .metric-headline {
+      font-size: calc(var(--cqmin) * 36 / 720);
+      font-weight: 600;
+      color: rgba(232, 233, 240, 0.7);
+      max-width: 90%;
+    }
+
+    .metric-slam .metric-divider {
+      width: 140px;
+      height: 1px;
+      background: rgba(232, 233, 240, 0.15);
+      margin: 12px 0;
+    }
+
+    .metric-slam .metric-number {
+      font-size: calc(var(--cqmin) * 190 / 720);
+      font-weight: 900;
+      line-height: 0.85;
+      letter-spacing: -0.06em;
+      color: var(--accent);
+      text-shadow: 0 0 60px rgba(224, 123, 60, 0.3);
+    }
+
+    .metric-slam .metric-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: calc(var(--cqmin) * 28 / 720);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #E8E9F0;
+    }
+
+    /* 3. TYPOGRAPHIC CHAPTER LIST */
+    .chapter-list .scene-content {
+      justify-content: flex-start;
+      padding-top: 15px;
+      align-items: stretch;
+    }
+
+    .chapter-list .overline {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: calc(var(--cqmin) * 24 / 720);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .chapter-list .list-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 16px;
+    }
+
+    .chapter-list .list-row {
       display: flex;
       align-items: center;
-      gap: 15px;
-      margin-bottom: 10px;
+      padding: 16px 8px;
+      border-bottom: 1px solid rgba(232, 233, 240, 0.08);
+      gap: 24px;
     }
 
-    .trending-tag {
-      background: var(--accent);
-      color: #000;
-      padding: 6px 20px;
-      font-size: calc(var(--cqmin) * 18 / 720);
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      border-radius: 4px;
+    .chapter-list .list-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: calc(var(--cqmin) * 28 / 720);
+      color: var(--accent);
+      transform: rotate(-6deg);
     }
 
-    .label-line {
-      width: 40px;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.3);
+    .chapter-list .list-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
-    .scene-title {
-      font-family: {{ FONT_FAMILY }};
-      font-weight: 800;
-      line-height: {{ LINE_HEIGHT }};
-      letter-spacing: -0.04em;
-      text-transform: uppercase;
-      color: #ffffff;
+    .chapter-list .list-title {
+      font-size: calc(var(--cqmin) * 32 / 720);
+      font-weight: 700;
+      color: #E8E9F0;
+    }
+
+    .chapter-list .list-sub {
+      font-size: calc(var(--cqmin) * 22 / 720);
+      font-weight: 400;
+      color: rgba(232, 233, 240, 0.5);
+    }
+
+    /* 4. EDITORIAL SLIDE (Responsive grid structure) */
+    .editorial-slide .scene-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    /* Side-by-side splits for 16:9, vertical stacks for 9:16 inside responsive grid */
+    .editorial-grid {
+      display: flex;
       width: 100%;
-      text-align: inherit;
-      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+      height: 100%;
+      align-items: center;
+      gap: 40px;
     }
 
-    .type-hook .scene-title {
-      font-size: calc(var(--cqmin) * var(--v-hook-size) / 720);
-      color: var(--v-hook-color);
+    /* Default (9:16 vertical mobile) */
+    .editorial-grid {
+      flex-direction: column;
+      justify-content: center;
     }
 
-    .type-body .scene-title {
+    .editorial-grid .image-card {
+      width: 100%;
+      height: 44%;
+      overflow: hidden;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .editorial-grid .image-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      will-change: transform;
+    }
+
+    .editorial-grid .text-card {
+      width: 100%;
+      height: 44%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    /* 16:9 Landscape overrides */
+    @media (min-aspect-ratio: 1.1) {
+      .editorial-grid {
+        flex-direction: row;
+      }
+      .editorial-grid .image-card {
+        width: 48%;
+        height: 85%;
+      }
+      .editorial-grid .text-card {
+        width: 48%;
+        height: 85%;
+        padding-left: 20px;
+      }
+    }
+
+    .editorial-slide .scene-title {
       font-size: calc(var(--cqmin) * var(--v-body-size) / 720);
       color: var(--v-body-color);
+      font-weight: 800;
+      line-height: 1.2;
+      text-transform: none;
     }
 
+    /* 5. CTA OUTRO */
+    .cta-outro .scene-content {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 32px;
+    }
+
+    .cta-outro .overline {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: calc(var(--cqmin) * 24 / 720);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .cta-outro .cta-headline {
+      font-size: calc(var(--cqmin) * 52 / 720);
+      font-weight: 800;
+      line-height: 1.15;
+      color: #E8E9F0;
+      max-width: 90%;
+    }
+
+    .cta-outro .cta-url-box {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 36px;
+      background: rgba(224, 123, 60, 0.05);
+      border: 1px solid rgba(224, 123, 60, 0.25);
+      border-radius: 100px;
+      margin-top: 10px;
+      box-shadow: 0 10px 30px rgba(224, 123, 60, 0.06);
+    }
+
+    .cta-outro .cta-arrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: calc(var(--cqmin) * 26 / 720);
+      color: var(--accent-clay);
+    }
+
+    .cta-outro .cta-url {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: calc(var(--cqmin) * 28 / 720);
+      color: #E8E9F0;
+      letter-spacing: 1px;
+    }
+
+    /* Progress tracking indicators */
     .scene-progress-container {
       width: 100px;
       height: 4px;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
       margin-top: 30px;
       border-radius: 100px;
       overflow: hidden;
@@ -161,6 +436,7 @@
       background: var(--accent);
     }
 
+    /* Floating static branding layers */
     .ui-layer {
       position: absolute;
       inset: 0;
@@ -221,15 +497,15 @@
       letter-spacing: 4px;
     }
 
-    /* Modern geometric accents */
     .geometric-accent {
       position: absolute;
-      width: 2px;
-      height: 100px;
+      width: 1px;
+      height: 140px;
       background: linear-gradient(to bottom, var(--accent), transparent);
-      top: 10%;
-      right: 5%;
-      opacity: 0.5;
+      top: 12%;
+      right: 4%;
+      opacity: 0.4;
+      z-index: 100;
     }
 
   </style>
@@ -238,8 +514,14 @@
 <body>
   <div id="root" data-composition-id="root" data-start="0" data-duration="{{ DURATION }}" data-width="{{ WIDTH }}"
     data-height="{{ HEIGHT }}">
+    
+    <!-- Ambient breathing layer -->
+    <div id="ambient"></div>
+
     <div id="scenes-container"></div>
+    
     <div class="geometric-accent"></div>
+    
     <div class="ui-layer">
       <div class="logo-text">
         <img class="logo-img" src="{{ LOGO_IMAGE }}" alt="">
@@ -250,6 +532,17 @@
         <div class="datetime-text">{{ DATETIME }}</div>
       </div>
     </div>
+
+    <!-- Banding prevention overlay -->
+    <svg id="noise-overlay" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="noise-filter" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" seed="8" stitchTiles="stitch" result="noise" />
+          <feColorMatrix type="saturate" values="0" in="noise" result="monoNoise" />
+        </filter>
+      </defs>
+      <rect width="100%" height="100%" filter="url(#noise-filter)" fill="white" />
+    </svg>
   </div>
 
   <script>
@@ -276,13 +569,43 @@
     window.__timelines = window.__timelines || {};
     window.__timelines["root"] = mainTl;
 
+    // Ambient floating breath animation
+    mainTl.fromTo("#ambient",
+      { opacity: 0.85, scale: 1.0 },
+      { opacity: 1.0, scale: 1.06, duration: 10, ease: "sine.inOut", yoyo: true, repeat: -1 },
+      0
+    );
+
     var globalLastImage = DEFAULT_BG;
 
+    // Dynamic client-side layout router mapping text content to professional templates
+    function detectSceneLayout(scene, index, total) {
+      if (index === 0) return 'hero-slam';
+      if (index === total - 1) return 'cta-outro';
+      
+      var txt = (scene.text || scene.bodyText || '').trim();
+      
+      // If text contains bold stats or metrics (%, 10x, numbers larger than 10)
+      var hasMetric = /[0-9]+(?:\s*%)|[0-9]+\s*[xX]|[0-9]{2,}/.test(txt);
+      if (hasMetric && txt.length < 130) {
+        return 'metric-slam';
+      }
+      
+      // If formatting implies a structured chapter/list (3 or more lines)
+      var hasList = txt.split(/(?:<br\s*\/?>|\n)/gi).length >= 3;
+      if (hasList) {
+        return 'chapter-list';
+      }
+      
+      return 'editorial-slide';
+    }
+
     function createSceneUnit(scene, i, start, duration) {
-      var isHook = (scene.type === 'hook' || i === 0);
       var unit = document.createElement('div');
       unit.id = 'unit-' + i;
-      unit.className = 'scene-unit ' + (isHook ? 'type-hook' : 'type-body');
+      
+      var layoutType = detectSceneLayout(scene, i, scenes.length);
+      unit.className = 'scene-unit ' + layoutType;
       
       unit.setAttribute('data-start', start.toFixed(3));
       var hfDuration = (i < scenes.length - 1) ? (duration + 0.2) : duration;
@@ -293,21 +616,141 @@
 
       if (scene.imageUrl) globalLastImage = scene.imageUrl;
       var imgUrl = globalLastImage;
+      var rawText = scene.text || scene.bodyText || '';
 
-      unit.innerHTML = 
-        '<div class="scene-bg-container">' +
-          '<img class="scene-bg" src="' + imgUrl + '">' +
-        '</div>' +
-        '<div class="scene-overlay"></div>' +
-        '<div class="scene-content" style="text-align: {{ MAIN_CSS_TEXT_ALIGN }};">' +
-          '<div class="modern-label-box">' +
-            (isHook ? '<div class="trending-tag">EXCLUSIVE</div>' : '<div class="label-line"></div>') +
-          '</div>' +
-          '<div class="scene-title">' + (scene.text || scene.bodyText || '') + '</div>' +
-          '<div class="scene-progress-container">' +
-            '<div class="scene-progress-bar"></div>' +
-          '</div>' +
-        '</div>';
+      var bgHtml = '<div class="scene-bg-container">' +
+                     '<img class="scene-bg" src="' + imgUrl + '">' +
+                   '</div>' +
+                   '<div class="scene-overlay"></div>';
+
+      var innerHtml = '';
+
+      if (layoutType === 'hero-slam') {
+        var preTitle = "INTRODUCING";
+        var heroWord = "MODERN";
+        var captionText = "Creative Edition";
+        
+        var parts = rawText.split(/(?:<br\s*\/?>|\n)/gi).filter(Boolean);
+        if (parts.length > 0) preTitle = parts[0];
+        if (parts.length > 1) heroWord = parts[1];
+        if (parts.length > 2) captionText = parts[2];
+
+        innerHtml += '<div class="scene-content">';
+        innerHtml += '  <div class="overline">PROLOGUE</div>';
+        innerHtml += '  <div class="hero-pre">' + preTitle + '</div>';
+        innerHtml += '  <div class="hero-word">' + heroWord + '</div>';
+        innerHtml += '  <div class="hero-caption">' + captionText + '</div>';
+        innerHtml += '  <div class="scene-progress-container"><div class="scene-progress-bar"></div></div>';
+        innerHtml += '</div>';
+
+      } else if (layoutType === 'metric-slam') {
+        var headlineText = "Featured Benchmark";
+        var metricVal = "100%";
+        var metricLabel = "EXCELLENCE";
+        
+        var lines = rawText.split(/(?:<br\s*\/?>|\n)/gi).filter(Boolean);
+        if (lines.length > 0) headlineText = lines[0];
+        
+        var matches = rawText.match(/[0-9]+(?:\s*%)|[0-9]+\s*[xX]|[0-9]{2,}/);
+        if (matches) metricVal = matches[0];
+        
+        if (lines.length > 1) {
+          metricLabel = lines[lines.length - 1];
+          if (metricLabel === metricVal && lines.length > 2) {
+            metricLabel = lines[lines.length - 2];
+          }
+        }
+
+        innerHtml += '<div class="scene-content">';
+        innerHtml += '  <div class="overline">STATISTICS</div>';
+        innerHtml += '  <div class="metric-headline">' + headlineText + '</div>';
+        innerHtml += '  <div class="metric-divider"></div>';
+        innerHtml += '  <div class="metric-number">' + metricVal + '</div>';
+        innerHtml += '  <div class="metric-label">' + metricLabel + '</div>';
+        innerHtml += '  <div class="scene-progress-container"><div class="scene-progress-bar"></div></div>';
+        innerHtml += '</div>';
+
+      } else if (layoutType === 'chapter-list') {
+        var points = rawText.split(/(?:<br\s*\/?>|\n)/gi).filter(Boolean);
+        var listTitle = "GUIDELINES";
+        if (points.length > 0 && points[0].length < 40) {
+          listTitle = points.shift();
+        }
+
+        innerHtml += '<div class="scene-content">';
+        innerHtml += '  <div class="overline">' + listTitle + '</div>';
+        innerHtml += '  <div class="list-container">';
+        
+        for (var k = 0; k < Math.min(points.length, 3); k++) {
+          var itemText = points[k];
+          var numStr = "0" + (k + 1);
+          var itemTitle = itemText;
+          var itemSub = "Overview Breakdown";
+          
+          var colonIdx = itemText.indexOf(':');
+          if (colonIdx > 0) {
+            itemTitle = itemText.substring(0, colonIdx).trim();
+            itemSub = itemText.substring(colonIdx + 1).trim();
+          } else if (itemText.length > 45) {
+            itemTitle = itemText.substring(0, 32) + "...";
+            itemSub = itemText;
+          }
+          
+          innerHtml += '    <div class="list-row">';
+          innerHtml += '      <div class="list-num">' + numStr + '</div>';
+          innerHtml += '      <div class="list-text">';
+          innerHtml += '        <div class="list-title">' + itemTitle + '</div>';
+          innerHtml += '        <div class="list-sub">' + itemSub + '</div>';
+          innerHtml += '      </div>';
+          innerHtml += '    </div>';
+        }
+        
+        innerHtml += '  </div>';
+        innerHtml += '  <div class="scene-progress-container"><div class="scene-progress-bar"></div></div>';
+        innerHtml += '</div>';
+
+      } else if (layoutType === 'cta-outro') {
+        var outroHeadline = "Join the Movement";
+        var ctaUrl = "autoreels.io";
+        
+        var outroParts = rawText.split(/(?:<br\s*\/?>|\n)/gi).filter(Boolean);
+        if (outroParts.length > 0) outroHeadline = outroParts[0];
+        if (outroParts.length > 1) ctaUrl = outroParts[outroParts.length - 1];
+
+        innerHtml += '<div class="scene-content">';
+        innerHtml += '  <div class="overline">FINALE</div>';
+        innerHtml += '  <div class="cta-headline">' + outroHeadline + '</div>';
+        innerHtml += '  <div class="cta-url-box">';
+        innerHtml += '    <span class="cta-arrow">→</span>';
+        innerHtml += '    <span class="cta-url">' + ctaUrl + '</span>';
+        innerHtml += '  </div>';
+        innerHtml += '  <div class="scene-progress-container"><div class="scene-progress-bar"></div></div>';
+        innerHtml += '</div>';
+
+      } else {
+        // editorial-slide (Image B-Roll Split or text central card)
+        innerHtml += '<div class="scene-content">';
+        innerHtml += '  <div class="editorial-grid">';
+        
+        if (scene.imageUrl) {
+          innerHtml += '    <div class="image-card">';
+          innerHtml += '      <img class="editorial-img" src="' + scene.imageUrl + '" alt="">';
+          innerHtml += '    </div>';
+          innerHtml += '    <div class="text-card">';
+          innerHtml += '      <div class="scene-title">' + rawText + '</div>';
+          innerHtml += '    </div>';
+        } else {
+          innerHtml += '    <div class="text-card" style="width:100%; text-align:inherit; align-items:inherit;">';
+          innerHtml += '      <div class="scene-title">' + rawText + '</div>';
+          innerHtml += '    </div>';
+        }
+        
+        innerHtml += '  </div>';
+        innerHtml += '  <div class="scene-progress-container"><div class="scene-progress-bar"></div></div>';
+        innerHtml += '</div>';
+      }
+
+      unit.innerHTML = bgHtml + innerHtml;
       return unit;
     }
 
@@ -335,7 +778,7 @@
     }
 
     var currentTime = 0;
-    var CROSSFADE = 0.6; // Match transition duration exactly
+    var CROSSFADE = 0.5; // Smooth cinematic blur crossfade overlapping time
 
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
@@ -344,40 +787,77 @@
       container.appendChild(unit);
 
       var bgImg = unit.querySelector('.scene-bg');
+      var editorialImg = unit.querySelector('.editorial-img');
       var titleEl = unit.querySelector('.scene-title');
       var progBar = unit.querySelector('.scene-progress-bar');
-      var spans = buildTypingContent(titleEl, (scene.text || scene.bodyText || ''));
-
-      var inDur = 0.6;
+      
+      var inDur = 0.8;
       var outDur = CROSSFADE;
       var tl = gsap.timeline();
 
-      // Modern slick animation - Fade in
-      tl.from(unit, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0)
-        .fromTo(bgImg, { scale: 1.15 }, { scale: 1, duration: dur, ease: "none", force3D: true }, 0)
-        .from(unit.querySelector('.scene-content'), { y: 30, opacity: 0, duration: 0.6, ease: "expo.out", force3D: true }, 0.15);
+      // Cinematic Stage transition: scale up, blur down, fade in
+      tl.fromTo(unit, 
+        { opacity: 0, scale: 1.05, filter: "blur(20px)" }, 
+        { opacity: 1, scale: 1.0, filter: "blur(0px)", duration: inDur, ease: "power2.out", force3D: true }, 
+        0
+      );
 
-      var staggerTime = Math.min(0.03, (dur * 0.6) / (spans.length || 1));
-      tl.to(spans, { opacity: 1, duration: 0.05, stagger: staggerTime, ease: 'none', force3D: true }, 0.3);
+      // Subtle atmospheric Ken Burns effect on full background texture
+      if (bgImg) {
+        tl.fromTo(bgImg, 
+          { scale: 1.15, filter: "brightness(0.8)" }, 
+          { scale: 1.0, filter: "brightness(1.0)", duration: dur, ease: "none", force3D: true }, 
+          0
+        );
+      }
+
+      // Elegant zoom-out inside Editorial B-roll image card
+      if (editorialImg) {
+        tl.fromTo(editorialImg,
+          { scale: 1.12 },
+          { scale: 1.0, duration: dur, ease: "sine.out", force3D: true },
+          0
+        );
+      }
+
+      var contentEl = unit.querySelector('.scene-content');
+      if (contentEl) {
+        tl.fromTo(contentEl,
+          { y: 35, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.7, ease: "power3.out", force3D: true },
+          0.12
+        );
+      }
+
+      // Word/character smooth stagger sweep if title elements are loaded
+      if (titleEl) {
+        var spans = buildTypingContent(titleEl, (scene.text || scene.bodyText || ''));
+        var staggerTime = Math.min(0.025, (dur * 0.5) / (spans.length || 1));
+        tl.to(spans, { opacity: 1, duration: 0.05, stagger: staggerTime, ease: 'none', force3D: true }, 0.35);
+      }
       
-      // Progress bar animation
-      tl.to(progBar, { width: "100%", duration: dur, ease: "none" }, 0);
+      // Progress tracking bar synced perfectly
+      if (progBar) {
+        tl.to(progBar, { width: "100%", duration: dur, ease: "none" }, 0);
+      }
 
-      // Exit fade - ONLY content, NOT background
+      // Exit transition: fade out, zoom down, blur out
       if (i < scenes.length - 1) {
-        tl.to(unit.querySelector('.scene-content'), { 
+        tl.to(unit, { 
           opacity: 0, 
-          y: -30,
+          scale: 0.96,
+          filter: "blur(15px)",
           duration: outDur, 
           ease: "power2.inOut", 
           force3D: true 
         }, dur - outDur);
       }
+      
       mainTl.add(tl, currentTime);
       
-      // Cleanup: Hide unit after next scene arrives
+      // Performance optimization: hide old units so browser compositor isn't overloaded
       if (i < scenes.length - 1) {
-        mainTl.add(gsap.set(unit, { visibility: 'hidden' }), currentTime + dur);
+        mainTl.add(gsap.set(unit, { visibility: 'hidden', display: 'none' }), currentTime + dur);
         currentTime += dur - CROSSFADE;
       } else {
         currentTime += dur;
@@ -387,16 +867,26 @@
     var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;
     window.duration = finalDur;
 
+    // Outro fade to black
+    mainTl.to("#root", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, finalDur - 0.5);
+
     mainTl.time(0);
     var isRendering = window.__hf && (window.__hf.active || window.__hf.duration);
     if (isRendering) {
       document.body.classList.add('is-rendering');
     }
 
-    if (!window.__hf) {
+    // Seeker contract integration for HyperFrames renders
+    window.__hf = {
+      duration: finalDur,
+      seek: function(t) { if (window._tl || window.mainTl) { (window._tl || window.mainTl).pause().seek(t); } }
+    };
+    window._tl = mainTl;
+
+    if (!window.__hf || (!window.__hf.active && !window.__hf.duration)) {
       setTimeout(function() { mainTl.play(); }, 500);
     }
-    console.log("[Template] Ultra Modern Init complete.");
+    console.log("[Template] Ultra Modern Anthropic Stage Init complete.");
   </script>
 </body>
 </html>
