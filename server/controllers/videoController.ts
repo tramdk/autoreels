@@ -131,15 +131,76 @@ export const generateBulk = async (req: Request, res: Response) => {
     for (const item of items) {
       const { articleId, templateId, ttsProvider, ttsVoiceId, bgmAssetId, bgmVolume, ratio, content, script, title, imageUrl, source } = item;
 
+      const article = articleId ? await prisma.article.findUnique({ where: { id: articleId } }) : null;
+
+      // Extract all images from item.imageUrl or article.imageUrl
+      let allImages: string[] = [];
+      const rawImageUrl = imageUrl || article?.imageUrl;
+      if (rawImageUrl) {
+        try {
+          const parsed = JSON.parse(rawImageUrl);
+          const mediaItems = Array.isArray(parsed) ? parsed : [parsed];
+          allImages = mediaItems
+            .filter(i => (i.type === 'image' || !(i.data || i.url || '').includes('/video/')))
+            .map(i => i.data || i.url)
+            .filter(url => !!url);
+        } catch (e) {
+          if (rawImageUrl.includes(',')) {
+            allImages = rawImageUrl.split(',').map((u: string) => u.trim()).filter((u: string) => !!u);
+          } else if (!rawImageUrl.includes('/video/') && !rawImageUrl.startsWith('[')) {
+            allImages = [rawImageUrl];
+          }
+        }
+      }
+
+      // Parse scenes from script or article script
+      let finalScenes: any[] = [];
+      let customSettings: any = null;
+      const scriptToParse = script || article?.script;
+      if (scriptToParse) {
+        try {
+          let parsed = typeof scriptToParse === 'string' ? JSON.parse(scriptToParse) : scriptToParse;
+          if (parsed && parsed.scenes && Array.isArray(parsed.scenes)) {
+            finalScenes = parsed.scenes;
+            customSettings = parsed.customSettings || null;
+          } else if (Array.isArray(parsed)) {
+            finalScenes = parsed;
+          } else if (parsed && typeof parsed === 'object') {
+            finalScenes = [parsed];
+          }
+        } catch (e) {
+          console.warn(`[Bulk API] Failed to parse script, falling back to text generation.`);
+        }
+      }
+
+      // Fallback: Generate scenes from content if script is missing or invalid
+      if (finalScenes.length === 0 && (content || article?.contentSnippet || article?.title)) {
+        const gen = generateScriptFromText(content || article?.contentSnippet || article?.title || '', allImages[0] || article?.imageUrl);
+        finalScenes = gen.scenes;
+      }
+
+      // Distribute images sequentially across scenes
+      if (allImages.length > 0 && finalScenes.length > 0) {
+        finalScenes = finalScenes.map((scene, idx) => ({
+          ...scene,
+          imageUrl: allImages[idx % allImages.length]
+        }));
+      }
+
+      const payload = {
+        scenes: finalScenes,
+        customSettings: customSettings || null
+      };
+
       // Create a persistent task in the database
       const task = await prisma.videoTask.create({
         data: {
           articleId: articleId || null,
           templateId: templateId || defaultTplId,
-          title: title || (content ? content.substring(0, 50) : null),
-          content: content || null,
-          script: script ? (typeof script === 'string' ? script : JSON.stringify(script)) : null,
-          imageUrl: imageUrl || null,
+          title: title || (content ? content.substring(0, 50) : null) || article?.title,
+          content: content || article?.contentSnippet || article?.title || null,
+          script: JSON.stringify(payload),
+          imageUrl: allImages[0] || imageUrl || null,
           ttsProvider: ttsProvider || 'edge',
           ttsVoiceId: ttsVoiceId || 'vi-VN-NamMinhNeural',
           bgmAssetId: bgmAssetId || null,
@@ -274,10 +335,39 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
       }
     }
 
+    // Parse all images from input imageUrl or article.imageUrl
+    let allImages: string[] = [];
+    const rawImageUrl = imageUrl || article.imageUrl;
+    if (rawImageUrl) {
+      try {
+        const parsed = JSON.parse(rawImageUrl);
+        const mediaItems = Array.isArray(parsed) ? parsed : [parsed];
+        allImages = mediaItems
+          .filter(i => (i.type === 'image' || !(i.data || i.url || '').includes('/video/')))
+          .map(i => i.data || i.url)
+          .filter(url => !!url);
+      } catch (e) {
+        // Fallback for comma-separated urls or single url
+        if (rawImageUrl.includes(',')) {
+          allImages = rawImageUrl.split(',').map((u: string) => u.trim()).filter((u: string) => !!u);
+        } else if (!rawImageUrl.includes('/video/') && !rawImageUrl.startsWith('[')) {
+          allImages = [rawImageUrl];
+        }
+      }
+    }
+
     // Fallback: Generate from content if script is missing or invalid
     if (finalScenes.length === 0) {
-      const gen = generateScriptFromText(article.contentSnippet || article.title, article.imageUrl);
+      const gen = generateScriptFromText(article.contentSnippet || article.title, allImages[0] || article.imageUrl);
       finalScenes = gen.scenes;
+    }
+
+    // Distribute images sequentially across scenes
+    if (allImages.length > 0 && finalScenes.length > 0) {
+      finalScenes = finalScenes.map((scene, idx) => ({
+        ...scene,
+        imageUrl: allImages[idx % allImages.length]
+      }));
     }
 
     // Get global default template if not specified
@@ -890,6 +980,38 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
         script = article.script as any;
         if (title === 'Untitled Video') title = article.title;
       }
+    }
+
+    // 2.5 Distribute all available images sequentially across scenes
+    try {
+      const article = articleId ? await prisma.article.findUnique({ where: { id: articleId } }) : null;
+      let allImages: string[] = [];
+      const rawImageUrl = customImageUrl || article?.imageUrl;
+      if (rawImageUrl) {
+        try {
+          const parsed = JSON.parse(rawImageUrl);
+          const mediaItems = Array.isArray(parsed) ? parsed : [parsed];
+          allImages = mediaItems
+            .filter(i => (i.type === 'image' || !(i.data || i.url || '').includes('/video/')))
+            .map(i => i.data || i.url)
+            .filter(url => !!url);
+        } catch (e) {
+          if (rawImageUrl.includes(',')) {
+            allImages = rawImageUrl.split(',').map((u: string) => u.trim()).filter((u: string) => !!u);
+          } else if (!rawImageUrl.includes('/video/') && !rawImageUrl.startsWith('[')) {
+            allImages = [rawImageUrl];
+          }
+        }
+      }
+
+      if (allImages.length > 0 && script.scenes && Array.isArray(script.scenes)) {
+        script.scenes = script.scenes.map((scene: any, idx: number) => ({
+          ...scene,
+          imageUrl: allImages[idx % allImages.length]
+        }));
+      }
+    } catch (err) {
+      console.warn('[PIPELINE] Failed to distribute scenes images, continuing with original:', err);
     }
 
     if (!script || !script.scenes || script.scenes.length === 0) {
