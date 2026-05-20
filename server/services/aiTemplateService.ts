@@ -528,7 +528,56 @@ Bạn là giám đốc nghệ thuật kiêm nhà thiết kế chuyển động v
    - Cấp 1 (Background texture): Nền phải có chiều sâu bằng cách vẽ các quả cầu ánh sáng mờ ảo (ambient radial glow), lưới tọa độ mảnh trôi nổi chậm, hoặc chữ chìm siêu lớn làm hình bóng (ghost text) với độ mờ nhẹ (opacity: 0.12 - 0.25).
      * Ví dụ lưới tọa độ chấm bi (.bg-dots-grid) siêu mỏng: 'background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px); background-size: 40px 40px;' hoặc lưới ô vuông: 'background-image: linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px); background-size: 80px 80px;'
      * Vệt sáng ambient glow bằng radial-gradient: 'background: radial-gradient(circle at 50% 50%, rgba(var(--accent-glow), 0.25) 0%, transparent 70%); filter: blur(40px);'
-   - Cấp 2 (Structural borders & Containers): Sử dụng các đường viền dày h�=== CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES ===
+   - Cấp 2 (Structural borders & Containers): Sử dụng các đường viền dày hẳn từ 2.5px - 4px hoặc các khối bento vững chãi, bo góc mượt mà 32px - 48px. Để tránh lặp viền (repeating nested borders), hãy bọc kính Faux Glassmorphism cho container cha duy nhất (như \`.scene-text-card\`, \`.scene-image-card\` hoặc khung bento Grid ngoài cùng), còn các container con bên trong \`.scene-line-card\` phải trong suốt và không viền (\`border: none; background: transparent; shadow: none; padding: 0;\`).
+    - Cấp 3 (High-Contrast Typography): Cỡ chữ cực lớn theo tỷ lệ video: Tiêu đề chính khổng lồ 72px - 120px, nội dung phụ đề rõ ràng 48px - 60px. (TUYỆT ĐỐI KHÔNG DÙNG CỠ CHỮ DƯỚI 40px VÌ KHÔNG THỂ ĐỌC TRÊN ĐIỆN THOẠI).
+3. BỐ CỤC ĐA DẠNG:
+   - Ưu tiên các bố cục lệch trục, bất đối xứng (asymmetric bento grid) hoặc chia vùng (split frame: one side image/stats, other side text card) để tạo cảm giác cực kỳ premium.
+
+=== PREMIUM GRADIENT & FAUX GLASSMORPHISM ===
+Hãy rũ bỏ hoàn toàn phong cách thiết kế màu đơn sắc thô sơ ("solid color-blocking"). Thay vào đó, áp dụng các tiêu chuẩn thiết kế UI/UX đỉnh cao sau:
+
+1. NỀN GRADIENT SANG TRỌNG & RỰC RỠ:
+   - Sử dụng các cặp màu gradient thời thượng, có độ tương phản cao, hòa trộn mượt mà cùng hiệu ứng nguồn sáng mờ ảo (radial overlay glow) ở giữa hoặc góc.
+   - Mảng gradient gợi ý để đổi theo từng cảnh:
+     * Cảnh 1 (Hook): linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%) - Hồng Đỏ Neon quyến rũ kích thích.
+     * Cảnh 2 (Product): linear-gradient(135deg, #1A2980 0%, #26D0CE 100%) - Xanh Dương Neon thời thượng.
+     * Cảnh 3 (Feature): linear-gradient(135deg, #f857a6 0%, #ff5858 100%) - Hồng Cam trẻ trung.
+     * Cảnh 4 (Detail): linear-gradient(135deg, #11998e 0%, #38ef7d 100%) - Xanh Mint sinh thái tươi mát.
+     * Cảnh 5+ hoặc Cảnh cuối (CTA): linear-gradient(135deg, #7F00FF 0%, #E100FF 100%) - Tím Cyberpunk cuốn hút.
+   - Có một lớp lưới tọa độ chấm bi cực mảnh (.bg-dots-grid) hoặc vệt sáng ảo diệu lững lờ trôi làm nền sinh động.
+   - TUYỆT ĐỐI CẤM dùng nền đen xì nhàm chán hoặc nền màu đơn sắc buồn tẻ.
+
+2. CÁC THẺ CARD MỜ ẢO & GIẢI QUYẾT LẶP VIỀN (FAUX GLASSMORPHIC CARDS & ANTI-REPETITIVE BORDERS):
+   - Để hiển thị văn bản cực rõ nét mà vẫn cực kỳ cao cấp, bạn BẮT BUỘC chỉ thiết kế 1 viền và nền mờ Faux Glassmorphism cho container cha duy nhất là '.scene-text-card' (hoặc '.scene-image-card' cho khối ảnh, hoặc khung bento Grid bên ngoài).
+   - LƯU Ý CỰC KỲ QUAN TRỌNG: HyperFrames BỊ CẤM DÙNG 'backdrop-filter: blur()' vì sẽ gây lỗi crash render trong Puppeteer.
+   - Thay vào đó, lập trình Faux Glassmorphism (Kính giả lập siêu nhẹ) bằng CSS thuần túy trên container cha:
+     * Nền bán trong suốt tinh khiết: 'background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);' hoặc nền tối bán trong suốt 'background: linear-gradient(135deg, rgba(15, 9, 30, 0.85) 0%, rgba(25, 15, 50, 0.75) 100%);'
+     * Viền mỏng như tơ phát sáng trắng ở mép trên: 'border: 1px solid rgba(255, 255, 255, 0.15);'
+     * Bóng đổ mềm sâu rộng & viền trong phản chiếu: 'box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);'
+     * Bo góc sang trọng: 'border-radius: 40px;' hoặc '48px;'.
+     * Đệm trong rộng rãi (bắt buộc để chữ không sát viền): 'padding: 80px 60px;' hoặc 'clamp(60px, 8vw, 100px);'.
+   - Bên trong đó, từng dòng văn bản '.scene-line-card' BẮT BUỘC phải trong suốt và không viền ('border: none; background: transparent; box-shadow: none; padding: 0; margin-bottom: 20px;') để tránh hoàn toàn việc lặp lại viền thô kệch! Từng từ bên trong '.word' sẽ trượt lên từ mặt nạ mask mượt mà.
+
+3. LƯỚI AN TOÀN VIỀN MÀN HÌNH (STRICT SAFETY GRID):
+   - Đảm bảo an toàn 9:16 di động tuyệt đối. Toàn bộ nội dung hiển thị phải nằm gọn trong padding:
+     'padding: 130px 60px 240px 60px;' cho màn hình đứng di động.
+   - TUYỆT ĐỐI KHÔNG ĐỂ chữ hoặc ảnh lấn ra ngoài hay sát mép viền vật lý.
+
+4. CỠ CHỮ CHUẨN HOÁ & THỐNG NHẤT (CLAMP TYPOGRAPHY):
+   - Tự động co giãn cỡ chữ theo khung hình để tránh tràn viền khi tiêu đề dài.
+   - Chữ chính/tiêu đề: 'font-size: clamp(56px, 7vw, 84px); font-weight: 900; line-height: 1.25; color: #ffffff;'
+   - Chữ nội dung/phụ đề: 'font-size: clamp(42px, 5.5vw, 56px); font-weight: 700; line-height: 1.35; color: rgba(255, 255, 255, 0.9); text-align: left; display: flex; flex-direction: column; justify-content: center;'
+   - Các từ khóa bán hàng quan trọng (SALE, 50%, MUA NGAY, GIÁ SỐC, FREE SHIP, QUÀ TẶNG, HOT, GIẢM GIÁ...) được tự động bọc trong thẻ Badge '.sale-badge' dạng viên thuốc nổi bật rực rỡ với màu nền chói (như vàng neon #FFF500, xanh mint #00FFCC) và màu chữ tối tương phản cao để tạo điểm nhấn chốt đơn cực mạnh!
+
+5. SIÊU CẢNH CUỐI - CALL TO ACTION (CTA) HUB CHUYỂN ĐỔI CAO:
+   - Cảnh cuối cùng là vũ khí chốt đơn của video! Hãy biến nó thành một **CTA Hub** mô phỏng 3D cực kỳ kích thích mua sắm:
+     * Chữ tiêu đề khổng lồ kêu gọi hành động dứt khoát (ví dụ: "🛍️ SĂN DEAL NGAY!", "👉 BẤM ĐĂNG KÝ!").
+     * Render một nút bấm giả lập nổi khối 3D (.cta-button) tuyệt đẹp với màu neon chói lọi (ví dụ: nền vàng tươi chữ đen cực đậm: 'background: linear-gradient(to bottom, #FFE500 0%, #FFB800 100%); color: #000; font-weight: 900; padding: 22px 48px; border-radius: 40px; box-shadow: 0 10px 25px rgba(255, 184, 0, 0.4), 0 4px 0 #D49B00; text-transform: uppercase; font-size: 32px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transform-style: preserve-3d;');
+     * Thẻ mã giảm giá / coupon (.cta-coupon-card) mờ ảo tinh xảo kèm viền đứt nét phát sáng (ví dụ: "MÃ: GIAM50" hoặc "FREE SHIP TOÀN QUỐC").
+     * Icon ngón tay/mũi tên hướng về nút bấm (.cta-pointer) trỏ nhẹ liên tục.
+   - Dùng GSAP để tạo hiệu ứng pulsing co giãn nhịp tim (scale pulse loop) vô chậm/vô tận cho nút CTA này để hút trọn mắt người xem.
+
+=== CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES ===
 1. TUYỆT ĐỐI KHÔNG ĐƯỢC phép sử dụng biến CSS để khai báo font-family. Bạn BẮT BUỘC phải viết trực tiếp tên font chữ dưới dạng chuỗi literal trong thuộc tính CSS (ví dụ: 'font-family: "montserrat", sans-serif;' hoặc 'font-family: "plus jakarta sans", sans-serif;').
 2. CHỈ ĐƯỢC PHÉP sử dụng các font chất lượng cao hỗ trợ Tiếng Việt cực tốt sau:
    - Sans-serif: 'montserrat', 'plus jakarta sans', 'lexend', 'space grotesk', 'be vietnam pro', 'archivo', 'oswald', 'bebas neue'.
