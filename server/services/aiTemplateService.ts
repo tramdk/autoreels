@@ -527,36 +527,39 @@ Dưới đây là thông tin chi tiết về kịch bản video để bạn phâ
 
 Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html quảng cáo sản phẩm hoàn toàn mới, standalone, hoàn chỉnh 100% để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. 
 
-=== YÊU CẦU THIẾT KẾ ĐỘC QUYỀN PROMO - KHÁC HOÀN TOÀN TEMPLATE DYNAMIC ===
-Để tạo ra một video đậm chất quảng cáo, thúc giục mua sắm, bạn BẮT BUỘC phải tuân thủ các quy tắc thiết kế thương mại cao cấp sau đây:
+=== PHONG CÁCH THIẾT KẾ ĐỘC QUYỀN PROMO (BLACK FRIDAY & PREMIUM EDITORIAL) ===
+Để tạo ra một video đậm chất quảng cáo chuyên nghiệp, thời thượng giống như các mẫu Black Friday/Cyber Monday của Clipchamp, bạn BẮT BUỘC phải tuân thủ các quy tắc thiết kế thương mại cao cấp sau đây:
 
-1. DẢI CHỮ CHẠY LIÊN TỤC (TICKER TAPES / RUNNING MARQUEE):
-   - Thiết kế hai dải băng chạy chữ liên tục ở trên và dưới màn hình (ví dụ: trên là sát mép trên logo, dưới là sát mép trên progress bar).
-   - Dải chữ này có nền màu solid rực rỡ (như vàng neon #fff000 hoặc hồng neon #ff0055), chữ màu đen viết hoa siêu dày (font-weight: 900), cỡ chữ 14px-16px, nghiêng chéo nhẹ (rotate(-1deg) hoặc rotate(1deg)).
-   - Nội dung chữ chạy liên tục: "SIÊU SALE • HOT DEAL • MUA NGAY • GIÁ SỐC • ĐẶT HÀNG NGAY • SALE 50% • SỐ LƯỢNG CÓ HẠN • FREE SHIP".
-   - Viết CSS Keyframe hoạt ảnh marquee trượt ngang vô tận mượt mà.
+1. BẢNG MÀU EDITORIAL SANG TRỌNG & HIGH-CONTRAST:
+   - Tông màu nền chủ đạo là đen tuyền huyền bí hoặc đen xám obsidian thẳm (#060609, #0a0a0f).
+   - Màu nhấn Accent rực rỡ, tương phản tuyệt đối: Neon Pink (#ff0055), Electric Cyan (#00f2ff), Neon Yellow (#e2ff3b), Gold/Metallic Amber (#ffd700).
 
-2. TIA SÁNG QUAY TRÒN & MESH GRADIENT NỀN (COMMERCIAL SUNBURST BACKGROUND):
-   - Tạo một lớp '.sunburst' ở dưới cùng nền (bên trong #bg-container). Lớp này có dạng các tia sáng tỏa ra quay tròn liên tục.
-   - CSS mẫu: 
-     .sunburst { position: absolute; top: 50%; left: 50%; width: 220%; height: 220%; background: repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.02) 0deg 15deg, transparent 15deg 30deg); transform: translate(-50%, -50%); animation: rotate-sunburst 45s linear infinite; z-index: 2; }
-     @keyframes rotate-sunburst { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
-   - Kết hợp với màu nền Radial Mesh Gradient tối sâu thẳm sang trọng phía dưới để các tia sáng phát huy tác dụng tốt nhất (ví dụ: radial-gradient(circle at center, #1b0a2a 0%, #050208 100%)).
+2. NỀN GỒM ÁNH SÁNG KHUẾCH TÁN & Ô LƯỚI KỸ THUẬT SỐ (AMBIENT GLOW & DIGITAL GRID):
+   - TUYỆT ĐỐI CẤM sử dụng các họa tiết tia mặt trời xoay tròn (sunburst conic gradient) rẻ tiền kiểu biểu ngữ quảng cáo cũ.
+   - Nền phải có một lớp phủ ô lưới kỹ thuật số mờ mịn (.grid-overlay) ở mức opacity cực thấp (0.015) để tạo chiều sâu công nghệ hiện đại.
+   - Sử dụng các quả cầu ánh sáng khuếch tán mờ ảo (.ambient-glow-1 và .ambient-glow-2) đổi màu hoặc di chuyển nhẹ ở góc màn hình tạo nên không gian điện ảnh cao cấp (Radial Gradient mờ).
 
-3. THIẾT KẾ PHIẾU GIẢM GIÁ (COUPON DASHED BENTO STYLE):
-   - Khác biệt hoàn toàn với viền đặc của dynamic template, các thẻ chữ của Promo Template ('.promo-coupon-card') BẮT BUỘC có viền đứt nét dạng phiếu mua hàng (voucher/coupon): 'border: 2.5px dashed var(--accent-neon);'.
-   - Viền nét đứt neon tạo cảm giác đây là một ưu đãi đặc quyền, giảm giá.
-   - Nền thẻ dùng màu tối mờ sang trọng: 'background: rgba(12, 12, 20, 0.95);'. Tuyệt đối CẤM sử dụng 'backdrop-filter'.
-   - Thẻ coupon này có bóng đổ màu neon mờ nhẹ (ví dụ: box-shadow: 0 10px 30px rgba(255, 0, 85, 0.2);).
+3. DẢI BĂNG CHỮ MARQUEE LỊCH LÃM (ELEGANT EDITORIAL TICKER TAPES):
+   - Thiết kế hai dải chữ chạy liên tục ở sát mép trên và mép dưới khung hình.
+   - Dải chữ này có nền màu đen nhám (matte black) hoặc trắng bạc, chữ màu tương phản viết hoa siêu dày (font-weight: 900), cỡ chữ nhỏ gọn (12px-14px) nhưng độ dãn chữ cực lớn (letter-spacing: 5px) tạo phong cách thời trang cao cấp.
+   - Biên viền dải chữ mỏng neon phát sáng (border-top/bottom: 1px solid rgba(255, 255, 255, 0.08)).
+   - Chữ chạy liên tục: "BLACK FRIDAY SALE • LIMITED TIME • SHOP NOW • UP TO 50% OFF • NEW ARRIVALS • FREE SHIPPING •".
 
-4. TỰ ĐỘNG BỌC BADGE CHO TỪ KHÓA CHỐT SALE (KEYWORD BADGE HIGHLIGHTER):
-   - Trong code Javascript hiển thị text, bạn phải viết hàm tự động dò tìm các từ khóa liên quan đến bán hàng/chốt đơn (như "SALE", "50%", "GIÁ SỐC", "MUA NGAY", "CHỐT ĐƠN", "KHUYẾN MÃI", "HOT", "FREE SHIP") và bọc chúng trong thẻ \`<span class="sale-badge">Từ khóa</span>\`.
-   - Lớp '.sale-badge' có CSS nổi bật rực rỡ: chữ màu đen, nền solid màu vàng neon rực rỡ hoặc đỏ rực rỡ, font viết hoa cực béo (Montserrat Black), padding 6px 14px, bo góc 8px, nghiêng chéo nhẹ (rotate(-2deg)), và hoạt ảnh co giãn đập nhịp liên tục (pulse).
+4. THIẾT KẾ THÀNH THẺ CARD GIAO DIỆN PREMIUM (SOLID UI BENTO CARDS):
+   - TUYỆT ĐỐI CẤM sử dụng các loại viền đứt nét (dashed lines) hay phong cách coupon học sinh thô kệch.
+   - Toàn bộ khối chữ và ảnh sản phẩm phải được bọc trong các chiếc thẻ card thiết kế dạng giao diện thiết bị cao cấp (Premium UI card):
+     * Nền thẻ tối đặc hoặc trong suốt nhẹ: 'background: rgba(13, 13, 18, 0.88);'.
+     * Viền thẻ liền cực kỳ mỏng mảnh tinh tế: 'border: 1px solid rgba(255, 255, 255, 0.08);'.
+     * Bo góc mịn màng (16px), đổ bóng đen dày tạo chiều sâu tuyệt vời (.promo-card).
+   - Thêm hiệu ứng quét bóng sáng kim loại chéo chạy qua mặt card sản phẩm hoặc chữ (.glare-swipe) định kỳ 3.5 giây một lần để tạo độ sang xịn.
 
-5. HIỆU ỨNG GSAP POP & BOUNCE CỰC MẠNH:
-   - Thay vì chạy chữ từng từ rườm rà, Promo Template yêu cầu hiện cả dòng hoặc cả cụm chữ trong coupon card xuất hiện đồng thời cực nhanh, giật gân.
-   - Các coupon card bay lên hoặc phóng to nhanh bằng hiệu ứng đàn hồi: 'ease: "back.out(1.5)"'.
-   - Các logo badge, discount ribbon phóng to nhảy lò xo: 'ease: "elastic.out(1.1, 0.45)"'.
+5. TỰ ĐỘNG HIGHLIGHT TỪ KHÓA BÁN HÀNG VỚI HUY HIỆU SLANTED BADGES:
+   - Viết hàm Javascript tự động dò tìm các từ khóa bán hàng (như "SALE", "50%", "GIÁ SỐC", "MUA NGAY", "CHỐT ĐƠN", "KHUYẾN MÃI", "FREE SHIP", "UP TO", "LIMITED") và bọc chúng trong thẻ \`<span class="sale-badge">Từ khóa</span>\`.
+   - Lớp '.sale-badge' có CSS nổi bật vượt trội: Chữ đen dày béo trên nền khối màu neon vàng (#fff000), đỏ coral (#ff0055) hoặc trắng tinh khôi, nghiêng nhẹ (transform: rotate(-2deg)), co giãn nhẹ (pulse animation).
+
+6. GSAP MASK REVEAL EFFECT (TRƯỢT CHỮ TRONG MẶT NẠ):
+   - Các khối card sản phẩm trượt từ dưới lên và phóng to êm ái: 'ease: "power3.out"'.
+   - Từng dòng chữ chính hiển thị theo kiểu che giấu mặt nạ (Mask Reveal Effect): Mỗi từ bọc trong một container 'overflow: hidden; display: inline-block;' và chữ trượt dọc từ dưới lên (translateY(110%) về 0%) đem lại cảm giác sang trọng như quảng cáo Apple/Nike.
 
 === CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES ===
 1. TUYỆT ĐỐI KHÔNG ĐƯỢC phép sử dụng biến CSS để khai báo font-family. Bạn BẮT BUỘC phải viết trực tiếp tên font chữ dưới dạng chuỗi literal trong thuộc tính CSS (ví dụ: 'font-family: "montserrat", sans-serif;').
@@ -620,20 +623,42 @@ function splitTextToLineCards(text) {
   return lines.map(function(line) {
     var trimmed = line.trim();
     if (!trimmed) return '';
-    return '<div class="promo-coupon-card shine-effect">' + trimmed + '</div>';
+    
+    // Tách từng từ bọc trong mask để trượt dọc mượt mà (Mask Reveal Effect)
+    var wordsSpans = trimmed.split(' ').map(function(word) {
+      if (!word.trim()) return '';
+      return '<span class="word-mask" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.25em;"><span class="word" style="display:inline-block; transform:translateY(110%); opacity:0; will-change:transform, opacity;">' + word + '</span></span>';
+    }).join(' ');
+    
+    return '<div class="promo-card shine-effect">' + wordsSpans + '</div>';
   }).join('');
 }
 
 if (document.getElementById('bg-container')) {
-  // Giữ lại lớp sunburst tĩnh trong bg-container
-  var sunburstEl = document.querySelector('.sunburst');
+  // Giữ lại các lớp nền tĩnh trong bg-container
+  var gridOverlay = document.querySelector('.grid-overlay');
+  var glow1 = document.querySelector('.ambient-glow-1');
+  var glow2 = document.querySelector('.ambient-glow-2');
+  
   document.getElementById('bg-container').innerHTML = '';
-  if (sunburstEl) {
-    document.getElementById('bg-container').appendChild(sunburstEl);
-  } else {
-    var div = document.createElement('div');
-    div.className = 'sunburst';
-    document.getElementById('bg-container').appendChild(div);
+  
+  if (gridOverlay) document.getElementById('bg-container').appendChild(gridOverlay);
+  else {
+    var divGrid = document.createElement('div');
+    divGrid.className = 'grid-overlay';
+    document.getElementById('bg-container').appendChild(divGrid);
+  }
+  if (glow1) document.getElementById('bg-container').appendChild(glow1);
+  else {
+    var divG1 = document.createElement('div');
+    divG1.className = 'ambient-glow-1';
+    document.getElementById('bg-container').appendChild(divG1);
+  }
+  if (glow2) document.getElementById('bg-container').appendChild(glow2);
+  else {
+    var divG2 = document.createElement('div');
+    divG2.className = 'ambient-glow-2';
+    document.getElementById('bg-container').appendChild(divG2);
   }
 }
 document.getElementById('scene-container').innerHTML = '';
@@ -643,7 +668,7 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   var duration = SCENE_DURATIONS[i] || 5;
   var sceneId = 'scene-' + i;
 
-  // 1. Tạo lớp ảnh nền mờ ảo (B-roll Background Blur Layer)
+  // 1. Tạo lớp ảnh nền mờ ảo đồng bộ (B-roll Background Blur Layer)
   var bgEl = null;
   if (document.getElementById('bg-container')) {
     bgEl = document.createElement('div');
@@ -665,14 +690,14 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   if (scene.imageUrl) {
     htmlContent += '<div class="scene-image-card shine-effect">';
     htmlContent += '  <img class="scene-image" src="' + scene.imageUrl + '" />';
-    htmlContent += '  <span class="promo-badge-ribbon hot">HOT DEAL</span>';
+    htmlContent += '  <span class="promo-badge-ribbon hot">BLACK FRIDAY</span>';
     htmlContent += '</div>';
     htmlContent += '<div class="scene-text-card">';
     htmlContent += '  <div class="scene-text highlight-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '</div>';
   } else {
     htmlContent += '<div class="scene-text-card full-size shine-effect">';
-    htmlContent += '  <span class="promo-badge-ribbon cta">SIÊU SALE</span>';
+    htmlContent += '  <span class="promo-badge-ribbon cta">OFFER TIME</span>';
     htmlContent += '  <div class="scene-text centered-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '</div>';
   }
@@ -688,10 +713,10 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     tl.set(bgEl, { display: 'block', visibility: 'visible', zIndex: i + 1 }, 0);
   }
   
-  // A. Entrance Animation cho toàn cảnh: Zoom nhanh
+  // A. Entrance Animation cho toàn cảnh: Slide-up và mờ dần mượt mà
   tl.fromTo(sceneEl, 
-    { opacity: 0, scale: 1.08 },
-    { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }, 
+    { opacity: 0, y: 30, scale: 0.98 },
+    { opacity: 1, y: 0, scale: 1, duration: 0.65, ease: "power3.out" }, 
     0
   );
 
@@ -699,7 +724,7 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   if (bgEl) {
     tl.fromTo(bgEl,
       { opacity: 0 },
-      { opacity: 1, duration: 0.6, ease: "power2.out" },
+      { opacity: 0.85, duration: 0.65, ease: "power2.out" },
       0
     );
   }
@@ -714,42 +739,62 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     );
   }
 
-  // D. Staggered Bounce cho khối ảnh sản phẩm thương mại
+  // D. Smooth Slide cho khối ảnh sản phẩm
   var imgCard = sceneEl.querySelector('.scene-image-card');
   if (imgCard) {
     tl.fromTo(imgCard, 
-      { opacity: 0, y: 70, scale: 0.75, rotation: -3 },
-      { opacity: 1, y: 0, scale: 1, rotation: 0, duration: 0.8, ease: "back.out(1.5)" },
+      { opacity: 0, y: 50, scale: 0.94 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out" },
       0.05
     );
   }
 
-  // E. Elastic-In cho các nhãn discount ribbon hoặc sale-badge
-  var badges = sceneEl.querySelectorAll('.promo-badge-ribbon, .sale-badge');
+  // E. Elastic Pop-In cho các nhãn sticker và ribbon
+  var badges = sceneEl.querySelectorAll('.promo-badge-ribbon');
   if (badges.length > 0) {
     tl.fromTo(badges,
-      { opacity: 0, scale: 0, rotation: -20 },
-      { opacity: 1, scale: 1, rotation: 0, duration: 0.75, stagger: 0.08, ease: "elastic.out(1.1, 0.45)" },
+      { opacity: 0, scale: 0, rotation: -12 },
+      { opacity: 1, scale: 1, rotation: 0, duration: 0.7, ease: "elastic.out(1.1, 0.5)" },
+      0.2
+    );
+  }
+
+  // F. Slide up cho các thẻ Promo Card
+  var cards = sceneEl.querySelectorAll('.promo-card');
+  if (cards.length > 0) {
+    tl.fromTo(cards, 
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power3.out" },
       0.15
     );
   }
 
-  // F. Entrance animation cho các thẻ Coupon nét đứt (Coupon card spring in)
-  var coupons = sceneEl.querySelectorAll('.promo-coupon-card');
-  if (coupons.length > 0) {
-    tl.fromTo(coupons, 
-      { opacity: 0, y: 40, scale: 0.9 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.65, stagger: 0.1, ease: "back.out(1.4)" },
-      0.1
+  // G. Word mask slide up (Mask Reveal Effect)
+  var words = sceneEl.querySelectorAll('.word');
+  var saleBadges = sceneEl.querySelectorAll('.sale-badge');
+  if (words.length > 0) {
+    tl.to(words, {
+      y: '0%',
+      opacity: 1,
+      duration: 0.5,
+      stagger: 0.02,
+      ease: "power2.out"
+    }, 0.25);
+  }
+  if (saleBadges.length > 0) {
+    tl.fromTo(saleBadges,
+      { scale: 0.75, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.5, stagger: 0.05, ease: "back.out(1.5)" },
+      0.3
     );
   }
 
-  // G. Exit Animation: Slide mượt và mờ nhanh ra sau
+  // H. Exit Animation: Slide mượt và mờ nhanh ra sau
   if (i < SCENES_DATA.length - 1) {
     tl.to(sceneEl, { 
       opacity: 0,
-      scale: 0.94,
-      y: 40,
+      scale: 0.96,
+      y: -30,
       duration: CROSSFADE,
       ease: "power2.in"
     }, duration - CROSSFADE);
