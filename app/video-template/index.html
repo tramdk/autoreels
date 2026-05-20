@@ -1,721 +1,411 @@
 <!DOCTYPE html>
 <html lang="vi"
-  style="--v-width: {{ WIDTH }}; --v-height: {{ HEIGHT }}; --v-logo-top: {{ LOGO_TOP }}; --v-logo-left: {{ LOGO_LEFT }}; --v-logo-size: {{ LOGO_SIZE }}; --v-logo-color: {{ LOGO_COLOR }}; --v-logo-show: {{ SHOW_LOGO }}; --v-tag-top: {{ TAG_TOP }}; --v-tag-left: {{ TAG_LEFT }}; --v-tag-size: {{ TAG_SIZE }}; --v-tag-color: {{ TAG_COLOR }}; --v-tag-bg: {{ TAG_BG }}; --v-tag-show: {{ SHOW_TAG }}; --v-show-datetime: {{ SHOW_DATETIME }}; --v-main-top: {{ MAIN_TOP }}; --v-main-left: {{ MAIN_LEFT }}; --v-content-gap: {{ CONTENT_GAP }}; --v-card-bg-color: {{ CARD_BG_COLOR }}; --v-card-border-top: {{ CARD_BORDER_TOP }}; --v-card-border-bottom: {{ CARD_BORDER_BOTTOM }}; --v-card-border-left: {{ CARD_BORDER_LEFT }}; --v-card-border-right: {{ CARD_BORDER_RIGHT }}; --v-card-border-color: {{ CARD_BORDER_COLOR }}; --v-card-border-radius: {{ CARD_BORDER_RADIUS }}; --v-divider-color: {{ DIVIDER_COLOR }}; --v-hook-size: {{ HOOK_SIZE }}; --v-hook-color: {{ HOOK_COLOR }}; --v-body-size: {{ BODY_SIZE }}; --v-body-color: {{ BODY_COLOR }}; --v-progress-show: {{ SHOW_PROGRESS_BAR }};">
-
+  style="--v-width: {{ WIDTH }}; --v-height: {{ HEIGHT }}; --v-accent: {{ ACCENT_COLOR }}; --v-secondary: {{ SECONDARY_COLOR }}; --v-divider: {{ DIVIDER_COLOR }}; --v-logo-color: {{ LOGO_COLOR }}; --v-logo-size: {{ LOGO_SIZE }}; --v-hook-color: {{ HOOK_COLOR }}; --v-hook-size: {{ HOOK_SIZE }}; --v-body-color: {{ BODY_COLOR }}; --v-body-size: {{ BODY_SIZE }}; --v-tag-color: {{ TAG_COLOR }}; --v-tag-bg: {{ TAG_BG }}; --v-tag-size: {{ TAG_SIZE }}; --v-content-gap: {{ CONTENT_GAP }}; --v-line-height: {{ LINE_HEIGHT }};">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1080, user-scalable=no">
-  <title>AutoReels UltraPremium Dynamic Template</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&family=Inter:wght@400;600;700;800&display=swap"
-    rel="stylesheet">
-  <script src="/assets/js/gsap.min.js"></script>
+  <meta name="viewport" content="width={{ WIDTH }}, user-scalable=no">
+  <title>Lumina Template</title>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
   <style>
-    :root {
-      --cqmin: min({{ WIDTH }} * 1px, {{ HEIGHT }} * 1px);
-      --accent-color: {{ ACCENT_COLOR }};
-      --secondary-color: {{ SECONDARY_COLOR }};
-      --divider-color: {{ DIVIDER_COLOR }};
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body,
-    html {
+    #preloader { position: absolute; width: 0; height: 0; overflow: hidden; opacity: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
       width: calc(var(--v-width) * 1px);
       height: calc(var(--v-height) * 1px);
       overflow: hidden;
-      background-color: #03050a;
-      font-family: {{ FONT_FAMILY }}, 'Plus Jakarta Sans', sans-serif;
-      line-height: {{ LINE_HEIGHT }};
+      background: #06080e;
+      font-family: {{ FONT_FAMILY }}, 'Inter', sans-serif;
     }
-
     #root {
       position: relative;
       width: 100%;
       height: 100%;
-      color: white;
+      color: #fff;
       overflow: hidden;
-      background-color: #03050a;
+      background: #06080e;
     }
-
-    /* Ambient Background Orbs */
-    #ambient-container {
+    #bg-layer {
+      position: absolute;
+      inset: -10%;
+      width: 120%;
+      height: 120%;
+      z-index: 0;
+    }
+    #bg-layer img {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
-      z-index: 1;
-      overflow: hidden;
-      pointer-events: none;
-    }
-
-    .ambient-orb {
-      position: absolute;
-      width: calc(var(--v-width) * 0.6px);
-      height: calc(var(--v-width) * 0.6px);
-      border-radius: 50%;
-      filter: blur(140px);
-      opacity: 0.12;
-      mix-blend-mode: screen;
-      will-change: transform;
-    }
-
-    .orb-1 {
-      top: -10%;
-      left: -10%;
-      background: var(--accent-color);
-    }
-
-    .orb-2 {
-      bottom: -15%;
-      right: -10%;
-      background: var(--secondary-color);
-    }
-
-    .orb-3 {
-      top: 40%;
-      left: 30%;
-      background: var(--divider-color);
-      opacity: 0.08;
-    }
-
-    /* Subtle Grid Overlay */
-    .grid-overlay {
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-      background-size: 50px 50px;
-      z-index: 2;
-      pointer-events: none;
-      opacity: 0.7;
-    }
-
-    /* Animated Film Grain */
-    @keyframes hf-grain-noise {
-      0%, 100% { transform: translate(0, 0); }
-      10% { transform: translate(-1%, -1%); }
-      20% { transform: translate(-2%, 1%); }
-      30% { transform: translate(1%, -2%); }
-      40% { transform: translate(-1%, 2%); }
-      50% { transform: translate(-2%, 1%); }
-      60% { transform: translate(1%, 1%); }
-      70% { transform: translate(1%, -2%); }
-      80% { transform: translate(-1%, 1%); }
-      90% { transform: translate(0%, -1%); }
-    }
-
-    .film-grain {
-      position: absolute;
-      top: -5%; left: -5%; width: 110%; height: 110%;
-      opacity: 0.06;
-      mix-blend-mode: overlay;
-      z-index: 800;
-      pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-      animation: hf-grain-noise 0.6s steps(1) infinite;
-    }
-
-    .vignette-overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 700;
-      pointer-events: none;
-      background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.55) 100%);
-    }
-
-    /* Background Layers */
-    .bg-layer {
-      position: absolute;
-      top: -5%;
-      left: -5%;
-      width: 110%;
-      height: 110%;
       object-fit: cover;
-      z-index: 0;
       will-change: transform, opacity;
     }
-
     #bg-overlay {
       position: absolute;
       inset: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(180deg, 
-        rgba(3, 5, 10, 0.2) 0%, 
-        rgba(3, 5, 10, 0.5) 40%, 
-        rgba(3, 5, 10, 0.85) 100%);
       z-index: 1;
+      background: linear-gradient(180deg,
+        rgba(6,8,14,0.15) 0%,
+        rgba(6,8,14,0.50) 50%,
+        rgba(6,8,14,0.90) 100%);
     }
-
-    /* Positioning Utility */
-    .pos-el {
+    .ambient-orb {
       position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      mix-blend-mode: screen;
+      pointer-events: none;
+      will-change: transform;
+    }
+    .orb-1 { width: 55%; height: 55%; top: -20%; right: -20%; background: var(--v-accent); opacity: 0.10; }
+    .orb-2 { width: 45%; height: 45%; bottom: -15%; left: -15%; background: var(--v-secondary); opacity: 0.08; }
+    .orb-3 { width: 30%; height: 30%; top: 35%; left: 35%; background: var(--v-divider); opacity: 0.05; }
+    .vignette {
+      position: absolute; inset: 0; z-index: 2;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.50) 100%);
+      pointer-events: none;
+    }
+    .brand-header {
+      position: absolute;
+      top: {{ LOGO_CSS_TOP }};
+      left: {{ LOGO_CSS_LEFT }};
+      transform: {{ LOGO_CSS_TRANSFORM }};
       z-index: 100;
-    }
-
-    /* Brand Header */
-    #brand-header {
-      top: calc(var(--v-logo-top) * 1px);
-      left: 50%;
-      transform: translateX(-50%) translateX(calc(var(--v-logo-left) * 1px));
-      display: var(--v-logo-show, flex);
+      display: {{ SHOW_LOGO }};
       align-items: center;
-      gap: 16px;
+      gap: 14px;
+      white-space: nowrap;
+      opacity: 0;
     }
-
-    #brand-logo-img {
-      display: {{ SHOW_LOGO_IMAGE }};
-      height: calc(var(--v-logo-size) * 1.2px);
+    .brand-logo-img {
+      height: calc(var(--v-logo-size) * 0.6px);
+      width: auto;
       object-fit: contain;
+      display: {{ SHOW_LOGO_IMAGE }};
     }
-
-    #brand-logo {
-      font-family: {{ FONT_FAMILY }}, 'Plus Jakarta Sans', sans-serif;
-      font-weight: 900;
-      font-size: calc(var(--v-logo-size) * 1px);
-      letter-spacing: 5px;
+    .brand-logo-text {
+      font-weight: 800;
+      font-size: calc(var(--v-logo-size) * 0.55px);
+      letter-spacing: 0.35em;
       text-transform: uppercase;
-      background: linear-gradient(135deg, var(--v-logo-color, #ffffff) 30%, var(--accent-color) 100%);
+      background: linear-gradient(135deg, #fff 30%, var(--v-accent) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
-      white-space: nowrap;
+      background-clip: text;
     }
-
-    /* Bottom Info & Tag */
-    #bottom-info {
-      top: calc(var(--v-tag-top) * 1px);
-      left: 50%;
-      transform: translateX(-50%) translateX(calc(var(--v-tag-left) * 1px));
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
+    .bottom-bar {
+      position: absolute;
+      bottom: {{ TAG_CSS_TOP }};
+      left: {{ TAG_CSS_LEFT }};
+      transform: {{ TAG_CSS_TRANSFORM }};
       z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      opacity: 0;
     }
-
-    #tag-badge {
-      padding: 14px 38px;
-      font-family: {{ FONT_FAMILY }}, 'Plus Jakarta Sans', sans-serif;
-      font-weight: 900;
-      font-size: calc(var(--v-tag-size) * 1px);
-      text-transform: uppercase;
-      --shimmer-pos: -100%;
-      background-image: linear-gradient(110deg, var(--v-tag-bg, #fff000) 30%, rgba(255, 255, 255, 0.5) 48%, var(--v-tag-bg, #fff000) 70%);
-      background-size: 250% 100%;
-      background-position: var(--shimmer-pos) 0%;
-      color: var(--v-tag-color, #000000);
-      border-radius: 50px;
-      letter-spacing: 2px;
-      display: var(--v-tag-show, flex);
-      white-space: nowrap;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    #datetime {
-      font-size: 24px;
-      color: rgba(255, 255, 255, 0.4);
+    .tag-badge {
+      display: {{ SHOW_TAG }};
+      padding: 10px 32px;
       font-weight: 800;
-      letter-spacing: 3px;
+      font-size: calc(var(--v-tag-size) * 0.5px);
       text-transform: uppercase;
-      display: var(--v-show-datetime, block);
-      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.15em;
+      color: var(--v-tag-color);
+      background: var(--v-tag-bg);
+      border-radius: 100px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.30);
+      white-space: nowrap;
     }
-
-    /* Scene Containers & Bento Cards */
+    .datetime {
+      display: {{ SHOW_DATETIME }};
+      font-size: calc(var(--v-tag-size) * 0.4px);
+      font-weight: 600;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      white-space: nowrap;
+    }
     #scene-container {
       position: absolute;
       inset: 0;
-      width: 100%;
-      height: 100%;
       z-index: 50;
+      display: flex;
+      align-items: {{ MAIN_CSS_ALIGN }};
+      justify-content: center;
+      text-align: {{ MAIN_CSS_TEXT_ALIGN }};
     }
-
     .scene-card {
       position: absolute;
-      top: calc(var(--v-main-top) * 1px);
-      left: 0;
       width: 100%;
-      padding: 70px calc(var(--v-main-left) * 1px);
+      max-width: min(88%, 1600px);
+      padding: 0 5%;
       display: none;
       flex-direction: column;
       gap: calc(var(--v-content-gap) * 1px);
       opacity: 0;
-      
-      /* Glowing Glassmorphism Bento Card Style */
-      background-color: var(--v-card-bg-color, rgba(8, 12, 24, 0.72));
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border-top: calc(var(--v-card-border-top) * 1px) solid var(--v-card-border-color, rgba(255, 255, 255, 0.08));
-      border-bottom: calc(var(--v-card-border-bottom) * 1px) solid var(--v-card-border-color, rgba(255, 255, 255, 0.08));
-      border-left: calc(var(--v-card-border-left) * 1px) solid var(--v-card-border-color, rgba(255, 255, 255, 0.08));
-      border-right: calc(var(--v-card-border-right) * 1px) solid var(--v-card-border-color, rgba(255, 255, 255, 0.08));
-      border-radius: calc(var(--v-card-border-radius) * 1px);
-      
-      box-shadow: 
-        0 40px 80px rgba(0, 0, 0, 0.6), 
-        inset 0 1px 1px rgba(255, 255, 255, 0.12),
-        0 0 50px rgba(255, 255, 255, 0.01);
-      
-      overflow: hidden;
-      will-change: transform, opacity;
     }
-
-    /* Support for disable card container style */
-    .scene-card.no-card-style {
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-    }
-
-    /* Soundwave Equalizer on Premium Card */
-    .audio-equalizer {
-      position: absolute;
-      top: 35px;
-      right: 45px;
-      display: flex;
-      align-items: flex-end;
-      gap: 4px;
-      height: 28px;
-      opacity: 0.65;
-    }
-
-    .eq-bar {
-      width: 4px;
-      background: var(--accent-color);
-      border-radius: 3px;
-      height: 6px;
-      will-change: height;
-    }
-
-    @keyframes eq-pulse-1 {
-      0%, 100% { height: 6px; }
-      50% { height: 26px; }
-    }
-    @keyframes eq-pulse-2 {
-      0%, 100% { height: 9px; }
-      50% { height: 32px; }
-    }
-    @keyframes eq-pulse-3 {
-      0%, 100% { height: 12px; }
-      50% { height: 20px; }
-    }
-    @keyframes eq-pulse-4 {
-      0%, 100% { height: 7px; }
-      50% { height: 24px; }
-    }
-
-    .eq-bar.bar-1 { animation: eq-pulse-1 0.75s ease-in-out infinite; }
-    .eq-bar.bar-2 { animation: eq-pulse-2 0.55s ease-in-out infinite; }
-    .eq-bar.bar-3 { animation: eq-pulse-3 0.65s ease-in-out infinite; }
-    .eq-bar.bar-4 { animation: eq-pulse-4 0.85s ease-in-out infinite; }
-
-    /* Scene Label & Badges */
-    .scene-label-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-
-    .scene-label-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--divider-color);
-      box-shadow: 0 0 10px var(--divider-color);
-    }
-
-    .scene-card.type-hook .scene-label {
-      font-family: {{ FONT_FAMILY }}, 'Plus Jakarta Sans', sans-serif;
-      font-weight: 800;
-      font-size: 26px;
-      letter-spacing: 5px;
-      color: var(--divider-color);
+    .scene-label {
+      font-weight: 700;
+      font-size: min(22px, 2.2vh);
+      letter-spacing: 0.30em;
       text-transform: uppercase;
+      color: var(--v-accent);
+      opacity: 0;
+      margin-bottom: 4px;
     }
-
-    .scene-card.type-outro .scene-cta-label {
-      font-family: {{ FONT_FAMILY }}, 'Plus Jakarta Sans', sans-serif;
-      font-weight: 800;
-      font-size: 28px;
-      letter-spacing: 6px;
-      color: var(--v-tag-bg, #fff000);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    /* Dynamic Highlights & Staggers */
-    .scene-text-container {
-      width: 100%;
-      overflow: hidden;
-    }
-
     .scene-text {
       width: 100%;
     }
-
-    /* Word wrapper for dynamic slide-up stagger */
     .word-wrapper {
       display: inline-block;
       overflow: hidden;
       vertical-align: bottom;
-      margin-right: 0.25em;
+      margin-right: 0.18em;
+      margin-bottom: -0.08em;
     }
-
     .word {
       display: inline-block;
       transform: translateY(105%);
       opacity: 0;
       will-change: transform, opacity;
     }
-
-    /* Gradient Highlight Keywords */
-    .word.highlight-word {
-      background: linear-gradient(135deg, var(--accent-color) 20%, var(--divider-color) 100%);
+    .word.accent-word {
+      background: linear-gradient(135deg, var(--v-accent) 0%, var(--v-secondary) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      font-weight: 900 !important;
-      filter: drop-shadow(0 2px 8px rgba(255,255,255,0.05));
+      background-clip: text;
     }
-
-    /* Fonts & Sizes */
     .scene-card.type-hook .scene-text {
-      font-family: {{ FONT_FAMILY }}, 'Plus Jakarta Sans', sans-serif;
       font-weight: 900;
-      font-size: calc(var(--v-hook-size) * 1px);
-      line-height: {{ LINE_HEIGHT }};
+      font-size: calc(var(--v-hook-size) * 0.9px);
+      line-height: var(--v-line-height);
       text-transform: uppercase;
-      color: var(--v-hook-color, #ffffff);
-      text-shadow: 0 4px 45px rgba(0, 0, 0, 0.45);
+      color: var(--v-hook-color);
+      text-shadow: 0 2px 30px rgba(0,0,0,0.30);
     }
-
     .scene-card.type-body .scene-text {
-      font-size: calc(var(--v-body-size) * 1px);
       font-weight: 700;
+      font-size: calc(var(--v-body-size) * 0.9px);
       line-height: 1.35;
-      color: var(--v-body-color, #ffffff);
-      text-shadow: 0 2px 25px rgba(0, 0, 0, 0.4);
+      color: var(--v-body-color);
+      text-shadow: 0 1px 20px rgba(0,0,0,0.25);
     }
-
     .scene-card.type-outro .scene-text {
-      font-size: calc(var(--v-body-size) * 1px);
+      font-weight: 800;
+      font-size: calc(var(--v-body-size) * 0.9px);
+      line-height: 1.30;
+      color: var(--v-body-color);
+    }
+    .cta-overline {
       font-weight: 700;
-      line-height: 1.35;
-      color: var(--v-body-color, #ffffff);
-      text-shadow: 0 2px 25px rgba(0, 0, 0, 0.4);
+      font-size: min(20px, 2vh);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--v-accent);
+      opacity: 0;
+      margin-bottom: 8px;
     }
-
-    /* Layout Accents */
-    .scene-accent-line {
-      width: 140px;
-      height: 6px;
+    .accent-divider {
+      width: 0;
+      height: 4px;
       border-radius: 4px;
-      background: linear-gradient(90deg, var(--divider-color), transparent);
-      margin-top: 15px;
+      background: linear-gradient(90deg, var(--v-accent), var(--v-secondary));
+      opacity: 0;
     }
-
-    .scene-bar {
-      width: 80px;
-      height: 6px;
-      border-radius: 4px;
-      background: var(--divider-color);
-      margin-bottom: 12px;
-    }
-
-    /* Alignment styles */
-    .main-align-center {
-      align-items: center;
-      text-align: center;
-    }
-
-    .main-align-right {
-      align-items: flex-end;
-      text-align: right;
-    }
-
-    .main-align-left {
-      align-items: flex-start;
-      text-align: left;
-    }
-
-    /* Dynamic Glowing Progress Bar */
-    .card-progress {
+    .scene-progress {
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.05);
+      height: 3px;
+      background: rgba(255,255,255,0.06);
       overflow: hidden;
-      display: var(--v-progress-show, block);
+      display: {{ SHOW_PROGRESS_BAR }};
     }
-
-    .card-progress-fill {
+    .scene-progress-fill {
       width: 0%;
       height: 100%;
-      background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
-      box-shadow: 0 0 10px var(--accent-color);
+      background: linear-gradient(90deg, var(--v-accent), var(--v-secondary));
+      box-shadow: 0 0 12px var(--v-accent);
       will-change: width;
     }
-
-    #preloader {
-      position: absolute;
-      width: 0;
-      height: 0;
-      overflow: hidden;
-      opacity: 0;
+    .scene-card.no-card-style {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
     }
   </style>
 </head>
-
 <body>
-  <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0"
-    data-duration="{{ DURATION }}">
-    <div id="preloader"></div>
-    <div id="bg-layers">
-      <img id="bg-1" class="bg-layer" src="{{BG_IMAGE_URL}}" style="opacity: {{BG_BRIGHTNESS}};" alt="">
-      <img id="bg-2" class="bg-layer" style="opacity: 0;" alt="">
+  <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0" data-duration="{{ DURATION }}">
+    <div id="bg-layer">
+      <img id="bg-1" style="opacity: 0; will-change: transform, opacity;" alt="" onerror="this.style.display='none'">
+      <img id="bg-2" style="opacity: 0; will-change: transform, opacity;" alt="" onerror="this.style.display='none'">
     </div>
     <div id="bg-overlay"></div>
-    <div class="grid-overlay"></div>
-    <div class="film-grain"></div>
-    <div class="vignette-overlay"></div>
-
-    <!-- Ambient floating glow mesh -->
-    <div id="ambient-container">
-      <div class="ambient-orb orb-1"></div>
-      <div class="ambient-orb orb-2"></div>
-      <div class="ambient-orb orb-3"></div>
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+    <div class="vignette"></div>
+    <div id="preloader"></div>
+    <div class="brand-header">
+      <img class="brand-logo-img" src="{{ LOGO_IMAGE }}" alt="">
+      <span class="brand-logo-text">{{ LOGO_TEXT }}</span>
     </div>
-
-    <!-- Brand Header -->
-    <div id="brand-header" class="pos-el">
-      <img id="brand-logo-img" src="{{LOGO_IMAGE}}" alt="logo" onerror="this.style.display='none'">
-      <h1 id="brand-logo">{{LOGO_TEXT}}</h1>
-    </div>
-
-    <!-- Content Bento Card Container -->
     <div id="scene-container"></div>
-
-    <!-- Bottom Badges & Datetime -->
-    <div id="bottom-info" class="pos-el">
-      <div id="tag-badge">{{TAG_TEXT}}</div>
-      <div id="datetime">{{DATETIME}}</div>
+    <div class="bottom-bar">
+      <div class="tag-badge">{{ TAG_TEXT }}</div>
+      <div class="datetime">{{ DATETIME }}</div>
     </div>
   </div>
-
   <script>
     var SCENES_DATA = JSON.parse('{{ SCENES_JSON }}');
     var SCENE_DURATIONS = JSON.parse('{{ SCENE_DURATIONS_JSON }}');
     var TOTAL_DURATION = parseFloat("{{ DURATION }}") || 15;
-    var MAIN_ALIGN = '{{MAIN_ALIGN}}';
-    var DEFAULT_BG = '{{BG_IMAGE_URL}}';
+    var DEFAULT_BG = "{{ BG_IMAGE_URL }}";
     var BG_BRIGHTNESS = parseFloat("{{ BG_BRIGHTNESS }}") || 0.45;
-    var SHOW_CARD = '{{SHOW_CARD}}';
+    var MAIN_ALIGN = "{{ MAIN_CSS_ALIGN }}";
+    var MAIN_TEXT_ALIGN = "{{ MAIN_CSS_TEXT_ALIGN }}";
 
-    // Preload images to avoid flickering during scene transitions
+    // Preload images
     (function preloadImages() {
       var urls = [DEFAULT_BG];
-      SCENES_DATA.forEach(function (s) { if (s.imageUrl) urls.push(s.imageUrl); });
-      var uniqueUrls = Array.from(new Set(urls.filter(Boolean)));
-      var preloader = document.getElementById('preloader');
-      uniqueUrls.forEach(function (url) {
-        var img = new Image();
-        img.src = url;
-        preloader.appendChild(img);
-      });
+      SCENES_DATA.forEach(function(s) { if (s.imageUrl) urls.push(s.imageUrl); });
+      var unique = Array.from(new Set(urls.filter(Boolean)));
+      var el = document.getElementById('preloader');
+      unique.forEach(function(url) { var img = new Image(); img.src = url; el.appendChild(img); });
     })();
-
-    window.__hf = { duration: TOTAL_DURATION, seek: function (t) { if (window._tl) window._tl.pause().seek(t); } };
   </script>
-
   <script>
-    try {
+    (function() {
       var scenes = SCENES_DATA;
       var n = scenes.length;
       var container = document.getElementById('scene-container');
       var hasDurations = SCENE_DURATIONS && SCENE_DURATIONS.length === n;
-
-      window._tl = gsap.timeline({ paused: true });
+      var tl = gsap.timeline({ paused: true });
+      window._tl = tl;
       window.__timelines = window.__timelines || {};
-      window.__timelines["main"] = window._tl;
-
-      // Brand elements intro
-      window._tl.from('#brand-header', { y: -45, opacity: 0, duration: 0.7, ease: 'power3.out' }, 0);
-      window._tl.from('#bottom-info', { y: 45, opacity: 0, duration: 0.7, ease: 'power3.out' }, 0.15);
-
-      // Slow ambient orbs floating drift animation
-      gsap.to(".orb-1", { x: 120, y: 150, duration: 15, repeat: -1, yoyo: true, ease: "sine.inOut" });
-      gsap.to(".orb-2", { x: -120, y: -100, duration: 18, repeat: -1, yoyo: true, ease: "sine.inOut" });
-      gsap.to(".orb-3", { x: 80, y: -80, scale: 1.25, duration: 13, repeat: -1, yoyo: true, ease: "sine.inOut" });
-
-      var currentBgIndex = 1;
+      window.__timelines["main"] = tl;
+      var TEXT_LEAD = 0.30;
+      var CROSSFADE = 0.50;
       var currentTime = 0;
-      // Text appears slightly before voice for natural feel
-      var TEXT_LEAD = 0.35;
+      var currentBg = 1;
 
-      // String split parser to support word-by-word stagger with dynamic bold/caps/hashtag highlight
-      function splitTextToSpans(text) {
-        if (!text) return '';
-        return text.split(' ').map(function(word) {
-          if (!word.trim()) return '';
-          var cleanWord = word;
-          var isHighlighted = false;
-          
-          // Pattern checking for bold, italic, uppercase and hashtag highlights
-          if (word.startsWith('**') && word.endsWith('**')) {
-            cleanWord = word.slice(2, -2);
-            isHighlighted = true;
-          } else if (word.startsWith('*') && word.endsWith('*')) {
-            cleanWord = word.slice(1, -1);
-            isHighlighted = true;
-          } else if (word.startsWith('#')) {
-            isHighlighted = true;
-          } else if (word.length > 2 && word === word.toUpperCase() && !/^[0-9\W]+$/.test(word)) {
-            isHighlighted = true;
-          }
-          
-          var className = isHighlighted ? 'word highlight-word' : 'word';
-          return '<span class="word-wrapper"><span class="' + className + '">' + cleanWord + '</span></span>';
-        }).join(' ');
+      function detectAccentWords(text) {
+        if (!text) return { tokens: [] };
+        var tokens = [];
+        var parts = text.split(/(\s+)/);
+        for (var i = 0; i < parts.length; i++) {
+          var p = parts[i];
+          if (p.trim() === '') { tokens.push({ text: p, accent: false }); continue; }
+          var clean = p;
+          var isAccent = false;
+          if (p.startsWith('**') && p.endsWith('**')) { clean = p.slice(2, -2); isAccent = true; }
+          else if (p.startsWith('*') && p.endsWith('*')) { clean = p.slice(1, -1); isAccent = true; }
+          else if (/^[A-Z]{4,}$/.test(p) && p.length > 3) isAccent = true;
+          tokens.push({ text: clean, accent: isAccent });
+        }
+        return { tokens: tokens };
       }
+
+      tl.from('.brand-header', { y: -30, opacity: 0, duration: 0.6, ease: 'power3.out' }, 0);
+      tl.from('.bottom-bar', { y: 30, opacity: 0, duration: 0.6, ease: 'power3.out' }, 0.15);
+
+      var orbDur = Math.min(TOTAL_DURATION, 15);
+      var orbRepeat = Math.ceil(TOTAL_DURATION / orbDur) - 1;
+      gsap.to('.orb-1', { x: 80, y: 100, duration: orbDur, repeat: orbRepeat, yoyo: true, ease: 'sine.inOut' });
+      gsap.to('.orb-2', { x: -80, y: -70, duration: orbDur * 1.2, repeat: orbRepeat, yoyo: true, ease: 'sine.inOut' });
+      gsap.to('.orb-3', { x: 50, y: -50, scale: 1.30, duration: orbDur * 0.9, repeat: orbRepeat, yoyo: true, ease: 'sine.inOut' });
 
       for (var i = 0; i < n; i++) {
         var s = scenes[i];
         var duration = hasDurations ? SCENE_DURATIONS[i] : TOTAL_DURATION / n;
         var sceneStart = Math.max(0, currentTime - (i > 0 ? TEXT_LEAD : 0));
-
+        var isLast = (i === n - 1);
         var card = document.createElement('div');
         card.className = 'scene-card type-' + s.type;
-
-        if (MAIN_ALIGN.indexOf('center') !== -1) card.classList.add('main-align-center');
-        else if (MAIN_ALIGN.indexOf('right') !== -1) card.classList.add('main-align-right');
-        else card.classList.add('main-align-left');
-
-        if (SHOW_CARD === 'none') {
-          card.classList.add('no-card-style');
-        }
-
+        card.style.textAlign = MAIN_TEXT_ALIGN;
+        card.style.alignItems = MAIN_ALIGN;
         var safeText = s.bodyText || s.voiceText || '';
-        
-        // Premium equalizer & content structure
-        var eqHtml = '<div class="audio-equalizer"><div class="eq-bar bar-1"></div><div class="eq-bar bar-2"></div><div class="eq-bar bar-3"></div><div class="eq-bar bar-4"></div></div>';
-        var progressHtml = '<div class="card-progress"><div class="card-progress-fill"></div></div>';
-
-        if (s.type === 'hook') {
-          card.innerHTML = eqHtml + 
-            '<div class="scene-label-container"><div class="scene-label-dot"></div><div class="scene-label">TRENDING</div></div>' + 
-            '<div class="scene-text-container"><div class="scene-text">' + splitTextToSpans(safeText) + '</div></div>' + 
-            '<div class="scene-accent-line"></div>' + 
-            progressHtml;
-        } else if (s.type === 'outro') {
-          card.innerHTML = eqHtml + 
-            '<div class="scene-cta-label">DO NOT MISS OUT</div>' + 
-            '<div class="scene-text-container"><div class="scene-text">' + splitTextToSpans(safeText) + '</div></div>' + 
-            progressHtml;
-        } else {
-          card.innerHTML = eqHtml + 
-            '<div class="scene-bar"></div>' + 
-            '<div class="scene-text-container"><div class="scene-text">' + splitTextToSpans(safeText) + '</div></div>' + 
-            progressHtml;
+        var parsed = detectAccentWords(safeText);
+        var wordHtml = '';
+        for (var t = 0; t < parsed.tokens.length; t++) {
+          var tok = parsed.tokens[t];
+          if (tok.text.trim() === '') { wordHtml += tok.text; continue; }
+          var cls = tok.accent ? 'word accent-word' : 'word';
+          wordHtml += '<span class="word-wrapper"><span class="' + cls + '">' + tok.text + '</span></span>';
         }
-
+        if (s.type === 'hook') {
+          card.innerHTML = '<div class="scene-label">FEATURED</div>' +
+            '<div class="scene-text">' + wordHtml + '</div>' +
+            '<div class="accent-divider"></div>' +
+            '<div class="scene-progress"><div class="scene-progress-fill"></div></div>';
+        } else if (s.type === 'outro') {
+          card.innerHTML = '<div class="cta-overline">DO NOT MISS OUT</div>' +
+            '<div class="scene-text">' + wordHtml + '</div>' +
+            '<div class="accent-divider"></div>' +
+            '<div class="scene-progress"><div class="scene-progress-fill"></div></div>';
+        } else {
+          card.innerHTML = '<div class="scene-text">' + wordHtml + '</div>' +
+            '<div class="accent-divider"></div>' +
+            '<div class="scene-progress"><div class="scene-progress-fill"></div></div>';
+        }
         container.appendChild(card);
-
-        // Always display as flex to allow scene visuals, hide bg details via no-card-style
-        window._tl.set(card, { display: 'flex', zIndex: 50 + i }, sceneStart);
-        
-        // Entrance: slide up and fade card container
-        window._tl.fromTo(card,
-          { opacity: 0, y: 40 },
-          { opacity: 1, y: 0, duration: 0.8, ease: 'power4.out' },
+        tl.set(card, { display: 'flex', zIndex: 50 + i }, sceneStart);
+        tl.fromTo(card,
+          { opacity: 0, y: 35, scale: 0.97, filter: 'blur(6px)' },
+          { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.75, ease: 'power4.out' },
           sceneStart
         );
-
-        // Word-by-word kinetic slide-up reveal with spring
         var words = card.querySelectorAll('.word');
         if (words.length > 0) {
-          window._tl.fromTo(words,
-            { y: '105%', opacity: 0, scale: 0.95 },
-            { y: '0%', opacity: 1, scale: 1, duration: 0.55, stagger: 0.04, ease: 'back.out(1.4)' },
-            sceneStart + 0.12
+          tl.fromTo(words,
+            { y: '105%', opacity: 0 },
+            { y: '0%', opacity: 1, duration: 0.50, stagger: 0.035, ease: 'back.out(1.5)' },
+            sceneStart + 0.15
           );
         }
-
-        // Accents entry
-        var label = card.querySelector('.scene-label-container');
-        if (label) window._tl.fromTo(label, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.5, ease: 'power2.out' }, sceneStart + 0.2);
-        var accentLine = card.querySelector('.scene-accent-line');
-        if (accentLine) window._tl.fromTo(accentLine, { width: 0 }, { width: 140, duration: 0.6, ease: 'power3.inOut' }, sceneStart + 0.3);
-        var bar = card.querySelector('.scene-bar');
-        if (bar) window._tl.fromTo(bar, { width: 0 }, { width: 80, duration: 0.5, ease: 'power3.inOut' }, sceneStart + 0.25);
-
-        // Animate bento progress bar
-        var progressFill = card.querySelector('.card-progress-fill');
+        var label = card.querySelector('.scene-label');
+        if (label) tl.fromTo(label, { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, sceneStart + 0.20);
+        var ctaLabel = card.querySelector('.cta-overline');
+        if (ctaLabel) tl.fromTo(ctaLabel, { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, sceneStart + 0.20);
+        var divider = card.querySelector('.accent-divider');
+        if (divider) tl.fromTo(divider, { width: 0, opacity: 1 }, { width: 100, duration: 0.60, ease: 'power3.inOut' }, sceneStart + 0.30);
+        var progressFill = card.querySelector('.scene-progress-fill');
         if (progressFill) {
-          window._tl.fromTo(progressFill,
-            { width: '0%' },
-            { width: '100%', duration: duration, ease: 'none' },
-            sceneStart
-          );
+          var fillDur = isLast ? duration : duration - CROSSFADE;
+          tl.fromTo(progressFill, { width: '0%' }, { width: '100%', duration: fillDur, ease: 'none' }, sceneStart);
         }
-
-        // Handle background transition for EVERY scene with subtle Ken Burns camera motion
         var imgUrl = s.imageUrl || (i === 0 ? DEFAULT_BG : null);
         if (imgUrl) {
-          var targetLayerId = currentBgIndex === 1 ? 'bg-2' : 'bg-1';
-          var prevLayerId = currentBgIndex === 1 ? 'bg-1' : 'bg-2';
-
-          (function (lId, url, pId, start, dur, sceneIndex) {
-            window._tl.set('#' + lId, { attr: { src: url } }, start);
-            window._tl.to('#' + lId, { opacity: BG_BRIGHTNESS, duration: 1.0, ease: 'power2.out' }, start);
-            window._tl.to('#' + pId, { opacity: 0, duration: 1.0, ease: 'power2.out' }, start);
-
-            // Stacking smooth zoom + slight angle camera rotation to simulate actual video footage
-            var scaleFrom = sceneIndex % 2 === 0 ? 1.0 : 1.15;
-            var scaleTo = sceneIndex % 2 === 0 ? 1.15 : 1.05;
-            window._tl.fromTo('#' + lId,
-              { scale: scaleFrom, rotation: sceneIndex % 2 === 0 ? 1.5 : -1.5 },
-              { scale: scaleTo, rotation: 0, duration: dur, ease: 'none' },
+          var targetId = currentBg === 1 ? 'bg-2' : 'bg-1';
+          var prevId = currentBg === 1 ? 'bg-1' : 'bg-2';
+          (function(tId, url, pId, start, dur, idx) {
+            tl.set('#' + tId, { attr: { src: url } }, start);
+            tl.to('#' + tId, { opacity: BG_BRIGHTNESS, duration: 1.0, ease: 'power2.out' }, start);
+            tl.to('#' + pId, { opacity: 0, duration: 1.0, ease: 'power2.out' }, start);
+            var scaleFrom = idx % 2 === 0 ? 1.0 : 1.10;
+            var scaleTo = idx % 2 === 0 ? 1.10 : 1.02;
+            tl.fromTo('#' + tId,
+              { scale: scaleFrom },
+              { scale: scaleTo, duration: dur, ease: 'none' },
               start
             );
-          })(targetLayerId, imgUrl, prevLayerId, sceneStart, duration, i);
-
-          currentBgIndex = (currentBgIndex === 1 ? 2 : 1);
+          })(targetId, imgUrl, prevId, sceneStart, duration, i);
+          currentBg = currentBg === 1 ? 2 : 1;
         }
-
-        // Exit: slide up and fade out card container
-        if (i < n - 1) {
-          window._tl.to(card, { opacity: 0, y: -30, duration: 0.4, ease: 'power3.in' }, sceneStart + duration - 0.4);
-          window._tl.set(card, { display: 'none' }, sceneStart + duration);
+        if (!isLast) {
+          tl.to(card, { opacity: 0, y: -20, filter: 'blur(4px)', duration: CROSSFADE, ease: 'power3.in' }, sceneStart + duration - CROSSFADE);
+          tl.set(card, { display: 'none' }, sceneStart + duration);
+        } else {
+          var fadeStart = sceneStart + Math.min(duration - 1.0, duration * 0.7);
+          tl.to('#root', { opacity: 0, duration: 1.0, ease: 'power2.inOut' }, fadeStart);
         }
-
         currentTime += duration;
       }
-
-      // Recurring shimmer sweep on tag badge
-      var shimmerRepeat = Math.ceil(TOTAL_DURATION / 3.5) - 1;
-      window._tl.add(gsap.fromTo('#tag-badge', 
-        { '--shimmer-pos': '-100%' }, 
-        { '--shimmer-pos': '200%', duration: 1.5, ease: 'power2.inOut', repeat: shimmerRepeat, repeatDelay: 2 }
-      ), 0.5);
-
-      window._tl.add('end', TOTAL_DURATION);
-
-    } catch (e) {
-      console.error('Template Script Error:', e);
-    }
+      tl.add('end', TOTAL_DURATION);
+    })();
   </script>
 </body>
-
 </html>
