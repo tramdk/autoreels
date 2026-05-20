@@ -30,7 +30,7 @@ Bạn đang thiết kế cho màn hình ngang (16:9) chuẩn máy tính/TV/Youtu
    - Màn hình 16:9 cực kỳ rộng rãi theo chiều ngang. Nếu cảnh CÓ hình ảnh (scene.imageUrl):
      * Khối ảnh '.scene-image-card' nằm bên TRÁI, chiếm khoảng 46% chiều rộng và 100% chiều cao của khu vực hiển thị.
      * Khối chữ '.scene-text-card' nằm bên PHẢI, chiếm khoảng 46% chiều rộng và 100% chiều cao của khu vực hiển thị.
-     * Hai khối này nằm cân đối cạnh nhau theo chiều ngang. Ảnh '.scene-image' phải có 'width: 100%; height: 100%; object-fit: cover; border-radius: 16px;'.
+     * Hai khối này nằm cân đối cạnh nhau theo chiều ngang. Ảnh '.scene-image' phải có 'width: 100%; height: 100%; object-fit: cover; border-radius: 16px; will-change: transform, filter; transform-origin: center;'.
    - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' tự động chiếm trọn vẹn 100% không gian bề ngang và nằm ở vị trí trung tâm.
 `;
   } else if (ratio === '1:1') {
@@ -57,7 +57,7 @@ Bạn đang thiết kế cho màn hình đứng (9:16) chuẩn di động.
 3. BỐ CỤC XẾP CHỒNG DỌC TUYỆT ĐỐI (NO HORIZONTAL COLUMNS):
    - Cấm hoàn toàn việc chia đôi màn hình theo chiều ngang (flex-direction: row) vì chiều rộng video đứng 9:16 cực kỳ hẹp.
    - Nếu cảnh CÓ hình ảnh (scene.imageUrl): Thiết kế dạng 2 khối bento xếp chồng dọc:
-     * Khối ảnh '.scene-image-card' nằm ở trên, chiếm khoảng 43% chiều cao, chiều rộng 100% full viền bo góc. Ảnh '.scene-image' phải có 'width: 100%; height: 100%; object-fit: cover; border-radius: 16px;'.
+     * Khối ảnh '.scene-image-card' nằm ở trên, chiếm khoảng 43% chiều cao, chiều rộng 100% full viền bo góc. Ảnh '.scene-image' phải có 'width: 100%; height: 100%; object-fit: cover; border-radius: 16px; will-change: transform, filter; transform-origin: center;'.
      * Khối chữ '.scene-text-card' nằm ở dưới, chiếm khoảng 43% chiều cao, chiều rộng 100%, bên trong hiển thị phụ đề.
    - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' tự động mở rộng chiếm trọn vẹn khu vực trung tâm (width: 100%; height: 80%;) với cỡ chữ khổng lồ bắt mắt.
 `;
@@ -98,10 +98,12 @@ Trình biên dịch của HyperFrames phân tích font chữ tĩnh (static compi
    - Không dùng viền mỏng neon 1px, không dùng các dải màu (gradient) chạy trên chữ (gradient text), không dùng viền sọc đơn độc bên mép trái, không dùng nền đen tuyệt đối (#000) hay trắng tinh tuyệt đối.
 2. ÁP DỤNG THIẾT KẾ CHI TIẾT 3 CẤP ĐỘ DENSITY:
    - Cấp 1 (Background texture): Nền phải có chiều sâu bằng cách vẽ các quả cầu ánh sáng mờ ảo (ambient radial glow), lưới tọa độ mảnh trôi nổi chậm, hoặc chữ chìm siêu lớn làm hình bóng (ghost text) với độ mờ nhẹ (opacity: 0.12 - 0.25).
-   - Cấp 2 (Structural borders & Containers): Sử dụng các đường viền dày hẳn từ 2.5px - 4px hoặc các khối bento vững chãi, bo góc mượt mà 20px - 32px.
+     * Ví dụ lưới tọa độ chấm bi (.bg-dots-grid) siêu mỏng: \`background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px); background-size: 40px 40px;\` hoặc lưới ô vuông: \`background-image: linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px); background-size: 80px 80px;\`
+     * Vệt sáng ambient glow bằng radial-gradient: \`background: radial-gradient(circle at 50% 50%, rgba(var(--accent-glow), 0.25) 0%, transparent 70%); filter: blur(40px);\`
+   - Cấp 2 (Structural borders & Containers): Sử dụng các đường viền dày hẳn từ 2.5px - 4px hoặc các khối bento vững chãi, bo góc mượt mà 20px - 32px. Để tránh lặp viền (repeating nested borders), hãy bọc kính Faux Glassmorphism cho container cha duy nhất (như \`.scene-text-card\`, \`.scene-image-card\` hoặc khung bento Grid ngoài cùng), còn các container con bên trong \`.scene-line-card\` phải trong suốt và không viền (\`border: none; background: transparent; shadow: none; padding: 0;\`).
    - Cấp 3 (High-Contrast Typography): Cỡ chữ cực lớn theo tỷ lệ video: Tiêu đề chính khổng lồ 64px - 120px, nội dung phụ đề rõ ràng 28px - 42px.
 3. BỐ CỤC ĐA DẠNG:
-   - Ưu tiên các bố cục lệch trục, bất đối xứng (asymmetric bento grid) hoặc chia vùng (split frame: một bên là hình ảnh hoặc số liệu thống kê lớn, một bên là các dòng phụ đề card) để tạo cảm giác cực kỳ premium.
+   - Ưu tiên các bố cục lệch trục, bất đối xứng (asymmetric bento grid) hoặc chia vùng (split frame: one side image/stats, other side text card) để tạo cảm giác cực kỳ premium.
 
 ${ratioLayoutRules}
 
@@ -117,18 +119,15 @@ ${ratioLayoutRules}
 4. Bạn BẮT BUỘC phải viết mã JavaScript ở cuối file sử dụng đúng khung cấu trúc vòng lặp dưới đây để sinh DOM động và dựng timeline GSAP seekable hoàn mỹ.
 
 === YÊU CẦU THIẾT KẾ ĐẸP MẮT & TƯƠNG PHẢN ĐỘC ĐÁO ===
-1. THIẾT KẾ CARD VIỀN CHO MỖI DÒNG/PHÂN CẢNH (AULAQ BENTO CARD STYLE):
-   - Đúng theo phong cách Aulaq.ai cao cấp (mỗi lần xuống dòng hay mỗi phân cảnh là một thẻ viền riêng biệt):
-   - Mọi dòng văn bản trong phân cảnh (tách bởi thẻ <br> hoặc \n) BẮT BUỘC phải được bọc trong một container dòng riêng biệt gọi là '.scene-line-card'.
-   - Lớp '.scene-line-card' BẮT BUỘC phải được bạn khai báo CSS tỉ mỉ với viền và nền như sau:
-     * Viền mỏng neon tinh tế phát sáng: 'border: 1.5px solid var(--accent-neon);' (ví dụ: xanh ngọc, cam, hồng tùy theo theme màu của chủ đề).
-     * Nền tối màu sắc nét: 'background: rgba(10, 12, 22, 0.9);' (Nền tối để hiển thị tương phản siêu rõ, TUYỆT ĐỐI CẤM sử dụng backdrop-filter vì sẽ gây lỗi crash render HyperFrames).
-     * Cấm sử dụng mờ hậu cảnh: TUYỆT ĐỐI KHÔNG thêm thuộc tính 'backdrop-filter' vào bất kỳ phần tử nào để tránh lỗi compositor starvation.
-     * Bo góc mềm mại: 'border-radius: 12px;' hoặc '16px;'.
-     * Đệm trong: 'padding: 16px 24px;'.
-     * Đổ bóng nhẹ: 'box-shadow: 0 4px 12px rgba(0,0,0,0.4);' (chỉ sử dụng đổ bóng nhẹ, tránh đổ bóng glow quá phức tạp gây nặng máy render).
-     * Định dạng hiển thị: 'display: block; margin: 0 auto 28px auto; width: fit-content; max-width: 90%; text-align: left; box-sizing: border-box; transition: transform 0.3s ease; will-change: transform, opacity;'.
-   - Khi đó, container ngoài '.scene-text-card' đóng vai trò là một container bố cục sạch sẽ, KHÔNG có background/border thô ráp bên ngoài nữa để tránh bị trùng lặp viền (hoặc chỉ có background trong suốt không viền).
+1. THIẾT KẾ CARD FONT-CONTAINER ĐỘC ĐÁO & GIẢI QUYẾT LẶP VIỀN (FAUX GLASSMORPHISM & ANTI-REPETITIVE BORDERS):
+   - Để tránh lỗi lặp viền thô ráp chồng chéo (repeating nested borders), bạn BẮT BUỘC chỉ thiết kế 1 viền và nền mờ Faux Glassmorphism cho container cha duy nhất là '.scene-text-card' (hoặc '.scene-image-card' cho khối ảnh, hoặc khung bento Grid bên ngoài).
+   - Lớp container cha '.scene-text-card' phải được thiết kế theo phong cách Kính giả lập siêu sang (Faux Glassmorphism) dùng CSS thuần (TUYỆT ĐỐI CẤM sử dụng backdrop-filter):
+     * Nền bán trong suốt mượt mà: 'background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);' hoặc nền tối bán trong suốt 'background: linear-gradient(135deg, rgba(10, 12, 22, 0.85) 0%, rgba(15, 18, 32, 0.75) 100%);'
+     * Phản xạ viền mỏng trắng bóng bẩy ở mép trên: 'border: 1px solid rgba(255, 255, 255, 0.15);'
+     * Bóng đổ mềm sâu rộng & viền trong phản chiếu: 'box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);'
+     * Bo góc mượt mà: 'border-radius: 20px;' hoặc '24px;'.
+     * Đệm trong rộng rãi: 'padding: 40px 30px;'.
+   - Bên trong đó, các thẻ dòng '.scene-line-card' BẮT BUỘC phải trong suốt và không viền ('border: none; background: transparent; box-shadow: none; padding: 0; margin-bottom: 20px;') để tránh lặp viền thô kệch! Từng từ bên trong '.word' sẽ trượt lên từ mặt nạ mask mượt mà.
    - Tuyệt đối CẤM sử dụng màu nền solid chói sáng (như vàng neon hay xanh neon nguyên khối) để làm nền thẻ, vì chữ trắng trên nền sáng sẽ cực kỳ nhạt nhòa, không thể đọc nổi.
    - Các màu Neon rực rỡ (xanh ngọc, cam, vàng, hồng) chỉ dùng để sơn viền card mỏng mảnh, hiệu ứng bóng mờ (box-shadow) và highlight chữ quan trọng.
 2. KHẮC PHỤC CHỮ TRÀN, AN TOÀN VIỀN MÀN HÌNH & TIÊU ĐỀ QUÁ DÀI (SCREEN BORDER & TYPOGRAPHY SAFETY):
@@ -471,7 +470,7 @@ Bạn đang thiết kế cho màn hình ngang (16:9) chuẩn máy tính/TV/Youtu
    'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 50px; box-sizing: border-box; padding: 80px 100px;'
 3. CHIA ĐÔI SONG SONG TRÁI-PHẢI PROMO (HORIZONTAL PROMO SPLIT):
    - Nếu cảnh CÓ hình ảnh (scene.imageUrl):
-     * Khối ảnh '.scene-image-card' bên TRÁI, 46% width, 90% height. Ảnh có: 'width: 100%; height: 100%; object-fit: cover; border-radius: 30px; border: 3px solid rgba(255,255,255,0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.3);'
+     * Khối ảnh '.scene-image-card' bên TRÁI, 46% width, 90% height. Ảnh có: 'width: 100%; height: 100%; object-fit: cover; border-radius: 30px; border: 3px solid rgba(255,255,255,0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.3); will-change: transform, filter; transform-origin: center;'
      * Khối chữ '.scene-text-card' bên PHẢI, 46% width. CHỮ CỰC TO: font-size tối thiểu 48px, font-weight: 900, color: #ffffff.
    - KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' chiếm 100% width, chữ khổng lồ font-size: 64px+.
 `;
@@ -499,14 +498,16 @@ Bạn đang thiết kế cho màn hình đứng (9:16) chuẩn di động.
    => LƯU Ý: Bắt buộc tuân thủ padding an toàn (top 130px, bottom 240px, sides 60px) để không bị chồng lấn bởi nút hay phụ đề hệ thống của TikTok/Reels.
 3. BỐ CỤC CANVA PROMO VỚI LƯỚI AN TOÀN (FULL-BLEED VERTICAL STACK):
    - Nếu cảnh CÓ hình ảnh (scene.imageUrl):
-     * Khối ảnh '.scene-image-card' chiếm khoảng 40% đến 45% chiều cao. Ảnh '.scene-image' có: 'width: 100%; height: 100%; object-fit: cover; border-radius: 24px; border: 2px solid rgba(255,255,255,0.25); box-shadow: 0 15px 35px rgba(0,0,0,0.35);'.
+     * Khối ảnh '.scene-image-card' chiếm khoảng 40% đến 45% chiều cao. Ảnh '.scene-image' có: 'width: 100%; height: 100%; object-fit: cover; border-radius: 24px; border: 2px solid rgba(255,255,255,0.25); box-shadow: 0 15px 35px rgba(0,0,0,0.35); will-change: transform, filter; transform-origin: center;'.
      * Khối chữ '.scene-text-card' nằm phía dưới ảnh, chiều rộng 100%. CHỮ RÕ RÀNG: font-size tối thiểu 46px cho chữ chính, font-weight: 900, color: #ffffff, text-shadow nhẹ.
    - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' chiếm toàn bộ không gian trung tâm (height: 75%). CHỮ KHỔNG LỒ: font-size: clamp(52px, 8vw, 84px), font-weight: 900, color: #ffffff.
 `;
   }
 
   const prompt = `
-Bạn là giám đốc nghệ thuật kiêm nhà thiết kế chuyển động và lập trình viên frontend cao cấp (creative director & senior motion designer) chuyên thiết kế các video quảng cá=== CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES (BẮT BUỘC TUÂN THỦ 100%) ===
+Bạn là giám đốc nghệ thuật kiêm nhà thiết kế chuyển động và lập trình viên frontend cao cấp (creative director & senior motion designer) chuyên thiết kế các video quảng cáo.
+
+=== CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES (BẮT BUỘC TUÂN THỦ 100%) ===
 1. TUYỆT ĐỐI KHÔNG ĐƯỢC phép sử dụng biến CSS để khai báo font-family. Bạn BẮT BUỘC phải viết trực tiếp tên font chữ dưới dạng chuỗi literal trong thuộc tính CSS (ví dụ: 'font-family: "montserrat", sans-serif;' hoặc 'font-family: "plus jakarta sans", sans-serif;').
 2. TUYỆT ĐỐI CẤM các font chữ mặc định, gây nhàm chán sau: 'inter', 'roboto', 'open sans', 'lato', 'poppins', 'outfit', 'nunito', 'playfair display', 'eb garamond', 'syne'.
 3. CHỈ ĐƯỢC PHÉP sử dụng các font chất lượng cao hỗ trợ Tiếng Việt cực tốt sau:
@@ -522,10 +523,14 @@ Bạn là giám đốc nghệ thuật kiêm nhà thiết kế chuyển động v
    - Không dùng viền mỏng neon 1px, không dùng các dải màu (gradient) chạy trên chữ (gradient text), không dùng viền sọc đơn độc bên mép trái, không dùng nền đen tuyệt đối (#000) hay trắng tinh tuyệt đối.
 2. ÁP DỤNG THIẾT KẾ CHI TIẾT 3 CẤP ĐỘ DENSITY:
    - Cấp 1 (Background texture): Nền phải có chiều sâu bằng cách vẽ các quả cầu ánh sáng mờ ảo (ambient radial glow), lưới tọa độ mảnh trôi nổi chậm, hoặc chữ chìm siêu lớn làm hình bóng (ghost text) với độ mờ nhẹ (opacity: 0.12 - 0.25).
-   - Cấp 2 (Structural borders & Containers): Sử dụng các đường viền dày hẳn từ 2.5px - 4px hoặc các khối bento vững chãi, bo góc mượt mà 20px - 32px.
+     * Ví dụ lưới tọa độ chấm bi (.bg-dots-grid) siêu mỏng: 'background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px); background-size: 40px 40px;' hoặc lưới ô vuông: 'background-image: linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px); background-size: 80px 80px;'
+     * Vệt sáng ambient glow bằng radial-gradient: 'background: radial-gradient(circle at 50% 50%, rgba(var(--accent-glow), 0.25) 0%, transparent 70%); filter: blur(40px);'
+   - Cấp 2 (Structural borders & Containers): Sử dụng các đường viền dày hẳn từ 2.5px - 4px hoặc các khối bento vững chãi, bo góc mượt mà 20px - 32px. Để tránh lặp viền (repeating nested borders), hãy bọc kính Faux Glassmorphism cho container cha duy nhất (như '.scene-text-card', '.scene-image-card' hoặc khung bento Grid ngoài cùng), còn các container con bên trong '.scene-line-card' phải trong suốt và không viền ('border: none; background: transparent; shadow: none; padding: 0;').
    - Cấp 3 (High-Contrast Typography): Cỡ chữ cực lớn theo tỷ lệ video: Tiêu đề chính khổng lồ 64px - 120px, nội dung phụ đề rõ ràng 28px - 42px.
 3. BỐ CỤC ĐA DẠNG:
-   - Ưu tiên các bố cục lệch trục, bất đối xứng (asymmetric bento grid) hoặc chia vùng (split frame: một bên là hình ảnh hoặc số liệu thống kê lớn, một bên là các dòng phụ đề card) để tạo cảm giác cực kỳ premium. (PREMIUM GRADIENT & FAUX GLASSMORPHISM) ===
+   - Ưu tiên các bố cục lệch trục, bất đối xứng (asymmetric bento grid) hoặc chia vùng (split frame: one side image/stats, other side text card) để tạo cảm giác cực kỳ premium.
+
+=== PREMIUM GRADIENT & FAUX GLASSMORPHISM ===
 Hãy rũ bỏ hoàn toàn phong cách thiết kế màu đơn sắc thô sơ ("solid color-blocking"). Thay vào đó, áp dụng các tiêu chuẩn thiết kế UI/UX đỉnh cao sau:
 
 1. NỀN GRADIENT SANG TRỌNG & RỰC RỠ:
@@ -539,16 +544,16 @@ Hãy rũ bỏ hoàn toàn phong cách thiết kế màu đơn sắc thô sơ ("s
    - Có một lớp lưới tọa độ chấm bi cực mảnh (.bg-dots-grid) hoặc vệt sáng ảo diệu lững lờ trôi làm nền sinh động.
    - TUYỆT ĐỐI CẤM dùng nền đen xì nhàm chán hoặc nền màu đơn sắc buồn tẻ.
 
-2. CÁC THẺ CARD MỜ ẢO (FAUX GLASSMORPHIC BENTO CARDS):
-   - Để hiển thị văn bản cực rõ nét trên nền gradient mà vẫn cực kỳ cao cấp, hãy bọc văn bản/phân cảnh vào các thẻ dòng '.scene-line-card'.
-   - LƯU Ý CỰC KỲ QUAN TRỌNG: HyperFrames BỊ NAY VÀ BẤT KỲ LÚC NÀO CẤM DÙNG 'backdrop-filter: blur()' vì sẽ gây lỗi crash render trong Puppeteer.
-   - Thay vào đó, lập trình Faux Glassmorphism (Kính giả lập siêu nhẹ) bằng CSS thuần túy:
-     * Nền bán trong suốt tinh khiết: 'background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);'
-     * Viền mỏng như tơ phát sáng trắng: 'border: 1px solid rgba(255, 255, 255, 0.15);'
-     * Bóng đổ mềm sâu rộng: 'box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);'
-     * Bo góc sang trọng: 'border-radius: 16px;' hoặc '20px;'.
-     * Đệm trong tinh tế: 'padding: 16px 24px;'.
-     * Chữ trắng sáng (#ffffff) có text-shadow nhẹ để nâng cao độ tương phản.
+2. CÁC THẺ CARD MỜ ẢO & GIẢI QUYẾT LẶP VIỀN (FAUX GLASSMORPHIC CARDS & ANTI-REPETITIVE BORDERS):
+   - Để hiển thị văn bản cực rõ nét mà vẫn cực kỳ cao cấp, bạn BẮT BUỘC chỉ thiết kế 1 viền và nền mờ Faux Glassmorphism cho container cha duy nhất là '.scene-text-card' (hoặc '.scene-image-card' cho khối ảnh, hoặc khung bento Grid bên ngoài).
+   - LƯU Ý CỰC KỲ QUAN TRỌNG: HyperFrames BỊ CẤM DÙNG 'backdrop-filter: blur()' vì sẽ gây lỗi crash render trong Puppeteer.
+   - Thay vào đó, lập trình Faux Glassmorphism (Kính giả lập siêu nhẹ) bằng CSS thuần túy trên container cha:
+     * Nền bán trong suốt tinh khiết: 'background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);' hoặc nền tối bán trong suốt 'background: linear-gradient(135deg, rgba(15, 9, 30, 0.85) 0%, rgba(25, 15, 50, 0.75) 100%);'
+     * Viền mỏng như tơ phát sáng trắng ở mép trên: 'border: 1px solid rgba(255, 255, 255, 0.15);'
+     * Bóng đổ mềm sâu rộng & viền trong phản chiếu: 'box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);'
+     * Bo góc sang trọng: 'border-radius: 20px;' hoặc '24px;'.
+     * Đệm trong rộng rãi: 'padding: 35px 25px;'.
+   - Bên trong đó, từng dòng văn bản '.scene-line-card' BẮT BUỘC phải trong suốt và không viền ('border: none; background: transparent; box-shadow: none; padding: 0; margin-bottom: 20px;') để tránh hoàn toàn việc lặp lại viền thô kệch! Từng từ bên trong '.word' sẽ trượt lên từ mặt nạ mask mượt mà.
 
 3. LƯỚI AN TOÀN VIỀN MÀN HÌNH (STRICT SAFETY GRID):
    - Đảm bảo an toàn 9:16 di động tuyệt đối. Toàn bộ nội dung hiển thị phải nằm gọn trong padding:

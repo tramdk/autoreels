@@ -131,7 +131,7 @@
       text-transform: uppercase;
       letter-spacing: 0.4em;
       font-size: calc(var(--cqmin) * var(--v-logo-size) / 720);
-      backdrop-filter: blur(40px);
+      /* backdrop-filter removed for Puppeteer compatibility */
       display: var(--v-logo-show);
       align-items: center;
       gap: 16px;
@@ -201,9 +201,9 @@
       border: 1px solid var(--glass-border);
       padding: 90px 70px;
       border-radius: 72px;
-      backdrop-filter: blur(var(--blur-amount)) saturate(220%) contrast(110%);
-      -webkit-backdrop-filter: blur(var(--blur-amount)) saturate(220%) contrast(110%);
-      will-change: transform, opacity, backdrop-filter;
+      /* Faux glassmorphism fallback for Puppeteer */
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+      will-change: transform, opacity;
       text-align: center;
       box-shadow: 
         0 60px 150px rgba(0, 0, 0, 0.7),

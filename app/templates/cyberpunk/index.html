@@ -194,7 +194,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 3px;
-      backdrop-filter: blur(var(--blur-amount));
+      /* backdrop-filter removed for Puppeteer compatibility */
     }
 
     #main-content {
@@ -230,7 +230,7 @@
       will-change: transform, opacity;
       
       text-align: {{ MAIN_CSS_TEXT_ALIGN }};
-      backdrop-filter: blur(var(--blur-amount));
+      /* backdrop-filter removed for Puppeteer compatibility */
       display: flex;
       flex-direction: column;
 
