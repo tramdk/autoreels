@@ -370,16 +370,28 @@
       }, inDur);
 
       // Exit fade (synchronized with crossfade)
-      // We only fade the card (sceneEl), NOT the whole background/unit
+      // ONLY fade the text/content children, NOT the whole sceneEl.
+      // This prevents the shared bg-image from being blocked during crossfade, eliminating black flash.
       if (i < scenes.length - 1) {
-        tl.to(sceneEl, { 
-          opacity: 0, 
-          scale: 0.95,
-          z: -50,
-          duration: CROSSFADE, 
-          ease: "power2.in", 
-          force3D: true 
-        }, duration - CROSSFADE);
+        var exitTargets = sceneEl.querySelectorAll('.scene-text, .divider-line, .scene-progress-container');
+        if (exitTargets.length > 0) {
+          tl.to(exitTargets, { 
+            opacity: 0, 
+            y: -15,
+            duration: CROSSFADE, 
+            ease: "power2.in", 
+            force3D: true 
+          }, duration - CROSSFADE);
+        } else {
+          tl.to(sceneEl, { 
+            opacity: 0, 
+            scale: 0.95,
+            z: -50,
+            duration: CROSSFADE, 
+            ease: "power2.in", 
+            force3D: true 
+          }, duration - CROSSFADE);
+        }
       }
       mainTl.add(tl, currentTime);
       

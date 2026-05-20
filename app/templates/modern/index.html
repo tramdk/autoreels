@@ -841,16 +841,31 @@
         tl.to(progBar, { width: "100%", duration: dur, ease: "none" }, 0);
       }
 
-      // Exit transition: fade out, zoom down, blur out
+      // Exit transition: ONLY fade content, NOT the whole unit (which contains per-scene bg image).
+      // Keeping unit visible during crossfade prevents black flash when next bg loads.
       if (i < scenes.length - 1) {
-        tl.to(unit, { 
-          opacity: 0, 
-          scale: 0.96,
-          filter: "blur(15px)",
-          duration: outDur, 
-          ease: "power2.inOut", 
-          force3D: true 
-        }, dur - outDur);
+        var exitContent = unit.querySelector('.scene-content');
+        var exitEditorial = unit.querySelector('.editorial-img-card');
+        var exitProg = unit.querySelector('.scene-progress-bar');
+        var exitTargets = [exitContent, exitEditorial, exitProg].filter(Boolean);
+        if (exitTargets.length > 0) {
+          tl.to(exitTargets, { 
+            opacity: 0, 
+            y: -20,
+            duration: outDur, 
+            ease: "power2.inOut", 
+            force3D: true 
+          }, dur - outDur);
+        } else {
+          tl.to(unit, { 
+            opacity: 0, 
+            scale: 0.96,
+            filter: "blur(15px)",
+            duration: outDur, 
+            ease: "power2.inOut", 
+            force3D: true 
+          }, dur - outDur);
+        }
       }
       
       mainTl.add(tl, currentTime);

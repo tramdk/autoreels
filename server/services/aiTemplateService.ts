@@ -528,70 +528,38 @@ Bạn là giám đốc nghệ thuật kiêm nhà thiết kế chuyển động v
    - Cấp 1 (Background texture): Nền phải có chiều sâu bằng cách vẽ các quả cầu ánh sáng mờ ảo (ambient radial glow), lưới tọa độ mảnh trôi nổi chậm, hoặc chữ chìm siêu lớn làm hình bóng (ghost text) với độ mờ nhẹ (opacity: 0.12 - 0.25).
      * Ví dụ lưới tọa độ chấm bi (.bg-dots-grid) siêu mỏng: 'background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px); background-size: 40px 40px;' hoặc lưới ô vuông: 'background-image: linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px); background-size: 80px 80px;'
      * Vệt sáng ambient glow bằng radial-gradient: 'background: radial-gradient(circle at 50% 50%, rgba(var(--accent-glow), 0.25) 0%, transparent 70%); filter: blur(40px);'
-   - Cấp 2 (Structural borders & Containers): Sử dụng các đường viền dày hẳn từ 2.5px - 4px hoặc các khối bento vững chãi, bo góc mượt mà 32px - 48px. Để tránh lặp viền (repeating nested borders), hãy bọc kính Faux Glassmorphism cho container cha duy nhất (như \`.scene-text-card\`, \`.scene-image-card\` hoặc khung bento Grid ngoài cùng), còn các container con bên trong \`.scene-line-card\` phải trong suốt và không viền (\`border: none; background: transparent; shadow: none; padding: 0;\`).
-   - Cấp 3 (High-Contrast Typography): Cỡ chữ cực lớn theo tỷ lệ video: Tiêu đề chính khổng lồ 72px - 120px, nội dung phụ đề rõ ràng 48px - 60px. (TUYỆT ĐỐI KHÔNG DÙNG CỠ CHỮ DƯỚI 40px VÌ KHÔNG THỂ ĐỌC TRÊN ĐIỆN THOẠI).
-3. BỐ CỤC ĐA DẠNG:
-   - Ưu tiên các bố cục lệch trục, bất đối xứng (asymmetric bento grid) hoặc chia vùng (split frame: one side image/stats, other side text card) để tạo cảm giác cực kỳ premium.
-
-=== PREMIUM GRADIENT & FAUX GLASSMORPHISM ===
-Hãy rũ bỏ hoàn toàn phong cách thiết kế màu đơn sắc thô sơ ("solid color-blocking"). Thay vào đó, áp dụng các tiêu chuẩn thiết kế UI/UX đỉnh cao sau:
-
-1. NỀN GRADIENT SANG TRỌNG & RỰC RỠ:
-   - Sử dụng các cặp màu gradient thời thượng, có độ tương phản cao, hòa trộn mượt mà cùng hiệu ứng nguồn sáng mờ ảo (radial overlay glow) ở giữa hoặc góc.
-   - Mảng gradient gợi ý để đổi theo từng cảnh:
-     * Cảnh 1 (Hook): linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%) - Hồng Đỏ Neon quyến rũ kích thích.
-     * Cảnh 2 (Product): linear-gradient(135deg, #1A2980 0%, #26D0CE 100%) - Xanh Dương Neon thời thượng.
-     * Cảnh 3 (Feature): linear-gradient(135deg, #f857a6 0%, #ff5858 100%) - Hồng Cam trẻ trung.
-     * Cảnh 4 (Detail): linear-gradient(135deg, #11998e 0%, #38ef7d 100%) - Xanh Mint sinh thái tươi mát.
-     * Cảnh 5+ hoặc Cảnh cuối (CTA): linear-gradient(135deg, #7F00FF 0%, #E100FF 100%) - Tím Cyberpunk cuốn hút.
-   - Có một lớp lưới tọa độ chấm bi cực mảnh (.bg-dots-grid) hoặc vệt sáng ảo diệu lững lờ trôi làm nền sinh động.
-   - TUYỆT ĐỐI CẤM dùng nền đen xì nhàm chán hoặc nền màu đơn sắc buồn tẻ.
-
-2. CÁC THẺ CARD MỜ ẢO & GIẢI QUYẾT LẶP VIỀN (FAUX GLASSMORPHIC CARDS & ANTI-REPETITIVE BORDERS):
-   - Để hiển thị văn bản cực rõ nét mà vẫn cực kỳ cao cấp, bạn BẮT BUỘC chỉ thiết kế 1 viền và nền mờ Faux Glassmorphism cho container cha duy nhất là '.scene-text-card' (hoặc '.scene-image-card' cho khối ảnh, hoặc khung bento Grid bên ngoài).
-   - LƯU Ý CỰC KỲ QUAN TRỌNG: HyperFrames BỊ CẤM DÙNG 'backdrop-filter: blur()' vì sẽ gây lỗi crash render trong Puppeteer.
-   - Thay vào đó, lập trình Faux Glassmorphism (Kính giả lập siêu nhẹ) bằng CSS thuần túy trên container cha:
-     * Nền bán trong suốt tinh khiết: 'background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);' hoặc nền tối bán trong suốt 'background: linear-gradient(135deg, rgba(15, 9, 30, 0.85) 0%, rgba(25, 15, 50, 0.75) 100%);'
-     * Viền mỏng như tơ phát sáng trắng ở mép trên: 'border: 1px solid rgba(255, 255, 255, 0.15);'
-     * Bóng đổ mềm sâu rộng & viền trong phản chiếu: 'box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);'
-     * Bo góc sang trọng: 'border-radius: 40px;' hoặc '48px;'.
-     * Đệm trong rộng rãi (bắt buộc để chữ không sát viền): 'padding: 80px 60px;' hoặc 'clamp(60px, 8vw, 100px);'.
-   - Bên trong đó, từng dòng văn bản '.scene-line-card' BẮT BUỘC phải trong suốt và không viền ('border: none; background: transparent; box-shadow: none; padding: 0; margin-bottom: 20px;') để tránh hoàn toàn việc lặp lại viền thô kệch! Từng từ bên trong '.word' sẽ trượt lên từ mặt nạ mask mượt mà.
-
-3. LƯỚI AN TOÀN VIỀN MÀN HÌNH (STRICT SAFETY GRID):
-   - Đảm bảo an toàn 9:16 di động tuyệt đối. Toàn bộ nội dung hiển thị phải nằm gọn trong padding:
-     'padding: 130px 60px 240px 60px;' cho màn hình đứng di động.
-   - TUYỆT ĐỐI KHÔNG ĐỂ chữ hoặc ảnh lấn ra ngoài hay sát mép viền vật lý.
-
-4. CỠ CHỮ CHUẨN HOÁ & THỐNG NHẤT (CLAMP TYPOGRAPHY):
-   - Tự động co giãn cỡ chữ theo khung hình để tránh tràn viền khi tiêu đề dài.
-   - Chữ chính/tiêu đề: 'font-size: clamp(56px, 7vw, 84px); font-weight: 900; line-height: 1.25; color: #ffffff;'
-   - Chữ nội dung/phụ đề: 'font-size: clamp(42px, 5.5vw, 56px); font-weight: 700; line-height: 1.35; color: rgba(255, 255, 255, 0.9); text-align: left; display: flex; flex-direction: column; justify-content: center;'
-   - Các từ khóa bán hàng quan trọng (SALE, 50%, MUA NGAY, GIÁ SỐC, FREE SHIP, QUÀ TẶNG, HOT, GIẢM GIÁ...) được tự động bọc trong thẻ Badge '.sale-badge' dạng viên thuốc nổi bật rực rỡ với màu nền chói (như vàng neon #FFF500, xanh mint #00FFCC) và màu chữ tối tương phản cao để tạo điểm nhấn chốt đơn cực mạnh!
-
-5. SIÊU CẢNH CUỐI - CALL TO ACTION (CTA) HUB CHUYỂN ĐỔI CAO:
-   - Cảnh cuối cùng là vũ khí chốt đơn của video! Hãy biến nó thành một **CTA Hub** mô phỏng 3D cực kỳ kích thích mua sắm:
-     * Chữ tiêu đề khổng lồ kêu gọi hành động dứt khoát (ví dụ: "🛍️ SĂN DEAL NGAY!", "👉 BẤM ĐĂNG KÝ!").
-     * Render một nút bấm giả lập nổi khối 3D (.cta-button) tuyệt đẹp với màu neon chói lọi (ví dụ: nền vàng tươi chữ đen cực đậm: 'background: linear-gradient(to bottom, #FFE500 0%, #FFB800 100%); color: #000; font-weight: 900; padding: 22px 48px; border-radius: 40px; box-shadow: 0 10px 25px rgba(255, 184, 0, 0.4), 0 4px 0 #D49B00; text-transform: uppercase; font-size: 32px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transform-style: preserve-3d;').
-     * Thẻ mã giảm giá / coupon (.cta-coupon-card) mờ ảo tinh xảo kèm viền đứt nét phát sáng (ví dụ: "MÃ: GIAM50" hoặc "FREE SHIP TOÀN QUỐC").
-     * Icon ngón tay/mũi tên hướng về nút bấm (.cta-pointer) trỏ nhẹ liên tục.
-   - Dùng GSAP để tạo hiệu ứng pulsing co giãn nhịp tim (scale pulse loop) vô tận cho nút CTA này để hút trọn mắt người xem.
-
-=== CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES ===
-1. TUYỆT ĐỐI KHÔNG ĐƯỢC phép sử dụng biến CSS để khai báo font-family. Bạn BẮT BUỘC phải viết trực tiếp tên font chữ dưới dạng chuỗi literal trong thuộc tính CSS (ví dụ: 'font-family: "montserrat", sans-serif;').
-2. CHỈ ĐƯỢC PHÉP sử dụng các font nằm trong danh sách được ánh xạ chính thức của HyperFrames: 'inter', 'montserrat', 'jetbrains mono', 'playfair display', 'outfit', 'nunito', 'eb garamond'. Đối với Promo, nên ưu tiên dùng 'montserrat' hoặc 'outfit' để tạo cảm giác dày dặn, thể thao hoặc hiện đại.
+   - Cấp 2 (Structural borders & Containers): Sử dụng các đường viền dày h�=== CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES ===
+1. TUYỆT ĐỐI KHÔNG ĐƯỢC phép sử dụng biến CSS để khai báo font-family. Bạn BẮT BUỘC phải viết trực tiếp tên font chữ dưới dạng chuỗi literal trong thuộc tính CSS (ví dụ: 'font-family: "montserrat", sans-serif;' hoặc 'font-family: "plus jakarta sans", sans-serif;').
+2. CHỈ ĐƯỢC PHÉP sử dụng các font chất lượng cao hỗ trợ Tiếng Việt cực tốt sau:
+   - Sans-serif: 'montserrat', 'plus jakarta sans', 'lexend', 'space grotesk', 'be vietnam pro', 'archivo', 'oswald', 'bebas neue'.
+   - Serif: 'lora', 'merriweather', 'fraunces', 'crimson pro', 'dm serif display', 'newsreader'.
+   - Monospace: 'jetbrains mono', 'space mono', 'source code pro', 'fira code'.
+   Đối với video Promo/Quảng cáo, nên ưu tiên dùng 'montserrat', 'archivo', 'bebas neue' hoặc 'plus jakarta sans' để tạo cảm giác cực kỳ dày dặn, năng động, thời thượng hoặc chuyên nghiệp.
 3. BẮT BUỘC HỖ TRỢ TIẾNG VIỆT UNICODE (KHÔNG LỖI DIACRITICS). Nhúng Google Fonts chuẩn Việt Hóa ở head:
-   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Outfit:wght@400;600;700;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900&display=swap" rel="stylesheet">
+
+=== ĐỊNH NGHĨA CSS HỖ TRỢ CHO LOGO & BACKGROUND (BẮT BUỘC KHAI BÁO TRONG STYLE TAG) ===
+- #bg-container: position: absolute; inset: 0; z-index: 1; overflow: hidden;
+- .scene-bg-layer: position: absolute; inset: 0; opacity: 0; z-index: 1; will-change: opacity; transition: none;
+- .logo-container: position: absolute; top: var(--v-logo-top, 60px); left: var(--v-logo-left, 60px); transform: var(--v-logo-transform, none); z-index: 100; display: flex; align-items: center; gap: 16px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.15); padding: 12px 32px; border-radius: 100px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+- .logo-img: height: 1.2em; width: auto; object-fit: contain;
+- .logo-text: font-size: calc(var(--cqmin) * var(--v-logo-size, 38) / 720); font-weight: 900; letter-spacing: 0.15em; text-transform: uppercase; white-space: nowrap;
 
 === CẤU TRÚC HTML BẮT BUỘC KHAI BÁO ===
 Thẻ body của bạn BẮT BUỘC phải bọc toàn bộ nội dung trong một container chính duy nhất có cấu trúc chính xác như sau:
 <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0" data-duration="{{ DURATION }}">
+  <!-- Container chứa các lớp nền chuyển màu mượt mà -->
+  <div id="bg-container"></div>
+
   <!-- Grid nền hạt trang trí hoặc chấm lưới lung linh -->
   <div class="bg-glow-layer"></div>
   <div class="bg-dots-grid"></div>
   
   <!-- Logo nhỏ góc trên trái -->
-  <div class="logo-container">...</div>
+  <div class="logo-container" style="display: {{ SHOW_LOGO }};">
+    <img class="logo-img" src="{{ LOGO_IMAGE }}" style="display: {{ SHOW_LOGO_IMAGE }};" onerror="this.style.display='none'" />
+    <span class="logo-text" style="color: {{ LOGO_COLOR }};">{{ LOGO_TEXT }}</span>
+  </div>
   <!-- Thanh progress bar neon -->
   <div class="progress-bar-container"><div id="progressBar"></div></div>
   
@@ -611,7 +579,7 @@ window.__timelines = { "main": mainTl };
 window._tl = mainTl;
 
 var currentTime = 0;
-var CROSSFADE = 0.5; 
+var CROSSFADE = 0.6; 
 
 // Hàm quét tự động làm nổi bật các từ khóa chốt sale bằng badge rực rỡ
 function highlightSellingKeywords(text) {
@@ -635,12 +603,218 @@ function highlightSellingKeywords(text) {
 function splitTextToLineCards(text, isCta = false) {
   if (!text) return '';
   var highlighted = highlightSellingKeywords(text);
-  var lines = highlighted.split(/(?:<br\\s*\\/?>|\\n)/gi);
+  var lines = highlighted.split(/(?:<br\s*\/?>|\n)/gi);
   return lines.map(function(line) {
     var trimmed = line.trim();
     if (!trimmed) return '';
     
     // Tách từng từ bọc trong word-mask để slide-up mượt
+    var wordsSpans = trimmed.split(' ').map(function(word) {
+      if (!word.trim()) return '';
+      return '<span class="word-mask" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.22em;"><span class="word" style="display:inline-block; transform:translateY(110%); opacity:0; will-change: transform, opacity;">' + word + '</span></span>';
+    }).join(' ');
+    
+    return '<div class="scene-line-card">' + wordsSpans + '</div>';
+  }).join('');
+}
+
+document.getElementById('scene-container').innerHTML = '';
+if (document.getElementById('bg-container')) {
+  document.getElementById('bg-container').innerHTML = '';
+}
+
+// Mảng màu gradient chuyển màu rực rỡ đặc trưng sang xịn mịn
+var BG_GRADIENTS = [
+  'linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%)', // Cảnh 1 (Hook): Hồng Đỏ
+  'linear-gradient(135deg, #1A2980 0%, #26D0CE 100%)', // Cảnh 2: Xanh Dương
+  'linear-gradient(135deg, #f857a6 0%, #ff5858 100%)', // Cảnh 3: Hồng Cam
+  'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', // Cảnh 4: Xanh Mint
+  'linear-gradient(135deg, #7F00FF 0%, #E100FF 100%)', // Cảnh 5: Tím Cyberpunk
+  'linear-gradient(135deg, #FF8C00 0%, #FF0080 100%)', // Đột phá Cam Hồng
+  'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)'  // Xanh Biển Neon
+];
+
+for (var i = 0; i < SCENES_DATA.length; i++) {
+  var scene = SCENES_DATA[i];
+  var duration = SCENE_DURATIONS[i] || 5;
+  var sceneId = 'scene-' + i;
+  var isLastScene = (i === SCENES_DATA.length - 1);
+
+  // 1. Tạo lớp ảnh nền mờ ảo / gradient (Background Transition Layer)
+  var bgEl = null;
+  if (document.getElementById('bg-container')) {
+    bgEl = document.createElement('div');
+    bgEl.className = 'scene-bg-layer';
+    bgEl.id = 'bg-' + i;
+    bgEl.style.background = BG_GRADIENTS[i % BG_GRADIENTS.length];
+    document.getElementById('bg-container').appendChild(bgEl);
+  }
+
+  // 2. Tạo phần tử DOM động cho Cảnh
+  var sceneEl = document.createElement('div');
+  sceneEl.id = sceneId;
+  sceneEl.className = 'scene-card' + (isLastScene ? ' cta-scene' : '');
+  sceneEl.style.display = 'none';
+  
+  var htmlContent = '';
+  
+  if (isLastScene) {
+    // Siêu cảnh cuối CTA Hub chốt đơn cực mạnh
+    htmlContent += '<div class="scene-text-card full-size cta-hub">';
+    htmlContent += '  <div class="scene-text centered-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '', true) + '</div>';
+    
+    // Nút CTA giả lập nổi 3D kèm mã giảm giá tinh tế
+    htmlContent += '  <div class="cta-interactive-wrapper" style="display:flex; flex-direction:column; align-items:center; gap:20px; margin-top:35px; width:100%;">';
+    htmlContent += '    <div class="cta-coupon-card">FREE SHIP + GIẢM 50%</div>';
+    htmlContent += '    <button class="cta-button">🛒 SĂN DEAL NGAY</button>';
+    htmlContent += '  </div>';
+    htmlContent += '</div>';
+  } else if (scene.imageUrl) {
+    // Cảnh thường có ảnh: Ảnh mượt mà bo góc glass ở trên, text ở dưới
+    htmlContent += '<div class="scene-image-card">';
+    htmlContent += '  <img class="scene-image" src="' + scene.imageUrl + '" />';
+    htmlContent += '</div>';
+    htmlContent += '<div class="scene-text-card">';
+    htmlContent += '  <div class="scene-text highlight-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
+    htmlContent += '</div>';
+  } else {
+    // Cảnh thường không ảnh: Text bento trôi nổi cực sang trọng
+    htmlContent += '<div class="scene-text-card full-size">';
+    htmlContent += '  <div class="scene-text centered-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
+    htmlContent += '</div>';
+  }
+  sceneEl.innerHTML = htmlContent;
+  document.getElementById('scene-container').appendChild(sceneEl);
+
+  // 3. Tạo sub-timeline riêng cho cảnh này
+  var tl = gsap.timeline();
+  tl.set(sceneEl, { display: 'flex', visibility: 'visible', zIndex: 50 + i }, 0);
+  if (bgEl) {
+    tl.set(bgEl, { display: 'block', visibility: 'visible', zIndex: i + 1 }, 0);
+  }
+  
+  // A. Entrance cho lớp nền (Background Crossfade) - Sử dụng đúng CROSSFADE (0.6s) để chuyển cảnh mịn màng, triệt tiêu nháy nền!
+  if (bgEl) {
+    tl.fromTo(bgEl,
+      { opacity: 0 },
+      { opacity: 1, duration: CROSSFADE, ease: "none" },
+      0
+    );
+  }
+  
+  // B. Entrance Animation cực mượt mà với Elastic Ease của GSAP cho sceneEl
+  tl.fromTo(sceneEl, 
+    { opacity: 0, y: 50, scale: 0.92 },
+    { opacity: 1, y: 0, scale: 1, duration: 0.75, ease: "back.out(1.4)" }, 
+    0
+  );
+
+  // C. Ảnh sản phẩm bay nhẹ từ dưới lên (nếu có)
+  var imgCard = sceneEl.querySelector('.scene-image-card');
+  if (imgCard) {
+    tl.fromTo(imgCard, 
+      { opacity: 0, y: 70, scale: 0.88 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "back.out(1.3)" },
+      0.05
+    );
+  }
+
+  // D. Zoom nhẹ ảnh sản phẩm kiểu điện ảnh (Ken Burns)
+  var imgEl = sceneEl.querySelector('.scene-image');
+  if (imgEl) {
+    tl.fromTo(imgEl, 
+      { scale: 1.0 }, 
+      { scale: 1.08, duration: duration, ease: "none" }, 
+      0
+    );
+  }
+
+  // E. Chữ trượt lên từ mặt nạ mask (Word Mask Slide Up)
+  var words = sceneEl.querySelectorAll('.word');
+  if (words.length > 0) {
+    tl.to(words, {
+      y: '0%',
+      opacity: 1,
+      duration: 0.5,
+      stagger: 0.03,
+      ease: "power3.out"
+    }, 0.2);
+  }
+
+  // F. Từ khóa bán hàng rực rỡ pop lên ấn tượng
+  var saleBadges = sceneEl.querySelectorAll('.sale-badge');
+  if (saleBadges.length > 0) {
+    tl.fromTo(saleBadges,
+      { scale: 0.5, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.55, stagger: 0.08, ease: "back.out(1.6)" },
+      0.35
+    );
+  }
+
+  // G. Xử lý hoạt ảnh looping và entrance đặc trưng cho CTA ở cảnh cuối
+  if (isLastScene) {
+    var ctaButton = sceneEl.querySelector('.cta-button');
+    var ctaCoupon = sceneEl.querySelector('.cta-coupon-card');
+    
+    if (ctaCoupon) {
+      tl.fromTo(ctaCoupon,
+        { scale: 0.8, opacity: 0, y: 20 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: "back.out(1.5)" },
+        0.4
+      );
+    }
+    
+    if (ctaButton) {
+      tl.fromTo(ctaButton,
+        { scale: 0.7, opacity: 0, rotationX: -30 },
+        { scale: 1, opacity: 1, rotationX: 0, duration: 0.8, ease: "back.out(1.7)" },
+        0.5
+      );
+      
+      // Tạo hiệu ứng đập co giãn vô hạn (Infinite Pulsing Pulse Loop) mô phỏng 3D
+      tl.add(function() {
+        gsap.to(ctaButton, {
+          scale: 1.06,
+          boxShadow: "0 15px 35px rgba(255, 184, 0, 0.6), 0 4px 0 #D49B00",
+          duration: 0.75,
+          yoyo: true,
+          repeat: -1,
+          ease: "power1.inOut"
+        });
+      }, 1.2);
+    }
+  }
+
+  // H. Tuyệt đối KHÔNG viết exit animation (opacity: 0) cho các cảnh trung gian ở đây.
+  // Sự giao thoa (crossfade) sẽ được đảm bảo tự nhiên khi cảnh tiếp theo đè lên cảnh hiện tại.
+
+  mainTl.add(tl, currentTime);
+
+  if (i < SCENES_DATA.length - 1) {
+    mainTl.add(gsap.set(sceneEl, { display: 'none', visibility: 'hidden' }), currentTime + duration + 0.3);
+    if (bgEl) {
+      mainTl.add(gsap.set(bgEl, { display: 'none', visibility: 'hidden' }), currentTime + duration + 0.3);
+    }
+    currentTime += duration - CROSSFADE;
+  } else {
+    currentTime += duration;
+  }
+}
+
+if (document.getElementById('progressBar')) {
+  mainTl.to("#progressBar", { width: "100%", duration: TOTAL_DURATION, ease: "none" }, 0);
+}
+
+mainTl.to("#root", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, TOTAL_DURATION - 0.5);
+
+window.__hf = {
+  duration: TOTAL_DURATION,
+  seek: function(t) { if (window._tl) window._tl.pause().seek(t); }
+};
+
+=== YÊU CẦU ĐẦU RA ===
+Trả về duy nhất mã nguồn index.html hoàn chỉnh nhất bên trong khối code markdown \`\`\`html. Tuyệt đối không giải thích thêm hay viết lời mở đầu/kết thúc nào cả.
+ọc trong word-mask để slide-up mượt
     var wordsSpans = trimmed.split(' ').map(function(word) {
       if (!word.trim()) return '';
       return '<span class="word-mask" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.22em;"><span class="word" style="display:inline-block; transform:translateY(110%); opacity:0; will-change: transform, opacity;">' + word + '</span></span>';

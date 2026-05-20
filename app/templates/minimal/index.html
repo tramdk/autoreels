@@ -189,15 +189,27 @@
       tl.from(sceneEl, { y: 15, duration: inDur, ease: "power3.out", force3D: true }, 0);
       tl.from(sceneEl, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0);
       
-      // Exit (synchronized with crossfade)
+      // Exit: ONLY fade the text content, NOT the whole sceneEl.
+      // Keeps the shared background visible during crossfade, preventing black flash.
       if (i < scenes.length - 1) {
-        tl.to(sceneEl, { 
-          opacity: 0, 
-          y: -15, 
-          duration: outDur, 
-          ease: "power3.in", 
-          force3D: true 
-        }, duration - outDur);
+        var exitTargets = sceneEl.querySelectorAll('.scene-title');
+        if (exitTargets.length > 0) {
+          tl.to(exitTargets, { 
+            opacity: 0, 
+            y: -15, 
+            duration: outDur, 
+            ease: "power3.in", 
+            force3D: true 
+          }, duration - outDur);
+        } else {
+          tl.to(sceneEl, { 
+            opacity: 0, 
+            y: -15, 
+            duration: outDur, 
+            ease: "power3.in", 
+            force3D: true 
+          }, duration - outDur);
+        }
       }
       
       mainTl.add(tl, currentTime);

@@ -319,16 +319,29 @@
       }, 0);
       tl.from(unit, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0);
 
-      // Synchronized Exit fade
-      // Since background is shared at root, fading the window (unit) is safe
+      // Exit: ONLY fade win-content children, NOT the whole unit.
+      // Keeps shared background visible during crossfade, preventing black flash.
       if (i < scenes.length - 1) {
-        tl.to(unit, {
-          opacity: 0,
-          scale: 0.8,
-          duration: outDur,
-          ease: "power2.in",
-          force3D: true
-        }, duration - outDur);
+        var winContent = unit.querySelector('.win-content');
+        var winHeader = unit.querySelector('.win-header');
+        var exitTargets = [winContent, winHeader].filter(Boolean);
+        if (exitTargets.length > 0) {
+          tl.to(exitTargets, {
+            opacity: 0,
+            y: -15,
+            duration: outDur,
+            ease: "power2.in",
+            force3D: true
+          }, duration - outDur);
+        } else {
+          tl.to(unit, {
+            opacity: 0,
+            scale: 0.8,
+            duration: outDur,
+            ease: "power2.in",
+            force3D: true
+          }, duration - outDur);
+        }
       }
 
       if (progBar) {
