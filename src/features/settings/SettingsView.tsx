@@ -263,6 +263,7 @@ export const SettingsView: React.FC = () => {
 
   const templates = [
     { id: 'dynamic', name: 'Dynamic' },
+    { id: 'promo', name: 'Promo Template' },
     { id: 'classic', name: 'Classic' },
     { id: 'modern', name: 'Modern' },
     { id: 'cinematic', name: 'Cinematic' },

@@ -39,6 +39,20 @@ const DEFAULT_SETTINGS: Record<string, string> = {
     showLogo: true, showTag: true, showDatetime: true, showCard: true,
     accentColor: '#00f2ff', secondaryColor: '#f43f5e', fontFamily: 'Plus Jakarta Sans', showProgressBar: true
   }),
+  video_template_promo: JSON.stringify({
+    logoText: 'PROMO', logoColor: '#ff0055', logoTop: 100, logoLeft: 0, logoAnim: 'slide-down', logoSize: 60,
+    hookColor: '#ffd700', hookAnim: 'bounce-in', hookSize: 120,
+    bodyColor: 'rgba(255, 255, 255, 0.95)', bodyAnim: 'scale-in', bodySize: 48,
+    dividerColor: '#ff0055', dividerWidth: 200,
+    mainTop: 600, mainLeft: 100, contentGap: 40,
+    tagText: 'SALE 50%', tagBg: '#ff0055', tagColor: '#ffffff', tagTop: 1600, tagLeft: 0, tagAnim: 'scale-in', tagSize: 32,
+    backgroundBrightness: 0.45, backgroundImage: '',
+    bgGradientStart: 'rgba(255, 0, 85, 0.4)', bgGradientEnd: 'rgba(0, 0, 0, 0.8)',
+    cardBgColor: 'rgba(8, 12, 24, 0.8)', cardBorderColor: '#ff0055',
+    cardBorderTop: 1, cardBorderBottom: 1, cardBorderLeft: 1, cardBorderRight: 1, cardBorderRadius: 24,
+    showLogo: true, showTag: true, showDatetime: false, showCard: true,
+    accentColor: '#ffd700', secondaryColor: '#ff0055', fontFamily: 'Montserrat', showProgressBar: true
+  }),
   video_template_classic: JSON.stringify({
     logoText: 'AUTOREELS', logoColor: '#ffffff', logoTop: 100, logoLeft: 0,
     hookColor: '#ffffff', hookSize: 120,
@@ -213,7 +227,7 @@ router.get('/templates/:id/raw', authenticate, async (req, res) => {
   const { id } = req.params;
   let templatePath = path.join(process.cwd(), 'app', 'templates', id, 'index.html');
   
-  if (id === 'dynamic') {
+  if (id === 'dynamic' || id === 'promo') {
     templatePath = path.join(process.cwd(), 'app', 'video-template', 'index.html');
   }
   

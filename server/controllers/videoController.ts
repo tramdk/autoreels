@@ -6,8 +6,7 @@ import { generateAudio } from '../services/tts';
 import { renderWithHyperFrames, findFfmpegPath, getAudioDuration } from '../services/renderer';
 import { publishToTikTok } from '../services/tiktok';
 import { uploadVideo, downloadFile, deleteRemoteFile } from '../services/storage';
-import { genAI, getAIClient } from '../lib/ai';
-import { generateAiDynamicHtml, generateAiTemplateSettings } from '../services/aiTemplateService';
+import { generateAiDynamicHtml, generateAiPromoHtml, generateAiTemplateSettings } from '../services/aiTemplateService';
 
 export const videoProgress = new Map<string, { progress: number, phase: string, title?: string }>();
 
@@ -69,9 +68,9 @@ function cleanBracketTags(text: string, isVoiceText: boolean): string {
     const technicalTagsRegex = /\[(cảnh|scene|visual|sound|music|sfx|bgm|giọng đọc|narrator|voiceover|voice|hình ảnh|âm thanh|hook|body|outro|intro)[^\]]*\]\s*[:\-–—]?\s*/gi;
     let cleaned = text.replace(technicalTagsRegex, '');
     
-    // 2. For stylistic segment labels like [AI FRONTEND] or [ANTI-PATTERN], keep the text but strip the outer square brackets.
-    // Make sure we do NOT touch progress-bar-like bracketed items, e.g., [==== 8/10 ====]
-    cleaned = cleaned.replace(/\[([a-zA-Z0-9_\s\-–—]{3,})\]/g, '$1');
+    // 2. Completely remove scene/segment titles in brackets (e.g. [Vấn đề], [Tính năng], [Kết luận], [AI FRONTEND])
+    const sceneTitleRegex = /\[([A-ZẮẰẲẴẶẤẦẨẪẬÉÈẺẼẸẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌỐỒỔỖỘỚỜỞỠỢÚÙỦŨỤỨỪỬỮỰÝỲỶỸỴa-zđ_ -]+)\]\s*(?:<br\s*\/?>|\n|[:\-–—])?\s*/gi;
+    cleaned = cleaned.replace(sceneTitleRegex, '');
     
     return cleaned.trim();
   }
@@ -571,12 +570,12 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
     }));
 
     // Merge short scenes dynamically to prevent fast flickering
-    if (templateId === 'dynamic') {
+    if (templateId === 'dynamic' || templateId === 'promo') {
       script.scenes = mergeShortScenes(script.scenes);
       console.log(`[PIPELINE] Merged short scenes -> ${script.scenes.length} scenes remaining.`);
     }
 
-    // Process AI dynamic template settings if templateId is 'dynamic'
+    // Process AI dynamic template settings if templateId is 'dynamic' or 'promo'
     let customHtml: string | undefined;
     if (templateId === 'dynamic') {
       try {
@@ -585,6 +584,14 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
         console.log(`[PIPELINE] Dynamic HTML designed successfully (length: ${customHtml?.length || 0} chars).`);
       } catch (err) {
         console.error(`[PIPELINE] Failed to generate AI custom HTML, falling back to defaults:`, err);
+      }
+    } else if (templateId === 'promo') {
+      try {
+        console.log(`[PIPELINE] Selected PROMO TEMPLATE. Invoking AI to design custom Promo HTML structure...`);
+        customHtml = await generateAiPromoHtml(title, script.scenes || [], customSettings || {}, ratio || '9:16');
+        console.log(`[PIPELINE] Promo HTML designed successfully (length: ${customHtml?.length || 0} chars).`);
+      } catch (err) {
+        console.error(`[PIPELINE] Failed to generate AI Promo HTML, falling back to defaults:`, err);
       }
     }
 

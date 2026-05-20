@@ -9,6 +9,7 @@ interface TemplateGridProps {
 export const TemplateGrid: React.FC<TemplateGridProps> = ({ selected, onSelect }) => {
   const templates = [
     { id: 'dynamic', label: 'Dynamic', icon: <Wand2 className="w-4 h-4" />, desc: 'AI Tự Động' },
+    { id: 'promo', label: 'Promo', icon: <Zap className="w-4 h-4" />, desc: 'Quảng Cáo' },
     { id: 'classic', label: 'Classic', icon: <Layout className="w-4 h-4" />, desc: 'Truyền thống' },
     { id: 'modern', label: 'Modern', icon: <Monitor className="w-4 h-4" />, desc: 'Chuyên nghiệp' },
     { id: 'cinematic', label: 'Cinematic', icon: <Film className="w-4 h-4" />, desc: 'Điện ảnh' },

@@ -135,11 +135,10 @@ Hãy tóm tắt bài viết dưới đây thành một kịch bản video slide-
 === QUY TẮC CẤU TRÚC BODYTEXT (HIỂN THỊ SLIDE) ===
 - BẮT BUỘC: Sử dụng thẻ \`<br>\` để xuống dòng trong bodyText. KHÔNG sử dụng \`\\n\`.
 - Mỗi bodyText phải được cấu trúc dạng thẻ giao diện tối giản gồm:
-  + Dòng 1: Nhãn phân đoạn viết hoa (như: \`[AI FRONTEND]\`, \`[ANTI-PATTERN]\`, \`[DIALS]\`, \`[EDGE CASES]\`).
-  + Dòng 2: Tiêu đề phụ ngắn gọn.
+  + Dòng 1: Tiêu đề phụ hoặc thông điệp chính ngắn gọn viết hoa (Ví dụ: CHẶN CODE RÁC SINH RA).
   + Các dòng tiếp theo: Danh sách dạng dấu chấm tròn \`•\`, hoặc so sánh, hoặc giá trị thông số dạng thanh trượt mô phỏng (ví dụ: \`Strictness: [==== 8/10 ====] ✓\`).
 - Ví dụ bodyText chuẩn:
-  \`[ANTI-PATTERN]<br>Chặn code rác sinh ra<br>• Any type ➔ BAN 🚫<br>• Nested loops ➔ REDUCE ⚠️<br>• Hardcoded secrets ➔ BLOCK ❌\`
+  \`CHẶN CODE RÁC SINH RA<br>• Any type ➔ BAN 🚫<br>• Nested loops ➔ REDUCE ⚠️<br>• Hardcoded secrets ➔ BLOCK ❌\`
 - Tuyệt đối KHÔNG viết các đoạn văn dài dòng vào bodyText. Càng ngắn gọn và trực quan càng tốt.
 
 === DỮ LIỆU BÀI BÁO ===
@@ -272,9 +271,9 @@ export function cleanBracketTags(text: string, isVoiceText: boolean): string {
     const technicalTagsRegex = /\[(cảnh|scene|visual|sound|music|sfx|bgm|giọng đọc|narrator|voiceover|voice|hình ảnh|âm thanh|hook|body|outro|intro)[^\]]*\]\s*[:\-–—]?\s*/gi;
     let cleaned = text.replace(technicalTagsRegex, '');
     
-    // 2. For stylistic segment labels like [AI FRONTEND] or [ANTI-PATTERN], keep the text but strip the outer square brackets.
-    // Make sure we do NOT touch progress-bar-like bracketed items, e.g., [==== 8/10 ====]
-    cleaned = cleaned.replace(/\[([a-zA-Z0-9_\s\-–—]{3,})\]/g, '$1');
+    // 2. Completely remove scene/segment titles in brackets (e.g. [Vấn đề], [Tính năng], [Kết luận], [AI FRONTEND])
+    const sceneTitleRegex = /\[([A-ZẮẰẲẴẶẤẦẨẪẬÉÈẺẼẸẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌỐỒỔỖỘỚỜỞỠỢÚÙỦŨỤỨỪỬỮỰÝỲỶỸỴa-zđ_ -]+)\]\s*(?:<br\s*\/?>|\n|[:\-–—])?\s*/gi;
+    cleaned = cleaned.replace(sceneTitleRegex, '');
     
     return cleaned.trim();
   }
