@@ -48,6 +48,35 @@ function generateScriptFromText(text: string, imageUrl?: string | null) {
   };
 }
 
+/**
+ * Clean technical bracketed tags from script texts.
+ * For voiceText (TTS), it removes ALL square brackets and their contents.
+ * For bodyText (visual display), it removes technical tags but keeps stylistic ones (stripping just the brackets).
+ */
+function cleanBracketTags(text: string, isVoiceText: boolean): string {
+  if (!text) return '';
+  if (isVoiceText) {
+    // For voiceText (TTS): ALWAYS remove ALL square brackets and their contents completely,
+    // along with any trailing colons, dashes or spaces.
+    return text
+      .replace(/\[[^\]]*\]\s*[:\-–—]?\s*/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  } else {
+    // For bodyText (visual display):
+    // 1. Completely remove technical/metadata tags like [Cảnh X], [Visual: ...], [Giọng đọc], [Music] etc.
+    const technicalTagsRegex = /\[(cảnh|scene|visual|sound|music|sfx|bgm|giọng đọc|narrator|voiceover|voice|hình ảnh|âm thanh|hook|body|outro|intro)[^\]]*\]\s*[:\-–—]?\s*/gi;
+    let cleaned = text.replace(technicalTagsRegex, '');
+    
+    // 2. For stylistic segment labels like [AI FRONTEND] or [ANTI-PATTERN], keep the text but strip the outer square brackets.
+    // Make sure we do NOT touch progress-bar-like bracketed items, e.g., [==== 8/10 ====]
+    cleaned = cleaned.replace(/\[([a-zA-Z0-9_\s\-–—]{3,})\]/g, '$1');
+    
+    return cleaned.trim();
+  }
+}
+
+
 export const getVideos = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -409,8 +438,18 @@ ${ratioLayoutRules}
 4. Bạn BẮT BUỘC phải viết mã JavaScript ở cuối file sử dụng đúng khung cấu trúc vòng lặp dưới đây để sinh DOM động và dựng timeline GSAP seekable hoàn mỹ.
 
 === YÊU CẦU THIẾT KẾ ĐẸP MẮT & TƯƠNG PHẢN ĐỘC ĐÁO ===
-1. PHÌ HỢP TƯƠNG PHẢN & NỀN TRANSLUCENT DASHBOARD CAO CẤP:
-   - Tất cả các thẻ chữ '.scene-text-card' BẮT BUỘC phải dùng màu nền tối thẫm bán trong suốt sang trọng: 'background: rgba(10, 12, 22, 0.82); backdrop-filter: blur(12px); border: 1.5px solid var(--accent-neon); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);'
+1. THIẾT KẾ CARD VIỀN CHO MỖI DÒNG/PHÂN CẢNH (AULAQ BENTO CARD STYLE):
+   - Đúng theo phong cách Aulaq.ai cao cấp (mỗi lần xuống dòng hay mỗi phân cảnh là một thẻ viền riêng biệt):
+   - Mọi dòng văn bản trong phân cảnh (tách bởi thẻ <br> hoặc \n) BẮT BUỘC phải được bọc trong một container dòng riêng biệt gọi là '.scene-line-card'.
+   - Lớp '.scene-line-card' BẮT BUỘC phải được bạn khai báo CSS tỉ mỉ với viền và nền như sau:
+     * Viền mỏng neon tinh tế phát sáng: 'border: 1.5px solid var(--accent-neon);' (ví dụ: xanh ngọc, cam, hồng tùy theo theme màu của chủ đề).
+     * Nền tối bán trong suốt: 'background: rgba(10, 12, 22, 0.75);' để đảm bảo chữ trắng hiển thị siêu tương phản và dễ đọc.
+     * Làm mờ hậu cảnh: 'backdrop-filter: blur(12px);'
+     * Bo góc mềm mại: 'border-radius: 12px;' hoặc '16px;'.
+     * Đệm trong: 'padding: 12px 20px;'.
+     * Đổ bóng nhẹ & hào quang neon: 'box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 0 10px var(--accent-neon-dim, rgba(0,245,255,0.15));'.
+     * Định dạng hiển thị: 'display: block; margin: 0 auto 12px auto; width: fit-content; max-width: 90%; text-align: center; box-sizing: border-box; transition: transform 0.3s ease;'.
+   - Khi đó, container ngoài '.scene-text-card' đóng vai trò là một container bố cục sạch sẽ, KHÔNG có background/border thô ráp bên ngoài nữa để tránh bị trùng lặp viền (hoặc chỉ có background trong suốt không viền).
    - Tuyệt đối CẤM sử dụng màu nền solid chói sáng (như vàng neon hay xanh neon nguyên khối) để làm nền thẻ, vì chữ trắng trên nền sáng sẽ cực kỳ nhạt nhòa, không thể đọc nổi.
    - Các màu Neon rực rỡ (xanh ngọc, cam, vàng, hồng) chỉ dùng để sơn viền card mỏng mảnh, hiệu ứng bóng mờ (box-shadow) và highlight chữ quan trọng.
 2. KHẮC PHỤC CHỮ TRÀN, AN TOÀN VIỀN MÀN HÌNH & TIÊU ĐỀ QUÁ DÀI (SCREEN BORDER & TYPOGRAPHY SAFETY):
@@ -499,17 +538,19 @@ window._tl = mainTl;
 var currentTime = 0;
 var CROSSFADE = 0.6; // Thời gian chồng chéo cảnh tiếp theo đè lên cảnh trước
 
-// Hàm tách từ để làm stagger word slide-up mượt mà
-function splitTextToSpans(text) {
+// Hàm tách dòng và bọc trong card viền cùng stagger word slide-up mượt mà
+function splitTextToLineCards(text) {
   if (!text) return '';
-  // Tách văn bản không phá vỡ thẻ HTML (<br>)
-  var fragments = text.split(/(<br\\s*\\/?>)/i);
-  return fragments.map(function(frag) {
-    if (frag.toLowerCase().indexOf('<br') === 0) return frag; // Giữ nguyên thẻ br
-    return frag.split(' ').map(function(word) {
+  // Tách văn bản theo các dòng bằng thẻ <br> hoặc xuống dòng \n
+  var lines = text.split(/(?:<br\\s*\\/?>|\\n)/gi);
+  return lines.map(function(line) {
+    var trimmed = line.trim();
+    if (!trimmed) return '';
+    var wordsSpans = trimmed.split(' ').map(function(word) {
       if (!word.trim()) return '';
       return '<span class="word-wrapper" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.22em;"><span class="word" style="display:inline-block; transform:translateY(105%); opacity:0; will-change:transform, opacity;">' + word + '</span></span>';
     }).join(' ');
+    return '<div class="scene-line-card">' + wordsSpans + '</div>';
   }).join('');
 }
 
@@ -534,7 +575,7 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     htmlContent += '  <img class="scene-image" src="' + scene.imageUrl + '" />';
     htmlContent += '</div>';
     htmlContent += '<div class="scene-text-card">';
-    htmlContent += '  <div class="scene-text highlight-text">' + splitTextToSpans(scene.bodyText || scene.voiceText || '') + '</div>';
+    htmlContent += '  <div class="scene-text highlight-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '  <div class="equalizer-container">';
     htmlContent += '    <div class="equalizer-bar bar-1"></div>';
     htmlContent += '    <div class="equalizer-bar bar-2"></div>';
@@ -546,7 +587,7 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   } else {
     // Không có ảnh thì thẻ chữ căn giữa to bản chiếm trọn không gian
     htmlContent += '<div class="scene-text-card full-size">';
-    htmlContent += '  <div class="scene-text centered-text">' + splitTextToSpans(scene.bodyText || scene.voiceText || '') + '</div>';
+    htmlContent += '  <div class="scene-text centered-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '  <div class="equalizer-container">';
     htmlContent += '    <div class="equalizer-bar bar-1"></div>';
     htmlContent += '    <div class="equalizer-bar bar-2"></div>';
@@ -584,16 +625,26 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     );
   }
 
-  // Word stagger slide-up
+  // Entrance animation for line cards (staggered)
+  var lineCards = sceneEl.querySelectorAll('.scene-line-card');
+  if (lineCards.length > 0) {
+    tl.fromTo(lineCards, 
+      { opacity: 0, y: 25, scale: 0.95 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.1, ease: "power2.out" },
+      0.1
+    );
+  }
+
+  // Word stagger slide-up inside line cards
   var words = sceneEl.querySelectorAll('.word');
   if (words.length > 0) {
     tl.to(words, {
       y: '0%',
       opacity: 1,
-      duration: 0.55,
-      stagger: 0.035,
-      ease: "power3.out"
-    }, 0.15);
+      duration: 0.5,
+      stagger: 0.025,
+      ease: "power2.out"
+    }, 0.2);
   }
 
   // 4. Exit Animation: Slide trượt qua bên trái để nhường chỗ cho cảnh sau
@@ -869,8 +920,18 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
       // === PARALLEL: TTS + BGM Download ===
       // Run both concurrently since they're independent I/O operations
       const SEPARATOR = ' . . . ';
-      const validScenes = scenes.map(s => ({ ...s, voiceText: s.voiceText || '' }));
+      // Clean bracket tags from both voiceText (TTS) and bodyText (displayed)
+      const validScenes = scenes.map(s => {
+        const rawVoice = s.voiceText || '';
+        const rawBody = s.bodyText || rawVoice;
+        return {
+          ...s,
+          voiceText: cleanBracketTags(rawVoice, true),
+          bodyText: cleanBracketTags(rawBody, false)
+        };
+      });
       const fullText = validScenes.map(s => s.voiceText).join(SEPARATOR);
+
 
       console.log(`[PIPELINE] STEP 1: Starting TTS (${fullText.length} chars) + BGM download in parallel...`);
       videoProgress.set(videoId, { progress: 10, phase: 'Generating AI Audio...', title });
