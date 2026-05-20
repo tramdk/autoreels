@@ -135,10 +135,9 @@ ${ratioLayoutRules}
    - Khi văn bản kịch bản hoặc tiêu đề Hook quá dài (trên 15 từ hoặc trên 80 ký tự):
      * Bạn phải tự động hạ cỡ chữ xuống mức an toàn bằng responsive typography (sử dụng 'font-size: clamp(38px, 4.5vw, 56px);' thay vì 80px).
      * Bắt buộc khai báo 'overflow: hidden; max-height: 100%;' cho các thẻ card chứa chữ và sử dụng line-height hợp lý 'line-height: 1.35' để ngăn chặn hoàn toàn việc chữ bị đè, tràn ra khỏi thẻ card hoặc lọt ra ngoài viền màn hình.
-   - Lớp .scene-text-card (đại diện cho Border bọc ngoài) nên dùng display flex để căn lề chữ hợp lý:
-     * NẾU text dài (chữ dạng đoạn văn): Đặt '.scene-text-card' thành 'display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left;' để chữ dễ đọc.
-     * NẾU text ngắn (tiêu đề/câu quote): Đặt 'align-items: center; text-align: center;'.
-   - Thẻ Subtitle '.scene-text' phải bọc trong các thẻ block có thuộc tính: 'white-space: normal; word-wrap: break-word; overflow-wrap: break-word; word-break: keep-all; display: block; width: 100%; font-size: 52px; font-weight: 600; line-height: 1.4;'
+   - Lớp .scene-text-card (đại diện cho Border bọc ngoài) BẮT BUỘC dùng flex căn trái toàn bộ:
+     * Đặt '.scene-text-card' thành 'display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left;' để chữ dễ đọc và không bao giờ bị tràn dòng (tuyệt đối không dùng text-align: center).
+   - Thẻ Subtitle '.scene-text' phải bọc trong các thẻ block có thuộc tính: 'white-space: normal; word-wrap: break-word; overflow-wrap: break-word; word-break: keep-all; text-align: left; display: block; width: 100%; font-size: 52px; font-weight: 600; line-height: 1.4;'
    - Từng từ bọc trong '.word-wrapper' có style 'display: inline-block; vertical-align: bottom; margin-right: 0.25em;' và lớp chữ '.word' bên trong dùng 'display: inline-block;'.
 3. LOGO PILL BADGE & PROGRESSBAR NEON: Thiết kế logo pill chữ đậm cách điệu ở góc trên bằng CSS. Thanh tiến trình chạy suốt thời lượng video ở đáy màn hình viền đen dày ruột neon rực rỡ.
 
@@ -308,9 +307,10 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
 
   // B. Entrance cho ảnh nền (Background Crossfade)
   if (bgEl) {
+    // SỬ DỤNG DURATION BẰNG CROSSFADE (0.6s) ĐỂ TRÁNH LỖI NHÁY NỀN (Flicker) KHI CHUYỂN CẢNH
     tl.fromTo(bgEl,
       { opacity: 0 },
-      { opacity: 1, duration: 0.8, ease: "power2.out" },
+      { opacity: 1, duration: CROSSFADE, ease: "none" },
       0
     );
   }
