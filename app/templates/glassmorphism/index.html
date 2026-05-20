@@ -199,12 +199,12 @@
       width: 100%;
       background: var(--glass-bg);
       border: 1px solid var(--glass-border);
-      padding: 90px 70px;
-      border-radius: 72px;
+      padding: calc(var(--cqmin) * 90 / 720) calc(var(--cqmin) * 60 / 720);
+      border-radius: calc(var(--cqmin) * 64 / 720);
       /* Faux glassmorphism fallback for Puppeteer */
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
       will-change: transform, opacity;
-      text-align: center;
+      text-align: {{ MAIN_CSS_TEXT_ALIGN }};
       box-shadow: 
         0 60px 150px rgba(0, 0, 0, 0.7),
         inset 0 0 0 1px var(--glass-edge),
@@ -213,7 +213,7 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      align-items: center;
+      align-items: var(--v-main-align);
       transform-style: preserve-3d;
     }
 
@@ -228,19 +228,21 @@
     .scene-text {
       position: relative;
       z-index: 1;
-      font-size: calc(var(--cqmin) * var(--v-body-size) / 720);
-      font-weight: 500;
+      font-size: calc(var(--cqmin) * var(--v-body-size) * 1.15 / 720); /* Boosted font size for readability */
+      font-weight: 600; /* Bolder weight for legibility inside glassmorphism */
       line-height: {{ LINE_HEIGHT }};
-      text-transform: uppercase;
       color: var(--v-body-color);
-      letter-spacing: -0.02em;
+      letter-spacing: -0.01em;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     .type-hook .scene-text {
       color: var(--v-hook-color);
-      font-size: calc(var(--cqmin) * var(--v-hook-size) / 720);
+      font-size: calc(var(--cqmin) * var(--v-hook-size) * 1.2 / 720);
       font-weight: 900;
-      letter-spacing: -0.04em;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
     }
     .divider-line {
       width: 80px;

@@ -57,8 +57,8 @@ Bạn đang thiết kế cho màn hình đứng (9:16) chuẩn di động.
 3. BỐ CỤC XẾP CHỒNG DỌC TUYỆT ĐỐI (NO HORIZONTAL COLUMNS):
    - Cấm hoàn toàn việc chia đôi màn hình theo chiều ngang (flex-direction: row) vì chiều rộng video đứng 9:16 cực kỳ hẹp.
    - Nếu cảnh CÓ hình ảnh (scene.imageUrl): Thiết kế dạng 2 khối bento xếp chồng dọc:
-     * Khối ảnh '.scene-image-card' nằm ở trên, chiếm khoảng 43% chiều cao, chiều rộng 100% full viền bo góc. Ảnh '.scene-image' phải có 'width: 100%; height: 100%; object-fit: cover; border-radius: 16px; will-change: transform, filter; transform-origin: center;'.
-     * Khối chữ '.scene-text-card' nằm ở dưới, chiếm khoảng 43% chiều cao, chiều rộng 100%, bên trong hiển thị phụ đề.
+     * Khối ảnh '.scene-image-card' nằm ở trên, chiếm TỐI ĐA 32% chiều cao (height: 32%), chiều rộng 100% full viền bo góc. (Không được để ảnh quá to lấn chiếm chỗ của chữ). Ảnh '.scene-image' phải có 'width: 100%; height: 100%; object-fit: cover; border-radius: 16px; will-change: transform, filter; transform-origin: center;'.
+     * Khối chữ '.scene-text-card' nằm ở dưới, ĐƯỢC ƯU TIÊN KHÔNG GIAN BẰNG CÁCH sử dụng 'flex: 1' hoặc 'height: 55%' để tự động chiếm toàn bộ phần không gian rộng lớn còn lại, đảm bảo văn bản dài không bao giờ bị cắt cụt.
    - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' tự động mở rộng chiếm trọn vẹn khu vực trung tâm (width: 100%; height: 80%;) với cỡ chữ khổng lồ bắt mắt.
 `;
   }
@@ -100,8 +100,8 @@ Trình biên dịch của HyperFrames phân tích font chữ tĩnh (static compi
    - Cấp 1 (Background texture): Nền phải có chiều sâu bằng cách vẽ các quả cầu ánh sáng mờ ảo (ambient radial glow), lưới tọa độ mảnh trôi nổi chậm, hoặc chữ chìm siêu lớn làm hình bóng (ghost text) với độ mờ nhẹ (opacity: 0.12 - 0.25).
      * Ví dụ lưới tọa độ chấm bi (.bg-dots-grid) siêu mỏng: \`background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px); background-size: 40px 40px;\` hoặc lưới ô vuông: \`background-image: linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px); background-size: 80px 80px;\`
      * Vệt sáng ambient glow bằng radial-gradient: \`background: radial-gradient(circle at 50% 50%, rgba(var(--accent-glow), 0.25) 0%, transparent 70%); filter: blur(40px);\`
-   - Cấp 2 (Structural borders & Containers): Sử dụng các đường viền dày hẳn từ 2.5px - 4px hoặc các khối bento vững chãi, bo góc mượt mà 20px - 32px. Để tránh lặp viền (repeating nested borders), hãy bọc kính Faux Glassmorphism cho container cha duy nhất (như \`.scene-text-card\`, \`.scene-image-card\` hoặc khung bento Grid ngoài cùng), còn các container con bên trong \`.scene-line-card\` phải trong suốt và không viền (\`border: none; background: transparent; shadow: none; padding: 0;\`).
-   - Cấp 3 (High-Contrast Typography): Cỡ chữ cực lớn theo tỷ lệ video: Tiêu đề chính khổng lồ 64px - 120px, nội dung phụ đề rõ ràng 28px - 42px.
+   - Cấp 2 (Structural borders & Containers): Sử dụng các đường viền dày hẳn từ 2.5px - 4px hoặc các khối bento vững chãi, bo góc mượt mà 32px - 48px. Để tránh lặp viền (repeating nested borders), hãy bọc kính Faux Glassmorphism cho container cha duy nhất (như \`.scene-text-card\`, \`.scene-image-card\` hoặc khung bento Grid ngoài cùng), còn các container con bên trong \`.scene-line-card\` phải trong suốt và không viền (\`border: none; background: transparent; shadow: none; padding: 0;\`).
+   - Cấp 3 (High-Contrast Typography): Cỡ chữ cực lớn theo tỷ lệ video: Tiêu đề chính khổng lồ 72px - 110px, nội dung phụ đề rõ ràng 48px - 60px. (TUYỆT ĐỐI KHÔNG DÙNG CỠ CHỮ DƯỚI 40px VÌ RẤT KHÓ ĐỌC TRÊN ĐIỆN THOẠI).
 3. BỐ CỤC ĐA DẠNG:
    - Ưu tiên các bố cục lệch trục, bất đối xứng (asymmetric bento grid) hoặc chia vùng (split frame: one side image/stats, other side text card) để tạo cảm giác cực kỳ premium.
 
@@ -125,18 +125,21 @@ ${ratioLayoutRules}
      * Nền bán trong suốt mượt mà: 'background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);' hoặc nền tối bán trong suốt 'background: linear-gradient(135deg, rgba(10, 12, 22, 0.85) 0%, rgba(15, 18, 32, 0.75) 100%);'
      * Phản xạ viền mỏng trắng bóng bẩy ở mép trên: 'border: 1px solid rgba(255, 255, 255, 0.15);'
      * Bóng đổ mềm sâu rộng & viền trong phản chiếu: 'box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);'
-     * Bo góc mượt mà: 'border-radius: 20px;' hoặc '24px;'.
-     * Đệm trong rộng rãi: 'padding: 40px 30px;'.
+     * Bo góc mượt mà: 'border-radius: 40px;' hoặc '48px;'.
+     * Đệm trong rộng rãi (rất quan trọng để chữ không sát mép): 'padding: 80px 60px;' hoặc 'clamp(60px, 8vw, 100px);'.
    - Bên trong đó, các thẻ dòng '.scene-line-card' BẮT BUỘC phải trong suốt và không viền ('border: none; background: transparent; box-shadow: none; padding: 0; margin-bottom: 20px;') để tránh lặp viền thô kệch! Từng từ bên trong '.word' sẽ trượt lên từ mặt nạ mask mượt mà.
    - Tuyệt đối CẤM sử dụng màu nền solid chói sáng (như vàng neon hay xanh neon nguyên khối) để làm nền thẻ, vì chữ trắng trên nền sáng sẽ cực kỳ nhạt nhòa, không thể đọc nổi.
    - Các màu Neon rực rỡ (xanh ngọc, cam, vàng, hồng) chỉ dùng để sơn viền card mỏng mảnh, hiệu ứng bóng mờ (box-shadow) và highlight chữ quan trọng.
 2. KHẮC PHỤC CHỮ TRÀN, AN TOÀN VIỀN MÀN HÌNH & TIÊU ĐỀ QUÁ DÀI (SCREEN BORDER & TYPOGRAPHY SAFETY):
    - TUYỆT ĐỐI CẤM đặt padding-left/right bằng 0 hoặc margin bằng 0 ở bất cứ cấp container chính nào. Toàn bộ thiết kế (Bento Grid, so sánh, slide text, card chứa) bắt buộc phải nằm cách viền màn hình vật lý tối thiểu 60px ở cả bên trái và bên phải (sử dụng padding: 160px 60px; hoặc 120px 60px;). Điều này cực kỳ quan trọng để ngăn chặn nội dung bị đè lên bởi giao diện ứng dụng (TikTok/Reels/Shorts UI overlays).
    - Khi văn bản kịch bản hoặc tiêu đề Hook quá dài (trên 15 từ hoặc trên 80 ký tự):
-     * Bạn phải tự động hạ cỡ chữ xuống mức an toàn bằng responsive typography (sử dụng 'font-size: clamp(24px, 3.5vw, 42px);' thay vì 60px).
-     * Bắt buộc khai báo 'overflow: hidden; max-height: 100%;' cho các thẻ card chứa chữ và sử dụng line-height hợp lý 'line-height: 1.25' để ngăn chặn hoàn toàn việc chữ bị đè, tràn ra khỏi thẻ card hoặc lọt ra ngoài viền màn hình.
-   - Thẻ Subtitle '.scene-text' phải bọc trong các thẻ block có thuộc tính: 'white-space: normal; word-wrap: break-word; overflow-wrap: break-word; word-break: keep-all; text-align: left; display: block; width: 100%; font-size: 38px; line-height: 1.35;'
-   - Từng từ bọc trong '.word-wrapper' có style 'display: inline-block; vertical-align: middle; margin-right: 0.22em;' và lớp chữ '.word' bên trong dùng 'display: inline-block;'.
+     * Bạn phải tự động hạ cỡ chữ xuống mức an toàn bằng responsive typography (sử dụng 'font-size: clamp(38px, 4.5vw, 56px);' thay vì 80px).
+     * Bắt buộc khai báo 'overflow: hidden; max-height: 100%;' cho các thẻ card chứa chữ và sử dụng line-height hợp lý 'line-height: 1.35' để ngăn chặn hoàn toàn việc chữ bị đè, tràn ra khỏi thẻ card hoặc lọt ra ngoài viền màn hình.
+   - Lớp .scene-text-card (đại diện cho Border bọc ngoài) nên dùng display flex để căn lề chữ hợp lý:
+     * NẾU text dài (chữ dạng đoạn văn): Đặt '.scene-text-card' thành 'display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left;' để chữ dễ đọc.
+     * NẾU text ngắn (tiêu đề/câu quote): Đặt 'align-items: center; text-align: center;'.
+   - Thẻ Subtitle '.scene-text' phải bọc trong các thẻ block có thuộc tính: 'white-space: normal; word-wrap: break-word; overflow-wrap: break-word; word-break: keep-all; display: block; width: 100%; font-size: 52px; font-weight: 600; line-height: 1.4;'
+   - Từng từ bọc trong '.word-wrapper' có style 'display: inline-block; vertical-align: bottom; margin-right: 0.25em;' và lớp chữ '.word' bên trong dùng 'display: inline-block;'.
 3. LOGO PILL BADGE & PROGRESSBAR NEON: Thiết kế logo pill chữ đậm cách điệu ở góc trên bằng CSS. Thanh tiến trình chạy suốt thời lượng video ở đáy màn hình viền đen dày ruột neon rực rỡ.
 
 === TRIẾT LÝ TRỰC QUAN HÓA THÔNG TIN (INFORMATION VISUALIZATION PHILOSOPHY) ===
@@ -233,7 +236,7 @@ function splitTextToLineCards(text) {
     if (!trimmed) return '';
     var wordsSpans = trimmed.split(' ').map(function(word) {
       if (!word.trim()) return '';
-      return '<span class="word-wrapper" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.22em;"><span class="word" style="display:inline-block; transform:translateY(105%); opacity:0; will-change:transform, opacity;">' + word + '</span></span>';
+      return '<span class="word-wrapper" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.25em;"><span class="word" style="display:inline-block; transform:translateY(105%); opacity:0; will-change:transform, opacity;">' + word + '</span></span>';
     }).join(' ');
     return '<div class="scene-line-card">' + wordsSpans + '</div>';
   }).join('');
@@ -498,9 +501,9 @@ Bạn đang thiết kế cho màn hình đứng (9:16) chuẩn di động.
    => LƯU Ý: Bắt buộc tuân thủ padding an toàn (top 130px, bottom 240px, sides 60px) để không bị chồng lấn bởi nút hay phụ đề hệ thống của TikTok/Reels.
 3. BỐ CỤC CANVA PROMO VỚI LƯỚI AN TOÀN (FULL-BLEED VERTICAL STACK):
    - Nếu cảnh CÓ hình ảnh (scene.imageUrl):
-     * Khối ảnh '.scene-image-card' chiếm khoảng 40% đến 45% chiều cao. Ảnh '.scene-image' có: 'width: 100%; height: 100%; object-fit: cover; border-radius: 24px; border: 2px solid rgba(255,255,255,0.25); box-shadow: 0 15px 35px rgba(0,0,0,0.35); will-change: transform, filter; transform-origin: center;'.
-     * Khối chữ '.scene-text-card' nằm phía dưới ảnh, chiều rộng 100%. CHỮ RÕ RÀNG: font-size tối thiểu 46px cho chữ chính, font-weight: 900, color: #ffffff, text-shadow nhẹ.
-   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' chiếm toàn bộ không gian trung tâm (height: 75%). CHỮ KHỔNG LỒ: font-size: clamp(52px, 8vw, 84px), font-weight: 900, color: #ffffff.
+     * Khối ảnh '.scene-image-card' chiếm TỐI ĐA 32% chiều cao (height: 32%). (Không được để ảnh quá to lấn chiếm chỗ của chữ). Ảnh '.scene-image' có: 'width: 100%; height: 100%; object-fit: cover; border-radius: 24px; border: 2px solid rgba(255,255,255,0.25); box-shadow: 0 15px 35px rgba(0,0,0,0.35); will-change: transform, filter; transform-origin: center;'.
+     * Khối chữ '.scene-text-card' nằm phía dưới ảnh, chiều rộng 100%, ĐƯỢC ƯU TIÊN KHÔNG GIAN BẰNG CÁCH sử dụng 'flex: 1' hoặc 'height: 55%' để tự động chiếm toàn bộ phần không gian rộng lớn còn lại, đảm bảo văn bản dài không bao giờ bị cắt cụt. CHỮ RÕ RÀNG: font-size tối thiểu 46px cho chữ chính, font-weight: 900, color: #ffffff, text-shadow nhẹ.
+   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' chiếm toàn bộ không gian trung tâm (height: 80%). CHỮ KHỔNG LỒ: font-size: clamp(52px, 8vw, 84px), font-weight: 900, color: #ffffff.
 `;
   }
 
@@ -525,8 +528,8 @@ Bạn là giám đốc nghệ thuật kiêm nhà thiết kế chuyển động v
    - Cấp 1 (Background texture): Nền phải có chiều sâu bằng cách vẽ các quả cầu ánh sáng mờ ảo (ambient radial glow), lưới tọa độ mảnh trôi nổi chậm, hoặc chữ chìm siêu lớn làm hình bóng (ghost text) với độ mờ nhẹ (opacity: 0.12 - 0.25).
      * Ví dụ lưới tọa độ chấm bi (.bg-dots-grid) siêu mỏng: 'background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px); background-size: 40px 40px;' hoặc lưới ô vuông: 'background-image: linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px); background-size: 80px 80px;'
      * Vệt sáng ambient glow bằng radial-gradient: 'background: radial-gradient(circle at 50% 50%, rgba(var(--accent-glow), 0.25) 0%, transparent 70%); filter: blur(40px);'
-   - Cấp 2 (Structural borders & Containers): Sử dụng các đường viền dày hẳn từ 2.5px - 4px hoặc các khối bento vững chãi, bo góc mượt mà 20px - 32px. Để tránh lặp viền (repeating nested borders), hãy bọc kính Faux Glassmorphism cho container cha duy nhất (như '.scene-text-card', '.scene-image-card' hoặc khung bento Grid ngoài cùng), còn các container con bên trong '.scene-line-card' phải trong suốt và không viền ('border: none; background: transparent; shadow: none; padding: 0;').
-   - Cấp 3 (High-Contrast Typography): Cỡ chữ cực lớn theo tỷ lệ video: Tiêu đề chính khổng lồ 64px - 120px, nội dung phụ đề rõ ràng 28px - 42px.
+   - Cấp 2 (Structural borders & Containers): Sử dụng các đường viền dày hẳn từ 2.5px - 4px hoặc các khối bento vững chãi, bo góc mượt mà 32px - 48px. Để tránh lặp viền (repeating nested borders), hãy bọc kính Faux Glassmorphism cho container cha duy nhất (như \`.scene-text-card\`, \`.scene-image-card\` hoặc khung bento Grid ngoài cùng), còn các container con bên trong \`.scene-line-card\` phải trong suốt và không viền (\`border: none; background: transparent; shadow: none; padding: 0;\`).
+   - Cấp 3 (High-Contrast Typography): Cỡ chữ cực lớn theo tỷ lệ video: Tiêu đề chính khổng lồ 72px - 120px, nội dung phụ đề rõ ràng 48px - 60px. (TUYỆT ĐỐI KHÔNG DÙNG CỠ CHỮ DƯỚI 40px VÌ KHÔNG THỂ ĐỌC TRÊN ĐIỆN THOẠI).
 3. BỐ CỤC ĐA DẠNG:
    - Ưu tiên các bố cục lệch trục, bất đối xứng (asymmetric bento grid) hoặc chia vùng (split frame: one side image/stats, other side text card) để tạo cảm giác cực kỳ premium.
 
@@ -551,8 +554,8 @@ Hãy rũ bỏ hoàn toàn phong cách thiết kế màu đơn sắc thô sơ ("s
      * Nền bán trong suốt tinh khiết: 'background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);' hoặc nền tối bán trong suốt 'background: linear-gradient(135deg, rgba(15, 9, 30, 0.85) 0%, rgba(25, 15, 50, 0.75) 100%);'
      * Viền mỏng như tơ phát sáng trắng ở mép trên: 'border: 1px solid rgba(255, 255, 255, 0.15);'
      * Bóng đổ mềm sâu rộng & viền trong phản chiếu: 'box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);'
-     * Bo góc sang trọng: 'border-radius: 20px;' hoặc '24px;'.
-     * Đệm trong rộng rãi: 'padding: 35px 25px;'.
+     * Bo góc sang trọng: 'border-radius: 40px;' hoặc '48px;'.
+     * Đệm trong rộng rãi (bắt buộc để chữ không sát viền): 'padding: 80px 60px;' hoặc 'clamp(60px, 8vw, 100px);'.
    - Bên trong đó, từng dòng văn bản '.scene-line-card' BẮT BUỘC phải trong suốt và không viền ('border: none; background: transparent; box-shadow: none; padding: 0; margin-bottom: 20px;') để tránh hoàn toàn việc lặp lại viền thô kệch! Từng từ bên trong '.word' sẽ trượt lên từ mặt nạ mask mượt mà.
 
 3. LƯỚI AN TOÀN VIỀN MÀN HÌNH (STRICT SAFETY GRID):
@@ -562,8 +565,8 @@ Hãy rũ bỏ hoàn toàn phong cách thiết kế màu đơn sắc thô sơ ("s
 
 4. CỠ CHỮ CHUẨN HOÁ & THỐNG NHẤT (CLAMP TYPOGRAPHY):
    - Tự động co giãn cỡ chữ theo khung hình để tránh tràn viền khi tiêu đề dài.
-   - Chữ chính/tiêu đề: 'font-size: clamp(38px, 5.5vw, 64px); font-weight: 900; line-height: 1.25; color: #ffffff;'
-   - Chữ nội dung/phụ đề: 'font-size: clamp(26px, 3.8vw, 36px); font-weight: 700; line-height: 1.35; color: rgba(255, 255, 255, 0.9);'
+   - Chữ chính/tiêu đề: 'font-size: clamp(56px, 7vw, 84px); font-weight: 900; line-height: 1.25; color: #ffffff;'
+   - Chữ nội dung/phụ đề: 'font-size: clamp(42px, 5.5vw, 56px); font-weight: 700; line-height: 1.35; color: rgba(255, 255, 255, 0.9); text-align: left; display: flex; flex-direction: column; justify-content: center;'
    - Các từ khóa bán hàng quan trọng (SALE, 50%, MUA NGAY, GIÁ SỐC, FREE SHIP, QUÀ TẶNG, HOT, GIẢM GIÁ...) được tự động bọc trong thẻ Badge '.sale-badge' dạng viên thuốc nổi bật rực rỡ với màu nền chói (như vàng neon #FFF500, xanh mint #00FFCC) và màu chữ tối tương phản cao để tạo điểm nhấn chốt đơn cực mạnh!
 
 5. SIÊU CẢNH CUỐI - CALL TO ACTION (CTA) HUB CHUYỂN ĐỔI CAO:
