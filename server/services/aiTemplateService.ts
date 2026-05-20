@@ -592,7 +592,7 @@ function highlightSellingKeywords(text) {
   keywords.sort(function(a, b) { return b.length - a.length; });
   var resultText = text;
   keywords.forEach(function(kw) {
-    var regex = new RegExp('(' + kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + ')', 'gi');
+    var regex = new RegExp('(' + kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\\\$&') + ')', 'gi');
     resultText = resultText.replace(regex, function(match) {
       return '<span class="sale-badge">' + match + '</span>';
     });
@@ -603,7 +603,7 @@ function highlightSellingKeywords(text) {
 function splitTextToLineCards(text, isCta = false) {
   if (!text) return '';
   var highlighted = highlightSellingKeywords(text);
-  var lines = highlighted.split(/(?:<br\s*\/?>|\n)/gi);
+  var lines = highlighted.split(/(?:<br\\s*\\/?>|\\n)/gi);
   return lines.map(function(line) {
     var trimmed = line.trim();
     if (!trimmed) return '';
@@ -795,188 +795,6 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     if (bgEl) {
       mainTl.add(gsap.set(bgEl, { display: 'none', visibility: 'hidden' }), currentTime + duration + 0.3);
     }
-    currentTime += duration - CROSSFADE;
-  } else {
-    currentTime += duration;
-  }
-}
-
-if (document.getElementById('progressBar')) {
-  mainTl.to("#progressBar", { width: "100%", duration: TOTAL_DURATION, ease: "none" }, 0);
-}
-
-mainTl.to("#root", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, TOTAL_DURATION - 0.5);
-
-window.__hf = {
-  duration: TOTAL_DURATION,
-  seek: function(t) { if (window._tl) window._tl.pause().seek(t); }
-};
-
-=== YÊU CẦU ĐẦU RA ===
-Trả về duy nhất mã nguồn index.html hoàn chỉnh nhất bên trong khối code markdown \`\`\`html. Tuyệt đối không giải thích thêm hay viết lời mở đầu/kết thúc nào cả.
-ọc trong word-mask để slide-up mượt
-    var wordsSpans = trimmed.split(' ').map(function(word) {
-      if (!word.trim()) return '';
-      return '<span class="word-mask" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.22em;"><span class="word" style="display:inline-block; transform:translateY(110%); opacity:0; will-change: transform, opacity;">' + word + '</span></span>';
-    }).join(' ');
-    
-    return '<div class="scene-line-card">' + wordsSpans + '</div>';
-  }).join('');
-}
-
-document.getElementById('scene-container').innerHTML = '';
-
-// Mảng màu gradient chuyển màu rực rỡ đặc trưng sang xịn mịn
-var BG_GRADIENTS = [
-  'linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%)', // Cảnh 1 (Hook): Hồng Đỏ
-  'linear-gradient(135deg, #1A2980 0%, #26D0CE 100%)', // Cảnh 2: Xanh Dương
-  'linear-gradient(135deg, #f857a6 0%, #ff5858 100%)', // Cảnh 3: Hồng Cam
-  'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', // Cảnh 4: Xanh Mint
-  'linear-gradient(135deg, #7F00FF 0%, #E100FF 100%)', // Cảnh 5: Tím Cyberpunk
-  'linear-gradient(135deg, #FF8C00 0%, #FF0080 100%)', // Đột phá Cam Hồng
-  'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)'  // Xanh Biển Neon
-];
-
-for (var i = 0; i < SCENES_DATA.length; i++) {
-  var scene = SCENES_DATA[i];
-  var duration = SCENE_DURATIONS[i] || 5;
-  var sceneId = 'scene-' + i;
-  var isLastScene = (i === SCENES_DATA.length - 1);
-
-  // 1. Tạo phần tử DOM động cho Cảnh
-  var sceneEl = document.createElement('div');
-  sceneEl.id = sceneId;
-  sceneEl.className = 'scene-card' + (isLastScene ? ' cta-scene' : '');
-  sceneEl.style.display = 'none';
-  
-  var htmlContent = '';
-  
-  if (isLastScene) {
-    // Siêu cảnh cuối CTA Hub chốt đơn cực mạnh
-    htmlContent += '<div class="scene-text-card full-size cta-hub">';
-    htmlContent += '  <div class="scene-text centered-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '', true) + '</div>';
-    
-    // Nút CTA giả lập nổi 3D kèm mã giảm giá tinh tế
-    htmlContent += '  <div class="cta-interactive-wrapper" style="display:flex; flex-direction:column; align-items:center; gap:20px; margin-top:35px; width:100%;">';
-    htmlContent += '    <div class="cta-coupon-card">FREE SHIP + GIẢM 50%</div>';
-    htmlContent += '    <button class="cta-button">🛒 SĂN DEAL NGAY</button>';
-    htmlContent += '  </div>';
-    htmlContent += '</div>';
-  } else if (scene.imageUrl) {
-    // Cảnh thường có ảnh: Ảnh mượt mà bo góc glass ở trên, text ở dưới
-    htmlContent += '<div class="scene-image-card">';
-    htmlContent += '  <img class="scene-image" src="' + scene.imageUrl + '" />';
-    htmlContent += '</div>';
-    htmlContent += '<div class="scene-text-card">';
-    htmlContent += '  <div class="scene-text highlight-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
-    htmlContent += '</div>';
-  } else {
-    // Cảnh thường không ảnh: Text bento trôi nổi cực sang trọng
-    htmlContent += '<div class="scene-text-card full-size">';
-    htmlContent += '  <div class="scene-text centered-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
-    htmlContent += '</div>';
-  }
-  sceneEl.innerHTML = htmlContent;
-  document.getElementById('scene-container').appendChild(sceneEl);
-
-  // 2. Tạo sub-timeline riêng cho cảnh này
-  var tl = gsap.timeline();
-  tl.set(sceneEl, { display: 'flex', visibility: 'visible', zIndex: 50 + i }, 0);
-  
-  // A. Chuyển đổi màu nền gradient ảo diệu theo mảng màu rực rỡ
-  var targetGradient = BG_GRADIENTS[i % BG_GRADIENTS.length];
-  tl.to('#root', { background: targetGradient, duration: 0.6, ease: "power2.out" }, 0);
-  
-  // B. Entrance Animation cực mượt mà với Elastic Ease của GSAP
-  tl.fromTo(sceneEl, 
-    { opacity: 0, y: 50, scale: 0.92 },
-    { opacity: 1, y: 0, scale: 1, duration: 0.75, ease: "back.out(1.4)" }, 
-    0
-  );
-
-  // C. Ảnh sản phẩm bay nhẹ từ dưới lên (nếu có)
-  var imgCard = sceneEl.querySelector('.scene-image-card');
-  if (imgCard) {
-    tl.fromTo(imgCard, 
-      { opacity: 0, y: 70, scale: 0.88 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "back.out(1.3)" },
-      0.05
-    );
-  }
-
-  // D. Zoom nhẹ ảnh sản phẩm kiểu điện ảnh (Ken Burns)
-  var imgEl = sceneEl.querySelector('.scene-image');
-  if (imgEl) {
-    tl.fromTo(imgEl, 
-      { scale: 1.0 }, 
-      { scale: 1.08, duration: duration, ease: "none" }, 
-      0
-    );
-  }
-
-  // E. Chữ trượt lên từ mặt nạ mask (Word Mask Slide Up)
-  var words = sceneEl.querySelectorAll('.word');
-  if (words.length > 0) {
-    tl.to(words, {
-      y: '0%',
-      opacity: 1,
-      duration: 0.5,
-      stagger: 0.03,
-      ease: "power3.out"
-    }, 0.2);
-  }
-
-  // F. Từ khóa bán hàng rực rỡ pop lên ấn tượng
-  var saleBadges = sceneEl.querySelectorAll('.sale-badge');
-  if (saleBadges.length > 0) {
-    tl.fromTo(saleBadges,
-      { scale: 0.5, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.55, stagger: 0.08, ease: "back.out(1.6)" },
-      0.35
-    );
-  }
-
-  // G. Xử lý hoạt ảnh looping và entrance đặc trưng cho CTA ở cảnh cuối
-  if (isLastScene) {
-    var ctaButton = sceneEl.querySelector('.cta-button');
-    var ctaCoupon = sceneEl.querySelector('.cta-coupon-card');
-    
-    if (ctaCoupon) {
-      tl.fromTo(ctaCoupon,
-        { scale: 0.8, opacity: 0, y: 20 },
-        { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: "back.out(1.5)" },
-        0.4
-      );
-    }
-    
-    if (ctaButton) {
-      tl.fromTo(ctaButton,
-        { scale: 0.7, opacity: 0, rotationX: -30 },
-        { scale: 1, opacity: 1, rotationX: 0, duration: 0.8, ease: "back.out(1.7)" },
-        0.5
-      );
-      
-      // Tạo hiệu ứng đập co giãn vô hạn (Infinite Pulsing Pulse Loop) mô phỏng 3D
-      tl.add(function() {
-        gsap.to(ctaButton, {
-          scale: 1.06,
-          boxShadow: "0 15px 35px rgba(255, 184, 0, 0.6), 0 4px 0 #D49B00",
-          duration: 0.75,
-          yoyo: true,
-          repeat: -1,
-          ease: "power1.inOut"
-        });
-      }, 1.2);
-    }
-  }
-
-  // H. Tuyệt đối KHÔNG viết exit animation (opacity: 0) cho các cảnh trung gian ở đây.
-  // Sự giao thoa (crossfade) sẽ được đảm bảo tự nhiên khi cảnh tiếp theo đè lên cảnh hiện tại.
-
-  mainTl.add(tl, currentTime);
-
-  if (i < SCENES_DATA.length - 1) {
-    mainTl.add(gsap.set(sceneEl, { display: 'none', visibility: 'hidden' }), currentTime + duration);
     currentTime += duration - CROSSFADE;
   } else {
     currentTime += duration;
