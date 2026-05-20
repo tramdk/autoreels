@@ -477,26 +477,28 @@ export async function generateAiPromoHtml(title: string, scenes: any[], customSe
 === QUY TẮC BỐ CỤC KHUNG HÌNH NGANG (16:9 LANDSCAPE WIDESCREEN) ===
 Bạn đang thiết kế cho màn hình ngang (16:9) chuẩn máy tính/TV/Youtube.
 1. CONTAINER GỐC #root: Bắt buộc khai báo: <div id="root" data-composition-id="main" data-width="1920" data-height="1080" data-start="0" data-duration="{{ DURATION }}">
-2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card): Toàn bộ các thẻ cảnh '.scene-card' BẮT BUỘC phải sử dụng thuộc tính CSS định vị absolute chồng lên nhau để crossfade hoàn hảo:
-   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 40px; box-sizing: border-box; padding: 120px 80px;'
+   - #root BẮT BUỘC có CSS: 'background-color: #F07C13;' (sẽ thay đổi bằng GSAP theo từng cảnh).
+2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card):
+   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 50px; box-sizing: border-box; padding: 60px 80px;'
 3. CHIA ĐÔI SONG SONG TRÁI-PHẢI PROMO (HORIZONTAL PROMO SPLIT):
    - Nếu cảnh CÓ hình ảnh (scene.imageUrl):
-     * Khối ảnh '.scene-image-card' nằm bên TRÁI, chiếm khoảng 46% chiều rộng và 100% chiều cao. Ảnh phải nổi bật viền dày lấp lánh neon, bo góc 24px.
-     * Khối chữ '.scene-text-card' nằm bên PHẢI, chiếm khoảng 46% chiều rộng. Có các badge nhỏ nổi bật (ví dụ: "CHI TIẾT", "SALE NOW") bay chéo trên hoặc dưới.
-   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' tự động chiếm trọn vẹn 100% không gian bề ngang.
+     * Khối ảnh '.scene-image-card' bên TRÁI, 48% width, 90% height, border-radius lớn bất đối xứng (80px 30px 80px 30px), border: 5px solid #ffffff.
+     * Khối chữ '.scene-text-card' bên PHẢI, 46% width. CHỮ CỰC TO: font-size tối thiểu 48px, font-weight: 900, color: #ffffff.
+   - KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' chiếm 100% width, chữ khổng lồ font-size: 64px+.
+   - TUYỆT ĐỐI CẤM viền neon, viền dashed. Chỉ dùng viền trắng dày.
 `;
   } else if (ratio === '1:1') {
     ratioLayoutRules = `
 === QUY TẮC BỐ CỤC KHUNG HÌNH VUÔNG (1:1 SQUARE INSTAGRAM) ===
 Bạn đang thiết kế cho màn hình vuông (1:1).
 1. CONTAINER GỐC #root: Bắt buộc khai báo: <div id="root" data-composition-id="main" data-width="1080" data-height="1080" data-start="0" data-duration="{{ DURATION }}">
-2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card): Toàn bộ các thẻ cảnh '.scene-card' BẮT BUỘC phải sử dụng thuộc tính CSS định vị absolute chồng lên nhau để crossfade hoàn hảo:
-   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 30px; box-sizing: border-box; padding: 80px 45px;'
+   - #root BẮT BUỘC có CSS: 'background-color: #F07C13;' (sẽ thay đổi bằng GSAP theo từng cảnh).
+2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card):
+   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 25px; box-sizing: border-box; padding: 60px 45px;'
 3. BỐ CỤC XẾP CHỒNG DỌC PROMO (VERTICAL PROMO STACK):
-   - Nếu cảnh CÓ hình ảnh (scene.imageUrl):
-     * Khối ảnh '.scene-image-card' nằm ở trên, chiếm khoảng 48% chiều cao.
-     * Khối chữ '.scene-text-card' nằm ở dưới, chiếm khoảng 42% chiều cao.
-   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' tự động mở rộng chiếm 80% không gian ở trung tâm.
+   - CÓ hình ảnh: Ảnh ở trên 50% cao, chữ ở dưới 40% cao. Font-size tối thiểu 40px.
+   - KHÔNG CÓ hình ảnh: Chữ chiếm 90% không gian, font-size: 56px+, font-weight: 900, color: #fff.
+   - TUYỆT ĐỐI CẤM viền neon hay dashed. Chỉ viền trắng dày.
 `;
   } else {
     // 9:16 vertical
@@ -504,13 +506,25 @@ Bạn đang thiết kế cho màn hình vuông (1:1).
 === QUY TẮC BỐ CỤC KHUNG HÌNH DỌC (9:16 VERTICAL MOBILE TIKTOK/REELS) ===
 Bạn đang thiết kế cho màn hình đứng (9:16) chuẩn di động.
 1. CONTAINER GỐC #root: Bắt buộc khai báo: <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-start="0" data-duration="{{ DURATION }}">
-2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card): Toàn bộ các thẻ cảnh '.scene-card' BẮT BUỘC phải sử dụng thuộc tính CSS định vị absolute chồng lên nhau để crossfade hoàn hảo:
-   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 35px; box-sizing: border-box; padding: 180px 45px;'
-3. BỐ CỤC XẾP CHỒNG DỌC PROMO (VERTICAL PROMO STACK):
-   - Nếu cảnh CÓ hình ảnh (scene.imageUrl): Thiết kế dạng 2 khối bento quảng cáo xếp chồng dọc:
-     * Khối ảnh sản phẩm '.scene-image-card' nằm ở trên, chiếm khoảng 45% chiều cao, chiều rộng 100% full viền bo góc lớn. Ảnh '.scene-image' phải có 'width: 100%; height: 100%; object-fit: contain; background: rgba(0,0,0,0.3); border-radius: 20px; border: 3px solid var(--accent-neon); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);'.
-     * Khối chữ '.scene-text-card' nằm ở dưới, chiếm khoảng 40% chiều cao, chiều rộng 100%.
-   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' tự động chiếm trọn vẹn khu vực trung tâm với cỡ chữ khổng lồ bắt mắt.
+   - #root BẮT BUỘC phải có CSS: 'background-color: #F07C13;' (màu nền mặc định cảnh đầu tiên, sẽ thay đổi theo từng cảnh bằng GSAP).
+   - TUYỆT ĐỐI CẤM dùng nền đen, nền gradient tối, hay nền ảnh mờ blur. Nền luôn luôn là MÀU ĐƠN SẮC RỰC RỠ.
+2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card): Toàn bộ các thẻ cảnh '.scene-card' BẮT BUỘC phải sử dụng:
+   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 25px; box-sizing: border-box; padding: 100px 50px;'
+   => padding rất nhỏ (50px hai bên, 100px trên dưới) để NỘI DUNG CHIẾM TỐI ĐA KHÔNG GIAN MÀN HÌNH.
+3. BỐ CỤC CANVA PROMO (FULL-BLEED VERTICAL STACK):
+   - TUYỆT ĐỐI CẤM viền neon, viền đứt, viền accent-neon, viền phát sáng. Chỉ được phép dùng viền trắng dày ('border: 4px solid #ffffff;').
+   - Nếu cảnh CÓ hình ảnh (scene.imageUrl):
+     * Khối ảnh '.scene-image-card' chiếm khoảng 50% chiều cao, chiều rộng 90%. Ảnh '.scene-image' có: 'width: 100%; height: 100%; object-fit: cover; border-radius: 30px; border: 5px solid #ffffff;'.
+     * Khối chữ '.scene-text-card' nằm phía dưới ảnh, chiều rộng 100%. CHỮ CỰC TO: font-size tối thiểu 54px cho chữ chính, font-weight: 900, color: #ffffff, text-shadow nhẹ.
+   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' chiếm toàn bộ không gian. CHỮ KHỔNG LỒ: font-size: clamp(56px, 8vw, 90px), font-weight: 900, color: #ffffff.
+4. QUY TẮC CỠ CHỮ TUYỆT ĐỐI (MANDATORY LARGE TEXT):
+   - Chữ tiêu đề/hook: font-size tối thiểu 64px, font-weight: 900, color: #ffffff.
+   - Chữ nội dung body: font-size tối thiểu 42px, font-weight: 700, color: #ffffff.
+   - Chữ phụ/subtitle: font-size tối thiểu 28px, color: rgba(255,255,255,0.85).
+   - TUYỆT ĐỐI CẤM dùng cỡ chữ dưới 24px cho bất kỳ thành phần nào (ngoại trừ marquee ticker).
+5. NỀN MÀU ĐƠN SẮC (SOLID COLOR BACKGROUND - KHÔNG CÓ ẢNH NỀN MỜ):
+   - TUYỆT ĐỐI CẤM sử dụng ảnh nền mờ ảo blur (scene-bg-layer filter:blur). Nền chỉ là màu đơn sắc đặc.
+   - TUYỆT ĐỐI CẤM sử dụng backdrop-filter hay filter: blur cho bất kỳ phần tử nào.
 `;
   }
 
@@ -562,6 +576,13 @@ Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html quảng cá
    - Các khung ảnh organic và thẻ chữ trượt từ dưới lên kèm theo góc xoay ngẫu nhiên nhẹ (ví dụ: 'rotation: "random(-4, 4)"', 'y: 60') với hiệu ứng đàn hồi: 'ease: "back.out(1.5)"'.
    - Hiệu ứng nét cọ gạch chân vẽ ra mềm mại bằng cách animate scaleX: 0 -> 1 từ trái qua phải khi chữ xuất hiện.
 
+=== CẢNH BÁO: CỠ CHỮ PHẢI CỰC TO (TYPOGRAPHY SIZE ENFORCEMENT) ===
+- NGUYÊN TẮC VÀNG: Khi người dùng xem video trên điện thoại, chữ PHẢI ĐỌC ĐƯỢC RÕ RÀNG từ khoảng cách 1 mét.
+- Chữ tiêu đề chính: font-size: clamp(56px, 7vw, 96px); font-weight: 900; color: #ffffff; line-height: 1.15;
+- Chữ nội dung: font-size: clamp(38px, 5vw, 56px); font-weight: 700; color: #ffffff; line-height: 1.3;
+- TUYỆT ĐỐI CẤM font-size dưới 24px cho bất kỳ phần tử hiển thị nào (trừ ticker marquee).
+- TUYỆT ĐỐI CẤM nền đen, nền gradient tối, hay ảnh nền mờ blur cho template Promo. Nền chỉ là MÀU ĐƠN SẮC RỰC RỠ.
+
 === CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES ===
 1. TUYỆT ĐỐI KHÔNG ĐƯỢC phép sử dụng biến CSS để khai báo font-family. Bạn BẮT BUỘC phải viết trực tiếp tên font chữ dưới dạng chuỗi literal trong thuộc tính CSS (ví dụ: 'font-family: "montserrat", sans-serif;').
 2. CHỈ ĐƯỢC PHÉP sử dụng các font nằm trong danh sách được ánh xạ chính thức của HyperFrames: 'inter', 'montserrat', 'jetbrains mono', 'playfair display', 'outfit', 'nunito', 'eb garamond'. Đối với Promo, nên ưu tiên dùng 'montserrat' hoặc 'outfit' để tạo cảm giác dày dặn, thể thao hoặc hiện đại.
@@ -571,10 +592,8 @@ Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html quảng cá
 === CẤU TRÚC HTML BẮT BUỘC KHAI BÁO ===
 Thẻ body của bạn BẮT BUỘC phải bọc toàn bộ nội dung trong một container chính duy nhất có cấu trúc chính xác như sau:
 <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0" data-duration="{{ DURATION }}">
-  <!-- Background mảng màu và vệt cọ vẽ -->
-  <div id="bg-container">
-    <div class="brush-overlay"></div>
-  </div>
+  <!-- Background màu đơn sắc (solid color, GSAP thay đổi theo cảnh) -->
+  <div id="bg-container"></div>
   
   <!-- Các logo pill tĩnh và progress bar -->
   <div class="logo-container">...</div>
@@ -626,69 +645,51 @@ function splitTextToLineCards(text) {
     if (!trimmed) return '';
     
     // Tách từng từ bọc trong mask để trượt dọc mượt mà
-    var wordsSpans = trimmed.split(' ').map(function(word, wIdx) {
+    var wordsSpans = trimmed.split(' ').map(function(word) {
       if (!word.trim()) return '';
-      // Phối trộn ngẫu nhiên một số từ quan trọng bằng kiểu font chữ cursive (eb garamond italic)
-      var isSpecial = word.includes('href') || word.length > 5 && wIdx % 3 === 0;
-      var styleStr = isSpecial ? 'font-family:\'eb garamond\', serif; font-style:italic; font-weight:700; text-transform:none;' : '';
-      return '<span class="word-mask" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.25em;"><span class="word" style="display:inline-block; transform:translateY(110%); opacity:0; will-change:transform, opacity;' + styleStr + '">' + word + '</span></span>';
+      return '<span class="word-mask" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.22em;"><span class="word" style="display:inline-block; transform:translateY(110%); opacity:0;">' + word + '</span></span>';
     }).join(' ');
     
-    return '<div class="promo-card shine-effect">' + wordsSpans + '</div>';
+    return '<div class="text-line">' + wordsSpans + '</div>';
   }).join('');
 }
 
+// Xóa sạch bg-container (Promo KHÔNG dùng ảnh nền mờ blur)
 if (document.getElementById('bg-container')) {
   document.getElementById('bg-container').innerHTML = '';
-  var divG = document.createElement('div');
-  divG.className = 'brush-overlay';
-  document.getElementById('bg-container').appendChild(divG);
+  document.getElementById('bg-container').style.display = 'none';
 }
 document.getElementById('scene-container').innerHTML = '';
 
-// Mảng màu color-blocking rực rỡ đổi theo từng cảnh
-var BG_COLORS = ['#F07C13', '#E72323', '#0C4DEB', '#19C37D', '#7A22FF'];
+// Mảng màu color-blocking rực rỡ đổi theo từng cảnh (Canva Style)
+var BG_COLORS = ['#F07C13', '#E72323', '#0C4DEB', '#19C37D', '#7A22FF', '#FF6B6B', '#1DB954', '#E040FB'];
 
 for (var i = 0; i < SCENES_DATA.length; i++) {
   var scene = SCENES_DATA[i];
   var duration = SCENE_DURATIONS[i] || 5;
   var sceneId = 'scene-' + i;
 
-  // 1. Tạo lớp ảnh nền mờ ảo đồng bộ (B-roll Background Blur Layer)
-  var bgEl = null;
-  if (document.getElementById('bg-container')) {
-    bgEl = document.createElement('div');
-    bgEl.className = 'scene-bg-layer';
-    bgEl.id = 'bg-' + i;
-    if (scene.imageUrl) {
-      bgEl.style.backgroundImage = 'url(' + scene.imageUrl + ')';
-    }
-    document.getElementById('bg-container').appendChild(bgEl);
-  }
+  // Promo KHÔNG tạo scene-bg-layer blur. Nền là màu đơn sắc rực rỡ.
 
-  // 2. Tạo phần tử DOM động
+  // 1. Tạo phần tử DOM động
   var sceneEl = document.createElement('div');
   sceneEl.id = sceneId;
   sceneEl.className = 'scene-card';
   sceneEl.style.display = 'none';
   
   var htmlContent = '';
-  // Vẽ vệt cọ vẽ trang trí bằng SVG tự nhiên
-  var decorativeSVG = '<svg class="brush-stroke-vector" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute; width:130%; height:130%; top:-15%; left:-15%; fill:rgba(255,255,255,0.18); pointer-events:none; z-index:-1;"><path d="M20,10 Q50,0 80,10 T95,45 T80,80 T20,80 T5,45 Z"/></svg>';
   
   if (scene.imageUrl) {
-    htmlContent += '<div class="scene-image-card shine-effect">';
+    // Layout có ảnh: Ảnh lớn ở trên + Text cực to ở dưới
+    htmlContent += '<div class="scene-image-card">';
     htmlContent += '  <img class="scene-image" src="' + scene.imageUrl + '" />';
-    htmlContent += '  <span class="promo-badge-ribbon hot">HOT NEWS</span>';
     htmlContent += '</div>';
     htmlContent += '<div class="scene-text-card">';
-    htmlContent += decorativeSVG;
     htmlContent += '  <div class="scene-text highlight-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '</div>';
   } else {
-    htmlContent += '<div class="scene-text-card full-size shine-effect">';
-    htmlContent += decorativeSVG;
-    htmlContent += '  <span class="promo-badge-ribbon cta">OFFER</span>';
+    // Layout không ảnh: Text chiếm toàn bộ màn hình, cỡ chữ khổng lồ
+    htmlContent += '<div class="scene-text-card full-size">';
     htmlContent += '  <div class="scene-text centered-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '</div>';
   }
@@ -696,121 +697,79 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   
   document.getElementById('scene-container').appendChild(sceneEl);
 
-  // 3. Tạo sub-timeline riêng cho cảnh này
+  // 2. Tạo sub-timeline riêng cho cảnh này
   var tl = gsap.timeline();
   
   tl.set(sceneEl, { display: 'flex', visibility: 'visible', zIndex: 50 + i }, 0);
-  if (bgEl) {
-    tl.set(bgEl, { display: 'block', visibility: 'visible', zIndex: i + 1 }, 0);
-  }
   
-  // A. Chuyển đổi màu sắc background theo phong cách Color-Blocking của Canva
+  // A. Chuyển đổi màu nền theo Color-Blocking (hiệu ứng đặc trưng Canva)
   var targetColor = BG_COLORS[i % BG_COLORS.length];
-  tl.to('#root', { backgroundColor: targetColor, duration: 0.65, ease: "power2.out" }, 0);
+  tl.to('#root', { backgroundColor: targetColor, duration: 0.5, ease: "power2.out" }, 0);
   
-  // B. Entrance Animation cho toàn cảnh: Slide-up xoay nghiêng nhẹ ngẫu hứng
-  var randomRot = (i % 2 === 0 ? 2 : -2);
+  // B. Entrance Animation cho toàn cảnh
   tl.fromTo(sceneEl, 
-    { opacity: 0, y: 50, rotation: randomRot, scale: 0.95 },
-    { opacity: 1, y: 0, rotation: 0, scale: 1, duration: 0.7, ease: "back.out(1.4)" }, 
+    { opacity: 0, y: 40, scale: 0.97 },
+    { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power3.out" }, 
     0
   );
 
-  // C. Entrance cho ảnh nền (Background Crossfade)
-  if (bgEl) {
-    tl.fromTo(bgEl,
-      { opacity: 0 },
-      { opacity: 0.7, duration: 0.65, ease: "power2.out" },
-      0
-    );
-  }
-
-  // D. Zoom chậm ảnh B-roll (Ken Burns Effect)
-  var imgEl = sceneEl.querySelector('.scene-image');
-  if (imgEl) {
-    tl.fromTo(imgEl, 
-      { scale: 1.0 }, 
-      { scale: 1.15, duration: duration, ease: "none" }, 
-      0
-    );
-  }
-
-  // E. Smooth Asymmetrical Slide cho khối ảnh sản phẩm organic
+  // C. Ảnh sản phẩm bay vào từ dưới
   var imgCard = sceneEl.querySelector('.scene-image-card');
   if (imgCard) {
     tl.fromTo(imgCard, 
-      { opacity: 0, y: 60, scale: 0.92, rotation: -randomRot },
-      { opacity: 1, y: 0, scale: 1, rotation: 0, duration: 0.75, ease: "back.out(1.5)" },
+      { opacity: 0, y: 60, scale: 0.9 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.3)" },
       0.05
     );
   }
 
-  // F. Elastic Pop-In cho các nhãn sticker và ribbon
-  var badges = sceneEl.querySelectorAll('.promo-badge-ribbon');
-  if (badges.length > 0) {
-    tl.fromTo(badges,
-      { opacity: 0, scale: 0, rotation: -15 },
-      { opacity: 1, scale: 1, rotation: 0, duration: 0.75, ease: "elastic.out(1.1, 0.45)" },
-      0.2
+  // D. Zoom nhẹ ảnh sản phẩm (Ken Burns)
+  var imgEl = sceneEl.querySelector('.scene-image');
+  if (imgEl) {
+    tl.fromTo(imgEl, 
+      { scale: 1.0 }, 
+      { scale: 1.08, duration: duration, ease: "none" }, 
+      0
     );
   }
 
-  // G. Slide up cho các thẻ Promo Card & vệt trang trí
-  var cards = sceneEl.querySelectorAll('.promo-card, .brush-stroke-vector');
-  if (cards.length > 0) {
-    tl.fromTo(cards, 
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0, duration: 0.65, stagger: 0.08, ease: "power3.out" },
-      0.15
-    );
-  }
-
-  // H. Word mask slide up (Mask Reveal Effect)
+  // E. Word mask slide up (chữ trượt lên từ dưới)
   var words = sceneEl.querySelectorAll('.word');
-  var saleBadges = sceneEl.querySelectorAll('.sale-badge');
   if (words.length > 0) {
     tl.to(words, {
       y: '0%',
       opacity: 1,
-      duration: 0.5,
-      stagger: 0.02,
+      duration: 0.45,
+      stagger: 0.025,
       ease: "power2.out"
-    }, 0.25);
+    }, 0.15);
   }
+
+  // F. Sale badges pop in
+  var saleBadges = sceneEl.querySelectorAll('.sale-badge');
   if (saleBadges.length > 0) {
     tl.fromTo(saleBadges,
-      { scale: 0.7, opacity: 0, rotation: -10 },
-      { scale: 1, opacity: 1, rotation: -2, duration: 0.6, stagger: 0.05, ease: "back.out(1.6)" },
-      0.35
+      { scale: 0.6, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.5, stagger: 0.05, ease: "back.out(1.5)" },
+      0.3
     );
   }
 
-  // I. Exit Animation: Slide mượt và mờ nhanh ra sau
+  // G. Exit Animation
   if (i < SCENES_DATA.length - 1) {
     tl.to(sceneEl, { 
       opacity: 0,
-      scale: 0.95,
-      y: -40,
+      scale: 0.96,
+      y: -30,
       duration: CROSSFADE,
       ease: "power2.in"
     }, duration - CROSSFADE);
-
-    if (bgEl) {
-      tl.to(bgEl, {
-        opacity: 0,
-        duration: CROSSFADE,
-        ease: "power2.in"
-      }, duration - CROSSFADE);
-    }
   }
 
   mainTl.add(tl, currentTime);
 
   if (i < SCENES_DATA.length - 1) {
     mainTl.add(gsap.set(sceneEl, { display: 'none', visibility: 'hidden' }), currentTime + duration);
-    if (bgEl) {
-      mainTl.add(gsap.set(bgEl, { display: 'none', visibility: 'hidden' }), currentTime + duration);
-    }
     currentTime += duration - CROSSFADE;
   } else {
     currentTime += duration;
