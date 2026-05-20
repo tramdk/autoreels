@@ -264,8 +264,8 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
     'WIDTH': width,
     'HEIGHT': height,
     'DURATION': String(totalDuration),
-    '__SCENES_DATA_INJECTED__': JSON.stringify(scenes.map(s => ({ ...s, bodyText: s.bodyText || s.voiceText || '' }))).replace(/'/g, "\\'"),
-    'SCENES_JSON': JSON.stringify(scenes.map(s => ({ ...s, bodyText: s.bodyText || s.voiceText || '' }))).replace(/'/g, "\\'"),
+    '__SCENES_DATA_INJECTED__': JSON.stringify(scenes.map(s => ({ ...s, bodyText: s.bodyText || s.voiceText || '' }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'"),
+    'SCENES_JSON': JSON.stringify(scenes.map(s => ({ ...s, bodyText: s.bodyText || s.voiceText || '' }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'"),
     '__SCENE_DURATIONS_INJECTED__': durationsJson,
     'SCENE_DURATIONS_JSON': durationsJson,
 
