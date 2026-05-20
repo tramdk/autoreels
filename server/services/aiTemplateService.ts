@@ -527,39 +527,40 @@ Dưới đây là thông tin chi tiết về kịch bản video để bạn phâ
 
 Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html quảng cáo sản phẩm hoàn toàn mới, standalone, hoàn chỉnh 100% để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. 
 
-=== PHONG CÁCH THIẾT KẾ ĐỘC QUYỀN PROMO (BLACK FRIDAY & PREMIUM EDITORIAL) ===
-Để tạo ra một video đậm chất quảng cáo chuyên nghiệp, thời thượng giống như các mẫu Black Friday/Cyber Monday của Clipchamp, bạn BẮT BUỘC phải tuân thủ các quy tắc thiết kế thương mại cao cấp sau đây:
+=== PHONG CÁCH THIẾT KẾ ĐỘC QUYỀN PROMO (VIBRANT ART POP & EDITORIAL STREETWEAR - CANVA STYLE) ===
+Để tạo ra một video quảng cáo nghệ thuật, tươi trẻ, năng động giống hệt phong cách mẫu Canva Art Market/Streetwear, bạn BẮT BUỘC phải tuân thủ các quy tắc thiết kế thương mại độc bản sau đây:
 
-1. BẢNG MÀU EDITORIAL SANG TRỌNG & HIGH-CONTRAST:
-   - Tông màu nền chủ đạo là đen tuyền huyền bí hoặc đen xám obsidian thẳm (#060609, #0a0a0f).
-   - Màu nhấn Accent rực rỡ, tương phản tuyệt đối: Neon Pink (#ff0055), Electric Cyan (#00f2ff), Neon Yellow (#e2ff3b), Gold/Metallic Amber (#ffd700).
+1. BẢNG MÀU COLOR-BLOCKING VÀ THAY ĐỔI MÀU NỀN THEO CẢNH:
+   - Tuyệt đối CẤM sử dụng tông màu đen tuyền hay obsidian xám xịt của Cyber Monday.
+   - Nền của mỗi cảnh phải là một mảng màu đơn sắc (solid color block) rực rỡ và độ bão hòa cao (Vibrant Color Blocking):
+     * Cảnh 1: Màu cam ấm áp (Orange #F07C13)
+     * Cảnh 2: Màu đỏ tươi năng lượng (Red #E72323)
+     * Cảnh 3: Màu xanh hoàng gia (Royal Blue #0C4DEB)
+     * Cảnh 4: Màu xanh lục bảo trẻ trung (Emerald Green #19C37D)
+     * Cảnh 5: Màu tím hoàng hôn (Sunset Violet #7A22FF)
+   - Trong dòng chảy GSAP (timeline), hãy viết mã chuyển màu nền (#root hoặc #bg-container) sang màu sắc đặc trưng của cảnh đó khi cảnh bắt đầu xuất hiện để tạo hiệu ứng thị giác cực kỳ kích thích.
 
-2. NỀN GỒM ÁNH SÁNG KHUẾCH TÁN & Ô LƯỚI KỸ THUẬT SỐ (AMBIENT GLOW & DIGITAL GRID):
-   - TUYỆT ĐỐI CẤM sử dụng các họa tiết tia mặt trời xoay tròn (sunburst conic gradient) rẻ tiền kiểu biểu ngữ quảng cáo cũ.
-   - Nền phải có một lớp phủ ô lưới kỹ thuật số mờ mịn (.grid-overlay) ở mức opacity cực thấp (0.015) để tạo chiều sâu công nghệ hiện đại.
-   - Sử dụng các quả cầu ánh sáng khuếch tán mờ ảo (.ambient-glow-1 và .ambient-glow-2) đổi màu hoặc di chuyển nhẹ ở góc màn hình tạo nên không gian điện ảnh cao cấp (Radial Gradient mờ).
+2. VỆT SƠN NGHỆ THUẬT & HỌA TIẾT CỌ VẼ (PAINT BRUSH STROKES & VECTORS OVERLAYS):
+   - Nền của video phải có các họa tiết vệt sơn mờ, vệt cọ vẽ (paint brush strokes/splatters) nằm ngẫu hứng ở các góc hoặc phía sau chữ để tạo phong cách đường phố/nghệ thuật (Urban Street Art).
+   - Hãy thiết kế các vệt sơn này bằng SVG path hoặc vẽ hình dạng phóng khoáng tự nhiên bằng gradient mờ (ví dụ: một path gồ ghề màu trắng hoặc màu tương phản nhẹ, opacity 0.15 - 0.25).
+   - Các tiêu đề hoặc chữ chính phải có nét cọ vẽ highlight nằm ở dưới làm gạch chân (.brush-underline), vẽ bằng SVG gạch chân tự vẽ (GSAP scaleX từ 0 lên 1).
 
-3. DẢI BĂNG CHỮ MARQUEE LỊCH LÃM (ELEGANT EDITORIAL TICKER TAPES):
-   - Thiết kế hai dải chữ chạy liên tục ở sát mép trên và mép dưới khung hình.
-   - Dải chữ này có nền màu đen nhám (matte black) hoặc trắng bạc, chữ màu tương phản viết hoa siêu dày (font-weight: 900), cỡ chữ nhỏ gọn (12px-14px) nhưng độ dãn chữ cực lớn (letter-spacing: 5px) tạo phong cách thời trang cao cấp.
-   - Biên viền dải chữ mỏng neon phát sáng (border-top/bottom: 1px solid rgba(255, 255, 255, 0.08)).
-   - Chữ chạy liên tục: "BLACK FRIDAY SALE • LIMITED TIME • SHOP NOW • UP TO 50% OFF • NEW ARRIVALS • FREE SHIPPING •".
+3. THIẾT KẾ KHUNG ẢNH ORGANIC BO GÓC BẤT ĐỐI XỨNG (ASYMMETRICAL BENTO GRID):
+   - Tuyệt đối CẤM sử dụng các thẻ viền sắc cạnh hay viền đứt nét dashed.
+   - Các container chứa ảnh (.scene-image-card) phải có bo góc cực lớn và bất đối xứng để tạo sự phá cách (ví dụ: 'border-radius: 120px 40px 120px 40px;' hoặc 'border-radius: 40px 120px 40px 120px;').
+   - Các ảnh phải có viền dày màu trắng tinh khôi liền mạch ('border: 4px solid #ffffff;') để nổi bật lên trên mảng màu nền.
+   - Nếu cảnh có nhiều ảnh hoặc danh sách, hãy xếp chúng theo dạng Bento Grid so le nghiêng nhẹ (rotation: -2deg đến 2deg).
 
-4. THIẾT KẾ THÀNH THẺ CARD GIAO DIỆN PREMIUM (SOLID UI BENTO CARDS):
-   - TUYỆT ĐỐI CẤM sử dụng các loại viền đứt nét (dashed lines) hay phong cách coupon học sinh thô kệch.
-   - Toàn bộ khối chữ và ảnh sản phẩm phải được bọc trong các chiếc thẻ card thiết kế dạng giao diện thiết bị cao cấp (Premium UI card):
-     * Nền thẻ tối đặc hoặc trong suốt nhẹ: 'background: rgba(13, 13, 18, 0.88);'.
-     * Viền thẻ liền cực kỳ mỏng mảnh tinh tế: 'border: 1px solid rgba(255, 255, 255, 0.08);'.
-     * Bo góc mịn màng (16px), đổ bóng đen dày tạo chiều sâu tuyệt vời (.promo-card).
-   - Thêm hiệu ứng quét bóng sáng kim loại chéo chạy qua mặt card sản phẩm hoặc chữ (.glare-swipe) định kỳ 3.5 giây một lần để tạo độ sang xịn.
+4. PHỐI HỢP ĐA DẠNG FONT CHỮ (MULTI-FONT BRAND SHOWCASE):
+   - Nhắm đến sự đa dạng của sản phẩm/thương hiệu, hãy cho phép hiển thị các cụm từ quan trọng bằng các kiểu font chữ tương phản hoàn toàn đặt cạnh nhau:
+     * Chữ nghiêng viết tay/Cursive nghệ thuật: Sử dụng 'eb garamond' ở chế độ italic, font-weight: 700 (ví dụ: font-family: 'eb garamond', serif; font-style: italic;).
+     * Chữ Serif cổ điển quý phái: Sử dụng 'playfair display', font-weight: 700.
+     * Chữ Sans-serif hình học hiện đại: Sử dụng 'outfit' hoặc 'montserrat' black viết hoa dày dặn.
+   - Tránh việc mọi dòng chữ đều dùng chung một kiểu font đơn điệu. Hãy phối hợp linh hoạt!
 
-5. TỰ ĐỘNG HIGHLIGHT TỪ KHÓA BÁN HÀNG VỚI HUY HIỆU SLANTED BADGES:
-   - Viết hàm Javascript tự động dò tìm các từ khóa bán hàng (như "SALE", "50%", "GIÁ SỐC", "MUA NGAY", "CHỐT ĐƠN", "KHUYẾN MÃI", "FREE SHIP", "UP TO", "LIMITED") và bọc chúng trong thẻ \`<span class="sale-badge">Từ khóa</span>\`.
-   - Lớp '.sale-badge' có CSS nổi bật vượt trội: Chữ đen dày béo trên nền khối màu neon vàng (#fff000), đỏ coral (#ff0055) hoặc trắng tinh khôi, nghiêng nhẹ (transform: rotate(-2deg)), co giãn nhẹ (pulse animation).
-
-6. GSAP MASK REVEAL EFFECT (TRƯỢT CHỮ TRONG MẶT NẠ):
-   - Các khối card sản phẩm trượt từ dưới lên và phóng to êm ái: 'ease: "power3.out"'.
-   - Từng dòng chữ chính hiển thị theo kiểu che giấu mặt nạ (Mask Reveal Effect): Mỗi từ bọc trong một container 'overflow: hidden; display: inline-block;' và chữ trượt dọc từ dưới lên (translateY(110%) về 0%) đem lại cảm giác sang trọng như quảng cáo Apple/Nike.
+5. HIỆU ỨNG CHUYỂN ĐỘNG GSAP BOUNCY & ELASTIC:
+   - Các khung ảnh organic và thẻ chữ trượt từ dưới lên kèm theo góc xoay ngẫu nhiên nhẹ (ví dụ: 'rotation: "random(-4, 4)"', 'y: 60') với hiệu ứng đàn hồi: 'ease: "back.out(1.5)"'.
+   - Hiệu ứng nét cọ gạch chân vẽ ra mềm mại bằng cách animate scaleX: 0 -> 1 từ trái qua phải khi chữ xuất hiện.
 
 === CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES ===
 1. TUYỆT ĐỐI KHÔNG ĐƯỢC phép sử dụng biến CSS để khai báo font-family. Bạn BẮT BUỘC phải viết trực tiếp tên font chữ dưới dạng chuỗi literal trong thuộc tính CSS (ví dụ: 'font-family: "montserrat", sans-serif;').
@@ -570,9 +571,9 @@ Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html quảng cá
 === CẤU TRÚC HTML BẮT BUỘC KHAI BÁO ===
 Thẻ body của bạn BẮT BUỘC phải bọc toàn bộ nội dung trong một container chính duy nhất có cấu trúc chính xác như sau:
 <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0" data-duration="{{ DURATION }}">
-  <!-- Background mờ ảo đồng bộ -->
+  <!-- Background mảng màu và vệt cọ vẽ -->
   <div id="bg-container">
-    <div class="sunburst"></div>
+    <div class="brush-overlay"></div>
   </div>
   
   <!-- Các logo pill tĩnh và progress bar -->
@@ -624,10 +625,13 @@ function splitTextToLineCards(text) {
     var trimmed = line.trim();
     if (!trimmed) return '';
     
-    // Tách từng từ bọc trong mask để trượt dọc mượt mà (Mask Reveal Effect)
-    var wordsSpans = trimmed.split(' ').map(function(word) {
+    // Tách từng từ bọc trong mask để trượt dọc mượt mà
+    var wordsSpans = trimmed.split(' ').map(function(word, wIdx) {
       if (!word.trim()) return '';
-      return '<span class="word-mask" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.25em;"><span class="word" style="display:inline-block; transform:translateY(110%); opacity:0; will-change:transform, opacity;">' + word + '</span></span>';
+      // Phối trộn ngẫu nhiên một số từ quan trọng bằng kiểu font chữ cursive (eb garamond italic)
+      var isSpecial = word.includes('href') || word.length > 5 && wIdx % 3 === 0;
+      var styleStr = isSpecial ? 'font-family:\'eb garamond\', serif; font-style:italic; font-weight:700; text-transform:none;' : '';
+      return '<span class="word-mask" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.25em;"><span class="word" style="display:inline-block; transform:translateY(110%); opacity:0; will-change:transform, opacity;' + styleStr + '">' + word + '</span></span>';
     }).join(' ');
     
     return '<div class="promo-card shine-effect">' + wordsSpans + '</div>';
@@ -635,33 +639,15 @@ function splitTextToLineCards(text) {
 }
 
 if (document.getElementById('bg-container')) {
-  // Giữ lại các lớp nền tĩnh trong bg-container
-  var gridOverlay = document.querySelector('.grid-overlay');
-  var glow1 = document.querySelector('.ambient-glow-1');
-  var glow2 = document.querySelector('.ambient-glow-2');
-  
   document.getElementById('bg-container').innerHTML = '';
-  
-  if (gridOverlay) document.getElementById('bg-container').appendChild(gridOverlay);
-  else {
-    var divGrid = document.createElement('div');
-    divGrid.className = 'grid-overlay';
-    document.getElementById('bg-container').appendChild(divGrid);
-  }
-  if (glow1) document.getElementById('bg-container').appendChild(glow1);
-  else {
-    var divG1 = document.createElement('div');
-    divG1.className = 'ambient-glow-1';
-    document.getElementById('bg-container').appendChild(divG1);
-  }
-  if (glow2) document.getElementById('bg-container').appendChild(glow2);
-  else {
-    var divG2 = document.createElement('div');
-    divG2.className = 'ambient-glow-2';
-    document.getElementById('bg-container').appendChild(divG2);
-  }
+  var divG = document.createElement('div');
+  divG.className = 'brush-overlay';
+  document.getElementById('bg-container').appendChild(divG);
 }
 document.getElementById('scene-container').innerHTML = '';
+
+// Mảng màu color-blocking rực rỡ đổi theo từng cảnh
+var BG_COLORS = ['#F07C13', '#E72323', '#0C4DEB', '#19C37D', '#7A22FF'];
 
 for (var i = 0; i < SCENES_DATA.length; i++) {
   var scene = SCENES_DATA[i];
@@ -687,17 +673,22 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   sceneEl.style.display = 'none';
   
   var htmlContent = '';
+  // Vẽ vệt cọ vẽ trang trí bằng SVG tự nhiên
+  var decorativeSVG = '<svg class="brush-stroke-vector" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute; width:130%; height:130%; top:-15%; left:-15%; fill:rgba(255,255,255,0.18); pointer-events:none; z-index:-1;"><path d="M20,10 Q50,0 80,10 T95,45 T80,80 T20,80 T5,45 Z"/></svg>';
+  
   if (scene.imageUrl) {
     htmlContent += '<div class="scene-image-card shine-effect">';
     htmlContent += '  <img class="scene-image" src="' + scene.imageUrl + '" />';
-    htmlContent += '  <span class="promo-badge-ribbon hot">BLACK FRIDAY</span>';
+    htmlContent += '  <span class="promo-badge-ribbon hot">HOT NEWS</span>';
     htmlContent += '</div>';
     htmlContent += '<div class="scene-text-card">';
+    htmlContent += decorativeSVG;
     htmlContent += '  <div class="scene-text highlight-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '</div>';
   } else {
     htmlContent += '<div class="scene-text-card full-size shine-effect">';
-    htmlContent += '  <span class="promo-badge-ribbon cta">OFFER TIME</span>';
+    htmlContent += decorativeSVG;
+    htmlContent += '  <span class="promo-badge-ribbon cta">OFFER</span>';
     htmlContent += '  <div class="scene-text centered-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '</div>';
   }
@@ -705,7 +696,7 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   
   document.getElementById('scene-container').appendChild(sceneEl);
 
-  // 3. Tạo sub-timeline riêng cho cảnh này (Hiệu ứng Commercial Bounce & Pop siêu sinh động)
+  // 3. Tạo sub-timeline riêng cho cảnh này
   var tl = gsap.timeline();
   
   tl.set(sceneEl, { display: 'flex', visibility: 'visible', zIndex: 50 + i }, 0);
@@ -713,23 +704,28 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     tl.set(bgEl, { display: 'block', visibility: 'visible', zIndex: i + 1 }, 0);
   }
   
-  // A. Entrance Animation cho toàn cảnh: Slide-up và mờ dần mượt mà
+  // A. Chuyển đổi màu sắc background theo phong cách Color-Blocking của Canva
+  var targetColor = BG_COLORS[i % BG_COLORS.length];
+  tl.to('#root', { backgroundColor: targetColor, duration: 0.65, ease: "power2.out" }, 0);
+  
+  // B. Entrance Animation cho toàn cảnh: Slide-up xoay nghiêng nhẹ ngẫu hứng
+  var randomRot = (i % 2 === 0 ? 2 : -2);
   tl.fromTo(sceneEl, 
-    { opacity: 0, y: 30, scale: 0.98 },
-    { opacity: 1, y: 0, scale: 1, duration: 0.65, ease: "power3.out" }, 
+    { opacity: 0, y: 50, rotation: randomRot, scale: 0.95 },
+    { opacity: 1, y: 0, rotation: 0, scale: 1, duration: 0.7, ease: "back.out(1.4)" }, 
     0
   );
 
-  // B. Entrance cho ảnh nền (Background Crossfade)
+  // C. Entrance cho ảnh nền (Background Crossfade)
   if (bgEl) {
     tl.fromTo(bgEl,
       { opacity: 0 },
-      { opacity: 0.85, duration: 0.65, ease: "power2.out" },
+      { opacity: 0.7, duration: 0.65, ease: "power2.out" },
       0
     );
   }
 
-  // C. Zoom chậm ảnh B-roll (Ken Burns Effect)
+  // D. Zoom chậm ảnh B-roll (Ken Burns Effect)
   var imgEl = sceneEl.querySelector('.scene-image');
   if (imgEl) {
     tl.fromTo(imgEl, 
@@ -739,37 +735,37 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     );
   }
 
-  // D. Smooth Slide cho khối ảnh sản phẩm
+  // E. Smooth Asymmetrical Slide cho khối ảnh sản phẩm organic
   var imgCard = sceneEl.querySelector('.scene-image-card');
   if (imgCard) {
     tl.fromTo(imgCard, 
-      { opacity: 0, y: 50, scale: 0.94 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out" },
+      { opacity: 0, y: 60, scale: 0.92, rotation: -randomRot },
+      { opacity: 1, y: 0, scale: 1, rotation: 0, duration: 0.75, ease: "back.out(1.5)" },
       0.05
     );
   }
 
-  // E. Elastic Pop-In cho các nhãn sticker và ribbon
+  // F. Elastic Pop-In cho các nhãn sticker và ribbon
   var badges = sceneEl.querySelectorAll('.promo-badge-ribbon');
   if (badges.length > 0) {
     tl.fromTo(badges,
-      { opacity: 0, scale: 0, rotation: -12 },
-      { opacity: 1, scale: 1, rotation: 0, duration: 0.7, ease: "elastic.out(1.1, 0.5)" },
+      { opacity: 0, scale: 0, rotation: -15 },
+      { opacity: 1, scale: 1, rotation: 0, duration: 0.75, ease: "elastic.out(1.1, 0.45)" },
       0.2
     );
   }
 
-  // F. Slide up cho các thẻ Promo Card
-  var cards = sceneEl.querySelectorAll('.promo-card');
+  // G. Slide up cho các thẻ Promo Card & vệt trang trí
+  var cards = sceneEl.querySelectorAll('.promo-card, .brush-stroke-vector');
   if (cards.length > 0) {
     tl.fromTo(cards, 
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power3.out" },
+      { opacity: 0, y: 40 },
+      { opacity: 1, y: 0, duration: 0.65, stagger: 0.08, ease: "power3.out" },
       0.15
     );
   }
 
-  // G. Word mask slide up (Mask Reveal Effect)
+  // H. Word mask slide up (Mask Reveal Effect)
   var words = sceneEl.querySelectorAll('.word');
   var saleBadges = sceneEl.querySelectorAll('.sale-badge');
   if (words.length > 0) {
@@ -783,18 +779,18 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   }
   if (saleBadges.length > 0) {
     tl.fromTo(saleBadges,
-      { scale: 0.75, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.5, stagger: 0.05, ease: "back.out(1.5)" },
-      0.3
+      { scale: 0.7, opacity: 0, rotation: -10 },
+      { scale: 1, opacity: 1, rotation: -2, duration: 0.6, stagger: 0.05, ease: "back.out(1.6)" },
+      0.35
     );
   }
 
-  // H. Exit Animation: Slide mượt và mờ nhanh ra sau
+  // I. Exit Animation: Slide mượt và mờ nhanh ra sau
   if (i < SCENES_DATA.length - 1) {
     tl.to(sceneEl, { 
       opacity: 0,
-      scale: 0.96,
-      y: -30,
+      scale: 0.95,
+      y: -40,
       duration: CROSSFADE,
       ease: "power2.in"
     }, duration - CROSSFADE);
