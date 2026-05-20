@@ -197,6 +197,14 @@ Bạn hãy đọc kỹ Tiêu đề video và Nội dung kịch bản để chọ
    - Viền Neon: Vàng Neon chói lọi (#e2ff3b) hoặc Cam Neon cá tính (#ff6b00).
    - Hạt trang trí lơ lửng ở nền: Ngôi sao 4 cánh Neubrutalism đặc trưng, chấm tròn to nhỏ.
 
+7. CHỦ ĐỀ QUẢNG CÁO SẢN PHẨM / KHUYẾN MÃI / THƯƠNG MẠI ĐIỆN TỬ (Product Promo/E-commerce):
+   - Phù hợp: Dùng để giới thiệu sản phẩm, bán hàng, review sản phẩm, ưu đãi giảm giá, hoặc kêu gọi hành động (Call to Action).
+   - Nền: Gradient sang trọng, sáng rực rỡ để tôn vinh sản phẩm (ví dụ: Cam Đào sang Hường (#ff7eb3 sang #ff758c) hoặc Trắng Kem ngọc trai (#fdfbfb sang #ebedee)).
+   - Bố cục & Typography: Ưu tiên không gian rộng để hiển thị rõ ảnh sản phẩm. Các từ khóa chốt sale (SALE, 50%, GIÁ SỐC, MUA NGAY) phải được làm cực kỳ to, sử dụng font béo (ExtraBold/Black) và bọc trong thẻ Badge nổi bật rực rỡ.
+   - Viền Neon: Vàng Gold lấp lánh (#ffd700) hoặc Đỏ Ruby thu hút sự chú ý.
+   - Hạt trang trí lơ lửng ở nền: Biểu tượng sale, hộp quà, ngôi sao vàng chớp nháy (sparkles) trôi lững lờ hoặc vụn pháo hoa confetti.
+   - Hoạt ảnh: Ảnh sản phẩm nảy lên (Bounce In) cực mạnh hoặc trượt vào dứt khoát kết hợp zoom nhẹ để tạo cảm giác mua sắm hấp dẫn.
+
 === KHUNG LẬP TRÌNH DỰNG DOM & GSAP TIMELINE ĐỘNG (BẮT BUỘC) ===
 Bạn phải viết mã JavaScript ở cuối file sử dụng đúng cấu trúc sau (Lưu ý: Bắt buộc viết mã này bên trong khối code javascript):
 
@@ -432,13 +440,13 @@ ${scriptText}
 Nhiệm vụ của bạn là phân tích tông giọng, chủ đề, cảm xúc và cấu trúc của kịch bản này để thiết kế ra một bộ thông số giao diện (template settings) hoàn hảo nhất, thu hút người xem từ 3 giây đầu tiên và giữ chân họ xuyên suốt video.
 
 === QUY TẮC PHÂN TÍCH TÔNG GIỌNG (TONE & THEME) ===
-Hãy xác định chủ đề chủ đạo của video (ví dụ: Công nghệ, Tin tức giật gân, Tài chính/Kinh doanh, Lịch sử kịch tính, Động lực cuộc sống, Hài hước/Giải trí...) và chọn:
-1. Palette màu phối hợp (màu logo, màu hook, màu tag badge, màu nền, màu divider, màu thẻ card, màu chữ body). Hãy dùng các màu sắc nổi bật, độ bão hòa tốt cho video dọc.
+Hãy xác định chủ đề chủ đạo của video (ví dụ: Công nghệ, Tin tức giật gân, Tài chính/Kinh doanh, Quảng cáo sản phẩm/Khuyến mãi, Lịch sử kịch tính, Động lực cuộc sống, Hài hước/Giải trí...) và chọn:
+1. Palette màu phối hợp (màu logo, màu hook, màu tag badge, màu nền, màu divider, màu thẻ card, màu chữ body). Hãy dùng các màu sắc nổi bật, độ bão hòa tốt cho video dọc (nhấn mạnh màu đỏ/vàng/cam cho chủ đề quảng cáo khuyến mãi).
 2. Phông chữ (fontFamily) phù hợp với cảm xúc chủ đạo (Lưu ý: BẮT BUỘC chỉ chọn các font hỗ trợ tiếng Việt Unicode hoàn hảo, tránh bị lỗi hiển thị các từ có dấu):
    - "Inter" cho tin tức mạnh mẽ, giật gân, kịch tính, công nghệ.
    - "Outfit" hoặc "Plus Jakarta Sans" cho hiện đại, tối giản, sang trọng, khoa học.
    - "Playfair Display" cho chiều sâu nghệ thuật, lịch sử cổ điển.
-   - "Montserrat" cho truyền cảm hứng, thể thao, năng động, tin tức nhanh.
+   - "Montserrat" cho truyền cảm hứng, thể thao, năng động, quảng cáo bán hàng, tin tức nhanh.
    - "Nunito" cho tình yêu, cảm xúc nhẹ nhàng, đời sống thường nhật.
 3. Hoạt ảnh chuyển động (Animations) cho từng khối văn bản:
    - Các hoạt ảnh hỗ trợ: "slide-up", "slide-down", "slide-left", "slide-right", "fade-in", "scale-in", "rotate-in", "bounce-in".
