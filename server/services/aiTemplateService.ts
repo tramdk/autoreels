@@ -541,47 +541,80 @@ Dưới đây là thông tin chi tiết về kịch bản video để bạn phâ
 
 Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html quảng cáo sản phẩm hoàn toàn mới, standalone, hoàn chỉnh 100% để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. 
 
-=== PHONG CÁCH THIẾT KẾ ĐỘC QUYỀN PROMO (VIBRANT ART POP & EDITORIAL STREETWEAR - CANVA STYLE) ===
-Để tạo ra một video quảng cáo nghệ thuật, tươi trẻ, năng động giống hệt phong cách mẫu Canva Art Market/Streetwear, bạn BẮT BUỘC phải tuân thủ các quy tắc thiết kế thương mại độc bản sau đây:
+=== PHONG CÁCH THIẾT KẾ PROMO (CANVA VIBRANT COLOR-BLOCKING - COPY Y HỆT) ===
+Hãy thiết kế video quảng cáo GIỐNG HỆT phong cách mẫu Canva sau đây. Đây là mô tả CHI TIẾT TỪNG SCENE của video mẫu Canva mà bạn phải sao chép y hệt phong cách:
 
-1. BẢNG MÀU COLOR-BLOCKING VÀ THAY ĐỔI MÀU NỀN THEO CẢNH:
-   - Tuyệt đối CẤM sử dụng tông màu đen tuyền hay obsidian xám xịt của Cyber Monday.
-   - Nền của mỗi cảnh phải là một mảng màu đơn sắc (solid color block) rực rỡ và độ bão hòa cao (Vibrant Color Blocking):
-     * Cảnh 1: Màu cam ấm áp (Orange #F07C13)
-     * Cảnh 2: Màu đỏ tươi năng lượng (Red #E72323)
-     * Cảnh 3: Màu xanh hoàng gia (Royal Blue #0C4DEB)
-     * Cảnh 4: Màu xanh lục bảo trẻ trung (Emerald Green #19C37D)
-     * Cảnh 5: Màu tím hoàng hôn (Sunset Violet #7A22FF)
-   - Trong dòng chảy GSAP (timeline), hãy viết mã chuyển màu nền (#root hoặc #bg-container) sang màu sắc đặc trưng của cảnh đó khi cảnh bắt đầu xuất hiện để tạo hiệu ứng thị giác cực kỳ kích thích.
+=== MÔ TẢ CHI TIẾT VIDEO MẪU CANVA (BẮT BUỘC SAO CHÉP PHONG CÁCH) ===
+SCENE 1 - HOOK/MỞ ĐẦU (Nền cam #F07C13):
+  - Nền: MÀU CAM ĐƠN SẮC (#F07C13) phủ kín 100% màn hình. TUYỆT ĐỐI KHÔNG có gradient, ảnh blur, hay bất kỳ lớp phủ tối nào.
+  - Logo: Ở góc trên trái, chữ trắng nhỏ (24px), một từ thường + một từ nghiêng có gạch chân.
+  - CHỮ CHÍNH: Nằm bên trái, chiếm khoảng 60% chiều ngang. Font-size CỰC TO: 72-90px. Font-weight: 900. Color: #ffffff. Text-align: left. Line-height: 1.1. Chữ KHÔNG có viền, KHÔNG có card bao quanh, KHÔNG có background - chỉ là chữ trắng trần trên nền màu.
+  - ẢNH: Nếu có ảnh, ảnh nằm bên phải chiếm ~40% width. Ảnh được cắt nền (cutout) hoặc có background nhạt hơn (hồng nhạt) bo góc tự nhiên. Phía sau ảnh có một vệt sơn/blob shape màu nhạt (hồng phấn) rất mờ để trang trí.
+  
+SCENE 2 - NỘI DUNG/SẢN PHẨM (Nền đỏ #E72323):
+  - Nền: MÀU ĐỎ TƯƠI (#E72323) phủ kín 100%.
+  - ẢNH: Nếu có ảnh, ảnh chiếm phần TRÊN (khoảng 55-60% chiều cao), bo góc lớn (24px), có viền trắng dày 4px. Ảnh object-fit: cover.
+  - CHỮ: Nằm phía dưới ảnh. Font-size: 48-64px. Font-weight: 700-900. Color: #ffffff. Không card, không viền.
+  
+SCENE 3 - LIỆT KÊ/BRANDS (Nền xanh dương #0C4DEB):
+  - Nền: MÀU XANH DƯƠNG (#0C4DEB) phủ kín 100%.
+  - CHỮ: Tiêu đề ở trên (font-size: 48px, font-weight: 900, color: #ffffff). Phía sau tiêu đề có vệt cọ trắng mờ (opacity 0.3).
+  - Các dòng text bên dưới sử dụng FONT CHỮ KHÁC NHAU cho mỗi dòng (eb garamond italic cho dòng 1, montserrat bold cho dòng 2, playfair display cho dòng 3...). Font-size: 42-56px. Color: #ffffff.
+  - ẢNH: Nếu có, ảnh cutout nằm ở góc phải.
 
-2. VỆT SƠN NGHỆ THUẬT & HỌA TIẾT CỌ VẼ (PAINT BRUSH STROKES & VECTORS OVERLAYS):
-   - Nền của video phải có các họa tiết vệt sơn mờ, vệt cọ vẽ (paint brush strokes/splatters) nằm ngẫu hứng ở các góc hoặc phía sau chữ để tạo phong cách đường phố/nghệ thuật (Urban Street Art).
-   - Hãy thiết kế các vệt sơn này bằng SVG path hoặc vẽ hình dạng phóng khoáng tự nhiên bằng gradient mờ (ví dụ: một path gồ ghề màu trắng hoặc màu tương phản nhẹ, opacity 0.15 - 0.25).
-   - Các tiêu đề hoặc chữ chính phải có nét cọ vẽ highlight nằm ở dưới làm gạch chân (.brush-underline), vẽ bằng SVG gạch chân tự vẽ (GSAP scaleX từ 0 lên 1).
+SCENE 4 - CHI TIẾT (Nền xanh lá #19C37D):
+  - Nền: MÀU XANH LÁ (#19C37D) phủ kín 100%.
+  - ẢNH: Nằm ở trên, trong khung bo góc lớn (24px) với nền hồng nhạt, chiếm ~45% chiều cao. Viền trắng dày.
+  - CHỮ CHÍNH: Phía dưới ảnh, font-size: 56-72px, font-weight: 900, color: #ffffff. Căn giữa.
+  - CHỮ PHỤ: Dưới chữ chính, font-size: 28-36px, color: rgba(255,255,255,0.85).
 
-3. THIẾT KẾ KHUNG ẢNH ORGANIC BO GÓC BẤT ĐỐI XỨNG (ASYMMETRICAL BENTO GRID):
-   - Tuyệt đối CẤM sử dụng các thẻ viền sắc cạnh hay viền đứt nét dashed.
-   - Các container chứa ảnh (.scene-image-card) phải có bo góc cực lớn và bất đối xứng để tạo sự phá cách (ví dụ: 'border-radius: 120px 40px 120px 40px;' hoặc 'border-radius: 40px 120px 40px 120px;').
-   - Các ảnh phải có viền dày màu trắng tinh khôi liền mạch ('border: 4px solid #ffffff;') để nổi bật lên trên mảng màu nền.
-   - Nếu cảnh có nhiều ảnh hoặc danh sách, hãy xếp chúng theo dạng Bento Grid so le nghiêng nhẹ (rotation: -2deg đến 2deg).
+SCENE 5 - KẾT/CTA (Nền đỏ #E72323):
+  - Nền: MÀU ĐỎ (#E72323) phủ kín 100%. Có vệt cọ sơn trắng mờ trang trí ở góc (opacity 0.25).
+  - CHỮ: Căn giữa cả ngang lẫn dọc. Font-size CỰC TO: 72-96px. Font-weight: 900. Color: #ffffff.
+  - CHỮ PHỤ: Phía dưới, font-size: 28-36px.
 
-4. PHỐI HỢP ĐA DẠNG FONT CHỮ (MULTI-FONT BRAND SHOWCASE):
-   - Nhắm đến sự đa dạng của sản phẩm/thương hiệu, hãy cho phép hiển thị các cụm từ quan trọng bằng các kiểu font chữ tương phản hoàn toàn đặt cạnh nhau:
-     * Chữ nghiêng viết tay/Cursive nghệ thuật: Sử dụng 'eb garamond' ở chế độ italic, font-weight: 700 (ví dụ: font-family: 'eb garamond', serif; font-style: italic;).
-     * Chữ Serif cổ điển quý phái: Sử dụng 'playfair display', font-weight: 700.
-     * Chữ Sans-serif hình học hiện đại: Sử dụng 'outfit' hoặc 'montserrat' black viết hoa dày dặn.
-   - Tránh việc mọi dòng chữ đều dùng chung một kiểu font đơn điệu. Hãy phối hợp linh hoạt!
+=== XỬ LÝ KHI VIDEO CÓ NHIỀU HƠN 5 SCENE ===
+Video có thể có 6, 7, 8, 10 hoặc nhiều scene hơn. Khi đó:
+1. MÀU NỀN LẶP VÒNG: Mảng màu BG_COLORS có 8 màu. Scene thứ i sẽ dùng màu BG_COLORS[i % BG_COLORS.length]. Ví dụ: Scene 6 dùng màu thứ 6, Scene 9 quay lại màu thứ 1.
+2. LAYOUT XOAY VÒNG GIỮA 5 KIỂU: Các scene từ thứ 6 trở đi sẽ xoay vòng layout theo mẫu:
+   - Scene 6, 11, 16... → Layout như Scene 1 (chữ to bên trái + ảnh bên phải)
+   - Scene 7, 12, 17... → Layout như Scene 2 (ảnh trên + chữ dưới)
+   - Scene 8, 13, 18... → Layout như Scene 3 (tiêu đề + danh sách font đa dạng)
+   - Scene 9, 14, 19... → Layout như Scene 4 (ảnh bo góc trên + chữ căn giữa dưới)
+   - Scene 10, 15, 20... → Layout như Scene 5 (chữ khổng lồ căn giữa)
+3. SCENE CUỐI CÙNG LUÔN LÀ CTA: Bất kể video có bao nhiêu scene, scene cuối cùng (SCENES_DATA[SCENES_DATA.length - 1]) LUÔN dùng layout kiểu Scene 5 (CTA - chữ khổng lồ căn giữa trên nền màu).
+4. LOGIC TRONG JS: Code JS đã dùng vòng lặp 'for (var i = 0; i < SCENES_DATA.length; i++)' nên tự động xử lý bất kỳ số lượng scene nào. Bạn KHÔNG cần hardcode số scene cố định.
 
-5. HIỆU ỨNG CHUYỂN ĐỘNG GSAP BOUNCY & ELASTIC:
-   - Các khung ảnh organic và thẻ chữ trượt từ dưới lên kèm theo góc xoay ngẫu nhiên nhẹ (ví dụ: 'rotation: "random(-4, 4)"', 'y: 60') với hiệu ứng đàn hồi: 'ease: "back.out(1.5)"'.
-   - Hiệu ứng nét cọ gạch chân vẽ ra mềm mại bằng cách animate scaleX: 0 -> 1 từ trái qua phải khi chữ xuất hiện.
+=== QUY TẮC BẮT BUỘC TUYỆT ĐỐI (MANDATORY RULES) ===
 
-=== CẢNH BÁO: CỠ CHỮ PHẢI CỰC TO (TYPOGRAPHY SIZE ENFORCEMENT) ===
-- NGUYÊN TẮC VÀNG: Khi người dùng xem video trên điện thoại, chữ PHẢI ĐỌC ĐƯỢC RÕ RÀNG từ khoảng cách 1 mét.
-- Chữ tiêu đề chính: font-size: clamp(56px, 7vw, 96px); font-weight: 900; color: #ffffff; line-height: 1.15;
-- Chữ nội dung: font-size: clamp(38px, 5vw, 56px); font-weight: 700; color: #ffffff; line-height: 1.3;
-- TUYỆT ĐỐI CẤM font-size dưới 24px cho bất kỳ phần tử hiển thị nào (trừ ticker marquee).
-- TUYỆT ĐỐI CẤM nền đen, nền gradient tối, hay ảnh nền mờ blur cho template Promo. Nền chỉ là MÀU ĐƠN SẮC RỰC RỠ.
+1. NỀN MÀU ĐƠN SẮC - TUYỆT ĐỐI CẤM NỀN ĐEN/TỐI/BLUR:
+   - TUYỆT ĐỐI CẤM background-color: #000, #0a0a0f, #060609, hay bất kỳ tông đen/xám tối nào.
+   - TUYỆT ĐỐI CẤM filter: blur() hay backdrop-filter trên bất kỳ phần tử nào.
+   - TUYỆT ĐỐI CẤM tạo lớp ảnh nền mờ ảo (scene-bg-layer). Nền CHỈ LÀ MÀU ĐƠN SẮC RỰC RỠ.
+   - #root phải có background-color ban đầu: #F07C13. JS code sẽ thay đổi màu nền theo từng cảnh.
+   - Mảng màu: ['#F07C13', '#E72323', '#0C4DEB', '#19C37D', '#7A22FF', '#FF6B6B', '#1DB954', '#E040FB'].
+
+2. CHỮ TRẦN TRỰC TIẾP TRÊN NỀN MÀU - KHÔNG CÓ CARD/VIỀN BAO QUANH CHỮ:
+   - TUYỆT ĐỐI CẤM bọc chữ trong các thẻ card có background tối (rgba(10,12,22,0.9)) hay viền neon.
+   - TUYỆT ĐỐI CẤM class .promo-card, .promo-coupon-card, .scene-line-card có background hay border.
+   - Chữ phải là chữ trắng trần (#ffffff) đặt trực tiếp trên nền màu rực rỡ, KHÔNG CÓ hộp/card bao quanh.
+   - Text-shadow nhẹ cho dễ đọc: 'text-shadow: 0 2px 8px rgba(0,0,0,0.15);'
+
+3. CỠ CHỮ CỰC TO:
+   - Chữ tiêu đề/hook: font-size: clamp(64px, 8vw, 96px); font-weight: 900; color: #ffffff; line-height: 1.1;
+   - Chữ nội dung: font-size: clamp(42px, 6vw, 64px); font-weight: 700; color: #ffffff; line-height: 1.25;
+   - Chữ phụ: font-size: clamp(24px, 3vw, 36px); color: rgba(255,255,255,0.85);
+   - TUYỆT ĐỐI CẤM font-size dưới 24px cho bất kỳ phần tử hiển thị nào (trừ logo nhỏ).
+
+4. ẢNH SẢN PHẨM LỚN VÀ NỔI BẬT:
+   - Ảnh chiếm tối thiểu 40-55% diện tích màn hình khi có ảnh.
+   - Bo góc lớn: border-radius: 24px; Border trắng dày: border: 4px solid #ffffff;
+   - object-fit: cover; để ảnh fill đầy khung.
+   - TUYỆT ĐỐI CẤM ảnh nhỏ bé nằm trong góc. Ảnh phải TO và NỔI BẬT.
+
+5. VỆT CỌ SƠN TRANG TRÍ (TÙY CHỌN - CHỈ Ở MỘT SỐ CẢNH):
+   - Có thể thêm vệt cọ sơn trắng mờ (opacity 0.2-0.3) ở góc hoặc phía sau tiêu đề bằng SVG path hoặc div với border-radius organic.
+   - Đây chỉ là trang trí phụ, KHÔNG được che khuất nội dung chính.
 
 === CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES ===
 1. TUYỆT ĐỐI KHÔNG ĐƯỢC phép sử dụng biến CSS để khai báo font-family. Bạn BẮT BUỘC phải viết trực tiếp tên font chữ dưới dạng chuỗi literal trong thuộc tính CSS (ví dụ: 'font-family: "montserrat", sans-serif;').
@@ -592,11 +625,11 @@ Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html quảng cá
 === CẤU TRÚC HTML BẮT BUỘC KHAI BÁO ===
 Thẻ body của bạn BẮT BUỘC phải bọc toàn bộ nội dung trong một container chính duy nhất có cấu trúc chính xác như sau:
 <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0" data-duration="{{ DURATION }}">
-  <!-- Background màu đơn sắc (solid color, GSAP thay đổi theo cảnh) -->
-  <div id="bg-container"></div>
+  <!-- Không cần bg-container cho Promo - nền là màu đơn sắc trên #root -->
   
-  <!-- Các logo pill tĩnh và progress bar -->
+  <!-- Logo nhỏ góc trên trái -->
   <div class="logo-container">...</div>
+  <!-- Thanh progress bar -->
   <div class="progress-bar-container"><div id="progressBar"></div></div>
   
   <!-- Container chứa các phân cảnh chạy động -->
@@ -644,13 +677,14 @@ function splitTextToLineCards(text) {
     var trimmed = line.trim();
     if (!trimmed) return '';
     
-    // Tách từng từ bọc trong mask để trượt dọc mượt mà
+    // Tách từng từ bọc trong word-mask để slide-up mượt. KHÔNG bọc trong card/viền.
     var wordsSpans = trimmed.split(' ').map(function(word) {
       if (!word.trim()) return '';
       return '<span class="word-mask" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.22em;"><span class="word" style="display:inline-block; transform:translateY(110%); opacity:0;">' + word + '</span></span>';
     }).join(' ');
     
-    return '<div class="text-line">' + wordsSpans + '</div>';
+    // Chữ trần trắng trên nền màu, KHÔNG CÓ card/viền bao quanh
+    return '<div style="margin-bottom:8px;">' + wordsSpans + '</div>';
   }).join('');
 }
 
