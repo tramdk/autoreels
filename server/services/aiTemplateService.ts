@@ -477,28 +477,26 @@ export async function generateAiPromoHtml(title: string, scenes: any[], customSe
 === QUY TẮC BỐ CỤC KHUNG HÌNH NGANG (16:9 LANDSCAPE WIDESCREEN) ===
 Bạn đang thiết kế cho màn hình ngang (16:9) chuẩn máy tính/TV/Youtube.
 1. CONTAINER GỐC #root: Bắt buộc khai báo: <div id="root" data-composition-id="main" data-width="1920" data-height="1080" data-start="0" data-duration="{{ DURATION }}">
-   - #root BẮT BUỘC có CSS: 'background-color: #F07C13;' (sẽ thay đổi bằng GSAP theo từng cảnh).
+   - #root có CSS: 'background: linear-gradient(135deg, #1f1235 0%, #100b25 100%);' làm nền mặc định, thay đổi bằng GSAP theo từng cảnh.
 2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card):
-   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 50px; box-sizing: border-box; padding: 60px 80px;'
+   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 50px; box-sizing: border-box; padding: 80px 100px;'
 3. CHIA ĐÔI SONG SONG TRÁI-PHẢI PROMO (HORIZONTAL PROMO SPLIT):
    - Nếu cảnh CÓ hình ảnh (scene.imageUrl):
-     * Khối ảnh '.scene-image-card' bên TRÁI, 48% width, 90% height, border-radius lớn bất đối xứng (80px 30px 80px 30px), border: 5px solid #ffffff.
+     * Khối ảnh '.scene-image-card' bên TRÁI, 46% width, 90% height. Ảnh có: 'width: 100%; height: 100%; object-fit: cover; border-radius: 30px; border: 3px solid rgba(255,255,255,0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.3);'
      * Khối chữ '.scene-text-card' bên PHẢI, 46% width. CHỮ CỰC TO: font-size tối thiểu 48px, font-weight: 900, color: #ffffff.
    - KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' chiếm 100% width, chữ khổng lồ font-size: 64px+.
-   - TUYỆT ĐỐI CẤM viền neon, viền dashed. Chỉ dùng viền trắng dày.
 `;
   } else if (ratio === '1:1') {
     ratioLayoutRules = `
 === QUY TẮC BỐ CỤC KHUNG HÌNH VUÔNG (1:1 SQUARE INSTAGRAM) ===
 Bạn đang thiết kế cho màn hình vuông (1:1).
 1. CONTAINER GỐC #root: Bắt buộc khai báo: <div id="root" data-composition-id="main" data-width="1080" data-height="1080" data-start="0" data-duration="{{ DURATION }}">
-   - #root BẮT BUỘC có CSS: 'background-color: #F07C13;' (sẽ thay đổi bằng GSAP theo từng cảnh).
+   - #root có CSS: 'background: linear-gradient(135deg, #1f1235 0%, #100b25 100%);' làm nền mặc định, thay đổi bằng GSAP theo từng cảnh.
 2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card):
-   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 25px; box-sizing: border-box; padding: 60px 45px;'
+   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 25px; box-sizing: border-box; padding: 80px 60px;'
 3. BỐ CỤC XẾP CHỒNG DỌC PROMO (VERTICAL PROMO STACK):
-   - CÓ hình ảnh: Ảnh ở trên 50% cao, chữ ở dưới 40% cao. Font-size tối thiểu 40px.
-   - KHÔNG CÓ hình ảnh: Chữ chiếm 90% không gian, font-size: 56px+, font-weight: 900, color: #fff.
-   - TUYỆT ĐỐI CẤM viền neon hay dashed. Chỉ viền trắng dày.
+   - CÓ hình ảnh: Ảnh ở trên 45% cao, chữ ở dưới 45% cao. Font-size tối thiểu 36px.
+   - KHÔNG CÓ hình ảnh: Chữ chiếm 80% không gian, font-size: 56px+, font-weight: 900, color: #fff.
 `;
   } else {
     // 9:16 vertical
@@ -506,30 +504,20 @@ Bạn đang thiết kế cho màn hình vuông (1:1).
 === QUY TẮC BỐ CỤC KHUNG HÌNH DỌC (9:16 VERTICAL MOBILE TIKTOK/REELS) ===
 Bạn đang thiết kế cho màn hình đứng (9:16) chuẩn di động.
 1. CONTAINER GỐC #root: Bắt buộc khai báo: <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-start="0" data-duration="{{ DURATION }}">
-   - #root BẮT BUỘC phải có CSS: 'background-color: #F07C13;' (màu nền mặc định cảnh đầu tiên, sẽ thay đổi theo từng cảnh bằng GSAP).
-   - TUYỆT ĐỐI CẤM dùng nền đen, nền gradient tối, hay nền ảnh mờ blur. Nền luôn luôn là MÀU ĐƠN SẮC RỰC RỠ.
+   - #root BẮT BUỘC phải có CSS: 'background: linear-gradient(135deg, #15092b 0%, #0a0418 100%);' ban đầu, có thể đổi màu nền hoặc chuyển tiếp màu gradient bằng GSAP.
 2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card): Toàn bộ các thẻ cảnh '.scene-card' BẮT BUỘC phải sử dụng:
-   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 25px; box-sizing: border-box; padding: 100px 50px;'
-   => padding rất nhỏ (50px hai bên, 100px trên dưới) để NỘI DUNG CHIẾM TỐI ĐA KHÔNG GIAN MÀN HÌNH.
-3. BỐ CỤC CANVA PROMO (FULL-BLEED VERTICAL STACK):
-   - TUYỆT ĐỐI CẤM viền neon, viền đứt, viền accent-neon, viền phát sáng. Chỉ được phép dùng viền trắng dày ('border: 4px solid #ffffff;').
+   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; gap: 30px; box-sizing: border-box; padding: 130px 60px 240px 60px;'
+   => LƯU Ý: Bắt buộc tuân thủ padding an toàn (top 130px, bottom 240px, sides 60px) để không bị chồng lấn bởi nút hay phụ đề hệ thống của TikTok/Reels.
+3. BỐ CỤC CANVA PROMO VỚI LƯỚI AN TOÀN (FULL-BLEED VERTICAL STACK):
    - Nếu cảnh CÓ hình ảnh (scene.imageUrl):
-     * Khối ảnh '.scene-image-card' chiếm khoảng 50% chiều cao, chiều rộng 90%. Ảnh '.scene-image' có: 'width: 100%; height: 100%; object-fit: cover; border-radius: 30px; border: 5px solid #ffffff;'.
-     * Khối chữ '.scene-text-card' nằm phía dưới ảnh, chiều rộng 100%. CHỮ CỰC TO: font-size tối thiểu 54px cho chữ chính, font-weight: 900, color: #ffffff, text-shadow nhẹ.
-   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' chiếm toàn bộ không gian. CHỮ KHỔNG LỒ: font-size: clamp(56px, 8vw, 90px), font-weight: 900, color: #ffffff.
-4. QUY TẮC CỠ CHỮ TUYỆT ĐỐI (MANDATORY LARGE TEXT):
-   - Chữ tiêu đề/hook: font-size tối thiểu 64px, font-weight: 900, color: #ffffff.
-   - Chữ nội dung body: font-size tối thiểu 42px, font-weight: 700, color: #ffffff.
-   - Chữ phụ/subtitle: font-size tối thiểu 28px, color: rgba(255,255,255,0.85).
-   - TUYỆT ĐỐI CẤM dùng cỡ chữ dưới 24px cho bất kỳ thành phần nào (ngoại trừ marquee ticker).
-5. NỀN MÀU ĐƠN SẮC (SOLID COLOR BACKGROUND - KHÔNG CÓ ẢNH NỀN MỜ):
-   - TUYỆT ĐỐI CẤM sử dụng ảnh nền mờ ảo blur (scene-bg-layer filter:blur). Nền chỉ là màu đơn sắc đặc.
-   - TUYỆT ĐỐI CẤM sử dụng backdrop-filter hay filter: blur cho bất kỳ phần tử nào.
+     * Khối ảnh '.scene-image-card' chiếm khoảng 40% đến 45% chiều cao. Ảnh '.scene-image' có: 'width: 100%; height: 100%; object-fit: cover; border-radius: 24px; border: 2px solid rgba(255,255,255,0.25); box-shadow: 0 15px 35px rgba(0,0,0,0.35);'.
+     * Khối chữ '.scene-text-card' nằm phía dưới ảnh, chiều rộng 100%. CHỮ RÕ RÀNG: font-size tối thiểu 46px cho chữ chính, font-weight: 900, color: #ffffff, text-shadow nhẹ.
+   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' chiếm toàn bộ không gian trung tâm (height: 75%). CHỮ KHỔNG LỒ: font-size: clamp(52px, 8vw, 84px), font-weight: 900, color: #ffffff.
 `;
   }
 
   const prompt = `
-Bạn là giám đốc nghệ thuật kiêm nhà thiết kế đồ họa chuyển động quảng cáo chuyên nghiệp (creative director & motion graphics designer) chuyên thiết kế các video giới thiệu, quảng bá sản phẩm thương mại (Product Promo/Ad Videos) thu hút người xem từ 3 giây đầu tiên trên TikTok/Reels/Shorts.
+Bạn là giám đốc nghệ thuật kiêm nhà thiết kế chuyển động và lập trình viên frontend cao cấp (creative director & senior motion designer) chuyên thiết kế các video quảng cáo, giới thiệu sản phẩm thương mại (E-commerce / Product Promo Videos) thu hút người xem từ 3 giây đầu tiên trên TikTok/Reels/Shorts.
 
 Dưới đây là thông tin chi tiết về kịch bản video để bạn phân tích chủ đề:
 === THÔNG TIN KỊCH BẢN ===
@@ -539,82 +527,51 @@ Dưới đây là thông tin chi tiết về kịch bản video để bạn phâ
 - Cấu trúc dữ liệu của 1 cảnh mẫu: ${JSON.stringify(sampleScene)}
 - Tỷ lệ khung hình video hiện tại: ${ratio}
 
-Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html quảng cáo sản phẩm hoàn toàn mới, standalone, hoàn chỉnh 100% để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. 
+Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html quảng cáo sản phẩm hoàn hảo, độc bản, hoàn chỉnh 100% để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. Giao diện phải cực kỳ sang trọng, hiện đại, và thuyết phục mua hàng cao!
 
-=== PHONG CÁCH THIẾT KẾ PROMO (CANVA VIBRANT COLOR-BLOCKING - COPY Y HỆT) ===
-Hãy thiết kế video quảng cáo GIỐNG HỆT phong cách mẫu Canva sau đây. Đây là mô tả CHI TIẾT TỪNG SCENE của video mẫu Canva mà bạn phải sao chép y hệt phong cách:
+=== TRIẾT LÝ THIẾT KẾ PROMO HIỆN ĐẠI (PREMIUM GRADIENT & FAUX GLASSMORPHISM) ===
+Hãy rũ bỏ hoàn toàn phong cách thiết kế màu đơn sắc thô sơ ("solid color-blocking"). Thay vào đó, áp dụng các tiêu chuẩn thiết kế UI/UX đỉnh cao sau:
 
-=== MÔ TẢ CHI TIẾT VIDEO MẪU CANVA (BẮT BUỘC SAO CHÉP PHONG CÁCH) ===
-SCENE 1 - HOOK/MỞ ĐẦU (Nền cam #F07C13):
-  - Nền: MÀU CAM ĐƠN SẮC (#F07C13) phủ kín 100% màn hình. TUYỆT ĐỐI KHÔNG có gradient, ảnh blur, hay bất kỳ lớp phủ tối nào.
-  - Logo: Ở góc trên trái, chữ trắng nhỏ (24px), một từ thường + một từ nghiêng có gạch chân.
-  - CHỮ CHÍNH: Nằm bên trái, chiếm khoảng 60% chiều ngang. Font-size CỰC TO: 72-90px. Font-weight: 900. Color: #ffffff. Text-align: left. Line-height: 1.1. Chữ KHÔNG có viền, KHÔNG có card bao quanh, KHÔNG có background - chỉ là chữ trắng trần trên nền màu.
-  - ẢNH: Nếu có ảnh, ảnh nằm bên phải chiếm ~40% width. Ảnh được cắt nền (cutout) hoặc có background nhạt hơn (hồng nhạt) bo góc tự nhiên. Phía sau ảnh có một vệt sơn/blob shape màu nhạt (hồng phấn) rất mờ để trang trí.
-  
-SCENE 2 - NỘI DUNG/SẢN PHẨM (Nền đỏ #E72323):
-  - Nền: MÀU ĐỎ TƯƠI (#E72323) phủ kín 100%.
-  - ẢNH: Nếu có ảnh, ảnh chiếm phần TRÊN (khoảng 55-60% chiều cao), bo góc lớn (24px), có viền trắng dày 4px. Ảnh object-fit: cover.
-  - CHỮ: Nằm phía dưới ảnh. Font-size: 48-64px. Font-weight: 700-900. Color: #ffffff. Không card, không viền.
-  
-SCENE 3 - LIỆT KÊ/BRANDS (Nền xanh dương #0C4DEB):
-  - Nền: MÀU XANH DƯƠNG (#0C4DEB) phủ kín 100%.
-  - CHỮ: Tiêu đề ở trên (font-size: 48px, font-weight: 900, color: #ffffff). Phía sau tiêu đề có vệt cọ trắng mờ (opacity 0.3).
-  - Các dòng text bên dưới sử dụng FONT CHỮ KHÁC NHAU cho mỗi dòng (eb garamond italic cho dòng 1, montserrat bold cho dòng 2, playfair display cho dòng 3...). Font-size: 42-56px. Color: #ffffff.
-  - ẢNH: Nếu có, ảnh cutout nằm ở góc phải.
+1. NỀN GRADIENT SANG TRỌNG & RỰC RỠ:
+   - Sử dụng các cặp màu gradient thời thượng, có độ tương phản cao, hòa trộn mượt mà cùng hiệu ứng nguồn sáng mờ ảo (radial overlay glow) ở giữa hoặc góc.
+   - Mảng gradient gợi ý để đổi theo từng cảnh:
+     * Cảnh 1 (Hook): linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%) - Hồng Đỏ Neon quyến rũ kích thích.
+     * Cảnh 2 (Product): linear-gradient(135deg, #1A2980 0%, #26D0CE 100%) - Xanh Dương Neon thời thượng.
+     * Cảnh 3 (Feature): linear-gradient(135deg, #f857a6 0%, #ff5858 100%) - Hồng Cam trẻ trung.
+     * Cảnh 4 (Detail): linear-gradient(135deg, #11998e 0%, #38ef7d 100%) - Xanh Mint sinh thái tươi mát.
+     * Cảnh 5+ hoặc Cảnh cuối (CTA): linear-gradient(135deg, #7F00FF 0%, #E100FF 100%) - Tím Cyberpunk cuốn hút.
+   - Có một lớp lưới tọa độ chấm bi cực mảnh (.bg-dots-grid) hoặc vệt sáng ảo diệu lững lờ trôi làm nền sinh động.
+   - TUYỆT ĐỐI CẤM dùng nền đen xì nhàm chán hoặc nền màu đơn sắc buồn tẻ.
 
-SCENE 4 - CHI TIẾT (Nền xanh lá #19C37D):
-  - Nền: MÀU XANH LÁ (#19C37D) phủ kín 100%.
-  - ẢNH: Nằm ở trên, trong khung bo góc lớn (24px) với nền hồng nhạt, chiếm ~45% chiều cao. Viền trắng dày.
-  - CHỮ CHÍNH: Phía dưới ảnh, font-size: 56-72px, font-weight: 900, color: #ffffff. Căn giữa.
-  - CHỮ PHỤ: Dưới chữ chính, font-size: 28-36px, color: rgba(255,255,255,0.85).
+2. CÁC THẺ CARD MỜ ẢO (FAUX GLASSMORPHIC BENTO CARDS):
+   - Để hiển thị văn bản cực rõ nét trên nền gradient mà vẫn cực kỳ cao cấp, hãy bọc văn bản/phân cảnh vào các thẻ dòng '.scene-line-card'.
+   - LƯU Ý CỰC KỲ QUAN TRỌNG: HyperFrames BỊ NAY VÀ BẤT KỲ LÚC NÀO CẤM DÙNG 'backdrop-filter: blur()' vì sẽ gây lỗi crash render trong Puppeteer.
+   - Thay vào đó, lập trình Faux Glassmorphism (Kính giả lập siêu nhẹ) bằng CSS thuần túy:
+     * Nền bán trong suốt tinh khiết: 'background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);'
+     * Viền mỏng như tơ phát sáng trắng: 'border: 1px solid rgba(255, 255, 255, 0.15);'
+     * Bóng đổ mềm sâu rộng: 'box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);'
+     * Bo góc sang trọng: 'border-radius: 16px;' hoặc '20px;'.
+     * Đệm trong tinh tế: 'padding: 16px 24px;'.
+     * Chữ trắng sáng (#ffffff) có text-shadow nhẹ để nâng cao độ tương phản.
 
-SCENE 5 - KẾT/CTA (Nền đỏ #E72323):
-  - Nền: MÀU ĐỎ (#E72323) phủ kín 100%. Có vệt cọ sơn trắng mờ trang trí ở góc (opacity 0.25).
-  - CHỮ: Căn giữa cả ngang lẫn dọc. Font-size CỰC TO: 72-96px. Font-weight: 900. Color: #ffffff.
-  - CHỮ PHỤ: Phía dưới, font-size: 28-36px.
+3. LƯỚI AN TOÀN VIỀN MÀN HÌNH (STRICT SAFETY GRID):
+   - Đảm bảo an toàn 9:16 di động tuyệt đối. Toàn bộ nội dung hiển thị phải nằm gọn trong padding:
+     'padding: 130px 60px 240px 60px;' cho màn hình đứng di động.
+   - TUYỆT ĐỐI KHÔNG ĐỂ chữ hoặc ảnh lấn ra ngoài hay sát mép viền vật lý.
 
-=== XỬ LÝ KHI VIDEO CÓ NHIỀU HƠN 5 SCENE ===
-Video có thể có 6, 7, 8, 10 hoặc nhiều scene hơn. Khi đó:
-1. MÀU NỀN LẶP VÒNG: Mảng màu BG_COLORS có 8 màu. Scene thứ i sẽ dùng màu BG_COLORS[i % BG_COLORS.length]. Ví dụ: Scene 6 dùng màu thứ 6, Scene 9 quay lại màu thứ 1.
-2. LAYOUT XOAY VÒNG GIỮA 5 KIỂU: Các scene từ thứ 6 trở đi sẽ xoay vòng layout theo mẫu:
-   - Scene 6, 11, 16... → Layout như Scene 1 (chữ to bên trái + ảnh bên phải)
-   - Scene 7, 12, 17... → Layout như Scene 2 (ảnh trên + chữ dưới)
-   - Scene 8, 13, 18... → Layout như Scene 3 (tiêu đề + danh sách font đa dạng)
-   - Scene 9, 14, 19... → Layout như Scene 4 (ảnh bo góc trên + chữ căn giữa dưới)
-   - Scene 10, 15, 20... → Layout như Scene 5 (chữ khổng lồ căn giữa)
-3. SCENE CUỐI CÙNG LUÔN LÀ CTA: Bất kể video có bao nhiêu scene, scene cuối cùng (SCENES_DATA[SCENES_DATA.length - 1]) LUÔN dùng layout kiểu Scene 5 (CTA - chữ khổng lồ căn giữa trên nền màu).
-4. LOGIC TRONG JS: Code JS đã dùng vòng lặp 'for (var i = 0; i < SCENES_DATA.length; i++)' nên tự động xử lý bất kỳ số lượng scene nào. Bạn KHÔNG cần hardcode số scene cố định.
+4. CỠ CHỮ CHUẨN HOÁ & THỐNG NHẤT (CLAMP TYPOGRAPHY):
+   - Tự động co giãn cỡ chữ theo khung hình để tránh tràn viền khi tiêu đề dài.
+   - Chữ chính/tiêu đề: 'font-size: clamp(38px, 5.5vw, 64px); font-weight: 900; line-height: 1.25; color: #ffffff;'
+   - Chữ nội dung/phụ đề: 'font-size: clamp(26px, 3.8vw, 36px); font-weight: 700; line-height: 1.35; color: rgba(255, 255, 255, 0.9);'
+   - Các từ khóa bán hàng quan trọng (SALE, 50%, MUA NGAY, GIÁ SỐC, FREE SHIP, QUÀ TẶNG, HOT, GIẢM GIÁ...) được tự động bọc trong thẻ Badge '.sale-badge' dạng viên thuốc nổi bật rực rỡ với màu nền chói (như vàng neon #FFF500, xanh mint #00FFCC) và màu chữ tối tương phản cao để tạo điểm nhấn chốt đơn cực mạnh!
 
-=== QUY TẮC BẮT BUỘC TUYỆT ĐỐI (MANDATORY RULES) ===
-
-1. NỀN MÀU ĐƠN SẮC - TUYỆT ĐỐI CẤM NỀN ĐEN/TỐI/BLUR:
-   - TUYỆT ĐỐI CẤM background-color: #000, #0a0a0f, #060609, hay bất kỳ tông đen/xám tối nào.
-   - TUYỆT ĐỐI CẤM filter: blur() hay backdrop-filter trên bất kỳ phần tử nào.
-   - TUYỆT ĐỐI CẤM tạo lớp ảnh nền mờ ảo (scene-bg-layer). Nền CHỈ LÀ MÀU ĐƠN SẮC RỰC RỠ.
-   - #root phải có background-color ban đầu: #F07C13. JS code sẽ thay đổi màu nền theo từng cảnh.
-   - Mảng màu: ['#F07C13', '#E72323', '#0C4DEB', '#19C37D', '#7A22FF', '#FF6B6B', '#1DB954', '#E040FB'].
-
-2. CHỮ TRẦN TRỰC TIẾP TRÊN NỀN MÀU - KHÔNG CÓ CARD/VIỀN BAO QUANH CHỮ:
-   - TUYỆT ĐỐI CẤM bọc chữ trong các thẻ card có background tối (rgba(10,12,22,0.9)) hay viền neon.
-   - TUYỆT ĐỐI CẤM class .promo-card, .promo-coupon-card, .scene-line-card có background hay border.
-   - Chữ phải là chữ trắng trần (#ffffff) đặt trực tiếp trên nền màu rực rỡ, KHÔNG CÓ hộp/card bao quanh.
-   - Text-shadow nhẹ cho dễ đọc: 'text-shadow: 0 2px 8px rgba(0,0,0,0.15);'
-
-3. CỠ CHỮ CỰC TO:
-   - Chữ tiêu đề/hook: font-size: clamp(64px, 8vw, 96px); font-weight: 900; color: #ffffff; line-height: 1.1;
-   - Chữ nội dung: font-size: clamp(42px, 6vw, 64px); font-weight: 700; color: #ffffff; line-height: 1.25;
-   - Chữ phụ: font-size: clamp(24px, 3vw, 36px); color: rgba(255,255,255,0.85);
-   - TUYỆT ĐỐI CẤM font-size dưới 24px cho bất kỳ phần tử hiển thị nào (trừ logo nhỏ).
-
-4. ẢNH SẢN PHẨM LỚN VÀ NỔI BẬT:
-   - Ảnh chiếm tối thiểu 40-55% diện tích màn hình khi có ảnh.
-   - Bo góc lớn: border-radius: 24px; Border trắng dày: border: 4px solid #ffffff;
-   - object-fit: cover; để ảnh fill đầy khung.
-   - TUYỆT ĐỐI CẤM ảnh nhỏ bé nằm trong góc. Ảnh phải TO và NỔI BẬT.
-
-5. VỆT CỌ SƠN TRANG TRÍ (TÙY CHỌN - CHỈ Ở MỘT SỐ CẢNH):
-   - Có thể thêm vệt cọ sơn trắng mờ (opacity 0.2-0.3) ở góc hoặc phía sau tiêu đề bằng SVG path hoặc div với border-radius organic.
-   - Đây chỉ là trang trí phụ, KHÔNG được che khuất nội dung chính.
+5. SIÊU CẢNH CUỐI - CALL TO ACTION (CTA) HUB CHUYỂN ĐỔI CAO:
+   - Cảnh cuối cùng là vũ khí chốt đơn của video! Hãy biến nó thành một **CTA Hub** mô phỏng 3D cực kỳ kích thích mua sắm:
+     * Chữ tiêu đề khổng lồ kêu gọi hành động dứt khoát (ví dụ: "🛍️ SĂN DEAL NGAY!", "👉 BẤM ĐĂNG KÝ!").
+     * Render một nút bấm giả lập nổi khối 3D (.cta-button) tuyệt đẹp với màu neon chói lọi (ví dụ: nền vàng tươi chữ đen cực đậm: 'background: linear-gradient(to bottom, #FFE500 0%, #FFB800 100%); color: #000; font-weight: 900; padding: 22px 48px; border-radius: 40px; box-shadow: 0 10px 25px rgba(255, 184, 0, 0.4), 0 4px 0 #D49B00; text-transform: uppercase; font-size: 32px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transform-style: preserve-3d;').
+     * Thẻ mã giảm giá / coupon (.cta-coupon-card) mờ ảo tinh xảo kèm viền đứt nét phát sáng (ví dụ: "MÃ: GIAM50" hoặc "FREE SHIP TOÀN QUỐC").
+     * Icon ngón tay/mũi tên hướng về nút bấm (.cta-pointer) trỏ nhẹ liên tục.
+   - Dùng GSAP để tạo hiệu ứng pulsing co giãn nhịp tim (scale pulse loop) vô tận cho nút CTA này để hút trọn mắt người xem.
 
 === CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES ===
 1. TUYỆT ĐỐI KHÔNG ĐƯỢC phép sử dụng biến CSS để khai báo font-family. Bạn BẮT BUỘC phải viết trực tiếp tên font chữ dưới dạng chuỗi literal trong thuộc tính CSS (ví dụ: 'font-family: "montserrat", sans-serif;').
@@ -625,11 +582,13 @@ Video có thể có 6, 7, 8, 10 hoặc nhiều scene hơn. Khi đó:
 === CẤU TRÚC HTML BẮT BUỘC KHAI BÁO ===
 Thẻ body của bạn BẮT BUỘC phải bọc toàn bộ nội dung trong một container chính duy nhất có cấu trúc chính xác như sau:
 <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0" data-duration="{{ DURATION }}">
-  <!-- Không cần bg-container cho Promo - nền là màu đơn sắc trên #root -->
+  <!-- Grid nền hạt trang trí hoặc chấm lưới lung linh -->
+  <div class="bg-glow-layer"></div>
+  <div class="bg-dots-grid"></div>
   
   <!-- Logo nhỏ góc trên trái -->
   <div class="logo-container">...</div>
-  <!-- Thanh progress bar -->
+  <!-- Thanh progress bar neon -->
   <div class="progress-bar-container"><div id="progressBar"></div></div>
   
   <!-- Container chứa các phân cảnh chạy động -->
@@ -650,13 +609,13 @@ window._tl = mainTl;
 var currentTime = 0;
 var CROSSFADE = 0.5; 
 
-// Hàm quét tự động làm nổi bật các từ khóa chốt sale
+// Hàm quét tự động làm nổi bật các từ khóa chốt sale bằng badge rực rỡ
 function highlightSellingKeywords(text) {
   if (!text) return '';
   var keywords = [
-    'SALE', '50%', 'GIÁ SỐC', 'MUA NGAY', 'CHỐT ĐƠN', 'HOT', 'HOT NEWS', 'TRENDING', 
-    'KHUYẾN MÃI', 'QUÀ TẶNG', 'ƯU ĐÃI', 'GIÁ RẺ', 'MUA 1 TẶNG 1', 'FREE SHIP', 
-    'GIẢM GIÁ', 'GIẢM ĐẾN', 'SỐ LƯỢNG CÓ HẠN', 'CLICK NGAY', 'ĐẶT HÀNG'
+    'SALE', '50%', '30%', '70%', 'GIÁ SỐC', 'MUA NGAY', 'CHỐT ĐƠN', 'HOT', 'TRENDING', 
+    'KHUYẾN MÃI', 'QUÀ TẶNG', 'ƯU ĐÃI', 'GIÁ RẺ', 'MUA 1 TẶNG 1', 'FREE SHIP', 'FREESHIP',
+    'GIẢM GIÁ', 'GIẢM ĐẾN', 'SỐ LƯỢNG CÓ HẠN', 'CLICK NGAY', 'ĐẶT HÀNG', 'ĐỘC QUYỀN'
   ];
   keywords.sort(function(a, b) { return b.length - a.length; });
   var resultText = text;
@@ -669,7 +628,7 @@ function highlightSellingKeywords(text) {
   return resultText;
 }
 
-function splitTextToLineCards(text) {
+function splitTextToLineCards(text, isCta = false) {
   if (!text) return '';
   var highlighted = highlightSellingKeywords(text);
   var lines = highlighted.split(/(?:<br\\s*\\/?>|\\n)/gi);
@@ -677,44 +636,56 @@ function splitTextToLineCards(text) {
     var trimmed = line.trim();
     if (!trimmed) return '';
     
-    // Tách từng từ bọc trong word-mask để slide-up mượt. KHÔNG bọc trong card/viền.
+    // Tách từng từ bọc trong word-mask để slide-up mượt
     var wordsSpans = trimmed.split(' ').map(function(word) {
       if (!word.trim()) return '';
-      return '<span class="word-mask" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.22em;"><span class="word" style="display:inline-block; transform:translateY(110%); opacity:0;">' + word + '</span></span>';
+      return '<span class="word-mask" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.22em;"><span class="word" style="display:inline-block; transform:translateY(110%); opacity:0; will-change: transform, opacity;">' + word + '</span></span>';
     }).join(' ');
     
-    // Chữ trần trắng trên nền màu, KHÔNG CÓ card/viền bao quanh
-    return '<div style="margin-bottom:8px;">' + wordsSpans + '</div>';
+    return '<div class="scene-line-card">' + wordsSpans + '</div>';
   }).join('');
 }
 
-// Xóa sạch bg-container (Promo KHÔNG dùng ảnh nền mờ blur)
-if (document.getElementById('bg-container')) {
-  document.getElementById('bg-container').innerHTML = '';
-  document.getElementById('bg-container').style.display = 'none';
-}
 document.getElementById('scene-container').innerHTML = '';
 
-// Mảng màu color-blocking rực rỡ đổi theo từng cảnh (Canva Style)
-var BG_COLORS = ['#F07C13', '#E72323', '#0C4DEB', '#19C37D', '#7A22FF', '#FF6B6B', '#1DB954', '#E040FB'];
+// Mảng màu gradient chuyển màu rực rỡ đặc trưng sang xịn mịn
+var BG_GRADIENTS = [
+  'linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%)', // Cảnh 1 (Hook): Hồng Đỏ
+  'linear-gradient(135deg, #1A2980 0%, #26D0CE 100%)', // Cảnh 2: Xanh Dương
+  'linear-gradient(135deg, #f857a6 0%, #ff5858 100%)', // Cảnh 3: Hồng Cam
+  'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', // Cảnh 4: Xanh Mint
+  'linear-gradient(135deg, #7F00FF 0%, #E100FF 100%)', // Cảnh 5: Tím Cyberpunk
+  'linear-gradient(135deg, #FF8C00 0%, #FF0080 100%)', // Đột phá Cam Hồng
+  'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)'  // Xanh Biển Neon
+];
 
 for (var i = 0; i < SCENES_DATA.length; i++) {
   var scene = SCENES_DATA[i];
   var duration = SCENE_DURATIONS[i] || 5;
   var sceneId = 'scene-' + i;
+  var isLastScene = (i === SCENES_DATA.length - 1);
 
-  // Promo KHÔNG tạo scene-bg-layer blur. Nền là màu đơn sắc rực rỡ.
-
-  // 1. Tạo phần tử DOM động
+  // 1. Tạo phần tử DOM động cho Cảnh
   var sceneEl = document.createElement('div');
   sceneEl.id = sceneId;
-  sceneEl.className = 'scene-card';
+  sceneEl.className = 'scene-card' + (isLastScene ? ' cta-scene' : '');
   sceneEl.style.display = 'none';
   
   var htmlContent = '';
   
-  if (scene.imageUrl) {
-    // Layout có ảnh: Ảnh lớn ở trên + Text cực to ở dưới
+  if (isLastScene) {
+    // Siêu cảnh cuối CTA Hub chốt đơn cực mạnh
+    htmlContent += '<div class="scene-text-card full-size cta-hub">';
+    htmlContent += '  <div class="scene-text centered-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '', true) + '</div>';
+    
+    // Nút CTA giả lập nổi 3D kèm mã giảm giá tinh tế
+    htmlContent += '  <div class="cta-interactive-wrapper" style="display:flex; flex-direction:column; align-items:center; gap:20px; margin-top:35px; width:100%;">';
+    htmlContent += '    <div class="cta-coupon-card">FREE SHIP + GIẢM 50%</div>';
+    htmlContent += '    <button class="cta-button">🛒 SĂN DEAL NGAY</button>';
+    htmlContent += '  </div>';
+    htmlContent += '</div>';
+  } else if (scene.imageUrl) {
+    // Cảnh thường có ảnh: Ảnh mượt mà bo góc glass ở trên, text ở dưới
     htmlContent += '<div class="scene-image-card">';
     htmlContent += '  <img class="scene-image" src="' + scene.imageUrl + '" />';
     htmlContent += '</div>';
@@ -722,42 +693,40 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     htmlContent += '  <div class="scene-text highlight-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '</div>';
   } else {
-    // Layout không ảnh: Text chiếm toàn bộ màn hình, cỡ chữ khổng lồ
+    // Cảnh thường không ảnh: Text bento trôi nổi cực sang trọng
     htmlContent += '<div class="scene-text-card full-size">';
     htmlContent += '  <div class="scene-text centered-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '</div>';
   }
   sceneEl.innerHTML = htmlContent;
-  
   document.getElementById('scene-container').appendChild(sceneEl);
 
   // 2. Tạo sub-timeline riêng cho cảnh này
   var tl = gsap.timeline();
-  
   tl.set(sceneEl, { display: 'flex', visibility: 'visible', zIndex: 50 + i }, 0);
   
-  // A. Chuyển đổi màu nền theo Color-Blocking (hiệu ứng đặc trưng Canva)
-  var targetColor = BG_COLORS[i % BG_COLORS.length];
-  tl.to('#root', { backgroundColor: targetColor, duration: 0.5, ease: "power2.out" }, 0);
+  // A. Chuyển đổi màu nền gradient ảo diệu theo mảng màu rực rỡ
+  var targetGradient = BG_GRADIENTS[i % BG_GRADIENTS.length];
+  tl.to('#root', { background: targetGradient, duration: 0.6, ease: "power2.out" }, 0);
   
-  // B. Entrance Animation cho toàn cảnh
+  // B. Entrance Animation cực mượt mà với Elastic Ease của GSAP
   tl.fromTo(sceneEl, 
-    { opacity: 0, y: 40, scale: 0.97 },
-    { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power3.out" }, 
+    { opacity: 0, y: 50, scale: 0.92 },
+    { opacity: 1, y: 0, scale: 1, duration: 0.75, ease: "back.out(1.4)" }, 
     0
   );
 
-  // C. Ảnh sản phẩm bay vào từ dưới
+  // C. Ảnh sản phẩm bay nhẹ từ dưới lên (nếu có)
   var imgCard = sceneEl.querySelector('.scene-image-card');
   if (imgCard) {
     tl.fromTo(imgCard, 
-      { opacity: 0, y: 60, scale: 0.9 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.3)" },
+      { opacity: 0, y: 70, scale: 0.88 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "back.out(1.3)" },
       0.05
     );
   }
 
-  // D. Zoom nhẹ ảnh sản phẩm (Ken Burns)
+  // D. Zoom nhẹ ảnh sản phẩm kiểu điện ảnh (Ken Burns)
   var imgEl = sceneEl.querySelector('.scene-image');
   if (imgEl) {
     tl.fromTo(imgEl, 
@@ -767,34 +736,68 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     );
   }
 
-  // E. Word mask slide up (chữ trượt lên từ dưới)
+  // E. Chữ trượt lên từ mặt nạ mask (Word Mask Slide Up)
   var words = sceneEl.querySelectorAll('.word');
   if (words.length > 0) {
     tl.to(words, {
       y: '0%',
       opacity: 1,
-      duration: 0.45,
-      stagger: 0.025,
-      ease: "power2.out"
-    }, 0.15);
+      duration: 0.5,
+      stagger: 0.03,
+      ease: "power3.out"
+    }, 0.2);
   }
 
-  // F. Sale badges pop in
+  // F. Từ khóa bán hàng rực rỡ pop lên ấn tượng
   var saleBadges = sceneEl.querySelectorAll('.sale-badge');
   if (saleBadges.length > 0) {
     tl.fromTo(saleBadges,
-      { scale: 0.6, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.5, stagger: 0.05, ease: "back.out(1.5)" },
-      0.3
+      { scale: 0.5, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.55, stagger: 0.08, ease: "back.out(1.6)" },
+      0.35
     );
   }
 
-  // G. Exit Animation
+  // G. Xử lý hoạt ảnh looping và entrance đặc trưng cho CTA ở cảnh cuối
+  if (isLastScene) {
+    var ctaButton = sceneEl.querySelector('.cta-button');
+    var ctaCoupon = sceneEl.querySelector('.cta-coupon-card');
+    
+    if (ctaCoupon) {
+      tl.fromTo(ctaCoupon,
+        { scale: 0.8, opacity: 0, y: 20 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: "back.out(1.5)" },
+        0.4
+      );
+    }
+    
+    if (ctaButton) {
+      tl.fromTo(ctaButton,
+        { scale: 0.7, opacity: 0, rotationX: -30 },
+        { scale: 1, opacity: 1, rotationX: 0, duration: 0.8, ease: "back.out(1.7)" },
+        0.5
+      );
+      
+      // Tạo hiệu ứng đập co giãn vô hạn (Infinite Pulsing Pulse Loop) mô phỏng 3D
+      tl.add(function() {
+        gsap.to(ctaButton, {
+          scale: 1.06,
+          boxShadow: "0 15px 35px rgba(255, 184, 0, 0.6), 0 4px 0 #D49B00",
+          duration: 0.75,
+          yoyo: true,
+          repeat: -1,
+          ease: "power1.inOut"
+        });
+      }, 1.2);
+    }
+  }
+
+  // H. Exit Animation crossfade mượt mà sang cảnh sau
   if (i < SCENES_DATA.length - 1) {
     tl.to(sceneEl, { 
       opacity: 0,
-      scale: 0.96,
-      y: -30,
+      scale: 0.95,
+      y: -40,
       duration: CROSSFADE,
       ease: "power2.in"
     }, duration - CROSSFADE);
