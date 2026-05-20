@@ -136,6 +136,14 @@
     .type-body .scene-title {
       font-size: calc(var(--cqmin) * {{ BODY_SIZE }} / 720);
     }
+
+    .accent-line {
+      width: 0;
+      height: 1px;
+      background: var(--v-divider-color);
+      margin-top: 30px;
+      opacity: 0.6;
+    }
   </style>
 </head>
 
@@ -160,7 +168,30 @@
     window.__timelines["root"] = mainTl;
 
     var currentTime = 0;
-    var CROSSFADE = 0.6; // Match transition duration exactly
+    var CROSSFADE = 0.6;
+
+    function buildMinimalContent(containerEl, text) {
+      containerEl.innerHTML = '';
+      if (!text) return [];
+      var words = text.split(/(\s+)/);
+      var wordEls = [];
+      for (var w = 0; w < words.length; w++) {
+        var word = words[w];
+        if (word.trim() === '') {
+          var space = document.createTextNode(word);
+          containerEl.appendChild(space);
+          continue;
+        }
+        var wordSpan = document.createElement('span');
+        wordSpan.style.display = 'inline-block';
+        wordSpan.style.position = 'relative';
+        wordSpan.style.opacity = 0;
+        wordSpan.textContent = word;
+        containerEl.appendChild(wordSpan);
+        wordEls.push(wordSpan);
+      }
+      return wordEls;
+    }
 
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
@@ -178,8 +209,19 @@
       sceneEl.style.zIndex = 100 + i;
       
       var fontSizeKey = (scene.type === 'hook' ? '{{ HOOK_SIZE }}' : '{{ BODY_SIZE }}');
-      sceneEl.innerHTML = '<div class="scene-title" style="font-size: calc(var(--cqmin) * ' + fontSizeKey + ' / 720)">' + (scene.text || scene.bodyText || '') + '</div>';
+      
+      var titleContainer = document.createElement('div');
+      titleContainer.className = 'scene-title';
+      titleContainer.style.fontSize = 'calc(var(--cqmin) * ' + fontSizeKey + ' / 720)';
+      sceneEl.appendChild(titleContainer);
+      
+      var accentLine = document.createElement('div');
+      accentLine.className = 'accent-line';
+      sceneEl.appendChild(accentLine);
+      
       document.getElementById('main-content').appendChild(sceneEl);
+      
+      var wordEls = buildMinimalContent(titleContainer, (scene.text || scene.bodyText || ''));
 
       var inDur = 0.6;
       var outDur = CROSSFADE;
@@ -189,27 +231,26 @@
       tl.from(sceneEl, { y: 15, duration: inDur, ease: "power3.out", force3D: true }, 0);
       tl.from(sceneEl, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0);
       
-      // Exit: ONLY fade the text content, NOT the whole sceneEl.
-      // Keeps the shared background visible during crossfade, preventing black flash.
+      // Word-by-word fade+slide up
+      var staggerTime = Math.min(0.06, (duration * 0.4) / (wordEls.length || 1));
+      tl.fromTo(wordEls, 
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.4, stagger: staggerTime, ease: "power2.out", force3D: true },
+        0.15
+      );
+      
+      // Accent line grows from 0 to 80px
+      tl.to(accentLine, { width: 80, duration: 0.8, ease: "power2.out" }, 0.3);
+      
+      // Exit: fade text content only
       if (i < scenes.length - 1) {
-        var exitTargets = sceneEl.querySelectorAll('.scene-title');
-        if (exitTargets.length > 0) {
-          tl.to(exitTargets, { 
-            opacity: 0, 
-            y: -15, 
-            duration: outDur, 
-            ease: "power3.in", 
-            force3D: true 
-          }, duration - outDur);
-        } else {
-          tl.to(sceneEl, { 
-            opacity: 0, 
-            y: -15, 
-            duration: outDur, 
-            ease: "power3.in", 
-            force3D: true 
-          }, duration - outDur);
-        }
+        tl.to([titleContainer, accentLine], { 
+          opacity: 0, 
+          y: -15, 
+          duration: outDur, 
+          ease: "power3.in", 
+          force3D: true 
+        }, duration - outDur);
       }
       
       mainTl.add(tl, currentTime);

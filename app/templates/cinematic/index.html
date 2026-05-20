@@ -132,14 +132,39 @@
       text-transform: none;
     }
 
+    @keyframes hf-grain-noise {
+      0%, 100% { transform: translate(0, 0); }
+      10% { transform: translate(-1%, -1%); }
+      20% { transform: translate(-2%, 1%); }
+      30% { transform: translate(1%, -2%); }
+      40% { transform: translate(-1%, 2%); }
+      50% { transform: translate(-2%, 1%); }
+      60% { transform: translate(1%, 1%); }
+      70% { transform: translate(1%, -2%); }
+      80% { transform: translate(-1%, 1%); }
+      90% { transform: translate(0%, -1%); }
+    }
+
     .film-grain {
       position: absolute;
-      inset: 0;
-      opacity: 0.12;
+      top: -5%;
+      left: -5%;
+      width: 110%;
+      height: 110%;
+      opacity: 0.08;
       mix-blend-mode: overlay;
       z-index: 500;
       pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      animation: hf-grain-noise 0.6s steps(1) infinite;
+    }
+
+    .vignette-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 450;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.65) 100%);
     }
 
     .ui-layer {
@@ -238,6 +263,7 @@
     data-height="{{ HEIGHT }}">
     <div id="scenes-container"></div>
     <div class="film-grain"></div>
+    <div class="vignette-overlay"></div>
     <div class="ui-layer">
       <div class="letterbox letterbox-top">
         <div class="letterbox-logo">{{ LOGO_TEXT }}</div>
@@ -362,9 +388,13 @@
       tl.from(unit, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0)
         .fromTo(bgImg, { scale: 1.15 }, { scale: 1, duration: dur, ease: "sine.inOut", force3D: true }, 0);
 
-      // Text animation
+      // Text animation - Premium y slide up
       var staggerTime = Math.min(0.04, (dur * 0.7) / (spans.length || 1));
-      tl.to(spans, { opacity: 1, duration: 0.05, stagger: staggerTime, ease: 'none', force3D: true }, 0.2);
+      tl.fromTo(spans, 
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.25, stagger: staggerTime, ease: "power2.out", force3D: true },
+        0.2
+      );
       
       // Progress bar animation
       if (progBar) {

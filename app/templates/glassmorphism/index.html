@@ -197,12 +197,14 @@
       top: 0;
       left: 0;
       width: 100%;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
       padding: calc(var(--cqmin) * 90 / 720) calc(var(--cqmin) * 60 / 720);
       border-radius: calc(var(--cqmin) * 64 / 720);
-      /* Faux glassmorphism fallback for Puppeteer */
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+      /* Faux glassmorphism fallback for Puppeteer + Shimmer border integration */
+      --shimmer-pos: -100%;
+      background: linear-gradient(110deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 35%, rgba(255, 255, 255, 0.3) 48%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.3) 52%, rgba(255, 255, 255, 0.1) 65%, rgba(255, 255, 255, 0.1) 100%) no-repeat;
+      background-size: 250% 100%;
+      background-position: var(--shimmer-pos) 0%;
+      border: 1px solid rgba(255, 255, 255, 0.25);
       will-change: transform, opacity;
       text-align: {{ MAIN_CSS_TEXT_ALIGN }};
       box-shadow: 
@@ -221,7 +223,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: var(--glass-shine);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.1) 100%);
       pointer-events: none;
     }
 
@@ -317,6 +319,32 @@
     var currentTime = 0;
     var CROSSFADE = 0.6; // Match transition duration exactly
 
+    function buildGlassContent(containerEl, text) {
+      containerEl.innerHTML = '';
+      if (!text) return [];
+      var words = text.split(/(\s+)/);
+      var wordEls = [];
+      for (var w = 0; w < words.length; w++) {
+        var word = words[w];
+        if (word.trim() === '') {
+          var space = document.createTextNode(word);
+          containerEl.appendChild(space);
+          continue;
+        }
+        
+        var wordSpan = document.createElement('span');
+        wordSpan.className = 'glass-word';
+        wordSpan.style.display = 'inline-block';
+        wordSpan.style.position = 'relative';
+        wordSpan.style.opacity = 0;
+        wordSpan.textContent = word;
+        
+        containerEl.appendChild(wordSpan);
+        wordEls.push(wordSpan);
+      }
+      return wordEls;
+    }
+
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
       var duration = sceneDurations[i] || 5;
@@ -332,14 +360,26 @@
       
       sceneEl.style.zIndex = 100 + i;
       
-      sceneEl.innerHTML = '<div class="scene-text">' + (scene.text || scene.bodyText || '') + '</div>' + 
-                          '<div class="divider-line"></div>' +
-                          '<div class="scene-progress-container"><div class="scene-progress-bar"></div></div>';
+      var textContainer = document.createElement('div');
+      textContainer.className = 'scene-text';
+      sceneEl.appendChild(textContainer);
+      
+      var divLine = document.createElement('div');
+      divLine.className = 'divider-line';
+      sceneEl.appendChild(divLine);
+      
+      var progCont = document.createElement('div');
+      progCont.className = 'scene-progress-container';
+      progCont.innerHTML = '<div class="scene-progress-bar"></div>';
+      sceneEl.appendChild(progCont);
+      
       document.getElementById('main-content').appendChild(sceneEl);
 
       var inDur = 0.6; 
       var progBar = sceneEl.querySelector('.scene-progress-bar');
       var tl = gsap.timeline();
+      
+      var wordEls = buildGlassContent(textContainer, (scene.text || scene.bodyText || ''));
       
       if (progBar) {
         tl.to(progBar, { width: "100%", duration: duration, ease: "none" }, 0);
@@ -357,6 +397,21 @@
         force3D: true
       }, 0);
       tl.from(sceneEl, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0);
+      
+      // Shimmer sweep reflection on entry
+      tl.fromTo(sceneEl, 
+        { "--shimmer-pos": "-100%" }, 
+        { "--shimmer-pos": "200%", duration: 1.5, ease: "power2.inOut" }, 
+        0.2
+      );
+
+      // Word slide-up entry
+      var staggerTime = Math.min(0.06, (duration * 0.4) / (wordEls.length || 1));
+      tl.fromTo(wordEls, 
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.35, stagger: staggerTime, ease: "power2.out", force3D: true },
+        0.15
+      );
 
       // Gentle floating during hold
       var floatDur = Math.max(0.1, duration - inDur - CROSSFADE);
@@ -370,28 +425,14 @@
       }, inDur);
 
       // Exit fade (synchronized with crossfade)
-      // ONLY fade the text/content children, NOT the whole sceneEl.
-      // This prevents the shared bg-image from being blocked during crossfade, eliminating black flash.
       if (i < scenes.length - 1) {
-        var exitTargets = sceneEl.querySelectorAll('.scene-text, .divider-line, .scene-progress-container');
-        if (exitTargets.length > 0) {
-          tl.to(exitTargets, { 
-            opacity: 0, 
-            y: -15,
-            duration: CROSSFADE, 
-            ease: "power2.in", 
-            force3D: true 
-          }, duration - CROSSFADE);
-        } else {
-          tl.to(sceneEl, { 
-            opacity: 0, 
-            scale: 0.95,
-            z: -50,
-            duration: CROSSFADE, 
-            ease: "power2.in", 
-            force3D: true 
-          }, duration - CROSSFADE);
-        }
+        tl.to([textContainer, divLine, progCont], { 
+          opacity: 0, 
+          y: -15,
+          duration: CROSSFADE, 
+          ease: "power2.in", 
+          force3D: true 
+        }, duration - CROSSFADE);
       }
       mainTl.add(tl, currentTime);
       

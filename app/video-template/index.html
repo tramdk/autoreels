@@ -96,6 +96,39 @@
       opacity: 0.7;
     }
 
+    /* Animated Film Grain */
+    @keyframes hf-grain-noise {
+      0%, 100% { transform: translate(0, 0); }
+      10% { transform: translate(-1%, -1%); }
+      20% { transform: translate(-2%, 1%); }
+      30% { transform: translate(1%, -2%); }
+      40% { transform: translate(-1%, 2%); }
+      50% { transform: translate(-2%, 1%); }
+      60% { transform: translate(1%, 1%); }
+      70% { transform: translate(1%, -2%); }
+      80% { transform: translate(-1%, 1%); }
+      90% { transform: translate(0%, -1%); }
+    }
+
+    .film-grain {
+      position: absolute;
+      top: -5%; left: -5%; width: 110%; height: 110%;
+      opacity: 0.06;
+      mix-blend-mode: overlay;
+      z-index: 800;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      animation: hf-grain-noise 0.6s steps(1) infinite;
+    }
+
+    .vignette-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 700;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.55) 100%);
+    }
+
     /* Background Layers */
     .bg-layer {
       position: absolute;
@@ -173,7 +206,10 @@
       font-weight: 900;
       font-size: calc(var(--v-tag-size) * 1px);
       text-transform: uppercase;
-      background: linear-gradient(135deg, var(--v-tag-bg, #fff000), var(--accent-color));
+      --shimmer-pos: -100%;
+      background-image: linear-gradient(110deg, var(--v-tag-bg, #fff000) 30%, rgba(255, 255, 255, 0.5) 48%, var(--v-tag-bg, #fff000) 70%);
+      background-size: 250% 100%;
+      background-position: var(--shimmer-pos) 0%;
       color: var(--v-tag-color, #000000);
       border-radius: 50px;
       letter-spacing: 2px;
@@ -452,6 +488,8 @@
     </div>
     <div id="bg-overlay"></div>
     <div class="grid-overlay"></div>
+    <div class="film-grain"></div>
+    <div class="vignette-overlay"></div>
 
     <!-- Ambient floating glow mesh -->
     <div id="ambient-container">
@@ -604,12 +642,12 @@
           sceneStart
         );
 
-        // Word-by-word kinetic slide reveal
+        // Word-by-word kinetic slide-up reveal with spring
         var words = card.querySelectorAll('.word');
         if (words.length > 0) {
           window._tl.fromTo(words,
-            { y: '105%', opacity: 0 },
-            { y: '0%', opacity: 1, duration: 0.65, stagger: 0.035, ease: 'power3.out' },
+            { y: '105%', opacity: 0, scale: 0.95 },
+            { y: '0%', opacity: 1, scale: 1, duration: 0.55, stagger: 0.04, ease: 'back.out(1.4)' },
             sceneStart + 0.12
           );
         }
@@ -664,6 +702,13 @@
 
         currentTime += duration;
       }
+
+      // Recurring shimmer sweep on tag badge
+      var shimmerRepeat = Math.ceil(TOTAL_DURATION / 3.5) - 1;
+      window._tl.add(gsap.fromTo('#tag-badge', 
+        { '--shimmer-pos': '-100%' }, 
+        { '--shimmer-pos': '200%', duration: 1.5, ease: 'power2.inOut', repeat: shimmerRepeat, repeatDelay: 2 }
+      ), 0.5);
 
       window._tl.add('end', TOTAL_DURATION);
 

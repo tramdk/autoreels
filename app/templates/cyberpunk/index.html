@@ -79,6 +79,17 @@
     opacity: {{ BG_BRIGHTNESS }};
     }
 
+    .cyber-grid {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background-image: 
+        radial-gradient(rgba(34, 211, 238, 0.12) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.7;
+    }
+
     .cyber-frame-container {
       position: absolute;
       inset: 40px;
@@ -272,6 +283,7 @@
     data-height="{{ HEIGHT }}" style="--v-bg-brightness: {{ BG_BRIGHTNESS }};">
     <img id="bg-image" class="bg-layer" src="{{ BG_IMAGE_URL }}" alt="" onerror="this.style.display='none'">
     <div id="bg-overlay"></div>
+    <div class="cyber-grid"></div>
 
     <div class="scan-line"></div>
     <div class="cyber-frame-container">
@@ -304,6 +316,32 @@
     var currentTime = 0;
     var CROSSFADE = 0.6; // Match transition duration exactly
 
+    function buildCyberpunkContent(containerEl, text) {
+      containerEl.innerHTML = '';
+      if (!text) return [];
+      var words = text.split(/(\s+)/);
+      var wordEls = [];
+      for (var w = 0; w < words.length; w++) {
+        var word = words[w];
+        if (word.trim() === '') {
+          var space = document.createTextNode(word);
+          containerEl.appendChild(space);
+          continue;
+        }
+        
+        var wordSpan = document.createElement('span');
+        wordSpan.className = 'cyber-word';
+        wordSpan.style.display = 'inline-block';
+        wordSpan.style.position = 'relative';
+        wordSpan.style.opacity = 0;
+        wordSpan.textContent = word;
+        
+        containerEl.appendChild(wordSpan);
+        wordEls.push(wordSpan);
+      }
+      return wordEls;
+    }
+
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
       var duration = sceneDurations[i] || 5;
@@ -319,8 +357,12 @@
       
       sceneEl.style.zIndex = 100 + i;
 
-      sceneEl.innerHTML = '<div class="scene-text">' + (scene.text || scene.bodyText || '') + '</div>';
+      var textContainer = document.createElement('div');
+      textContainer.className = 'scene-text';
+      sceneEl.appendChild(textContainer);
       document.getElementById('main-content').appendChild(sceneEl);
+
+      var wordEls = buildCyberpunkContent(textContainer, (scene.text || scene.bodyText || ''));
 
       var inDur = 0.6;
       var outDur = CROSSFADE;
@@ -330,9 +372,21 @@
       tl.from(sceneEl, { x: 80, skewX: -15, duration: inDur, ease: "expo.out", force3D: true }, 0);
       tl.from(sceneEl, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0);
       
+      // Word glitch entry
+      var staggerTime = Math.min(0.08, (duration * 0.5) / (wordEls.length || 1));
+      for (var w = 0; w < wordEls.length; w++) {
+        var wordSpan = wordEls[w];
+        var startOffset = 0.15 + w * staggerTime;
+        tl.fromTo(wordSpan, 
+          { opacity: 0, x: -15, textShadow: "6px 0 #ff003c, -6px 0 #00e5ff" },
+          { opacity: 1, x: 0, textShadow: "0px 0px rgba(0,0,0,0)", duration: 0.18, ease: "power2.out", force3D: true },
+          startOffset
+        );
+      }
+      
       // Exit - ONLY fade the text to avoid background flickering
       if (i < scenes.length - 1) {
-        tl.to(sceneEl.querySelector('.scene-text'), { 
+        tl.to(textContainer, { 
           opacity: 0, 
           x: -80, 
           skewX: 15, 

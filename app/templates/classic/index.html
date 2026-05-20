@@ -172,7 +172,7 @@
     }
 
     .divider {
-      width: 100px;
+      width: 0;
       height: 6px;
       background: {{ DIVIDER_COLOR }};
       border-radius: 100px;
@@ -211,6 +211,29 @@
     var currentTime = 0;
     var CROSSFADE = 0.6; // Synchronized transition duration
 
+    function buildClassicContent(containerEl, text) {
+      containerEl.innerHTML = '';
+      if (!text) return [];
+      var words = text.split(/(\s+)/);
+      var wordEls = [];
+      for (var w = 0; w < words.length; w++) {
+        var word = words[w];
+        if (word.trim() === '') {
+          var space = document.createTextNode(word);
+          containerEl.appendChild(space);
+          continue;
+        }
+        var wordSpan = document.createElement('span');
+        wordSpan.style.display = 'inline-block';
+        wordSpan.style.position = 'relative';
+        wordSpan.style.opacity = 0;
+        wordSpan.textContent = word;
+        containerEl.appendChild(wordSpan);
+        wordEls.push(wordSpan);
+      }
+      return wordEls;
+    }
+
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
       var duration = sceneDurations[i] || 5;
@@ -226,16 +249,27 @@
       sceneEl.setAttribute('data-track-index', "1");
       sceneEl.style.zIndex = 100 + i;
 
-      var html = '';
+      var trendingLabel = null;
       if (scene.type === 'hook') {
-        html += '<div class="trending-label">TRENDING</div>';
+        trendingLabel = document.createElement('div');
+        trendingLabel.className = 'trending-label';
+        trendingLabel.textContent = 'TRENDING';
+        sceneEl.appendChild(trendingLabel);
       }
-      var fontSizeKey = (scene.type === 'hook' ? '{{ HOOK_SIZE }}' : '{{ BODY_SIZE }}');
-      html += '<div class="scene-title" style="font-size: calc(var(--cqmin) * ' + fontSizeKey + ' / 720)">' + (scene.text || scene.bodyText || '') + '</div>';
-      html += '<div class="divider"></div>';
       
-      sceneEl.innerHTML = html;
+      var fontSizeKey = (scene.type === 'hook' ? '{{ HOOK_SIZE }}' : '{{ BODY_SIZE }}');
+      var titleContainer = document.createElement('div');
+      titleContainer.className = 'scene-title';
+      titleContainer.style.fontSize = 'calc(var(--cqmin) * ' + fontSizeKey + ' / 720)';
+      sceneEl.appendChild(titleContainer);
+      
+      var divider = document.createElement('div');
+      divider.className = 'divider';
+      sceneEl.appendChild(divider);
+      
       document.getElementById('main-content').appendChild(sceneEl);
+      
+      var wordEls = buildClassicContent(titleContainer, (scene.text || scene.bodyText || ''));
 
       var inDur = 0.6;
       var outDur = CROSSFADE;
@@ -249,27 +283,38 @@
       }, 0);
       tl.from(sceneEl, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0);
       
-      // Exit: ONLY fade the text content, NOT the whole sceneEl.
-      // This keeps the shared background visible during crossfade, preventing black flash.
+      // Trending label fade in
+      if (trendingLabel) {
+        tl.fromTo(trendingLabel, 
+          { opacity: 0, letterSpacing: '0.8em' },
+          { opacity: 1, letterSpacing: '0.4em', duration: 0.5, ease: "power2.out" },
+          0.1
+        );
+      }
+      
+      // Word-by-word slide up
+      var staggerTime = Math.min(0.06, (duration * 0.4) / (wordEls.length || 1));
+      tl.fromTo(wordEls, 
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.35, stagger: staggerTime, ease: "power2.out", force3D: true },
+        0.15
+      );
+      
+      // Divider grows from 0 to 100px
+      tl.to(divider, { width: 100, duration: 0.8, ease: "power2.out" }, 0.3);
+      
+      // Exit: fade text content only
+      var exitElements = [titleContainer, divider];
+      if (trendingLabel) exitElements.push(trendingLabel);
+      
       if (i < scenes.length - 1) {
-        var exitTargets = sceneEl.querySelectorAll('.scene-title, .divider, .trending-label');
-        if (exitTargets.length > 0) {
-          tl.to(exitTargets, {
-            opacity: 0,
-            y: -20,
-            duration: outDur,
-            ease: "power2.inOut",
-            force3D: true
-          }, duration - outDur);
-        } else {
-          tl.to(sceneEl, {
-            opacity: 0,
-            y: -20,
-            duration: outDur,
-            ease: "power2.inOut",
-            force3D: true
-          }, duration - outDur);
-        }
+        tl.to(exitElements, {
+          opacity: 0,
+          y: -20,
+          duration: outDur,
+          ease: "power2.inOut",
+          force3D: true
+        }, duration - outDur);
       }
       
       mainTl.add(tl, currentTime);

@@ -758,23 +758,23 @@
       containerEl.innerHTML = '';
       if (!text) return [];
       var words = text.split(/(\s+)/);
-      var spans = [];
+      var wordEls = [];
       for (var w = 0; w < words.length; w++) {
         var word = words[w];
+        if (word.trim() === '') {
+          var space = document.createTextNode(word);
+          containerEl.appendChild(space);
+          continue;
+        }
         var wordSpan = document.createElement('span');
         wordSpan.style.display = 'inline-block';
-        wordSpan.style.whiteSpace = 'pre';
-        var chars = word.split('');
-        for (var c = 0; c < chars.length; c++) {
-          var span = document.createElement('span');
-          span.textContent = chars[c];
-          span.style.opacity = 0;
-          wordSpan.appendChild(span);
-          spans.push(span);
-        }
+        wordSpan.style.position = 'relative';
+        wordSpan.style.opacity = 0;
+        wordSpan.textContent = word;
         containerEl.appendChild(wordSpan);
+        wordEls.push(wordSpan);
       }
-      return spans;
+      return wordEls;
     }
 
     var currentTime = 0;
@@ -829,11 +829,15 @@
         );
       }
 
-      // Word/character smooth stagger sweep if title elements are loaded
+      // Word-level smooth slide-up stagger
       if (titleEl) {
-        var spans = buildTypingContent(titleEl, (scene.text || scene.bodyText || ''));
-        var staggerTime = Math.min(0.025, (dur * 0.5) / (spans.length || 1));
-        tl.to(spans, { opacity: 1, duration: 0.05, stagger: staggerTime, ease: 'none', force3D: true }, 0.35);
+        var wordEls = buildTypingContent(titleEl, (scene.text || scene.bodyText || ''));
+        var staggerTime = Math.min(0.06, (dur * 0.4) / (wordEls.length || 1));
+        tl.fromTo(wordEls, 
+          { opacity: 0, y: 15 },
+          { opacity: 1, y: 0, duration: 0.35, stagger: staggerTime, ease: "power2.out", force3D: true },
+          0.3
+        );
       }
       
       // Progress tracking bar synced perfectly

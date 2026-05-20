@@ -273,6 +273,32 @@
     var currentTime = 0;
     var CROSSFADE = 0.6; // Match transition duration exactly
 
+    function buildY2KContent(containerEl, text) {
+      containerEl.innerHTML = '';
+      if (!text) return [];
+      var words = text.split(/(\s+)/);
+      var wordEls = [];
+      for (var w = 0; w < words.length; w++) {
+        var word = words[w];
+        if (word.trim() === '') {
+          var space = document.createTextNode(word);
+          containerEl.appendChild(space);
+          continue;
+        }
+        
+        var wordSpan = document.createElement('span');
+        wordSpan.className = 'y2k-word';
+        wordSpan.style.display = 'inline-block';
+        wordSpan.style.position = 'relative';
+        wordSpan.style.opacity = 0;
+        wordSpan.textContent = word;
+        
+        containerEl.appendChild(wordSpan);
+        wordEls.push(wordSpan);
+      }
+      return wordEls;
+    }
+
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
       var duration = sceneDurations[i] || 5;
@@ -286,7 +312,7 @@
       unit.setAttribute('data-track-index', "1");
       unit.style.zIndex = 100 + i; // Ensure newer scenes are always on top
 
-      unit.innerHTML = `
+      var headerHtml = `
         <div class="win-header">
           <div class="win-title">${scene.type === 'hook' ? 'VIRAL_ALERT.EXE' : 'SYSTEM_UPDATE.SYS'}</div>
           <div class="win-controls">
@@ -295,12 +321,26 @@
             <div class="win-btn">X</div>
           </div>
         </div>
-        <div class="win-content">
-          <div class="scene-text">${scene.text || scene.bodyText || ''}</div>
-          <div class="scene-progress-container"><div class="scene-progress-bar"></div></div>
-        </div>
       `;
+      
+      var contentWrapper = document.createElement('div');
+      contentWrapper.className = 'win-content';
+      
+      var textContainer = document.createElement('div');
+      textContainer.className = 'scene-text';
+      contentWrapper.appendChild(textContainer);
+      
+      var progCont = document.createElement('div');
+      progCont.className = 'scene-progress-container';
+      progCont.innerHTML = '<div class="scene-progress-bar"></div>';
+      contentWrapper.appendChild(progCont);
+      
+      unit.innerHTML = headerHtml;
+      unit.appendChild(contentWrapper);
+      
       document.getElementById('main-content').appendChild(unit);
+      
+      var wordEls = buildY2KContent(textContainer, (scene.text || scene.bodyText || ''));
 
       var tl = gsap.timeline();
       var progBar = unit.querySelector('.scene-progress-bar');
@@ -318,13 +358,24 @@
         force3D: true
       }, 0);
       tl.from(unit, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0);
+      
+      // Dialog-style word popups
+      var staggerTime = Math.min(0.08, (duration * 0.45) / (wordEls.length || 1));
+      for (var w = 0; w < wordEls.length; w++) {
+        var wordSpan = wordEls[w];
+        var startOffset = 0.15 + w * staggerTime;
+        tl.fromTo(wordSpan, 
+          { opacity: 0, scale: 0, rotation: w % 2 === 0 ? -15 : 15 },
+          { opacity: 1, scale: 1, rotation: 0, duration: 0.25, ease: "back.out(2)", force3D: true },
+          startOffset
+        );
+      }
 
       // Exit: ONLY fade win-content children, NOT the whole unit.
       // Keeps shared background visible during crossfade, preventing black flash.
       if (i < scenes.length - 1) {
-        var winContent = unit.querySelector('.win-content');
         var winHeader = unit.querySelector('.win-header');
-        var exitTargets = [winContent, winHeader].filter(Boolean);
+        var exitTargets = [contentWrapper, winHeader].filter(Boolean);
         if (exitTargets.length > 0) {
           tl.to(exitTargets, {
             opacity: 0,

@@ -105,6 +105,65 @@ Trình biên dịch của HyperFrames phân tích font chữ tĩnh (static compi
 3. BỐ CỤC ĐA DẠNG:
    - Ưu tiên các bố cục lệch trục, bất đối xứng (asymmetric bento grid) hoặc chia vùng (split frame: one side image/stats, other side text card) để tạo cảm giác cực kỳ premium.
 
+=== HIỆU ỨNG VÀ CHUYỂN CẢNH CAO CẤP (CINEMATIC OVERLAYS & TRANSITIONS) ===
+1. LỚP PHỦ HẠT NHIỄU PHIM (FILM GRAIN NOISE OVERLAY - KHÔNG PHỤ THUỘC FILE NGOÀI):
+   - Thêm lớp phủ hạt nhiễu (Film Grain) bằng SVG data URI để tạo chiều sâu điện ảnh (chủ đề Kỳ bí, Lịch sử, Kinh dị, hoặc Tài chính sang trọng).
+   - HTML (đặt trong #root):
+     <div id="grain-overlay" style="position: absolute; inset: 0; pointer-events: none; z-index: 100;"><div class="grain-texture"></div></div>
+   - CSS:
+     @keyframes hf-grain-noise {
+       0%, 100% { transform: translate(0, 0); }
+       10% { transform: translate(-5%, -5%); }
+       20% { transform: translate(-10%, 5%); }
+       30% { transform: translate(5%, -10%); }
+       40% { transform: translate(-5%, 15%); }
+       50% { transform: translate(-10%, 5%); }
+       60% { transform: translate(15%, 0); }
+       70% { transform: translate(0, 10%); }
+       80% { transform: translate(-15%, 0); }
+       90% { transform: translate(10%, 5%); }
+     }
+     #grain-overlay .grain-texture {
+       position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+       background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+       opacity: 0.12; animation: hf-grain-noise 0.5s steps(1) infinite;
+     }
+2. LỚP PHỦ VIGNETTE CINEMATIC:
+   - Tạo hiệu ứng bo góc tối nghệ thuật làm nổi bật trung tâm.
+   - HTML: <div id="hf-vignette" style="position: absolute; inset: 0; pointer-events: none; z-index: 90;"></div>
+   - CSS:
+     #hf-vignette { background: radial-gradient(ellipse at center, transparent var(--vignette-size, 45%), var(--vignette-color, rgba(0, 0, 0, 0.65)) var(--vignette-edge, 100%)); }
+3. BÓNG BẨY KIM LOẠI (SHIMMER SWEEP):
+   - Tạo vệt sáng quét ngang qua các thẻ card hoặc Badge để thu hút chú ý.
+   - CSS:
+     .shimmer-sweep-target { position: relative; display: inline-block; overflow: hidden; }
+     .shimmer-sweep-target::after {
+       content: ''; position: absolute; inset: 0; pointer-events: none;
+       background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.4) var(--shimmer-pos, -20%), transparent 100%);
+       mix-blend-mode: overlay;
+     }
+   - Dùng GSAP quét từ trái sang phải ở cảnh tương ứng:
+     tl.fromTo(".shimmer-sweep-target", {"--shimmer-pos": "-20%"}, {"--shimmer-pos": "120%", duration: 1.2, ease: "power2.inOut"}, startTime);
+4. CHUYỂN CẢNH LƯỚI ĐIỂM ẢNH (GRID PIXELATE WIPE TRANSITION):
+   - Tạo chuyển cảnh cực ngầu bằng cách phóng to/thu nhỏ lưới ô vuông giữa các phân cảnh.
+   - HTML (đặt trong #root): <div id="grid-pixelate-overlay" style="position: absolute; inset: 0; pointer-events: none; z-index: 999; display: grid;"></div>
+   - CSS:
+     #grid-pixelate-overlay { --grid-color: #06080F; }
+     #grid-pixelate-overlay .grid-cell { background: var(--grid-color); transform: scale(0); transform-origin: center center; }
+
+=== HOẠT ẢNH CHỮ CHẠY ĐỘNG CAO CẤP (PREMIUM DYNAMIC CAPTIONS) ===
+Hãy thiết kế 1 trong các bộ hoạt ảnh chữ phù hợp với chủ đề của video để tạo cảm giác cực kỳ chuyên nghiệp:
+1. GIẢI MÃ MA TRẬN (MATRIX DECODE) - Chủ đề Công nghệ, AI, Bí ẩn:
+   - Dùng JS tách từ thành các phần tử chứa ký tự nhiễu (scrambled chars như @, #, $, %, &) và từ thực tế. GSAP set hiển thị lần lượt nhiễu 0.08s -> nhiễu 0.16s -> từ thật.
+2. LỖI KÊNH MÀU (GLITCH RGB) - Chủ đề Gaming, Cyberpunk, Trẻ trung:
+   - Sử dụng GSAP dịch chuyển ngang x kết hợp textShadow kênh màu đỏ/cyan rồi trả về 0:
+     tl.to(wordEl, { x: -8, textShadow: "5px 0 #ff003c, -5px 0 #00e5ff, 0 4px 10px rgba(0,0,0,0.5)", duration: 0.08, ease: "none" }, w.start);
+     tl.to(wordEl, { x: 0, textShadow: "0 0px 0px rgba(0,0,0,0)", duration: 0.12, ease: "power3.out" }, w.start + 0.08);
+3. ĐẬP MẠNH (KINETIC SLAM) - Chủ đề Hooks, Promo, Năng động:
+   - Mỗi từ rơi mạnh từ trên xuống hoặc zoom to đập ra với easing back.out(1.7) kết hợp scale/rotation nhẹ.
+4. THAY ĐỔI ĐỘ DÀY (WEIGHT SHIFT) - Chủ đề Slide, Tài chính, Tối giản:
+   - Chuyển font-weight từ 300 (light) sang 800 (bold) khi từ được nói tới, và trả về 300 khi qua từ khác.
+
 ${ratioLayoutRules}
 
 === CẢNH BÁO BẮT BUỘC KHÁC VỀ THẺ CHỮ & BỐ CỤC CHUNG ===
@@ -345,16 +404,14 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     );
   }
 
-  // F. Word stagger slide-up inside line cards
+  // F. Word stagger slide-up with spring bounce inside line cards
   var words = sceneEl.querySelectorAll('.word');
   if (words.length > 0) {
-    tl.to(words, {
-      y: '0%',
-      opacity: 1,
-      duration: 0.4,
-      stagger: 0.015,
-      ease: "power2.out"
-    }, 0.25);
+    tl.fromTo(words, 
+      { y: '105%', opacity: 0, scale: 0.92 },
+      { y: '0%', opacity: 1, scale: 1, duration: 0.45, stagger: 0.025, ease: "back.out(1.4)" },
+      0.2
+    );
   }
 
   // G. Tuyệt đối KHÔNG viết exit animation (opacity: 0) cho các cảnh trung gian ở đây.
@@ -532,6 +589,57 @@ Bạn là giám đốc nghệ thuật kiêm nhà thiết kế chuyển động v
     - Cấp 3 (High-Contrast Typography): Cỡ chữ cực lớn theo tỷ lệ video: Tiêu đề chính khổng lồ 72px - 120px, nội dung phụ đề rõ ràng 48px - 60px. (TUYỆT ĐỐI KHÔNG DÙNG CỠ CHỮ DƯỚI 40px VÌ KHÔNG THỂ ĐỌC TRÊN ĐIỆN THOẠI).
 3. BỐ CỤC ĐA DẠNG:
    - Ưu tiên các bố cục lệch trục, bất đối xứng (asymmetric bento grid) hoặc chia vùng (split frame: one side image/stats, other side text card) để tạo cảm giác cực kỳ premium.
+
+=== HIỆU ỨNG VÀ CHUYỂN CẢNH CAO CẤP (CINEMATIC OVERLAYS & TRANSITIONS) ===
+1. LỚP PHỦ HẠT NHIỄU PHIM (FILM GRAIN NOISE OVERLAY - KHÔNG PHỤ THUỘC FILE NGOÀI):
+   - Thêm lớp phủ hạt nhiễu (Film Grain) bằng SVG data URI để tạo cảm giác điện ảnh cổ điển hoặc chuyên nghiệp.
+   - HTML: <div id="grain-overlay" style="position: absolute; inset: 0; pointer-events: none; z-index: 100;"><div class="grain-texture"></div></div>
+   - CSS:
+     @keyframes hf-grain-noise {
+       0%, 100% { transform: translate(0, 0); }
+       10% { transform: translate(-5%, -5%); }
+       20% { transform: translate(-10%, 5%); }
+       30% { transform: translate(5%, -10%); }
+       40% { transform: translate(-5%, 15%); }
+       50% { transform: translate(-10%, 5%); }
+       60% { transform: translate(15%, 0); }
+       70% { transform: translate(0, 10%); }
+       80% { transform: translate(-15%, 0); }
+       90% { transform: translate(10%, 5%); }
+     }
+     #grain-overlay .grain-texture {
+       position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+       background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+       opacity: 0.12; animation: hf-grain-noise 0.5s steps(1) infinite;
+     }
+2. LỚP PHỦ VIGNETTE CINEMATIC:
+   - HTML: <div id="hf-vignette" style="position: absolute; inset: 0; pointer-events: none; z-index: 90;"></div>
+   - CSS:
+     #hf-vignette { background: radial-gradient(ellipse at center, transparent var(--vignette-size, 45%), var(--vignette-color, rgba(0, 0, 0, 0.65)) var(--vignette-edge, 100%)); }
+3. BÓNG BẨY KIM LOẠI (SHIMMER SWEEP):
+   - Tạo vệt sáng quét ngang qua các thẻ card, Badge hoặc nút CTA (.cta-button) để thu hút chú ý.
+   - CSS:
+     .shimmer-sweep-target { position: relative; display: inline-block; overflow: hidden; }
+     .shimmer-sweep-target::after {
+       content: ''; position: absolute; inset: 0; pointer-events: none;
+       background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.4) var(--shimmer-pos, -20%), transparent 100%);
+       mix-blend-mode: overlay;
+     }
+   - Dùng GSAP quét từ trái sang phải ở cảnh tương ứng:
+     tl.fromTo(".shimmer-sweep-target", {"--shimmer-pos": "-20%"}, {"--shimmer-pos": "120%", duration: 1.2, ease: "power2.inOut"}, startTime);
+4. CHUYỂN CẢNH LƯỚI ĐIỂM ẢNH (GRID PIXELATE WIPE TRANSITION):
+   - Tạo chuyển cảnh ô vuông giữa các phân cảnh:
+     - HTML: <div id="grid-pixelate-overlay" style="position: absolute; inset: 0; pointer-events: none; z-index: 999; display: grid;"></div>
+     - CSS:
+       #grid-pixelate-overlay { --grid-color: #0c0914; }
+       #grid-pixelate-overlay .grid-cell { background: var(--grid-color); transform: scale(0); transform-origin: center center; }
+
+=== HOẠT ẢNH CHỮ CHẠY ĐỘNG CAO CẤP (PREMIUM DYNAMIC CAPTIONS) ===
+Hãy thiết kế 1 trong các bộ hoạt ảnh chữ phù hợp với sản phẩm/quảng cáo để tăng hiệu ứng kích thích thị giác:
+1. GIẢI MÃ MA TRẬN (MATRIX DECODE) - Chủ đề Sản phẩm AI, Thiết bị thông minh.
+2. LỖI KÊNH MÀU (GLITCH RGB) - Chủ đề Thời trang cá tính, Đồ uống thể thao, Đồ công nghệ.
+3. ĐẬP MẠNH (KINETIC SLAM) - Đặt biệt khuyên dùng cho các cảnh chốt khuyến mãi, flash sale, deal hời.
+4. THAY ĐỔI ĐỘ DÀY (WEIGHT SHIFT) - Phù hợp với thông số kỹ thuật sản phẩm sang trọng.
 
 === PREMIUM GRADIENT & FAUX GLASSMORPHISM ===
 Hãy rũ bỏ hoàn toàn phong cách thiết kế màu đơn sắc thô sơ ("solid color-blocking"). Thay vào đó, áp dụng các tiêu chuẩn thiết kế UI/UX đỉnh cao sau:
@@ -778,16 +886,14 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     );
   }
 
-  // E. Chữ trượt lên từ mặt nạ mask (Word Mask Slide Up)
+  // E. Chữ trượt lên nảy nhẹ (Word Mask Slide Up with Spring)
   var words = sceneEl.querySelectorAll('.word');
   if (words.length > 0) {
-    tl.to(words, {
-      y: '0%',
-      opacity: 1,
-      duration: 0.5,
-      stagger: 0.03,
-      ease: "power3.out"
-    }, 0.2);
+    tl.fromTo(words, 
+      { y: '110%', opacity: 0, scale: 0.92 },
+      { y: '0%', opacity: 1, scale: 1, duration: 0.45, stagger: 0.03, ease: "back.out(1.4)" },
+      0.2
+    );
   }
 
   // F. Từ khóa bán hàng rực rỡ pop lên ấn tượng
