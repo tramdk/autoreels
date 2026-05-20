@@ -421,8 +421,39 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
     next(err);
   }
 };
-
-
+/**
+ * Merges extremely short scenes to avoid fast flickering/transitions.
+ */
+function mergeShortScenes(scenes: any[], minChars: number = 40, maxChars: number = 150): any[] {
+  if (!scenes || scenes.length <= 1) return scenes;
+  
+  const merged: any[] = [];
+  let currentScene = { ...scenes[0] };
+  
+  for (let i = 1; i < scenes.length; i++) {
+    const nextScene = scenes[i];
+    const currentText = currentScene.voiceText || currentScene.bodyText || '';
+    const nextText = nextScene.voiceText || nextScene.bodyText || '';
+    
+    const isCurrentTooShort = currentText.length < minChars;
+    const isNextTooShort = nextText.length < minChars;
+    const combinedLength = currentText.length + nextText.length;
+    
+    if ((isCurrentTooShort || isNextTooShort) && combinedLength <= maxChars) {
+       // Merge next into current
+       currentScene.voiceText = ((currentScene.voiceText || '') + ' ' + (nextScene.voiceText || '')).trim();
+       currentScene.bodyText = ((currentScene.bodyText || '') + ' ' + (nextScene.bodyText || '')).trim();
+       if (!currentScene.imageUrl) currentScene.imageUrl = nextScene.imageUrl;
+    } else {
+       merged.push(currentScene);
+       currentScene = { ...nextScene };
+    }
+  }
+  merged.push(currentScene);
+  
+  // Re-assign IDs for safety
+  return merged.map((s, idx) => ({ ...s, id: idx + 1 }));
+}
 
 
 export const runVideoGenerationPipeline = async (articleId: string, settings: any, existingVideoId?: string, userId?: string) => {
@@ -530,6 +561,12 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
 
     if (!script || !script.scenes || script.scenes.length === 0) {
       throw new Error('No valid script found for rendering');
+    }
+
+    // Merge short scenes dynamically to prevent fast flickering
+    if (templateId === 'dynamic') {
+      script.scenes = mergeShortScenes(script.scenes);
+      console.log(`[PIPELINE] Merged short scenes -> ${script.scenes.length} scenes remaining.`);
     }
 
     // Process AI dynamic template settings if templateId is 'dynamic'
