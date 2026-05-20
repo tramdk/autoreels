@@ -563,6 +563,13 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
       throw new Error('No valid script found for rendering');
     }
 
+    // Clean bracket tags before AI template generation or scene merging
+    script.scenes = script.scenes.map((s: any) => ({
+      ...s,
+      voiceText: cleanBracketTags(s.voiceText || '', true),
+      bodyText: cleanBracketTags(s.bodyText || s.voiceText || '', false)
+    }));
+
     // Merge short scenes dynamically to prevent fast flickering
     if (templateId === 'dynamic') {
       script.scenes = mergeShortScenes(script.scenes);

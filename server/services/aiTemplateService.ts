@@ -119,9 +119,9 @@ ${ratioLayoutRules}
      * Nền tối bán trong suốt: 'background: rgba(10, 12, 22, 0.75);' để đảm bảo chữ trắng hiển thị siêu tương phản và dễ đọc.
      * Làm mờ hậu cảnh: 'backdrop-filter: blur(12px);'
      * Bo góc mềm mại: 'border-radius: 12px;' hoặc '16px;'.
-     * Đệm trong: 'padding: 12px 20px;'.
+     * Đệm trong: 'padding: 16px 24px;'.
      * Đổ bóng nhẹ & hào quang neon: 'box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 0 10px var(--accent-neon-dim, rgba(0,245,255,0.15));'.
-     * Định dạng hiển thị: 'display: block; margin: 0 auto 12px auto; width: fit-content; max-width: 90%; text-align: center; box-sizing: border-box; transition: transform 0.3s ease;'.
+     * Định dạng hiển thị: 'display: block; margin: 0 auto 28px auto; width: fit-content; max-width: 90%; text-align: left; box-sizing: border-box; transition: transform 0.3s ease;'.
    - Khi đó, container ngoài '.scene-text-card' đóng vai trò là một container bố cục sạch sẽ, KHÔNG có background/border thô ráp bên ngoài nữa để tránh bị trùng lặp viền (hoặc chỉ có background trong suốt không viền).
    - Tuyệt đối CẤM sử dụng màu nền solid chói sáng (như vàng neon hay xanh neon nguyên khối) để làm nền thẻ, vì chữ trắng trên nền sáng sẽ cực kỳ nhạt nhòa, không thể đọc nổi.
    - Các màu Neon rực rỡ (xanh ngọc, cam, vàng, hồng) chỉ dùng để sơn viền card mỏng mảnh, hiệu ứng bóng mờ (box-shadow) và highlight chữ quan trọng.
@@ -130,7 +130,7 @@ ${ratioLayoutRules}
    - Khi văn bản kịch bản hoặc tiêu đề Hook quá dài (trên 15 từ hoặc trên 80 ký tự):
      * Bạn phải tự động hạ cỡ chữ xuống mức an toàn bằng responsive typography (sử dụng 'font-size: clamp(24px, 3.5vw, 42px);' thay vì 60px).
      * Bắt buộc khai báo 'overflow: hidden; max-height: 100%;' cho các thẻ card chứa chữ và sử dụng line-height hợp lý 'line-height: 1.25' để ngăn chặn hoàn toàn việc chữ bị đè, tràn ra khỏi thẻ card hoặc lọt ra ngoài viền màn hình.
-   - Thẻ Subtitle '.scene-text' phải bọc trong các thẻ block có thuộc tính: 'white-space: normal; word-wrap: break-word; overflow-wrap: break-word; word-break: keep-all; text-align: center; display: block; width: 100%; font-size: 38px; line-height: 1.35;'
+   - Thẻ Subtitle '.scene-text' phải bọc trong các thẻ block có thuộc tính: 'white-space: normal; word-wrap: break-word; overflow-wrap: break-word; word-break: keep-all; text-align: left; display: block; width: 100%; font-size: 38px; line-height: 1.35;'
    - Từng từ bọc trong '.word-wrapper' có style 'display: inline-block; vertical-align: middle; margin-right: 0.22em;' và lớp chữ '.word' bên trong dùng 'display: inline-block;'.
 3. AUDIO-REACTIVE EQUALIZER: Bên trong mỗi '.scene-text-card', tích hợp một cụm cột sóng equalizer âm thanh 5 thanh đứng '.equalizer-bar' tự động co giãn chiều cao nhịp nhàng bằng keyframes để tăng độ sống động.
 4. LOGO PILL BADGE & PROGRESSBAR NEON: Thiết kế logo pill chữ đậm cách điệu ở góc trên bằng CSS. Thanh tiến trình chạy suốt thời lượng video ở đáy màn hình viền đen dày ruột neon rực rỡ.
@@ -311,7 +311,7 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   if (lineCards.length > 0) {
     tl.fromTo(lineCards, 
       { opacity: 0, y: 25, scale: 0.95 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.1, ease: "power2.out" },
+      { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.8, ease: "power2.out" },
       0.1
     );
   }
