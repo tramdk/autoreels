@@ -116,12 +116,12 @@ ${ratioLayoutRules}
    - Mọi dòng văn bản trong phân cảnh (tách bởi thẻ <br> hoặc \n) BẮT BUỘC phải được bọc trong một container dòng riêng biệt gọi là '.scene-line-card'.
    - Lớp '.scene-line-card' BẮT BUỘC phải được bạn khai báo CSS tỉ mỉ với viền và nền như sau:
      * Viền mỏng neon tinh tế phát sáng: 'border: 1.5px solid var(--accent-neon);' (ví dụ: xanh ngọc, cam, hồng tùy theo theme màu của chủ đề).
-     * Nền tối bán trong suốt: 'background: rgba(10, 12, 22, 0.75);' để đảm bảo chữ trắng hiển thị siêu tương phản và dễ đọc.
-     * Làm mờ hậu cảnh: 'backdrop-filter: blur(12px);'
+     * Nền tối màu sắc nét: 'background: rgba(10, 12, 22, 0.9);' (Nền tối để hiển thị tương phản siêu rõ, TUYỆT ĐỐI CẤM sử dụng backdrop-filter vì sẽ gây lỗi crash render HyperFrames).
+     * Cấm sử dụng mờ hậu cảnh: TUYỆT ĐỐI KHÔNG thêm thuộc tính 'backdrop-filter' vào bất kỳ phần tử nào để tránh lỗi compositor starvation.
      * Bo góc mềm mại: 'border-radius: 12px;' hoặc '16px;'.
      * Đệm trong: 'padding: 16px 24px;'.
-     * Đổ bóng nhẹ & hào quang neon: 'box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 0 10px var(--accent-neon-dim, rgba(0,245,255,0.15));'.
-     * Định dạng hiển thị: 'display: block; margin: 0 auto 28px auto; width: fit-content; max-width: 90%; text-align: left; box-sizing: border-box; transition: transform 0.3s ease;'.
+     * Đổ bóng nhẹ: 'box-shadow: 0 4px 12px rgba(0,0,0,0.4);' (chỉ sử dụng đổ bóng nhẹ, tránh đổ bóng glow quá phức tạp gây nặng máy render).
+     * Định dạng hiển thị: 'display: block; margin: 0 auto 28px auto; width: fit-content; max-width: 90%; text-align: left; box-sizing: border-box; transition: transform 0.3s ease; will-change: transform, opacity;'.
    - Khi đó, container ngoài '.scene-text-card' đóng vai trò là một container bố cục sạch sẽ, KHÔNG có background/border thô ráp bên ngoài nữa để tránh bị trùng lặp viền (hoặc chỉ có background trong suốt không viền).
    - Tuyệt đối CẤM sử dụng màu nền solid chói sáng (như vàng neon hay xanh neon nguyên khối) để làm nền thẻ, vì chữ trắng trên nền sáng sẽ cực kỳ nhạt nhòa, không thể đọc nổi.
    - Các màu Neon rực rỡ (xanh ngọc, cam, vàng, hồng) chỉ dùng để sơn viền card mỏng mảnh, hiệu ứng bóng mờ (box-shadow) và highlight chữ quan trọng.
