@@ -127,7 +127,13 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ templateId, templateDa
       'SHOW_TAG': tpl.showTag !== false ? 'flex' : 'none',
       'SHOW_DATETIME': tpl.showDatetime !== false ? 'flex' : 'none',
       'SHOW_CARD': tpl.showCard !== false ? 'flex' : 'none',
-      'SCENES_JSON': JSON.stringify(scenes.map((s: any) => ({ ...s, bodyText: s.bodyText || s.voiceText || '' }))),
+      'SCENES_JSON': JSON.stringify(scenes.map((s: any) => ({ ...s, bodyText: s.bodyText || s.voiceText || '' })))
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/\t/g, '\\t')
+        .replace(/[\x00-\x1f]/g, (ch: string) => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0')),
       'SCENE_DURATIONS_JSON': JSON.stringify([]),
       'LOGO_CSS_TOP': getTopPos(tpl.logoTop ?? 10, tpl.logoPlacement || 'top'),
       'LOGO_CSS_LEFT': getLeftPos(tpl.logoLeft || 0, tpl.logoAlign || 'center'),

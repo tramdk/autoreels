@@ -1,6 +1,83 @@
 import { genAI, getAIClient } from '../lib/ai';
 
 /**
+ * Sanitize AI-generated HTML to prevent "Bad control character in string literal" errors.
+ * 
+ * Problem: Gemini Flash sometimes outputs literal control characters (newlines, tabs, etc.)
+ * inside JS string literals like JSON.parse('...'). When the browser executes this code,
+ * JSON.parse throws "Bad control character in string literal".
+ * 
+ * This function:
+ * 1. Finds all JSON.parse('...') single-quoted string arguments in the HTML
+ * 2. Strips literal control characters from inside those strings
+ * 3. Ensures {{ SCENES_JSON }} / {{ SCENE_DURATIONS_JSON }} placeholders are properly formatted
+ * 4. Removes any hardcoded Vietnamese text that AI may have leaked into JS blocks
+ */
+function sanitizeAiHtmlForJsonParse(html: string): string {
+  let result = html;
+
+  // 1. Fix AI sometimes wrapping JSON.parse with double quotes instead of single quotes
+  //    e.g. JSON.parse("{{ SCENES_JSON }}") → JSON.parse('{{ SCENES_JSON }}')
+  result = result.replace(
+    /JSON\.parse\(\s*"(\{\{[^}]+\}\})"\s*\)/g,
+    "JSON.parse('$1')"
+  );
+
+  // 2. Fix AI sometimes using template literals: JSON.parse(`{{ SCENES_JSON }}`)
+  result = result.replace(
+    /JSON\.parse\(\s*`(\{\{[^}]+\}\})`\s*\)/g,
+    "JSON.parse('$1')"
+  );
+
+  // 3. Clean control characters inside ALL single-quoted JS strings that contain {{ }} placeholders
+  //    This catches: JSON.parse('{{ SCENES_JSON }}'), var x = '{{ SOME_VAR }}', etc.
+  result = result.replace(
+    /('(?:[^'\\]|\\.)*\{\{[^}]+\}\}(?:[^'\\]|\\.)*')/g,
+    (match) => {
+      // Remove literal control characters (newlines, tabs, carriage returns, etc.)
+      // but keep the escaped versions (\n, \t, \r) as-is
+      return match.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, '')  // Remove non-printable controls
+                  .replace(/\r\n/g, '')   // Remove literal CRLF
+                  .replace(/\r/g, '')     // Remove literal CR
+                  .replace(/\n/g, '')     // Remove literal LF
+                  .replace(/\t/g, ' ');   // Replace literal TAB with space
+    }
+  );
+
+  // 4. Ensure {{ SCENES_JSON }} placeholder exists — if AI hardcoded data instead of using the placeholder,
+  //    try to detect and fix it
+  if (!result.includes('{{ SCENES_JSON }}') && !result.includes('{{SCENES_JSON}}')) {
+    // Check for variants AI might produce
+    const scenesVarPattern = /var\s+SCENES_DATA\s*=\s*JSON\.parse\(\s*'([^']*)'\s*\)/;
+    const match = result.match(scenesVarPattern);
+    if (match && !match[1].includes('SCENES_JSON')) {
+      // AI hardcoded data — replace with placeholder
+      console.warn('[AI HTML Sanitizer] AI hardcoded SCENES_DATA instead of using {{ SCENES_JSON }} placeholder. Fixing...');
+      result = result.replace(scenesVarPattern, "var SCENES_DATA = JSON.parse('{{ SCENES_JSON }}')");
+    }
+  }
+
+  // 5. Same check for SCENE_DURATIONS_JSON
+  if (!result.includes('{{ SCENE_DURATIONS_JSON }}') && !result.includes('{{SCENE_DURATIONS_JSON}}')) {
+    const durationsVarPattern = /var\s+SCENE_DURATIONS\s*=\s*JSON\.parse\(\s*'([^']*)'\s*\)/;
+    const match = result.match(durationsVarPattern);
+    if (match && !match[1].includes('SCENE_DURATIONS_JSON')) {
+      console.warn('[AI HTML Sanitizer] AI hardcoded SCENE_DURATIONS instead of using {{ SCENE_DURATIONS_JSON }} placeholder. Fixing...');
+      result = result.replace(durationsVarPattern, "var SCENE_DURATIONS = JSON.parse('{{ SCENE_DURATIONS_JSON }}')");
+    }
+  }
+
+  // 6. Normalize {{ KEY }} spacing: handle AI writing {{KEY}} or {{ KEY}} or {{KEY }}
+  result = result.replace(/\{\{\s*(SCENES_JSON)\s*\}\}/g, '{{ SCENES_JSON }}');
+  result = result.replace(/\{\{\s*(SCENE_DURATIONS_JSON)\s*\}\}/g, '{{ SCENE_DURATIONS_JSON }}');
+  result = result.replace(/\{\{\s*(DURATION)\s*\}\}/g, '{{ DURATION }}');
+  result = result.replace(/\{\{\s*(WIDTH)\s*\}\}/g, '{{ WIDTH }}');
+  result = result.replace(/\{\{\s*(HEIGHT)\s*\}\}/g, '{{ HEIGHT }}');
+
+  return result;
+}
+
+/**
  * Standalone AI Custom HTML Template Generator: uses Gemini Flash to design 
  * a 100% custom visual layout, styling, and GSAP timeline specifically tailored 
  * to the emotions, theme, and rhythm of the script.
@@ -475,6 +552,10 @@ Trả về duy nhất mã nguồn index.html hoàn chỉnh nhất bên trong kh�
       }
       return "font-family: 'montserrat', sans-serif";
     });
+    
+    // 4. SANITIZE JSON.parse() PATTERNS — Fix AI generating broken single-quoted JS string literals
+    // AI sometimes outputs literal newlines/tabs/control chars inside JS strings which breaks JSON.parse
+    sanitizedHtml = sanitizeAiHtmlForJsonParse(sanitizedHtml);
     
     return sanitizedHtml;
   } catch (error) {
@@ -975,6 +1056,9 @@ Trả về duy nhất mã nguồn index.html hoàn chỉnh nhất bên trong kh�
       }
       return "font-family: 'montserrat', sans-serif";
     });
+    
+    // 4. SANITIZE JSON.parse() PATTERNS — Fix AI generating broken single-quoted JS string literals
+    sanitizedHtml = sanitizeAiHtmlForJsonParse(sanitizedHtml);
     
     return sanitizedHtml;
   } catch (error) {

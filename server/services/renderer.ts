@@ -56,6 +56,21 @@ function escapeHtml(unsafe: string) {
   return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
+/**
+ * Safely serialize a value as JSON for injection into a single-quoted JS string literal.
+ * Escapes backslashes, single quotes, newlines, carriage returns, tabs, and all ASCII
+ * control characters (0x00–0x1F) to prevent "Bad control character in string literal" errors.
+ */
+function safeJsonForSingleQuote(value: any): string {
+  return JSON.stringify(value)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t')
+    .replace(/[\x00-\x1f]/g, (ch) => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0'));
+}
+
 function getAlignItems(align: string) { return align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center'; }
 function getJustifyContent(align: string) { return align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center'; }
 
@@ -264,8 +279,8 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
     'WIDTH': width,
     'HEIGHT': height,
     'DURATION': String(totalDuration),
-    '__SCENES_DATA_INJECTED__': JSON.stringify(scenes.map(s => ({ ...s, bodyText: s.bodyText || s.voiceText || '' }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'"),
-    'SCENES_JSON': JSON.stringify(scenes.map(s => ({ ...s, bodyText: s.bodyText || s.voiceText || '' }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'"),
+    '__SCENES_DATA_INJECTED__': safeJsonForSingleQuote(scenes.map(s => ({ ...s, bodyText: s.bodyText || s.voiceText || '' }))),
+    'SCENES_JSON': safeJsonForSingleQuote(scenes.map(s => ({ ...s, bodyText: s.bodyText || s.voiceText || '' }))),
     '__SCENE_DURATIONS_INJECTED__': durationsJson,
     'SCENE_DURATIONS_JSON': durationsJson,
 
