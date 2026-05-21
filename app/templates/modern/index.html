@@ -863,9 +863,9 @@
       
       mainTl.add(tl, currentTime);
       
-      // Performance optimization: hide old units so browser compositor isn't overloaded
+      // Hide old unit only AFTER next scene is fully visible (buffer +0.3s prevents bg flicker)
       if (i < scenes.length - 1) {
-        mainTl.add(gsap.set(unit, { visibility: 'hidden', display: 'none' }), currentTime + dur);
+        mainTl.add(gsap.set(unit, { visibility: 'hidden', zIndex: -1 }), currentTime + dur + 0.3);
         currentTime += dur - CROSSFADE;
       } else {
         currentTime += dur;

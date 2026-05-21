@@ -417,10 +417,9 @@
       
       mainTl.add(tl, currentTime);
       
-      // Cleanup: Hide this unit after the next scene has fully covered it
-      // This prevents overdraw and flickering from stacking dozens of layers
+      // Cleanup: delay hiding unit until next scene's bg is fully visible (+0.3s buffer)
       if (i < scenes.length - 1) {
-        mainTl.add(gsap.set(unit, { visibility: 'hidden' }), currentTime + dur);
+        mainTl.add(gsap.set(unit, { visibility: 'hidden', zIndex: -1 }), currentTime + dur + 0.3);
         currentTime += dur - CROSSFADE;
       } else {
         currentTime += dur;

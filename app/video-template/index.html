@@ -397,7 +397,7 @@
         }
         if (!isLast) {
           tl.to(card, { opacity: 0, y: -20, filter: 'blur(4px)', duration: CROSSFADE, ease: 'power3.in' }, sceneStart + duration - CROSSFADE);
-          tl.set(card, { display: 'none' }, sceneStart + duration);
+          tl.set(card, { visibility: 'hidden', zIndex: -1 }, sceneStart + duration + 0.5);
         } else {
           var fadeStart = sceneStart + Math.min(duration - 1.0, duration * 0.7);
           tl.to('#root', { opacity: 0, duration: 1.0, ease: 'power2.inOut' }, fadeStart);
