@@ -58,10 +58,12 @@ async function main() {
     const start = i * (durationPerSlide - crossfade);
     // Each slide exists for durationPerSlide + crossfade (to overlap perfectly with the next one)
     const clipDuration = (i === numSlides - 1) ? durationPerSlide : durationPerSlide + crossfade;
+    const enterClass = (i % 2 === 0) ? 'slide-in-left' : 'slide-in-right';
+    const panClass = (i % 2 === 0) ? 'pan-ltr' : 'pan-rtl';
     
     slidesHtml += `
-      <div class="slide-container" id="slide-${i}" data-start="${start.toFixed(3)}" data-duration="${clipDuration.toFixed(3)}" data-track-index="1" style="z-index: ${10 + i};">
-        <div class="image-wrapper">
+      <div class="slide-container ${enterClass}" id="slide-${i}" data-start="${start.toFixed(3)}" data-duration="${clipDuration.toFixed(3)}" data-track-index="1" style="z-index: ${10 + i};">
+        <div class="image-wrapper ${panClass}" style="animation-duration: ${clipDuration.toFixed(3)}s;">
           <img class="slide-image" src="./${imageFiles[i]}" />
         </div>
         <div class="overlay-wrapper">
@@ -91,7 +93,7 @@ async function main() {
     .slide-container { 
       position: absolute; width: 100%; height: 100%; 
       display: flex; align-items: center; justify-content: center;
-      opacity: 1; 
+      opacity: 0; /* Khởi đầu bằng ẩn để CSS animation hiện lên */
       will-change: transform, opacity;
       perspective: 1500px;
     }
@@ -110,6 +112,38 @@ async function main() {
       width: 100%; height: 100%; object-fit: cover; 
       backface-visibility: hidden;
       transform: translate3d(0,0,0);
+      transform: scale(1.15); /* Tăng nhẹ kích thước ảnh nền để khi pan không lộ viền */
+    }
+    
+    /* CSS KEYFRAME ANIMATIONS FOR HYPERFRAMES ADAPTER */
+    @keyframes hf-slide-in-left {
+      from { opacity: 0; transform: translate3d(-150px, 0, 0); filter: blur(15px); }
+      to { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0px); }
+    }
+    @keyframes hf-slide-in-right {
+      from { opacity: 0; transform: translate3d(150px, 0, 0); filter: blur(15px); }
+      to { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0px); }
+    }
+    @keyframes hf-pan-ltr {
+      from { transform: translate3d(-30px, -10px, 0) rotate(-0.3deg); }
+      to { transform: translate3d(30px, 10px, 0) rotate(0.3deg); }
+    }
+    @keyframes hf-pan-rtl {
+      from { transform: translate3d(30px, 10px, 0) rotate(0.3deg); }
+      to { transform: translate3d(-30px, -10px, 0) rotate(-0.3deg); }
+    }
+    
+    .slide-in-left {
+      animation: hf-slide-in-left 1200ms cubic-bezier(0.25, 1, 0.5, 1) both;
+    }
+    .slide-in-right {
+      animation: hf-slide-in-right 1200ms cubic-bezier(0.25, 1, 0.5, 1) both;
+    }
+    .pan-ltr {
+      animation: hf-pan-ltr linear both;
+    }
+    .pan-rtl {
+      animation: hf-pan-rtl linear both;
     }
     .overlay-wrapper {
       position: absolute; bottom: 80px; left: 120px; 
@@ -160,14 +194,6 @@ async function main() {
       const wrapper = slide.querySelector('.image-wrapper');
       const overlayWrapper = slide.querySelector('.overlay-wrapper');
       
-      // HIỆU ỨNG HOÀN THIỆN: VELOCITY SYNC + MOTION BLUR
-      // Entrance
-      tl.fromTo(slide, 
-        { opacity: 0, scale: 1.15, filter: "blur(15px)" },
-        { opacity: 1, scale: 1.0, filter: "blur(0px)", duration: 1.2, ease: "power2.inOut" }, 
-        start
-      );
-
       // Exit (synchronized with next slide)
       // We ONLY fade the overlay (text) to avoid ghosting.
       // We keep the slide container (background) solid to avoid flickering.
@@ -179,17 +205,6 @@ async function main() {
           ease: "power2.in"
         }, start + dur - 0.8);
       }
-      
-      // KEN BURNS ĐỐI NGHỊCH: Slide 1 zoom ra, Slide 2 zoom vào (hoặc ngược lại)
-      // Tạo cảm giác chuyển động liên tục không điểm dừng
-      const scaleFrom = (i % 2 === 0) ? 1.0 : 1.1;
-      const scaleTo = (i % 2 === 0) ? 1.1 : 1.0;
-      
-      tl.fromTo(wrapper, 
-        { scale: scaleFrom, rotation: -0.3 },
-        { scale: scaleTo, rotation: 0.3, force3D: true, duration: dur, ease: "sine.inOut" }, 
-        start
-      );
       
       // Overlay hiện ra mượt mà không gây xao nhãng
       tl.from(overlayWrapper, 

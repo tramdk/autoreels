@@ -230,6 +230,19 @@ Trình biên dịch của HyperFrames phân tích font chữ tĩnh (static compi
    - CSS:
      #grid-pixelate-overlay { --grid-color: #06080F; }
      #grid-pixelate-overlay .grid-cell { background: var(--grid-color); transform: scale(0); transform-origin: center center; }
+5. CHUYỂN CẢNH CSS KEYFRAMES VÀ PANNING (CẤM ZOOM/SCALE):
+   - Tuyệt đối CẤM sử dụng GSAP (timeline hay tween) để tạo hiệu ứng zoom/scale trên ảnh nền \`.scene-image\`, \`.scene-card\` hoặc \`.scene-image-card\` (không zoom hay scale bằng GSAP). Khi render hoặc seek, GSAP reset scale đột ngột gây giật nháy hình.
+   - BẮT BUỘC chỉ sử dụng CSS \`@keyframes\` animations để thực hiện transition đi vào cho các slide/ảnh và hiệu ứng pan nền (panning) bằng \`translate3d\`.
+   - Định nghĩa sẵn các \`@keyframes\` trong thẻ \`<style>\`:
+     * Chuyển động đi vào (Scene Entrance):
+       \`@keyframes hf-scene-enter-left { from { opacity: 0; transform: translate3d(-100px, 0, 0); filter: blur(10px); } to { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); } }\`
+       \`@keyframes hf-scene-enter-right { from { opacity: 0; transform: translate3d(100px, 0, 0); filter: blur(10px); } to { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); } }\`
+     * Chuyển động pan ảnh nền (Background Panning):
+       \`@keyframes hf-pan-slow-ltr { from { transform: translate3d(-30px, -10px, 0) scale(1.15); } to { transform: translate3d(30px, 10px, 0) scale(1.15); } }\`
+       \`@keyframes hf-pan-slow-rtl { from { transform: translate3d(30px, 10px, 0) scale(1.15); } to { transform: translate3d(-30px, -10px, 0) scale(1.15); } }\`
+       (Lưu ý: giữ \`scale(1.15)\` cố định trong suốt quá trình pan để tránh nháy viền).
+   - Sử dụng \`animation-fill-mode: both;\` cho các chuyển động để HyperFrames có thể seek chính xác.
+   - Gán các class CSS hoạt ảnh này khi tạo phần tử động trong JS.
 
 === HOẠT ẢNH CHỮ CHẠY ĐỘNG CAO CẤP (PREMIUM DYNAMIC CAPTIONS) ===
 Hãy thiết kế 1 trong các bộ hoạt ảnh chữ phù hợp với chủ đề của video để tạo cảm giác cực kỳ chuyên nghiệp:
@@ -408,14 +421,18 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   // 2. Tạo phần tử DOM động dựa trên cấu trúc Layout độc bản bạn thiết kế
   var sceneEl = document.createElement('div');
   sceneEl.id = sceneId;
-  sceneEl.className = 'scene-card';
+  var enterClass = (i % 2 === 0) ? 'scene-enter-left' : 'scene-enter-right';
+  sceneEl.className = 'scene-card ' + enterClass;
   sceneEl.style.display = 'none';
+  sceneEl.setAttribute('data-start', currentTime.toFixed(3));
+  sceneEl.setAttribute('data-duration', duration.toFixed(3));
   
   var htmlContent = '';
   // Hiển thị hình ảnh ở bất cứ cảnh nào có scene.imageUrl (Bento grid xếp chồng dọc hoặc song song ngang tùy CSS)
   if (scene.imageUrl) {
+    var panClass = (i % 2 === 0) ? 'pan-ltr' : 'pan-rtl';
     htmlContent += '<div class="scene-image-card">';
-    htmlContent += '  <img class="scene-image" src="' + scene.imageUrl + '" />';
+    htmlContent += '  <img class="scene-image ' + panClass + '" src="' + scene.imageUrl + '" style="animation-duration: ' + duration + 's;" />';
     htmlContent += '</div>';
     htmlContent += '<div class="scene-text-card">';
     htmlContent += '  <div class="scene-text highlight-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
@@ -439,12 +456,8 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     tl.set(bgEl, { display: 'block', visibility: 'visible', zIndex: i + 1 }, 0);
   }
   
-  // A. Entrance Animation cho toàn cảnh: Zoom nhẹ kết hợp Fade-In cực kỳ điện ảnh (Cinematic Crossfade Zoom)
-  tl.fromTo(sceneEl, 
-    { opacity: 0, scale: 1.03 },
-    { opacity: 1, scale: 1, duration: 0.8, ease: "power3.out" }, 
-    0
-  );
+  // A. Entrance Animation cho toàn cảnh được kích hoạt bởi CSS animation khi display: flex.
+  // Không dùng GSAP scale/opacity để tránh xung đột với CSS keyframes.
 
   // B. Entrance cho ảnh nền (Background Crossfade)
   if (bgEl) {
@@ -456,42 +469,35 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     );
   }
 
-  // C. Zoom chậm ảnh B-roll (Ken Burns Effect) kết hợp tăng nhẹ độ sáng
-  var imgEl = sceneEl.querySelector('.scene-image');
-  if (imgEl) {
-    tl.fromTo(imgEl, 
-      { scale: 1.0, filter: 'brightness(0.95)' }, 
-      { scale: 1.12, filter: 'brightness(1.05)', duration: duration, ease: "none" }, 
-      0
-    );
-  }
+  // C. Chuyển động Panning ảnh B-roll qua CSS class (pan-ltr/pan-rtl)
+  // Không sử dụng GSAP scale/zoom.
 
-  // D. Staggered entrance for B-roll image card
+  // D. Staggered entrance for B-roll image card (không scale)
   var imgCard = sceneEl.querySelector('.scene-image-card');
   if (imgCard) {
     tl.fromTo(imgCard, 
-      { opacity: 0, y: 35, scale: 0.96 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out" },
+      { opacity: 0, y: 35 },
+      { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
       0
     );
   }
 
-  // E. Entrance animation for line cards (staggered)
+  // E. Entrance animation for line cards (staggered, không scale)
   var lineCards = sceneEl.querySelectorAll('.scene-line-card');
   if (lineCards.length > 0) {
     tl.fromTo(lineCards, 
-      { opacity: 0, y: 30, scale: 0.96 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.15, ease: "power3.out" },
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.7, stagger: 0.15, ease: "power3.out" },
       0.1
     );
   }
 
-  // F. Word stagger slide-up with spring bounce inside line cards
+  // F. Word stagger slide-up with spring bounce inside line cards (không scale)
   var words = sceneEl.querySelectorAll('.word');
   if (words.length > 0) {
     tl.fromTo(words, 
-      { y: '105%', opacity: 0, scale: 0.92 },
-      { y: '0%', opacity: 1, scale: 1, duration: 0.45, stagger: 0.025, ease: "back.out(1.4)" },
+      { y: '105%', opacity: 0 },
+      { y: '0%', opacity: 1, duration: 0.45, stagger: 0.025, ease: "back.out(1.4)" },
       0.2
     );
   }
@@ -703,6 +709,19 @@ Bạn là giám đốc nghệ thuật kiêm nhà thiết kế chuyển động v
      - CSS:
        #grid-pixelate-overlay { --grid-color: #0c0914; }
        #grid-pixelate-overlay .grid-cell { background: var(--grid-color); transform: scale(0); transform-origin: center center; }
+5. CHUYỂN CẢNH CSS KEYFRAMES VÀ PANNING (CẤM ZOOM/SCALE):
+   - Tuyệt đối CẤM sử dụng GSAP (timeline hay tween) để tạo hiệu ứng zoom/scale trên ảnh nền \`.scene-image\`, \`.scene-card\` hoặc \`.scene-image-card\` (không zoom hay scale bằng GSAP). Khi render hoặc seek, GSAP reset scale đột ngột gây giật nháy hình.
+   - BẮT BUỘC chỉ sử dụng CSS \`@keyframes\` animations để thực hiện transition đi vào cho các slide/ảnh và hiệu ứng pan nền (panning) bằng \`translate3d\`.
+   - Định nghĩa sẵn các \`@keyframes\` trong thẻ \`<style>\`:
+     * Chuyển động đi vào (Scene Entrance):
+       \`@keyframes hf-scene-enter-left { from { opacity: 0; transform: translate3d(-100px, 0, 0); filter: blur(10px); } to { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); } }\`
+       \`@keyframes hf-scene-enter-right { from { opacity: 0; transform: translate3d(100px, 0, 0); filter: blur(10px); } to { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); } }\`
+     * Chuyển động pan ảnh nền (Background Panning):
+       \`@keyframes hf-pan-slow-ltr { from { transform: translate3d(-30px, -10px, 0) scale(1.15); } to { transform: translate3d(30px, 10px, 0) scale(1.15); } }\`
+       \`@keyframes hf-pan-slow-rtl { from { transform: translate3d(30px, 10px, 0) scale(1.15); } to { transform: translate3d(-30px, -10px, 0) scale(1.15); } }\`
+       (Lưu ý: giữ \`scale(1.15)\` cố định trong suốt quá trình pan để tránh nháy viền).
+   - Sử dụng \`animation-fill-mode: both;\` cho các chuyển động để HyperFrames có thể seek chính xác.
+   - Gán các class CSS hoạt ảnh này khi tạo phần tử động trong JS.
 
 === HOẠT ẢNH CHỮ CHẠY ĐỘNG CAO CẤP (PREMIUM DYNAMIC CAPTIONS) ===
 Hãy thiết kế 1 trong các bộ hoạt ảnh chữ phù hợp với sản phẩm/quảng cáo để tăng hiệu ứng kích thích thị giác:
@@ -879,8 +898,11 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   // 2. Tạo phần tử DOM động cho Cảnh
   var sceneEl = document.createElement('div');
   sceneEl.id = sceneId;
-  sceneEl.className = 'scene-card' + (isLastScene ? ' cta-scene' : '');
+  var enterClass = (i % 2 === 0) ? 'scene-enter-left' : 'scene-enter-right';
+  sceneEl.className = 'scene-card ' + enterClass + (isLastScene ? ' cta-scene' : '');
   sceneEl.style.display = 'none';
+  sceneEl.setAttribute('data-start', currentTime.toFixed(3));
+  sceneEl.setAttribute('data-duration', duration.toFixed(3));
   
   var htmlContent = '';
   
@@ -897,8 +919,9 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     htmlContent += '</div>';
   } else if (scene.imageUrl) {
     // Cảnh thường có ảnh: Ảnh mượt mà bo góc glass ở trên, text ở dưới
+    var panClass = (i % 2 === 0) ? 'pan-ltr' : 'pan-rtl';
     htmlContent += '<div class="scene-image-card">';
-    htmlContent += '  <img class="scene-image" src="' + scene.imageUrl + '" />';
+    htmlContent += '  <img class="scene-image ' + panClass + '" src="' + scene.imageUrl + '" style="animation-duration: ' + duration + 's;" />';
     htmlContent += '</div>';
     htmlContent += '<div class="scene-text-card">';
     htmlContent += '  <div class="scene-text highlight-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
@@ -928,39 +951,27 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     );
   }
   
-  // B. Entrance Animation cực mượt mà với Elastic Ease của GSAP cho sceneEl
-  tl.fromTo(sceneEl, 
-    { opacity: 0, y: 50, scale: 0.92 },
-    { opacity: 1, y: 0, scale: 1, duration: 0.75, ease: "back.out(1.4)" }, 
-    0
-  );
+  // B. Entrance cho sceneEl được xử lý bởi CSS keyframes (scene-enter-left/right). GSAP chỉ kích hoạt hiển thị.
 
-  // C. Ảnh sản phẩm bay nhẹ từ dưới lên (nếu có)
+  // C. Ảnh sản phẩm bay nhẹ từ dưới lên (nếu có) - không scale để tránh giật hình
   var imgCard = sceneEl.querySelector('.scene-image-card');
   if (imgCard) {
     tl.fromTo(imgCard, 
-      { opacity: 0, y: 70, scale: 0.88 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "back.out(1.3)" },
+      { opacity: 0, y: 70 },
+      { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
       0.05
     );
   }
 
-  // D. Zoom nhẹ ảnh sản phẩm kiểu điện ảnh (Ken Burns)
-  var imgEl = sceneEl.querySelector('.scene-image');
-  if (imgEl) {
-    tl.fromTo(imgEl, 
-      { scale: 1.0 }, 
-      { scale: 1.08, duration: duration, ease: "none" }, 
-      0
-    );
-  }
+  // D. Chuyển động Panning ảnh sản phẩm qua CSS class (pan-ltr/pan-rtl)
+  // Không sử dụng GSAP scale/zoom.
 
-  // E. Chữ trượt lên nảy nhẹ (Word Mask Slide Up with Spring)
+  // E. Chữ trượt lên nảy nhẹ (Word Mask Slide Up with Spring, không scale)
   var words = sceneEl.querySelectorAll('.word');
   if (words.length > 0) {
     tl.fromTo(words, 
-      { y: '110%', opacity: 0, scale: 0.92 },
-      { y: '0%', opacity: 1, scale: 1, duration: 0.45, stagger: 0.03, ease: "back.out(1.4)" },
+      { y: '110%', opacity: 0 },
+      { y: '0%', opacity: 1, duration: 0.45, stagger: 0.03, ease: "back.out(1.4)" },
       0.2
     );
   }

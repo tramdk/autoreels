@@ -255,6 +255,36 @@
       height: 100%;
       background: #ff0000; /* Matching REC dot */
     }
+
+    /* CSS KEYFRAME ANIMATIONS FOR HYPERFRAMES */
+    @keyframes hf-scene-enter-left {
+      from { opacity: 0; transform: translate3d(-100px, 0, 0); filter: blur(10px); }
+      to { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+    }
+    @keyframes hf-scene-enter-right {
+      from { opacity: 0; transform: translate3d(100px, 0, 0); filter: blur(10px); }
+      to { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+    }
+    @keyframes hf-pan-slow-ltr {
+      from { transform: translate3d(-30px, -10px, 0) scale(1.15); }
+      to { transform: translate3d(30px, 10px, 0) scale(1.15); }
+    }
+    @keyframes hf-pan-slow-rtl {
+      from { transform: translate3d(30px, 10px, 0) scale(1.15); }
+      to { transform: translate3d(-30px, -10px, 0) scale(1.15); }
+    }
+    .scene-enter-left {
+      animation: hf-scene-enter-left 600ms cubic-bezier(0.25, 1, 0.5, 1) both;
+    }
+    .scene-enter-right {
+      animation: hf-scene-enter-right 600ms cubic-bezier(0.25, 1, 0.5, 1) both;
+    }
+    .pan-slow-ltr {
+      animation: hf-pan-slow-ltr linear both;
+    }
+    .pan-slow-rtl {
+      animation: hf-pan-slow-rtl linear both;
+    }
   </style>
 </head>
 
@@ -375,7 +405,17 @@
       var unit = createSceneUnit(scene, i, currentTime, dur);
       container.appendChild(unit);
 
+      var enterClass = i % 2 === 0 ? 'scene-enter-left' : 'scene-enter-right';
+      unit.classList.add(enterClass);
+
       var bgImg = unit.querySelector('.scene-bg');
+      if (bgImg) {
+        var panClass = i % 2 === 0 ? 'pan-slow-ltr' : 'pan-slow-rtl';
+        bgImg.classList.add(panClass);
+        bgImg.style.animationDuration = dur + 's';
+        bgImg.setAttribute('data-start', currentTime.toFixed(3));
+        bgImg.setAttribute('data-duration', dur.toFixed(3));
+      }
       var titleEl = unit.querySelector('.scene-title');
       var progBar = unit.querySelector('.scene-progress-bar');
       var spans = buildTypingContent(titleEl, (scene.text || scene.bodyText || ''));
@@ -383,10 +423,6 @@
       var inDur = 0.6;
       var outDur = CROSSFADE;
       var tl = gsap.timeline();
-
-      // Entrance animation - Fade in
-      tl.from(unit, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0)
-        .fromTo(bgImg, { scale: 1.15 }, { scale: 1, duration: dur, ease: "sine.inOut", force3D: true }, 0);
 
       // Text animation - Premium y slide up
       var staggerTime = Math.min(0.04, (dur * 0.7) / (spans.length || 1));

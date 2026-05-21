@@ -508,6 +508,35 @@
       z-index: 100;
     }
 
+    /* CSS KEYFRAME ANIMATIONS FOR HYPERFRAMES */
+    @keyframes hf-modern-enter {
+      from { opacity: 0; filter: blur(20px); transform: translate3d(0, 30px, 0); }
+      to { opacity: 1; filter: blur(0px); transform: translate3d(0, 0, 0); }
+    }
+    .modern-enter {
+      animation: hf-modern-enter 800ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes hf-pan-slow-ltr {
+      from { transform: translate3d(-30px, -10px, 0) scale(1.15); }
+      to { transform: translate3d(30px, 10px, 0) scale(1.15); }
+    }
+    @keyframes hf-pan-slow-rtl {
+      from { transform: translate3d(30px, 10px, 0) scale(1.15); }
+      to { transform: translate3d(-30px, -10px, 0) scale(1.15); }
+    }
+    .pan-slow-ltr {
+      animation: hf-pan-slow-ltr linear both;
+    }
+    .pan-slow-rtl {
+      animation: hf-pan-slow-rtl linear both;
+    }
+    @keyframes hf-editorial-pan {
+      from { transform: translate3d(-20px, 0, 0) scale(1.1); }
+      to { transform: translate3d(20px, 0, 0) scale(1.1); }
+    }
+    .editorial-pan {
+      animation: hf-editorial-pan linear both;
+    }
   </style>
 </head>
 
@@ -626,9 +655,9 @@
       var innerHtml = '';
 
       if (layoutType === 'hero-slam') {
-        var preTitle = "INTRODUCING";
-        var heroWord = "MODERN";
-        var captionText = "Creative Edition";
+        var preTitle = "Giới thiệu";
+        var heroWord = "Tin tức";
+        var captionText = "Autoreels by TDK";
         
         var parts = rawText.split(/(?:<br\s*\/?>|\n)/gi).filter(Boolean);
         if (parts.length > 0) preTitle = parts[0];
@@ -636,7 +665,7 @@
         if (parts.length > 2) captionText = parts[2];
 
         innerHtml += '<div class="scene-content">';
-        innerHtml += '  <div class="overline">PROLOGUE</div>';
+        innerHtml += '  <div class="overline">TDK</div>';
         innerHtml += '  <div class="hero-pre">' + preTitle + '</div>';
         innerHtml += '  <div class="hero-word">' + heroWord + '</div>';
         innerHtml += '  <div class="hero-caption">' + captionText + '</div>';
@@ -644,9 +673,9 @@
         innerHtml += '</div>';
 
       } else if (layoutType === 'metric-slam') {
-        var headlineText = "Featured Benchmark";
+        var headlineText = " ";
         var metricVal = "100%";
-        var metricLabel = "EXCELLENCE";
+        var metricLabel = " ";
         
         var lines = rawText.split(/(?:<br\s*\/?>|\n)/gi).filter(Boolean);
         if (lines.length > 0) headlineText = lines[0];
@@ -710,15 +739,15 @@
         innerHtml += '</div>';
 
       } else if (layoutType === 'cta-outro') {
-        var outroHeadline = "Join the Movement";
-        var ctaUrl = "autoreels.io";
+        var outroHeadline = "Còn chần chờ gì nữa";
+        var ctaUrl = " autoreels";
         
         var outroParts = rawText.split(/(?:<br\s*\/?>|\n)/gi).filter(Boolean);
         if (outroParts.length > 0) outroHeadline = outroParts[0];
         if (outroParts.length > 1) ctaUrl = outroParts[outroParts.length - 1];
 
         innerHtml += '<div class="scene-content">';
-        innerHtml += '  <div class="overline">FINALE</div>';
+        innerHtml += '  <div class="overline">Khám phá thêm</div>';
         innerHtml += '  <div class="cta-headline">' + outroHeadline + '</div>';
         innerHtml += '  <div class="cta-url-box">';
         innerHtml += '    <span class="cta-arrow">→</span>';
@@ -786,8 +815,26 @@
       var unit = createSceneUnit(scene, i, currentTime, dur);
       container.appendChild(unit);
 
+      // CSS entrance class for unit
+      unit.classList.add('modern-enter');
+
       var bgImg = unit.querySelector('.scene-bg');
+      if (bgImg) {
+        var panClass = i % 2 === 0 ? 'pan-slow-ltr' : 'pan-slow-rtl';
+        bgImg.classList.add(panClass);
+        bgImg.style.animationDuration = dur + 's';
+        bgImg.setAttribute('data-start', currentTime.toFixed(3));
+        bgImg.setAttribute('data-duration', dur.toFixed(3));
+      }
+
       var editorialImg = unit.querySelector('.editorial-img');
+      if (editorialImg) {
+        editorialImg.classList.add('editorial-pan');
+        editorialImg.style.animationDuration = dur + 's';
+        editorialImg.setAttribute('data-start', currentTime.toFixed(3));
+        editorialImg.setAttribute('data-duration', dur.toFixed(3));
+      }
+
       var titleEl = unit.querySelector('.scene-title');
       var progBar = unit.querySelector('.scene-progress-bar');
       
@@ -795,27 +842,11 @@
       var outDur = CROSSFADE;
       var tl = gsap.timeline();
 
-      // Cinematic Stage transition: scale up, blur down, fade in
-      tl.fromTo(unit, 
-        { opacity: 0, scale: 1.05, filter: "blur(20px)" }, 
-        { opacity: 1, scale: 1.0, filter: "blur(0px)", duration: inDur, ease: "power2.out", force3D: true }, 
-        0
-      );
-
-      // Subtle atmospheric Ken Burns effect on full background texture
+      // Subtle atmospheric brightness transition on full background texture (no scale!)
       if (bgImg) {
         tl.fromTo(bgImg, 
-          { scale: 1.15, filter: "brightness(0.8)" }, 
-          { scale: 1.0, filter: "brightness(1.0)", duration: dur, ease: "none", force3D: true }, 
-          0
-        );
-      }
-
-      // Elegant zoom-out inside Editorial B-roll image card
-      if (editorialImg) {
-        tl.fromTo(editorialImg,
-          { scale: 1.12 },
-          { scale: 1.0, duration: dur, ease: "sine.out", force3D: true },
+          { filter: "brightness(0.8)" }, 
+          { filter: "brightness(1.0)", duration: dur, ease: "none", force3D: true }, 
           0
         );
       }

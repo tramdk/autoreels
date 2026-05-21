@@ -235,14 +235,34 @@
       box-shadow: none !important;
       backdrop-filter: none !important;
     }
+
+    /* CSS KEYFRAME ANIMATIONS FOR HYPERFRAMES */
+    @keyframes hf-card-enter {
+      from { opacity: 0; transform: translate3d(0, 35px, 0); filter: blur(6px); }
+      to { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0px); }
+    }
+    .card-enter {
+      animation: hf-card-enter 750ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes hf-pan-slow-ltr {
+      from { transform: translate3d(-30px, -10px, 0) scale(1.15); }
+      to { transform: translate3d(30px, 10px, 0) scale(1.15); }
+    }
+    @keyframes hf-pan-slow-rtl {
+      from { transform: translate3d(30px, 10px, 0) scale(1.15); }
+      to { transform: translate3d(-30px, -10px, 0) scale(1.15); }
+    }
+    .pan-slow-ltr {
+      animation: hf-pan-slow-ltr linear both;
+    }
+    .pan-slow-rtl {
+      animation: hf-pan-slow-rtl linear both;
+    }
   </style>
 </head>
 <body>
   <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0" data-duration="{{ DURATION }}">
-    <div id="bg-layer">
-      <img id="bg-1" style="opacity: 0; will-change: transform, opacity;" alt="" onerror="this.style.display='none'">
-      <img id="bg-2" style="opacity: 0; will-change: transform, opacity;" alt="" onerror="this.style.display='none'">
-    </div>
+    <div id="bg-layer"></div>
     <div id="bg-overlay"></div>
     <div class="ambient-orb orb-1"></div>
     <div class="ambient-orb orb-2"></div>
@@ -324,7 +344,9 @@
         var sceneStart = Math.max(0, currentTime - (i > 0 ? TEXT_LEAD : 0));
         var isLast = (i === n - 1);
         var card = document.createElement('div');
-        card.className = 'scene-card type-' + s.type;
+        card.className = 'scene-card type-' + s.type + ' card-enter';
+        card.setAttribute('data-start', sceneStart.toFixed(3));
+        card.setAttribute('data-duration', duration.toFixed(3));
         card.style.textAlign = MAIN_TEXT_ALIGN;
         card.style.alignItems = MAIN_ALIGN;
         var safeText = s.bodyText || s.voiceText || '';
@@ -353,11 +375,7 @@
         }
         container.appendChild(card);
         tl.set(card, { display: 'flex', zIndex: 50 + i }, sceneStart);
-        tl.fromTo(card,
-          { opacity: 0, y: 35, scale: 0.97, filter: 'blur(6px)' },
-          { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.75, ease: 'power4.out' },
-          sceneStart
-        );
+
         var words = card.querySelectorAll('.word');
         if (words.length > 0) {
           tl.fromTo(words,
@@ -379,21 +397,25 @@
         }
         var imgUrl = s.imageUrl || (i === 0 ? DEFAULT_BG : null);
         if (imgUrl) {
-          var targetId = currentBg === 1 ? 'bg-2' : 'bg-1';
-          var prevId = currentBg === 1 ? 'bg-1' : 'bg-2';
-          (function(tId, url, pId, start, dur, idx) {
-            tl.set('#' + tId, { attr: { src: url } }, start);
-            tl.to('#' + tId, { opacity: BG_BRIGHTNESS, duration: 1.0, ease: 'power2.out' }, start);
-            tl.to('#' + pId, { opacity: 0, duration: 1.0, ease: 'power2.out' }, start);
-            var scaleFrom = idx % 2 === 0 ? 1.0 : 1.10;
-            var scaleTo = idx % 2 === 0 ? 1.10 : 1.02;
-            tl.fromTo('#' + tId,
-              { scale: scaleFrom },
-              { scale: scaleTo, duration: dur, ease: 'none' },
-              start
-            );
-          })(targetId, imgUrl, prevId, sceneStart, duration, i);
-          currentBg = currentBg === 1 ? 2 : 1;
+          var bgImg = document.createElement('img');
+          bgImg.src = imgUrl;
+          bgImg.className = i % 2 === 0 ? 'pan-slow-ltr' : 'pan-slow-rtl';
+          bgImg.style.position = 'absolute';
+          bgImg.style.inset = '0';
+          bgImg.style.width = '100%';
+          bgImg.style.height = '100%';
+          bgImg.style.objectFit = 'cover';
+          bgImg.style.willChange = 'transform, opacity';
+          bgImg.style.opacity = '0';
+          bgImg.style.animationDuration = duration + 's';
+          bgImg.setAttribute('data-start', sceneStart.toFixed(3));
+          bgImg.setAttribute('data-duration', duration.toFixed(3));
+          document.getElementById('bg-layer').appendChild(bgImg);
+
+          tl.fromTo(bgImg, { opacity: 0 }, { opacity: BG_BRIGHTNESS, duration: 1.0, ease: 'power2.out' }, sceneStart);
+          if (i < n - 1) {
+            tl.to(bgImg, { opacity: 0, duration: 1.0, ease: 'power2.out' }, sceneStart + duration - 1.0);
+          }
         }
         if (!isLast) {
           tl.to(card, { opacity: 0, y: -20, filter: 'blur(4px)', duration: CROSSFADE, ease: 'power3.in' }, sceneStart + duration - CROSSFADE);
