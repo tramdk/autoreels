@@ -383,7 +383,7 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
       }
       window.duration = d;
       window.remotion_duration = d;
-      window.remotion_totalFrames = Math.ceil(d * 24);
+      window.remotion_totalFrames = Math.ceil(d * 30);
       window.__hf.duration = d;
       window.__hf.getDuration = function() { return d; };
       window.__hf.seek = function(t) { 
@@ -455,7 +455,7 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
     const child = spawn(hyperframesBin, [
       'render', absoluteWorkDir,
       '-o', tempVideoPath,
-      '-f', '24',              // 24fps: 20% fewer frames vs 30fps, negligible quality loss for text
+      '-f', '30',              // Render at 30fps
       '-q', 'high',             // High quality: avoid artifacts that look like flickering
       '--max-workers', '2'     // Limit concurrent Chrome tabs to prevent CPU saturation
     ], {

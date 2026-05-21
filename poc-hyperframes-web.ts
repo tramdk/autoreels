@@ -215,7 +215,7 @@ async function main() {
   let hyperframesBin = path.join(__dirname, 'node_modules', '.bin', 'hyperframes');
   if (process.platform === 'win32') hyperframesBin += '.cmd';
 
-  const cmd = `"${hyperframesBin}" render "${workDir}" -o "${outputPath}" -f 24 -q high`;
+  const cmd = `"${hyperframesBin}" render "${workDir}" -o "${outputPath}" -f 30 -q high`;
   
   const ffmpegStatic = (await import('ffmpeg-static')).default;
   const ffmpegDir = path.dirname(ffmpegStatic);

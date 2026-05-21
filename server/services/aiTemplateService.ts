@@ -747,7 +747,8 @@ Hãy rũ bỏ hoàn toàn phong cách thiết kế màu đơn sắc thô sơ ("s
    - Chữ nội dung/phụ đề: 'font-size: clamp(42px, 5.5vw, 56px); font-weight: 700; line-height: 1.35; color: rgba(255, 255, 255, 0.9); text-align: left; display: flex; flex-direction: column; justify-content: center;'
    - Các từ khóa bán hàng quan trọng (SALE, 50%, MUA NGAY, GIÁ SỐC, FREE SHIP, QUÀ TẶNG, HOT, GIẢM GIÁ...) được tự động bọc trong thẻ Badge '.sale-badge' dạng viên thuốc nổi bật rực rỡ với màu nền chói (như vàng neon #FFF500, xanh mint #00FFCC) và màu chữ tối tương phản cao để tạo điểm nhấn chốt đơn cực mạnh!
 
-5. SIÊU CẢNH CUỐI - CALL TO ACTION (CTA) HUB CHUYỂN ĐỔI CAO:
+ 5. SIÊU CẢNH CUỐI - CALL TO ACTION (CTA) HUB CHUYỂN ĐỔI CAO:
+    - BẮT BUỘC KHÔNG HIỂN THỊ HÌNH ẢNH Ở CẢNH CUỐI: Cảnh cuối cùng (isLastScene === true) BẮT BUỘC phải là layout CTA Hub hoàn chỉnh. Trong mã JavaScript sinh DOM, điều kiện kiểm tra 'isLastScene' PHẢI ĐƯỢC ƯU TIÊN hàng đầu (nằm ở nhánh 'if' đầu tiên) trước khi kiểm tra 'scene.imageUrl' để tránh việc ảnh sản phẩm đè lên hoặc thay thế CTA Hub.
    - Cảnh cuối cùng là vũ khí chốt đơn của video! Hãy biến nó thành một **CTA Hub** mô phỏng 3D cực kỳ kích thích mua sắm:
      * Chữ tiêu đề khổng lồ kêu gọi hành động dứt khoát (ví dụ: "🛍️ SĂN DEAL NGAY!", "👉 BẤM ĐĂNG KÝ!").
      * Render một nút bấm giả lập nổi khối 3D (.cta-button) tuyệt đẹp với màu neon chói lọi (ví dụ: nền vàng tươi chữ đen cực đậm: 'background: linear-gradient(to bottom, #FFE500 0%, #FFB800 100%); color: #000; font-weight: 900; padding: 22px 48px; border-radius: 40px; box-shadow: 0 10px 25px rgba(255, 184, 0, 0.4), 0 4px 0 #D49B00; text-transform: uppercase; font-size: 32px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transform-style: preserve-3d;');

@@ -179,11 +179,11 @@ export const generateBulk = async (req: Request, res: Response) => {
         finalScenes = gen.scenes;
       }
 
-      // Distribute images sequentially across scenes
+      // Distribute images sequentially across scenes without wrapping
       if (allImages.length > 0 && finalScenes.length > 0) {
         finalScenes = finalScenes.map((scene, idx) => ({
           ...scene,
-          imageUrl: allImages[idx % allImages.length]
+          imageUrl: idx < allImages.length ? allImages[idx] : null
         }));
       }
 
@@ -362,11 +362,11 @@ export const generateVideo = async (req: Request, res: Response, next: NextFunct
       finalScenes = gen.scenes;
     }
 
-    // Distribute images sequentially across scenes
+    // Distribute images sequentially across scenes without wrapping
     if (allImages.length > 0 && finalScenes.length > 0) {
       finalScenes = finalScenes.map((scene, idx) => ({
         ...scene,
-        imageUrl: allImages[idx % allImages.length]
+        imageUrl: idx < allImages.length ? allImages[idx] : null
       }));
     }
 
@@ -551,7 +551,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
       if (allImages.length > 0 && script.scenes && Array.isArray(script.scenes)) {
         script.scenes = script.scenes.map((scene: any, idx: number) => ({
           ...scene,
-          imageUrl: allImages[idx % allImages.length]
+          imageUrl: idx < allImages.length ? allImages[idx] : null
         }));
       }
     } catch (err) {
