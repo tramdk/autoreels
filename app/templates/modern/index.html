@@ -852,24 +852,13 @@
         var exitEditorial = unit.querySelector('.editorial-img-card');
         var exitProg = unit.querySelector('.scene-progress-bar');
         var exitTargets = [exitContent, exitEditorial, exitProg].filter(Boolean);
-        if (exitTargets.length > 0) {
-          tl.to(exitTargets, { 
-            opacity: 0, 
-            y: -20,
-            duration: outDur, 
-            ease: "power2.inOut", 
-            force3D: true 
-          }, dur - outDur);
-        } else {
-          tl.to(unit, { 
-            opacity: 0, 
-            scale: 0.96,
-            filter: "blur(15px)",
-            duration: outDur, 
-            ease: "power2.inOut", 
-            force3D: true 
-          }, dur - outDur);
-        }
+        tl.to(exitTargets, { 
+          opacity: 0, 
+          y: -20,
+          duration: outDur, 
+          ease: "power2.inOut", 
+          force3D: true 
+        }, dur - outDur);
       }
       
       mainTl.add(tl, currentTime);
