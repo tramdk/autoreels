@@ -6,7 +6,7 @@ import { generateAudio } from '../services/tts';
 import { renderWithHyperFrames, findFfmpegPath, getAudioDuration } from '../services/renderer';
 import { publishToTikTok } from '../services/tiktok';
 import { uploadVideo, downloadFile, deleteRemoteFile } from '../services/storage';
-import { generateAiDynamicHtml, generateAiPromoHtml, generateAiTemplateSettings } from '../services/aiTemplateService';
+import { generateAiDynamicHtml, generateAiTemplateSettings } from '../services/aiTemplateService';
 
 export const videoProgress = new Map<string, { progress: number, phase: string, title?: string }>();
 
@@ -587,8 +587,8 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
       }
     } else if (templateId === 'promo') {
       try {
-        console.log(`[PIPELINE] Selected PROMO TEMPLATE. Invoking AI to design custom Promo HTML structure...`);
-        customHtml = await generateAiPromoHtml(title, script.scenes || [], customSettings || {}, ratio || '9:16');
+        console.log(`[PIPELINE] Selected PROMO TEMPLATE. Redirecting to generateAiDynamicHtml for custom HTML structure...`);
+        customHtml = await generateAiDynamicHtml(title, script.scenes || [], customSettings || {}, ratio || '9:16');
         console.log(`[PIPELINE] Promo HTML designed successfully (length: ${customHtml?.length || 0} chars).`);
       } catch (err) {
         console.error(`[PIPELINE] Failed to generate AI Promo HTML, falling back to defaults:`, err);
