@@ -57,8 +57,14 @@ export async function startEventBusWorker() {
         groupCreated = true;
       } else {
         console.error('❌ [EVENT BUS] Error creating group:', err.message);
-        console.log('🔄 [EVENT BUS] Retrying in 5s...');
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        let delay = 5000;
+        if (err && err.message && err.message.includes('max requests limit exceeded')) {
+          console.warn('⚠️ [EVENT BUS] Redis limit exceeded. Sleeping for 15 minutes before retrying group creation...');
+          delay = 15 * 60 * 1000;
+        } else {
+          console.log('🔄 [EVENT BUS] Retrying in 5s...');
+        }
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
   }
@@ -89,9 +95,14 @@ export async function startEventBusWorker() {
         // Acknowledge message
         await redis.xack(STREAM_NAME, GROUP_NAME, messageId);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('❌ [EVENT BUS] Error in worker loop:', err);
-      await new Promise(resolve => setTimeout(resolve, 5000)); // Wait before retry
+      let delay = 5000;
+      if (err && err.message && err.message.includes('max requests limit exceeded')) {
+        console.warn('⚠️ [EVENT BUS] Redis limit exceeded. Sleeping for 15 minutes to prevent spamming...');
+        delay = 15 * 60 * 1000; // 15 minutes
+      }
+      await new Promise(resolve => setTimeout(resolve, delay)); // Wait before retry
     }
   }
 }
