@@ -580,7 +580,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
     if (templateId === 'dynamic') {
       try {
         console.log(`[PIPELINE] Selected DYNAMIC TEMPLATE. Invoking AI to design custom HTML structure...`);
-        customHtml = await generateAiDynamicHtml(title, script.scenes || [], customSettings || {}, ratio || '9:16');
+        customHtml = await generateAiDynamicHtml(title, script.scenes || [], customSettings || {}, ratio || '9:16', 'dynamic');
         console.log(`[PIPELINE] Dynamic HTML designed successfully (length: ${customHtml?.length || 0} chars).`);
       } catch (err) {
         console.error(`[PIPELINE] Failed to generate AI custom HTML, falling back to defaults:`, err);
@@ -588,7 +588,7 @@ export const runVideoGenerationPipeline = async (articleId: string, settings: an
     } else if (templateId === 'promo') {
       try {
         console.log(`[PIPELINE] Selected PROMO TEMPLATE. Redirecting to generateAiDynamicHtml for custom HTML structure...`);
-        customHtml = await generateAiDynamicHtml(title, script.scenes || [], customSettings || {}, ratio || '9:16');
+        customHtml = await generateAiDynamicHtml(title, script.scenes || [], customSettings || {}, ratio || '9:16', 'promo');
         console.log(`[PIPELINE] Promo HTML designed successfully (length: ${customHtml?.length || 0} chars).`);
       } catch (err) {
         console.error(`[PIPELINE] Failed to generate AI Promo HTML, falling back to defaults:`, err);

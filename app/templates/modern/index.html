@@ -655,17 +655,25 @@
       var innerHtml = '';
 
       if (layoutType === 'hero-slam') {
+        var overlineText = "{{ TAG_TEXT }}" || "TDK";
         var preTitle = "Giới thiệu";
         var heroWord = "Tin tức";
         var captionText = "Autoreels by TDK";
         
         var parts = rawText.split(/(?:<br\s*\/?>|\n)/gi).filter(Boolean);
-        if (parts.length > 0) preTitle = parts[0];
-        if (parts.length > 1) heroWord = parts[1];
-        if (parts.length > 2) captionText = parts[2];
+        if (parts.length >= 4) {
+          overlineText = parts[0];
+          preTitle = parts[1];
+          heroWord = parts[2];
+          captionText = parts[3];
+        } else {
+          if (parts.length > 0) preTitle = parts[0];
+          if (parts.length > 1) heroWord = parts[1];
+          if (parts.length > 2) captionText = parts[2];
+        }
 
         innerHtml += '<div class="scene-content">';
-        innerHtml += '  <div class="overline">TDK</div>';
+        innerHtml += '  <div class="overline">' + overlineText + '</div>';
         innerHtml += '  <div class="hero-pre">' + preTitle + '</div>';
         innerHtml += '  <div class="hero-word">' + heroWord + '</div>';
         innerHtml += '  <div class="hero-caption">' + captionText + '</div>';

@@ -95,7 +95,7 @@ function sanitizeAiHtmlForJsonParse(html: string): string {
  * a 100% custom visual layout, styling, and GSAP timeline specifically tailored 
  * to the emotions, theme, and rhythm of the script.
  */
-export async function generateAiDynamicHtml(title: string, scenes: any[], customSettings: any, ratio: string = '9:16'): Promise<string> {
+export async function generateAiDynamicHtml(title: string, scenes: any[], customSettings: any, ratio: string = '9:16', templateId: string = 'dynamic'): Promise<string> {
   const resolvedAI = getAIClient(genAI);
   if (!resolvedAI) {
     console.warn('[AI HTML] AI not configured. Returning empty string.');
@@ -104,7 +104,6 @@ export async function generateAiDynamicHtml(title: string, scenes: any[], custom
 
   const sampleScene = scenes[0] || { id: 1, type: 'hook', voiceText: 'Nội dung mẫu cảnh mở đầu' };
   const scriptSummary = scenes.map((s, idx) => `Cảnh ${idx + 1}: ${s.voiceText || s.bodyText || ''}`).join('\n');
-
   let ratioLayoutRules = "";
   if (ratio === '16:9') {
     ratioLayoutRules = `
@@ -112,37 +111,9 @@ export async function generateAiDynamicHtml(title: string, scenes: any[], custom
 Bạn đang thiết kế cho màn hình ngang (16:9) chuẩn máy tính/TV/Youtube.
 1. CONTAINER GỐC #root: Bắt buộc khai báo: <div id="root" data-composition-id="main" data-width="1920" data-height="1080" data-start="0" data-duration="{{ DURATION }}">
 2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card): Toàn bộ các thẻ cảnh '.scene-card' BẮT BUỘC phải sử dụng thuộc tính CSS định vị absolute chồng lên nhau để crossfade hoàn hảo:
-   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 50px; box-sizing: border-box; padding: 120px 100px;'
-3. CHIA ĐÔI SONG SONG TRÁI-PHẢI @aulaq.ai BENTO STYLE (HORIZONTAL SIDE-BY-SIDE SPLIT):
-   - Nếu cảnh CÓ hình ảnh (scene.imageUrl):
-     * Khối ảnh '.scene-image-card' nằm bên TRÁI, chiếm khoảng 46% chiều rộng và 90% chiều cao. BẮT BUỘC được bọc trong macOS Browser Mockup:
-       HTML cấu trúc:
-       <div class="scene-image-card browser-mockup">
-         <div class="browser-header">
-           <div class="browser-dots">
-             <div class="browser-dot red"></div>
-             <div class="browser-dot yellow"></div>
-             <div class="browser-dot green"></div>
-           </div>
-           <div class="browser-address">aulaq.ai/preview</div>
-         </div>
-         <div class="browser-content">
-           <img class="scene-image pan-ltr" src="scene.imageUrl" />
-         </div>
-       </div>
-       CSS mockup tương ứng cho browser mockup:
-       .browser-mockup { border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(15, 18, 30, 0.6); overflow: hidden; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; width: 100%; height: 100%; }
-       .browser-header { display: flex; align-items: center; padding: 0 16px; height: 36px; background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid rgba(255, 255, 255, 0.05); gap: 10px; }
-       .browser-dots { display: flex; gap: 6px; }
-       .browser-dot { width: 10px; height: 10px; border-radius: 50%; }
-       .browser-dot.red { background: #FF5F56; }
-       .browser-dot.yellow { background: #FFBD2E; }
-       .browser-dot.green { background: #27C93F; }
-       .browser-address { flex: 1; max-width: 50%; margin: 0 auto; height: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: "jetbrains mono", monospace; font-size: 11px; color: rgba(255, 255, 255, 0.4); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-       .browser-content { flex: 1; overflow: hidden; position: relative; }
-     * Khối chữ '.scene-text-card' nằm bên PHẢI, chiếm khoảng 46% chiều rộng và 90% chiều cao. Style theo Bento Box với padding rộng rãi:
-       .scene-text-card { border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(15, 18, 30, 0.6); padding: 50px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; justify-content: center; }
-   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' tự động chiếm trọn vẹn 90% không gian bề ngang ở trung tâm, styled Bento Box.
+   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; box-sizing: border-box;'
+3. BỐ CỤC LINH HOẠT THEO PHONG CÁCH:
+   - Hãy thiết kế bố cục ngang rộng rãi, chia cột hợp lý hoặc căn giữa nghệ thuật tùy thuộc vào Style được chọn (ví dụ: Promo dùng split-screen 50/50 hoặc thẻ nổi bật; Tech dùng bento-grid ngang hoặc console mockup; Editorial dùng layout tối giản sang trọng).
 `;
   } else if (ratio === '1:1') {
     ratioLayoutRules = `
@@ -150,27 +121,7 @@ Bạn đang thiết kế cho màn hình ngang (16:9) chuẩn máy tính/TV/Youtu
 Bạn đang thiết kế cho màn hình vuông (1:1).
 1. CONTAINER GỐC #root: Bắt buộc khai báo: <div id="root" data-composition-id="main" data-width="1080" data-height="1080" data-start="0" data-duration="{{ DURATION }}">
 2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card): Toàn bộ các thẻ cảnh '.scene-card' BẮT BUỘC phải sử dụng thuộc tính CSS định vị absolute chồng lên nhau để crossfade hoàn hảo:
-   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 30px; box-sizing: border-box; padding: 80px 45px;'
-3. BỐ CỤC XẾP CHỒNG DỌC @aulaq.ai BENTO STYLE (VERTICAL BALANCED STACK):
-   - Nếu cảnh CÓ hình ảnh (scene.imageUrl):
-     * Khối ảnh '.scene-image-card' nằm ở trên, chiếm khoảng 44% chiều cao và 100% chiều rộng. BẮT BUỘC được bọc trong macOS Browser Mockup:
-       HTML cấu trúc:
-       <div class="scene-image-card browser-mockup">
-         <div class="browser-header">
-           <div class="browser-dots">
-             <div class="browser-dot red"></div>
-             <div class="browser-dot yellow"></div>
-             <div class="browser-dot green"></div>
-           </div>
-           <div class="browser-address">aulaq.ai/preview</div>
-         </div>
-         <div class="browser-content">
-           <img class="scene-image pan-ltr" src="scene.imageUrl" />
-         </div>
-       </div>
-       (CSS mockup tương tự như trên).
-     * Khối chữ '.scene-text-card' nằm ở dưới, chiếm khoảng 44% chiều cao và 100% chiều rộng. Style theo Bento Box.
-   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' tự động mở rộng chiếm 80% không gian vuông ở trung tâm.
+   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; padding: 60px 40px;'
 `;
   } else {
     ratioLayoutRules = `
@@ -178,38 +129,8 @@ Bạn đang thiết kế cho màn hình vuông (1:1).
 Bạn đang thiết kế cho màn hình đứng (9:16) chuẩn di động.
 1. CONTAINER GỐC #root: Bắt buộc khai báo: <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-start="0" data-duration="{{ DURATION }}">
 2. ĐỊNH VỊ PHỦ ĐÈ TUYỆT ĐỐI (.scene-card): Toàn bộ các thẻ cảnh '.scene-card' BẮT BUỘC phải sử dụng thuộc tính CSS định vị absolute chồng lên nhau để crossfade hoàn hảo:
-   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 35px; box-sizing: border-box; padding: 160px 45px;'
-3. BỐ CỤC XẾP CHỒNG DỌC @aulaq.ai BENTO STYLE (NO HORIZONTAL COLUMNS):
-   - Cấm hoàn toàn việc chia đôi màn hình theo chiều ngang (flex-direction: row) vì chiều rộng video đứng 9:16 cực kỳ hẹp.
-   - Nếu cảnh CÓ hình ảnh (scene.imageUrl): Thiết kế dạng khối bento và macOS browser mockup xếp chồng dọc:
-     * Khối ảnh '.scene-image-card' nằm ở trên, chiếm khoảng 35% chiều cao (height: 35%), chiều rộng 100%. BẮT BUỘC được bọc trong macOS Browser Mockup:
-       HTML cấu trúc:
-       <div class="scene-image-card browser-mockup">
-         <div class="browser-header">
-           <div class="browser-dots">
-             <div class="browser-dot red"></div>
-             <div class="browser-dot yellow"></div>
-             <div class="browser-dot green"></div>
-           </div>
-           <div class="browser-address">aulaq.ai/preview</div>
-         </div>
-         <div class="browser-content">
-           <img class="scene-image pan-ltr" src="scene.imageUrl" />
-         </div>
-       </div>
-       CSS mockup tương ứng cho browser mockup:
-       .browser-mockup { border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(15, 18, 30, 0.6); overflow: hidden; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; width: 100%; height: 100%; }
-       .browser-header { display: flex; align-items: center; padding: 0 16px; height: 36px; background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid rgba(255, 255, 255, 0.05); gap: 10px; }
-       .browser-dots { display: flex; gap: 6px; }
-       .browser-dot { width: 10px; height: 10px; border-radius: 50%; }
-       .browser-dot.red { background: #FF5F56; }
-       .browser-dot.yellow { background: #FFBD2E; }
-       .browser-dot.green { background: #27C93F; }
-       .browser-address { flex: 1; max-width: 50%; margin: 0 auto; height: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: "jetbrains mono", monospace; font-size: 11px; color: rgba(255, 255, 255, 0.4); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-       .browser-content { flex: 1; overflow: hidden; position: relative; }
-     * Khối chữ '.scene-text-card' nằm ở dưới, chiếm khoảng 50% chiều cao (height: 50%), style theo Bento Box:
-       .scene-text-card { border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(15, 18, 30, 0.6); padding: 40px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; justify-content: center; }
-   - Nếu cảnh KHÔNG CÓ hình ảnh: Khối chữ '.scene-text-card.full-size' tự động mở rộng chiếm 80% không gian trung tâm, styled Bento Box.
+   'position: absolute; inset: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; padding: 160px 45px;'
+3. TRÁNH CHIA CỘT NGANG RỘNG: Vì chiều rộng 9:16 rất hẹp, hãy thiết kế bố cục xếp chồng dọc mượt mà (ảnh/video ở trên hoặc làm nền mờ toàn màn hình, chữ và call-to-action xếp dưới).
 `;
   }
 
@@ -224,7 +145,28 @@ Dưới đây là thông tin chi tiết về kịch bản video để bạn phâ
 - Cấu trúc dữ liệu của 1 cảnh mẫu: ${JSON.stringify(sampleScene)}
 - Tỷ lệ khung hình video hiện tại: ${ratio}
 
-Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html hoàn toàn mới, standalone, hoàn chỉnh 100% để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. Trang này phải thiết kế theo phong cách ĐỘC BẢN: "@aulaq.ai Tech Developer Bento Style", đo ni đóng giày phù hợp hoàn hảo với chủ đề và nội dung của kịch bản trên!
+Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html hoàn toàn mới, standalone, hoàn chỉnh 100% để HyperFrames (sử dụng GSAP + Puppeteer) render ra video. 
+
+=== CHỈ THỊ PHONG CÁCH (STYLE DIRECTIVE) ===
+${templateId === 'promo' ? `BẮT BUỘC sử dụng phong cách [PROMO & MARKETING]. Thiết kế phải mang đậm tính thương mại cao cấp, kêu gọi hành động mạnh mẽ, thu hút mua hàng/đăng ký.` : `Hãy TỰ ĐỘNG phân tích kịch bản để chọn phong cách phù hợp nhất trong danh sách bên dưới.`}
+
+=== CÁC PHONG CÁCH NGHỆ THUẬT CÓ SẴN (STYLE CLASSIFICATION) ===
+1. [PROMO & MARKETING] (Bán hàng, quảng cáo, ra mắt sản phẩm, khuyến mãi, giới thiệu dịch vụ):
+   - Tone màu: Rực rỡ, độ tương phản cực mạnh (ví dụ: Cam hoàng hôn ấm áp + Đen bóng đêm, hoặc Đỏ Cherry + Vàng Neon, hoặc Xanh dương Electric + Trắng ngọc trai).
+   - Layout: Modern Grid, thẻ sản phẩm nổi (glassmorphism/neumorphism cards), các nhãn kêu gọi hành động (Call To Action - CTA) lớn, bo góc tròn sang trọng (32px), có hiệu ứng pulsing mượt mà ở các viền.
+   - Graphics: Thêm các hình trang trí độc đáo như viền phát sáng, các đường gạch chân nghiêng, huy hiệu "OFFER", "GIẢM GIÁ", "MUA NGAY" mang đậm tính thương mại cao cấp.
+   - Typography: Chữ tiêu đề cực lớn, bold 900, gradient color. CTA buttons với nền sáng rực + chữ đậm.
+2. [CINEMATIC & EDITORIAL] (Kể chuyện, chia sẻ kiến thức sâu sắc, tin tức tài chính sang trọng):
+   - Tone màu: Tối giản, quý phái (ví dụ: Be trầm ấm + Than củi tối, hoặc Xám đá + Vàng Gold mờ, hoặc Trắng sữa + Xanh lục bảo đậm).
+   - Layout: Không gian mở rộng rãi (Generous whitespace), chữ căn giữa hoặc lệch trái tinh tế, khung ảnh cổ điển (Classic film frame) mỏng tinh khiết.
+   - Graphics: Đường phân cách siêu mảnh (0.5px), typography sang trọng bậc nhất.
+3. [TECH & DEVELOPMENT] (Công nghệ, AI, lập trình, tiền điện tử):
+   - Tone màu: High-contrast Dark Tech (Đen sâu thẳm + Xanh Mint neon, hoặc Tím Neon + Xanh Cyber).
+   - Layout: Bento Grid hiện đại, mã nguồn hoặc các ô dữ liệu xếp chồng mượt mà, khung mô phỏng giao diện Terminal/Browser macOS tối giản.
+   - Graphics: Lưới tọa độ chấm bi nhỏ mờ, các tag/badge dạng font monospace (JetBrains Mono).
+4. [DYNAMIC & ENERGETIC] (Tin nhanh, giải trí, thể thao, động lực):
+   - Tone màu: Trẻ trung, giàu năng lượng (ví dụ: Vàng chanh + Đen nhám, hoặc Xanh lá Neon + Tím khói).
+   - Layout: Nghiêng góc nhẹ (skew -2deg đến -4deg), chữ cực lớn, các khung thẻ viền kép cá tính.
 
 === CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES (BẮT BUỘC TUÂN THỦ 100%) ===
 Trình biên dịch của HyperFrames phân tích font chữ tĩnh (static compilation) nên có những giới hạn cực kỳ khắt khe sau:
@@ -236,32 +178,17 @@ Trình biên dịch của HyperFrames phân tích font chữ tĩnh (static compi
    - Serif: 'lora', 'merriweather', 'fraunces', 'crimson pro', 'dm serif display', 'newsreader'.
    - Monospace: 'jetbrains mono', 'space mono', 'source code pro', 'fira code'.
 4. Cặp font tương phản cao (Typography Pairings & Weight Contrast):
-   - Luôn kết hợp font có độ tương phản lớn về kiểu dáng hoặc độ dày. Sử dụng 'plus jakarta sans' hoặc 'be vietnam pro' làm font chính và 'jetbrains mono' hoặc 'space mono' làm font cho badges/labels/tags/technical elements.
+   - Luôn kết hợp font có độ tương phản lớn về kiểu dáng hoặc độ dày.
 5. BẮT BUỘC HỖ TRỢ TIẾNG VIỆT UNICODE (KHÔNG LỖI DIACRITICS):
    - Bạn BẮT BUỘC phải nhập liên kết Google Fonts ở thẻ <head> chứa đúng các bộ font được hỗ trợ tiếng Việt có dấu hoàn hảo.
-   - Ví dụ nhúng tối ưu:
-     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Be+Vietnam+Pro:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-=== TIÊU CHUẨN THIẾT KẾ ĐỘC ĐÁO "@aulaq.ai TECH BENTO" (BẮT BUỘC TUÂN THỦ) ===
-1. HIGH-CONTRAST DARK TECH MODE:
-   - Sử dụng nền tối sâu thẳm sang trọng như \`#0B0D17\` hoặc \`#0F111A\`.
-   - Card bento grid phải có viền mỏng mờ nhạt: \`border: 1px solid rgba(255, 255, 255, 0.08)\` và bo góc mượt mà \`24px\` hoặc \`32px\`. Nền card dùng màu tối bán trong suốt: \`background: rgba(15, 18, 30, 0.6);\`.
-2. MONOSPACE BADGES / TAGS:
-   - Các badge, tags, metadata (e.g. \`[npm]\`, \`[git]\`, \`[react]\`, \`[node.js]\`, metrics, statistics) phải sử dụng font-family: 'jetbrains mono', monospace với màu sắc neon rực rỡ (xanh mint, cam neon, tím sáng) và bo góc mượt mà \`8px\` hoặc \`12px\` với background trong suốt/neon mờ.
-3. macOS BROWSER MOCKUPS FOR IMAGES:
-   - Toàn bộ các khối ảnh nền/B-roll (.scene-image-card) hiển thị hình ảnh phải được bọc trong macOS Browser Mockup như mô tả bên dưới phần Rules. Trông phải giống một cửa sổ trình duyệt thực thụ của macOS với dots đỏ/vàng/xanh, thanh địa chỉ mỏng, và viền xám tối tinh tế.
-4. ÁP DỤNG THIẾT KẾ CHI TIẾT 3 CẤP ĐỘ DENSITY:
-   - Cấp 1 (Background texture): Nền phải có lưới tọa độ chấm bi (.bg-dots-grid) siêu mỏng: \`background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px); background-size: 40px 40px;\` và các quả cầu ánh sáng mờ ảo (ambient radial glow) bằng gradient.
-   - Cấp 2 (Structural borders & Containers): Sử dụng các bento card mờ ảo.
-   - Cấp 3 (High-Contrast Typography): Cỡ chữ cực lớn theo tỷ lệ video. Tiêu đề phụ đề to rõ ràng, từ khóa chính được highlight rực rỡ.
-
-=== HIỆU ỨNG VÀ CHUYỂN CẢNH CAO CẤP (TRANSITIONS & HIGHLIGHTING) ===
+=== HIỆU ỨNG VÀ CHUYỂN CẢNH CAO CẤP TRÊN HYPERFRAMES (BẮT BUỘC) ===
 1. CẤM HOÀN TOÀN SCALE/ZOOM DƯỚI MỌI HÌNH THỨC TRÊN CARD/WORD/SCENE QUA GSAP:
    - Tuyệt đối CẤM sử dụng GSAP (timeline hay tween) để tạo hiệu ứng zoom/scale hoặc thay đổi tọa độ Y trên các chữ/từ đang highlight (active word) để tránh giật seeker và Puppeteer crashes.
-   - Khi render hoặc seek, GSAP reset scale đột ngột gây giật nháy hình. Mọi chuyển động zoom/scale bằng GSAP timeline đều bị cấm.
+   - Khi render hoặc seek, GSAP reset scale đột ngột gây giật nháy hình.
 2. ACTIVE WORD HIGHLIGHTING QUA MÀU SẮC VÀ GLOW:
    - Highlight chữ chạy: chữ mặc định ở trạng thái inactive sẽ mờ nhẹ (e.g., \`opacity: 0.4; color: #ffffff;\`).
-   - Khi được đọc tới, GSAP sẽ chỉ thay đổi màu chữ (color) sang màu vàng neon \`#FFE600\` hoặc xanh mint \`#4AE3B5\`, tăng opacity lên \`1\`, và thêm bóng chữ phát sáng \`text-shadow: 0 0 12px rgba(255, 230, 0, 0.75)\`. Cấm thay đổi scale, rotation, hay vị trí Y của từ trong lúc highlight!
+   - Khi được đọc tới, GSAP sẽ chỉ thay đổi màu chữ (color) sang màu neon làm điểm nhấn sáng (ví dụ: Vàng Neon \`#FFE600\`, Xanh mint \`#4AE3B5\` hoặc Cam rực rỡ), tăng opacity lên \`1\`, và thêm bóng chữ phát sáng nhẹ. Cấm thay đổi scale, rotation, hay vị trí Y của từ trong lúc highlight!
 3. CHUYỂN CẢNH CSS KEYFRAMES VÀ PANNING:
    - Sử dụng CSS \`@keyframes\` animations để thực hiện transition đi vào cho các slide/ảnh và hiệu ứng pan nền (panning) bằng \`translate3d\`.
    - Định nghĩa sẵn các \`@keyframes\` trong thẻ \`<style>\`:
@@ -270,8 +197,7 @@ Trình biên dịch của HyperFrames phân tích font chữ tĩnh (static compi
        (Lưu ý: giữ \`scale(1.15)\` cố định trong suốt quá trình pan để tránh nháy viền).
 4. EXIT TRANSITION FADE INTERNAL CARDS ONLY (CẤM FADE sceneEl CONTAINER):
    - Tuyệt đối KHÔNG được fade opacity của \`sceneEl\` (scene container) về 0. Làm như vậy sẽ làm ẩn luôn ảnh nền blur và gây chớp nháy màn hình đen giữa các cảnh.
-   - Thay vào đó, exit transition của mỗi cảnh chỉ được fade-out các elements nội dung bên trong (\`.scene-text-card\` và \`.scene-image-card\`) về \`opacity: 0\` khi gần hết thời gian cảnh (bắt đầu từ \`duration - CROSSFADE\`).
-
+   - Thay vào đó, exit transition của mỗi cảnh chỉ được fade-out các elements nội dung bên trong về \`opacity: 0\` khi gần hết thời gian cảnh (bắt đầu từ \`duration - CROSSFADE\`).
 
 ${ratioLayoutRules}
 
@@ -307,7 +233,7 @@ function splitTextToLineCards(text) {
       if (!word.trim()) return '';
       return '<span class="word-wrapper" style="display:inline-block; overflow:hidden; vertical-align:bottom; margin-right:0.25em;"><span class="word" style="display:inline-block; transform:translateY(105%); opacity:0.4; color:#ffffff; will-change:transform, opacity, color, text-shadow;">' + word + '</span></span>';
     }).join(' ');
-    return '<div class="scene-line-card" style="border: none; background: transparent; box-shadow: none; padding: 0; margin-bottom: 20px;">' + wordsSpans + '</div>';
+    return '<div class="scene-line-card">' + wordsSpans + '</div>';
   }).join('');
 }
 
@@ -334,7 +260,7 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     document.getElementById('bg-container').appendChild(bgEl);
   }
 
-  // 2. Tạo phần tử DOM động
+  // 2. Tạo phần tử DOM động dựa trên cấu trúc style của bạn
   var sceneEl = document.createElement('div');
   sceneEl.id = sceneId;
   sceneEl.className = 'scene-card';
@@ -343,30 +269,30 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
   sceneEl.setAttribute('data-duration', duration.toFixed(3));
   
   var htmlContent = '';
-  // Hiển thị hình ảnh với macOS browser mockup
+  
+  // HÃY TỰ DO THIẾT KẾ CẤU TRÚC HTML ĐỘC ĐÁO PHÙ HỢP VỚI CHỦ ĐỀ KỊCH BẢN CỦA BẠN!
+  // Bạn có 100% sự linh hoạt để sắp xếp, thiết kế các thẻ chứa (ví dụ: chia đôi trái-phải, 
+  // bento grid, khung terminal mockups, khung điện ảnh cổ điển, hoặc thẻ promo sản phẩm).
+  // ĐIỀU KIỆN DUY NHẤT để GSAP tự động nhận diện và tạo chuyển động mượt mà là:
+  // - Khối chứa hình ảnh của bạn phải có class "scene-image-card"
+  // - Mỗi dòng phụ đề phải được bọc bằng hàm splitTextToLineCards() và có class "scene-line-card"
+  // - Mỗi từ trong phụ đề sẽ tự động có class "word" để phục vụ việc highlight karaoke chữ chạy.
+  //
+  // Ví dụ cấu trúc linh hoạt:
   if (scene.imageUrl) {
     var panClass = (i % 2 === 0) ? 'pan-ltr' : 'pan-rtl';
-    htmlContent += '<div class="scene-image-card browser-mockup">';
-    htmlContent += '  <div class="browser-header">';
-    htmlContent += '    <div class="browser-dots">';
-    htmlContent += '      <div class="browser-dot red"></div>';
-    htmlContent += '      <div class="browser-dot yellow"></div>';
-    htmlContent += '      <div class="browser-dot green"></div>';
-    htmlContent += '    </div>';
-    htmlContent += '    <div class="browser-address">aulaq.ai/preview</div>';
-    htmlContent += '  </div>';
-    htmlContent += '  <div class="browser-content">';
-    htmlContent += '    <img class="scene-image ' + panClass + '" src="' + scene.imageUrl + '" style="animation-duration: ' + duration + 's;" />';
-    htmlContent += '  </div>';
+    htmlContent += '<div class="scene-image-card my-custom-img-container">';
+    htmlContent += '  <img class="scene-image ' + panClass + '" src="' + scene.imageUrl + '" style="animation-duration: ' + duration + 's;" />';
     htmlContent += '</div>';
-    htmlContent += '<div class="scene-text-card">';
+    htmlContent += '<div class="scene-text-card my-custom-text-layout">';
     htmlContent += '  <div class="scene-text highlight-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '</div>';
   } else {
-    htmlContent += '<div class="scene-text-card full-size">';
+    htmlContent += '<div class="scene-text-card full-size my-custom-text-layout">';
     htmlContent += '  <div class="scene-text centered-text">' + splitTextToLineCards(scene.bodyText || scene.voiceText || '') + '</div>';
     htmlContent += '</div>';
   }
+  
   sceneEl.innerHTML = htmlContent;
   document.getElementById('scene-container').appendChild(sceneEl);
 
@@ -413,7 +339,7 @@ for (var i = 0; i < SCENES_DATA.length; i++) {
     var highlightDuration = duration - 0.6 - CROSSFADE;
     if (highlightDuration > 0.5) {
       tl.to(words, {
-        color: '#FFE600',
+        color: '#FFE600', // Đổi màu highlight động theo style của bạn (ví dụ màu vàng neon)
         textShadow: '0 0 12px rgba(255, 230, 0, 0.75)',
         opacity: 1,
         stagger: {
