@@ -203,6 +203,7 @@ Trình biên dịch của HyperFrames phân tích font chữ tĩnh (static compi
      * Chuyển động pan ảnh nền (Background Panning):
        \`@keyframes hf-pan-slow-ltr { from { transform: translate3d(-30px, -10px, 0) scale(1.15); } to { transform: translate3d(30px, 10px, 0) scale(1.15); } }\`
        (Lưu ý: giữ \`scale(1.15)\` cố định trong suốt quá trình pan để tránh nháy viền).
+     * BẮT BUỘC khai báo thuộc tính fill-mode là \`both\` hoặc \`forwards\` (ví dụ: \`animation: hf-pan-slow-ltr linear both;\`) cho toàn bộ các hiệu ứng chuyển động ảnh/nền. TUYỆT ĐỐI CẤM quên khai báo \`both\`/\`forwards\`, nếu không hình ảnh sẽ tự động reset về trạng thái ban đầu khi hết chu kỳ giây của cảnh, gây chớp nháy giật màn hình cực kỳ khó chịu.
 4. EXIT TRANSITION FADE INTERNAL CARDS ONLY (CẤM FADE sceneEl CONTAINER):
    - Tuyệt đối KHÔNG được fade opacity của \`sceneEl\` (scene container) về 0. Làm như vậy sẽ làm ẩn luôn ảnh nền blur và gây chớp nháy màn hình đen giữa các cảnh.
    - Thay vào đó, exit transition của mỗi cảnh chỉ được fade-out các elements nội dung bên trong về \`opacity: 0\` khi gần hết thời gian cảnh (bắt đầu từ \`duration - CROSSFADE\`).

@@ -830,17 +830,17 @@
       if (bgImg) {
         var panClass = i % 2 === 0 ? 'pan-slow-ltr' : 'pan-slow-rtl';
         bgImg.classList.add(panClass);
-        bgImg.style.animationDuration = dur + 's';
+        bgImg.style.animationDuration = (dur + 1.0) + 's';
         bgImg.setAttribute('data-start', currentTime.toFixed(3));
-        bgImg.setAttribute('data-duration', dur.toFixed(3));
+        bgImg.setAttribute('data-duration', (dur + 1.0).toFixed(3));
       }
 
       var editorialImg = unit.querySelector('.editorial-img');
       if (editorialImg) {
         editorialImg.classList.add('editorial-pan');
-        editorialImg.style.animationDuration = dur + 's';
+        editorialImg.style.animationDuration = (dur + 1.0) + 's';
         editorialImg.setAttribute('data-start', currentTime.toFixed(3));
-        editorialImg.setAttribute('data-duration', dur.toFixed(3));
+        editorialImg.setAttribute('data-duration', (dur + 1.0).toFixed(3));
       }
 
       var titleEl = unit.querySelector('.scene-title');
