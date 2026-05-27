@@ -151,22 +151,30 @@ Nhiệm vụ của bạn là: Lập trình ra MỘT TRANG index.html hoàn toàn
 ${templateId === 'promo' ? `BẮT BUỘC sử dụng phong cách [PROMO & MARKETING]. Thiết kế phải mang đậm tính thương mại cao cấp, kêu gọi hành động mạnh mẽ, thu hút mua hàng/đăng ký.` : `Hãy TỰ ĐỘNG phân tích kịch bản để chọn phong cách phù hợp nhất trong danh sách bên dưới.`}
 
 === CÁC PHONG CÁCH NGHỆ THUẬT CÓ SẴN (STYLE CLASSIFICATION) ===
-1. [PROMO & MARKETING] (Bán hàng, quảng cáo, ra mắt sản phẩm, khuyến mãi, giới thiệu dịch vụ):
-   - Tone màu: Rực rỡ, độ tương phản cực mạnh (ví dụ: Cam hoàng hôn ấm áp + Đen bóng đêm, hoặc Đỏ Cherry + Vàng Neon, hoặc Xanh dương Electric + Trắng ngọc trai).
-   - Layout: Modern Grid, thẻ sản phẩm nổi (glassmorphism/neumorphism cards), các nhãn kêu gọi hành động (Call To Action - CTA) lớn, bo góc tròn sang trọng (32px), có hiệu ứng pulsing mượt mà ở các viền.
-   - Graphics: Thêm các hình trang trí độc đáo như viền phát sáng, các đường gạch chân nghiêng, huy hiệu "OFFER", "GIẢM GIÁ", "MUA NGAY" mang đậm tính thương mại cao cấp.
-   - Typography: Chữ tiêu đề cực lớn, bold 900, gradient color. CTA buttons với nền sáng rực + chữ đậm.
-2. [CINEMATIC & EDITORIAL] (Kể chuyện, chia sẻ kiến thức sâu sắc, tin tức tài chính sang trọng):
-   - Tone màu: Tối giản, quý phái (ví dụ: Be trầm ấm + Than củi tối, hoặc Xám đá + Vàng Gold mờ, hoặc Trắng sữa + Xanh lục bảo đậm).
-   - Layout: Không gian mở rộng rãi (Generous whitespace), chữ căn giữa hoặc lệch trái tinh tế, khung ảnh cổ điển (Classic film frame) mỏng tinh khiết.
-   - Graphics: Đường phân cách siêu mảnh (0.5px), typography sang trọng bậc nhất.
-3. [TECH & DEVELOPMENT] (Công nghệ, AI, lập trình, tiền điện tử):
-   - Tone màu: High-contrast Dark Tech (Đen sâu thẳm + Xanh Mint neon, hoặc Tím Neon + Xanh Cyber).
-   - Layout: Bento Grid hiện đại, mã nguồn hoặc các ô dữ liệu xếp chồng mượt mà, khung mô phỏng giao diện Terminal/Browser macOS tối giản.
-   - Graphics: Lưới tọa độ chấm bi nhỏ mờ, các tag/badge dạng font monospace (JetBrains Mono).
-4. [DYNAMIC & ENERGETIC] (Tin nhanh, giải trí, thể thao, động lực):
-   - Tone màu: Trẻ trung, giàu năng lượng (ví dụ: Vàng chanh + Đen nhám, hoặc Xanh lá Neon + Tím khói).
-   - Layout: Nghiêng góc nhẹ (skew -2deg đến -4deg), chữ cực lớn, các khung thẻ viền kép cá tính.
+Bạn BẮT BUỘC phải tự thiết kế một hệ thống CSS cực kỳ đẹp mắt, nhiều màu sắc, có chiều sâu, mang tính thẩm mỹ cao (WOW factor). CẤM HOÀN TOÀN việc để nền màu đen thui đơn điệu (#000000). Hãy sử dụng:
+- Các dải màu Gradient chuyển động mượt mà (Linear/Radial/Mesh gradients) kết hợp với các đốm sáng Neon mờ ảo (flowing blur blobs).
+- Khung thẻ chứa Glassmorphism hiện đại (bo góc lớn từ 24px - 32px, viền trắng mờ phát sáng nhẹ, đổ bóng mịn màng).
+- Bố cục Bento Grid tinh tế hoặc Split-Screen chia tỉ lệ vàng cực chuyên nghiệp.
+
+1. [PROMO & MARKETING] (Quảng cáo, ra mắt sản phẩm, bán hàng, khuyến mãi):
+   - Tone màu & Nền: Nền gradient chuyển động cực mạnh (ví dụ: Deep Purple sang Emerald, hoặc Dark Charcoal sang Warm Orange #FF4E50). Thêm các đốm sáng neon (blur circles) chuyển động mượt mà dưới nền.
+   - Layout & Graphics: Thẻ Bento nổi bật dạng Glassmorphism cao cấp, viền vàng kim hoặc neon phát sáng, nút bấm CTA (Call to Action) lớn bo tròn rực rỡ, các nhãn dán như "SALE", "HOT", "MUA NGAY".
+   - Typography: Chữ tiêu đề siêu lớn, bold 900, tô màu gradient óng ánh, bóng chữ rực rỡ.
+
+2. [CINEMATIC & EDITORIAL] (Lịch sử, kể chuyện, triết lý, tin tức tài chính cao cấp):
+   - Tone màu & Nền: Gradient tông màu sang trọng, tối giản nhưng ấm áp (ví dụ: Be trầm ấm sang Dark Charcoal, hoặc Creamy White sang Emerald). Có hiệu ứng Vignette tối mờ ở 4 góc để tập trung ánh nhìn.
+   - Layout & Graphics: Khung ảnh cổ điển siêu mỏng tinh khiết (Classic Border), đường phân cách thanh lịch (0.5px), khoảng trống thoáng đãng (Generous Whitespace).
+   - Typography: Font chữ Serif quý phái như 'fraunces' hoặc 'lora' kết hợp với Sans-serif mảnh mai cực kỳ sang trọng.
+
+3. [TECH & DEVELOPMENT] (AI, lập trình, công nghệ, tiền điện tử):
+   - Tone màu & Nền: Nền Dark Cyber Deep (Đen sâu thẳm kết hợp với Grid tọa độ chấm bi nhỏ mờ ảo màu Xanh Mint neon hoặc Tím Cyber). Các đốm sáng phát quang mềm mại.
+   - Layout & Graphics: Bố cục Bento Grid công nghệ, các ô dữ liệu xếp chồng mượt mà, khung mô phỏng giao diện Terminal/Browser macOS tối giản có nút bấm 3 màu đỏ/vàng/xanh ở góc trái.
+   - Typography: Sử dụng font Monospace ('jetbrains mono', 'fira code') cho các thẻ phụ, màu xanh neon phát sáng.
+
+4. [DYNAMIC & ENERGETIC] (Giải trí, tin nhanh, thể thao, tạo động lực):
+   - Tone màu & Nền: Gradient chéo góc nghiêng (ví dụ: Vàng chanh rực rỡ sang Đen nhám hoặc Xanh lá Neon sang Tím khói).
+   - Layout & Graphics: Thiết kế phá cách với góc nghiêng nhẹ (skew -3deg), viền kép (double borders), họa tiết Retro Halftone hoặc sọc chéo thể thao năng động.
+   - Typography: Chữ cực lớn (Heavy Ultra Bold), viền chữ đen dày cá tính.
 
 === CẢNH BÁO CỰC KỲ QUAN TRỌNG VỀ FONT CHỮ TRONG HYPERFRAMES (BẮT BUỘC TUÂN THỦ 100%) ===
 Trình biên dịch của HyperFrames phân tích font chữ tĩnh (static compilation) nên có những giới hạn cực kỳ khắt khe sau:
@@ -203,10 +211,18 @@ ${ratioLayoutRules}
 
 === CẢNH BÁO BẮT BUỘC KHÁC VỀ THẺ CHỮ & BỐ CỤC CHUNG ===
 1. Bạn TUYỆT ĐỐI KHÔNG ĐƯỢC phép hardcode bất kỳ thẻ HTML nào đại diện cho cảnh.
-2. Thẻ body của bạn BẮT BUỘC phải bọc toàn bộ nội dung trong một container chính duy nhất có cấu trúc chính xác như sau:
+2. Thẻ body của bạn BẮT BUỘC phải bọc toàn bộ nội dung trong một container chính duy nhất có cấu trúc chính xác như sau để đảm bảo có background rực rỡ, không bị đen:
    <div id="root" data-composition-id="main" data-width="{{ WIDTH }}" data-height="{{ HEIGHT }}" data-start="0" data-duration="{{ DURATION }}">
-3. Bên trong container #root trên, đặt container rỗng để chứa các ảnh nền B-roll mờ ảo chuyển động: <div id="bg-container"></div>, rồi đến các phần tử tĩnh như logo, progress-bar rỗng, và container rỗng để đổ cảnh: <div id="scene-container"></div>.
-4. Bạn BẮT BUỘC phải viết mã JavaScript ở cuối file sử dụng đúng khung cấu trúc vòng lặp dưới đây để sinh DOM động và dựng timeline GSAP seekable hoàn mỹ.
+     <!-- Hai đốm sáng phát quang ambient cực đẹp để tạo chiều sâu cho video, ngăn chặn nền đen -->
+     <div class="ambient-glow ambient-glow-1"></div>
+     <div class="ambient-glow ambient-glow-2"></div>
+     
+     <div id="bg-container"></div>
+     <div id="scene-container"></div>
+   </div>
+3. Trong thẻ \`<style>\`, bạn BẮT BUỘC phải định nghĩa các lớp CSS chất lượng cao cho \`.ambient-glow\`, \`.ambient-glow-1\`, \`.ambient-glow-2\` sử dụng radial-gradient với các màu neon tương thích với chủ đề đã chọn và hiệu ứng di chuyển \`@keyframes float-ambient\` (sử dụng translate3d và blur từ 80px - 120px) để nền luôn luôn chuyển động sang trọng, óng ánh đầy chiều sâu.
+4. Các thẻ chứa chữ \`.scene-text-card\` hoặc Bento cards của bạn BẮT BUỘC phải sử dụng phong cách Glassmorphism cao cấp: \`background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1.5px solid rgba(255, 255, 255, 0.1); border-radius: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);\` hoặc tương tự để tăng tính thẩm mỹ vượt trội.
+5. Bạn BẮT BUỘC phải viết mã JavaScript ở cuối file sử dụng đúng khung cấu trúc vòng lặp dưới đây để sinh DOM động và dựng timeline GSAP seekable hoàn mỹ.
 
 === KHUNG LẬP TRÌNH DỰNG DOM & GSAP TIMELINE ĐỘNG (BẮT BUỘC) ===
 Bạn phải viết mã JavaScript ở cuối file sử dụng đúng cấu trúc sau (Lưu ý: Bắt buộc viết mã này bên trong khối code javascript):

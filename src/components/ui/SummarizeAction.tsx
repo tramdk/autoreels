@@ -56,7 +56,7 @@ export const SummarizeAction: React.FC<SummarizeActionProps> = ({
           className
         )}
       >
-        <Wand2 data-icon="inline-start" className={cn("size-3.5", loading && "animate-spin")} />
+        <Wand2 data-icon="inline-start" className={cn("size-3.5", loading && "animate-twinkle-sway")} />
         {label}
       </button>
 
