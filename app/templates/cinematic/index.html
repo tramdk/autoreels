@@ -73,13 +73,13 @@
       overflow: hidden;
     }
 
-    .scene-bg {
+      .scene-bg {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transform: scale(1.1);
+      transform: scale(1.05);
       will-change: transform;
     }
 
@@ -339,7 +339,7 @@
       var tl = gsap.timeline();
 
       tl.from(unit, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0)
-        .fromTo(bgImg, { scale: 1.15 }, { scale: 1, duration: dur, ease: "sine.inOut", force3D: true }, 0);
+        .fromTo(bgImg, { scale: 1.05, x: -5, y: -5 }, { scale: 1, x: 0, y: 0, duration: dur, ease: "sine.inOut", force3D: true }, 0);
 
       var totalChars = spans.length;
       var targetTypingDuration = dur * 0.6;
