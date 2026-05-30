@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width={{ WIDTH }}, user-scalable=no">
-  <title>Cinematic Template</title>
+  <title>Cinematic Template - Optimized by BotTom</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,22 +21,16 @@
     }
 
     body.is-rendering {
-      --blur-amount: 3px;
+      --blur-amount: 4px;
     }
 
     body.is-rendering .film-grain {
       opacity: 0.05 !important;
-      mix-blend-mode: normal !important;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body,
-    html {
+    body, html {
       width: calc(var(--v-width) * 1px);
       height: calc(var(--v-height) * 1px);
       overflow: hidden;
@@ -87,7 +81,6 @@
       object-fit: cover;
       transform: scale(1.1);
       will-change: transform;
-      /* Prevent white edges during blur */
     }
 
     .scene-overlay {
@@ -121,7 +114,8 @@
       color: #ffffff;
       padding: 15px 30px;
       background: rgba(0, 0, 0, 0.45);
-      /* backdrop-filter removed for Puppeteer compatibility */
+      backdrop-filter: blur(var(--blur-amount));
+      -webkit-backdrop-filter: blur(var(--blur-amount));
       border-radius: 4px;
       text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       max-width: 95%;
@@ -132,39 +126,14 @@
       text-transform: none;
     }
 
-    @keyframes hf-grain-noise {
-      0%, 100% { transform: translate(0, 0); }
-      10% { transform: translate(-1%, -1%); }
-      20% { transform: translate(-2%, 1%); }
-      30% { transform: translate(1%, -2%); }
-      40% { transform: translate(-1%, 2%); }
-      50% { transform: translate(-2%, 1%); }
-      60% { transform: translate(1%, 1%); }
-      70% { transform: translate(1%, -2%); }
-      80% { transform: translate(-1%, 1%); }
-      90% { transform: translate(0%, -1%); }
-    }
-
     .film-grain {
       position: absolute;
-      top: -5%;
-      left: -5%;
-      width: 110%;
-      height: 110%;
-      opacity: 0.08;
+      inset: 0;
+      opacity: 0.12;
       mix-blend-mode: overlay;
       z-index: 500;
       pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-      animation: hf-grain-noise 0.6s steps(1) infinite;
-    }
-
-    .vignette-overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 450;
-      pointer-events: none;
-      background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.65) 100%);
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     }
 
     .ui-layer {
@@ -186,15 +155,8 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .letterbox-top {
-      top: 0;
-    }
-
-    .letterbox-bottom {
-      bottom: 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      justify-content: center;
-    }
+    .letterbox-top { top: 0; }
+    .letterbox-bottom { bottom: 0; border-top: 1px solid rgba(255, 255, 255, 0.05); justify-content: center; }
 
     .letterbox-logo {
       font-family: 'JetBrains Mono';
@@ -253,37 +215,7 @@
     .scene-progress-bar {
       width: 0%;
       height: 100%;
-      background: #ff0000; /* Matching REC dot */
-    }
-
-    /* CSS KEYFRAME ANIMATIONS FOR HYPERFRAMES */
-    @keyframes hf-scene-enter-left {
-      from { opacity: 0; transform: translate3d(-100px, 0, 0); filter: blur(10px); }
-      to { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
-    }
-    @keyframes hf-scene-enter-right {
-      from { opacity: 0; transform: translate3d(100px, 0, 0); filter: blur(10px); }
-      to { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
-    }
-    @keyframes hf-pan-slow-ltr {
-      from { transform: translate3d(-30px, -10px, 0) scale(1.15); }
-      to { transform: translate3d(30px, 10px, 0) scale(1.15); }
-    }
-    @keyframes hf-pan-slow-rtl {
-      from { transform: translate3d(30px, 10px, 0) scale(1.15); }
-      to { transform: translate3d(-30px, -10px, 0) scale(1.15); }
-    }
-    .scene-enter-left {
-      animation: hf-scene-enter-left 600ms cubic-bezier(0.25, 1, 0.5, 1) both;
-    }
-    .scene-enter-right {
-      animation: hf-scene-enter-right 600ms cubic-bezier(0.25, 1, 0.5, 1) both;
-    }
-    .pan-slow-ltr {
-      animation: hf-pan-slow-ltr linear both;
-    }
-    .pan-slow-rtl {
-      animation: hf-pan-slow-rtl linear both;
+      background: #ff0000;
     }
   </style>
 </head>
@@ -293,7 +225,6 @@
     data-height="{{ HEIGHT }}">
     <div id="scenes-container"></div>
     <div class="film-grain"></div>
-    <div class="vignette-overlay"></div>
     <div class="ui-layer">
       <div class="letterbox letterbox-top">
         <div class="letterbox-logo">{{ LOGO_TEXT }}</div>
@@ -314,24 +245,22 @@
     var DEFAULT_BG = "{{ BG_IMAGE_URL }}";
   </script>
   <script>
-    console.log("[Template] Cinematic script starting...");
+    console.log("[Template] Cinematic script starting (Optimized by BotTom)...");
     var scenes = SCENES_DATA;
     var sceneDurations = SCENE_DURATIONS;
     var container = document.getElementById('scenes-container');
 
-    // --- DOUBLE SAFETY NET (CLIENT-SIDE FALLBACK) ---
     var totalDuration = parseFloat("{{ DURATION }}") || 15;
     if (!sceneDurations || sceneDurations.length === 0) {
       var avg = totalDuration / (scenes.length || 1);
       sceneDurations = [];
-      for (var s = 0; s < scenes.length; s++) {
-        sceneDurations.push(avg);
-      }
+      for (var s = 0; s < scenes.length; s++) { sceneDurations.push(avg); }
     }
 
     var mainTl = gsap.timeline({ id: "root", paused: true });
     window.__timelines = window.__timelines || {};
     window.__timelines["root"] = mainTl;
+    window._tl = mainTl;
 
     var globalLastImage = DEFAULT_BG;
 
@@ -340,13 +269,10 @@
       var unit = document.createElement('div');
       unit.id = 'unit-' + i;
       unit.className = 'scene-unit ' + (isHook ? 'scene-hook' : 'scene-body');
-      
-      // HyperFrames native visibility control via data attributes
       unit.setAttribute('data-start', start.toFixed(3));
       var hfDuration = (i < scenes.length - 1) ? (duration + 0.2) : duration;
       unit.setAttribute('data-duration', hfDuration.toFixed(3));
       unit.setAttribute('data-track-index', "1");
-      
       unit.style.zIndex = 100 + i;
 
       if (scene.imageUrl) globalLastImage = scene.imageUrl;
@@ -362,14 +288,10 @@
         '<div class="scene-title" style="font-size: calc(var(--cqmin) * ' + fontSize + ' / 720); color: ' + color + ';">' + (scene.text || scene.bodyText || '') + '</div>';
 
       unit.innerHTML = 
-        '<div class="scene-bg-container">' +
-          '<img class="scene-bg" src="' + imgUrl + '">' +
-        '</div>' +
+        '<div class="scene-bg-container"><img class="scene-bg" src="' + imgUrl + '"></div>' +
         '<div class="scene-overlay"></div>' +
         '<div class="scene-progress-container"><div class="scene-progress-bar"></div></div>' +
-        '<div class="scene-content">' +
-          contentHtml +
-        '</div>';
+        '<div class="scene-content">' + contentHtml + '</div>';
       return unit;
     }
 
@@ -397,66 +319,55 @@
     }
 
     var currentTime = 0;
-    var CROSSFADE = 0.6;
+    var DEFAULT_CROSSFADE = 0.6;
 
     for (var i = 0; i < scenes.length; i++) {
       var scene = scenes[i];
       var dur = parseFloat(sceneDurations[i]) || 5;
+      
+      var crossfade = (dur < 1.2) ? (dur * 0.3) : DEFAULT_CROSSFADE;
+
       var unit = createSceneUnit(scene, i, currentTime, dur);
       container.appendChild(unit);
 
-      var enterClass = i % 2 === 0 ? 'scene-enter-left' : 'scene-enter-right';
-      unit.classList.add(enterClass);
-
       var bgImg = unit.querySelector('.scene-bg');
-      if (bgImg) {
-        var panClass = i % 2 === 0 ? 'pan-slow-ltr' : 'pan-slow-rtl';
-        bgImg.classList.add(panClass);
-        bgImg.style.animationDuration = (dur + 1.0) + 's';
-        bgImg.setAttribute('data-start', currentTime.toFixed(3));
-        bgImg.setAttribute('data-duration', (dur + 1.0).toFixed(3));
-      }
       var titleEl = unit.querySelector('.scene-title');
       var progBar = unit.querySelector('.scene-progress-bar');
       var spans = buildTypingContent(titleEl, (scene.text || scene.bodyText || ''));
 
       var inDur = 0.6;
-      var outDur = CROSSFADE;
       var tl = gsap.timeline();
 
-      // Text animation - Premium y slide up
-      var staggerTime = Math.min(0.04, (dur * 0.7) / (spans.length || 1));
-      tl.fromTo(spans, 
-        { opacity: 0, y: 15 },
-        { opacity: 1, y: 0, duration: 0.25, stagger: staggerTime, ease: "power2.out", force3D: true },
-        0.2
-      );
+      tl.from(unit, { opacity: 0, duration: inDur, ease: "none", force3D: true }, 0)
+        .fromTo(bgImg, { scale: 1.15 }, { scale: 1, duration: dur, ease: "sine.inOut", force3D: true }, 0);
+
+      var totalChars = spans.length;
+      var targetTypingDuration = dur * 0.6;
+      var staggerTime = totalChars > 0 ? targetTypingDuration / totalChars : 0;
       
-      // Progress bar animation
+      tl.to(spans, { opacity: 1, duration: 0.05, stagger: staggerTime, ease: 'none', force3D: true }, 0.2);
+      
       if (progBar) {
         tl.to(progBar, { width: "100%", duration: dur, ease: "none" }, 0);
       }
 
-      // Exit fade - ONLY fade the content/text, NOT the background/unit
-      // This prevents the black background from 'flashing' through during crossfade
       if (i < scenes.length - 1) {
         var content = unit.querySelector('.scene-content');
         var progress = unit.querySelector('.scene-progress-container');
         tl.to([content, progress], { 
           opacity: 0, 
           y: -20,
-          duration: outDur, 
+          duration: crossfade, 
           ease: "power2.inOut", 
           force3D: true 
-        }, dur - outDur);
+        }, dur - crossfade);
       }
       
       mainTl.add(tl, currentTime);
       
-      // Cleanup: delay hiding unit until next scene's bg is fully visible (+0.3s buffer)
       if (i < scenes.length - 1) {
-        mainTl.add(gsap.set(unit, { visibility: 'hidden', zIndex: -1 }), currentTime + dur + 0.3);
-        currentTime += dur - CROSSFADE;
+        mainTl.add(gsap.set(unit, { visibility: 'hidden' }), currentTime + dur);
+        currentTime += dur - crossfade;
       } else {
         currentTime += dur;
       }
@@ -465,23 +376,17 @@
     var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;
     window.duration = finalDur;
 
-    // Fixed repeat counts for deterministic rendering
     var recDotRepeat = Math.ceil(finalDur / 1.0) - 1;
     mainTl.add(gsap.to(".rec-dot", { opacity: 0.3, duration: 0.5, repeat: recDotRepeat, yoyo: true, ease: "sine.inOut" }), 0);
 
-    // Initial state trigger
     mainTl.time(0);
-    
     var isRendering = window.__hf && (window.__hf.active || window.__hf.duration);
     if (isRendering) {
       document.body.classList.add('is-rendering');
-    }
-
-    if (!window.__hf) {
+    } else {
       setTimeout(function() { mainTl.play(); }, 500);
     }
-    
-    console.log("[Template] Init complete. Duration: " + finalDur + "s. Scenes: " + scenes.length);
+    console.log("[Template] Cinematic Optimized Init complete. Duration: " + finalDur + "s.");
   </script>
 </body>
 </html>
