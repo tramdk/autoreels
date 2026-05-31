@@ -11,36 +11,48 @@
     var DEFAULT_BG = "{{ BG_IMAGE_URL }}";
     var LOGO_TEXT = "{{ LOGO_TEXT }}";
     var DATETIME = "{{ DATETIME }}";
+    var DYNAMIC_FONT = "{{ FONT_FAMILY }}";
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width={{ WIDTH }}, user-scalable=no">
   <title>Premium Glassmorphism Template</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;900&display=swap" rel="stylesheet">
+  <script>
+    // Dynamic Font Loader: Convert "Be Vietnam Pro" -> "Be+Vietnam+Pro"
+    (function() {
+      if (typeof DYNAMIC_FONT !== 'undefined' && DYNAMIC_FONT) {
+        var fontUrl = 'https://fonts.googleapis.com/css2?family=' + DYNAMIC_FONT.replace(/ /g, '+') + ':wght@300;400;500;600;700;900&display=swap';
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = fontUrl;
+        document.head.appendChild(link);
+      }
+    })();
+  </script>
   <script src="/assets/js/gsap.min.js"></script>
   <style>
     :root {
       --cqmin: min(var(--v-width) * 1px, var(--v-height) * 1px);
-      --glass-bg: rgba(255, 255, 255, 0.015);
-      --glass-border: rgba(255, 255, 255, 0.25);
-      --glass-edge: rgba(255, 255, 255, 0.15);
-      --glass-shine: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.1) 100%);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.3);
+      --glass-edge: rgba(255, 255, 255, 0.2);
+      --glass-shine: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.2) 100%);
       --accent-color: {{ DIVIDER_COLOR }};
-      --blur-amount: 30px;
+      --blur-amount: 25px;
     }
 
     body.is-rendering {
-      --blur-amount: 8px; /* Extreme reduction */
+      --blur-amount: 12px; /* Balanced for Puppeteer */
     }
 
     body.is-rendering .grain,
     body.is-rendering .orb {
-      display: none !important; /* Disable high-cost background elements */
+      display: none !important;
     }
 
     body.is-rendering .scene-card {
-      background: rgba(255, 255, 255, 0.08); /* Increase opacity to compensate for less blur */
+      background: rgba(255, 255, 255, 0.12);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -199,18 +211,21 @@
       width: 100%;
       padding: calc(var(--cqmin) * 90 / 720) calc(var(--cqmin) * 60 / 720);
       border-radius: calc(var(--cqmin) * 64 / 720);
-      /* Faux glassmorphism fallback for Puppeteer + Shimmer border integration */
       --shimmer-pos: -100%;
-      background: linear-gradient(110deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 35%, rgba(255, 255, 255, 0.3) 48%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.3) 52%, rgba(255, 255, 255, 0.1) 65%, rgba(255, 255, 255, 0.1) 100%) no-repeat;
+      background: 
+        linear-gradient(110deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 35%, rgba(255, 255, 255, 0.3) 48%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.3) 52%, rgba(255, 255, 255, 0.1) 65%, rgba(255, 255, 255, 0.1) 100%) no-repeat,
+        var(--glass-bg);
       background-size: 250% 100%;
       background-position: var(--shimmer-pos) 0%;
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(var(--blur-amount));
+      -webkit-backdrop-filter: blur(var(--blur-amount));
+      border: 1px solid var(--glass-border);
       will-change: transform, opacity;
       text-align: {{ MAIN_CSS_TEXT_ALIGN }};
       box-shadow: 
         0 60px 150px rgba(0, 0, 0, 0.7),
         inset 0 0 0 1px var(--glass-edge),
-        inset 0 0 100px rgba(255, 255, 255, 0.08);
+        inset 0 0 100px rgba(255, 255, 255, 0.15);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -413,15 +428,24 @@
         0.15
       );
 
-      // Gentle floating during hold
+      // Gentle floating with depth - deterministic
       var floatDur = Math.max(0.1, duration - inDur - CROSSFADE);
       tl.to(sceneEl, {
-        rotationX: isRendering ? 0 : -3,
-        rotationY: isRendering ? 0 : 3,
-        y: "-=15",
+        rotationX: isRendering ? 0 : -2,
+        rotationY: isRendering ? 0 : 2,
+        y: "-=20",
         duration: floatDur,
         ease: "sine.inOut",
         force3D: true
+      }, inDur);
+
+      // Infinite light sweep (adds premium feel)
+      tl.to(sceneEl, {
+        "--shimmer-pos": "200%",
+        duration: 4 + Math.random() * 2,
+        repeat: -1,
+        ease: "linear",
+        repeatDelay: 2
       }, inDur);
 
       // Exit fade (synchronized with crossfade)
@@ -448,13 +472,14 @@
     var finalDur = parseFloat("{{ DURATION }}") || mainTl.duration() || 15;
     window.duration = finalDur;
 
-    // Premium floating orbs animation - deterministic
+    // Premium floating orbs animation - Brownian-style motion
     var orbRepeat = Math.ceil(finalDur / 10.0) - 1; 
     document.querySelectorAll(".orb").forEach(function(orb, idx) {
+      var range = 150 + (idx * 50);
       mainTl.add(gsap.to(orb, {
-        x: (idx % 2 === 0 ? 100 : -100),
-        y: (idx % 3 === 0 ? 50 : -50),
-        duration: 8 + idx,
+        x: "random(-" + range + "," + range + ")",
+        y: "random(-" + range + "," + range + ")",
+        duration: 6 + idx * 2,
         repeat: orbRepeat,
         yoyo: true,
         ease: "sine.inOut"

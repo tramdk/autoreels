@@ -9,6 +9,17 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script>
+    (function() {
+      if (typeof DYNAMIC_FONT !== 'undefined' && DYNAMIC_FONT) {
+        var fontUrl = 'https://fonts.googleapis.com/css2?family=' + DYNAMIC_FONT.replace(/ /g, '+') + ':wght@300;400;500;600;700;900&display=swap';
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = fontUrl;
+        document.head.appendChild(link);
+      }
+    })();
+  </script>
   <link
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap"
     rel="stylesheet">
