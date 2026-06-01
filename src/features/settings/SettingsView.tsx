@@ -512,6 +512,11 @@ export const SettingsView: React.FC = () => {
                                   <option value="'Playfair Display'" className="bg-[#050505]">Playfair (Elegant Serif)</option>
                                   <option value="'JetBrains Mono'" className="bg-[#050505]">JetBrains (Tech Mono)</option>
                                   <option value="'Be Vietnam Pro'" className="bg-[#050505]">Be Vietnam Pro (Clean)</option>
+                                  <option value="'Plus Jakarta Sans'" className="bg-[#050505]">Plus Jakarta Sans (Modern Geometric)</option>
+                                  <option value="'Lexend'" className="bg-[#050505]">Lexend (Highly Readable)</option>
+                                  <option value="'Lora'" className="bg-[#050505]">Lora (Elegant Serif)</option>
+                                  <option value="'Fraunces'" className="bg-[#050505]">Fraunces (Vintage Serif)</option>
+                                  <option value="'Space Grotesk'" className="bg-[#050505]">Space Grotesk (Tech Grotesque)</option>
                                 </select>
                               </div>
                               <SizeSlider label="Line Height" value={template.lineHeight || 1.1} min={0.8} max={2} onChange={v => setTemplate({ ...template, lineHeight: v })} />

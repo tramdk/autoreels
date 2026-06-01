@@ -4,6 +4,75 @@ import fs from 'fs';
 import prisma from '../lib/prisma';
 import fetch from 'node-fetch';
 
+const PREMIUM_FONTS: Record<string, { regular: string; bold: string }> = {
+  'be vietnam pro': {
+    regular: 'https://fonts.gstatic.com/s/bevietnampro/v12/QdVPSTAyLFyeg_IDWvOJmVES_Eww.ttf',
+    bold: 'https://fonts.gstatic.com/s/bevietnampro/v12/QdVMSTAyLFyeg_IDWvOJmVES_HSMIF8y.ttf'
+  },
+  'plus jakarta sans': {
+    regular: 'https://fonts.gstatic.com/s/plusjakartasans/v12/LDIbaomQNQcsA88c7O9yZ4KMCoOg4IA6-91aHEjcWuA_qU7NSg.ttf',
+    bold: 'https://fonts.gstatic.com/s/plusjakartasans/v12/LDIbaomQNQcsA88c7O9yZ4KMCoOg4IA6-91aHEjcWuA_TknNSg.ttf'
+  },
+  'lexend': {
+    regular: 'https://fonts.gstatic.com/s/lexend/v26/wlptgwvFAVdoq2_F94zlCfv0bz1WCzsW_LA.ttf',
+    bold: 'https://fonts.gstatic.com/s/lexend/v26/wlptgwvFAVdoq2_F94zlCfv0bz1WC9wR_LA.ttf'
+  },
+  'lora': {
+    regular: 'https://fonts.gstatic.com/s/lora/v37/0QI6MX1D_JOuGQbT0gvTJPa787weuyJG.ttf',
+    bold: 'https://fonts.gstatic.com/s/lora/v37/0QI6MX1D_JOuGQbT0gvTJPa787z5vCJG.ttf'
+  },
+  'fraunces': {
+    regular: 'https://fonts.gstatic.com/s/fraunces/v38/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0K7iN7hzFUPJH58nib1603gg7S2nfgRYIctxujDg.ttf',
+    bold: 'https://fonts.gstatic.com/s/fraunces/v38/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0K7iN7hzFUPJH58nib1603gg7S2nfgRYIcUByjDg.ttf'
+  },
+  'space grotesk': {
+    regular: 'https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj7oUUsj.ttf',
+    bold: 'https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksj.ttf'
+  }
+};
+
+async function ensureFontsDownloaded(fontFamily: string): Promise<void> {
+  const f = fontFamily.toLowerCase().trim().replace(/['"]/g, '');
+  
+  let matchedKey = '';
+  if (f.includes('be vietnam pro') || f.includes('be-vietnam-pro')) matchedKey = 'be vietnam pro';
+  else if (f.includes('plus jakarta sans') || f.includes('plus-jakarta-sans')) matchedKey = 'plus jakarta sans';
+  else if (f.includes('lexend')) matchedKey = 'lexend';
+  else if (f.includes('lora')) matchedKey = 'lora';
+  else if (f.includes('fraunces')) matchedKey = 'fraunces';
+  else if (f.includes('space grotesk') || f.includes('space-grotesk')) matchedKey = 'space grotesk';
+
+  if (!matchedKey) return;
+
+  const urls = PREMIUM_FONTS[matchedKey];
+  const fontsDir = path.join(process.cwd(), 'fonts');
+  if (!fs.existsSync(fontsDir)) fs.mkdirSync(fontsDir, { recursive: true });
+
+  const regularName = `${matchedKey.replace(/\s+/g, '-')}-regular.ttf`;
+  const boldName = `${matchedKey.replace(/\s+/g, '-')}-bold.ttf`;
+
+  const regularPath = path.join(fontsDir, regularName);
+  const boldPath = path.join(fontsDir, boldName);
+
+  const downloadFile = async (url: string, dest: string) => {
+    if (fs.existsSync(dest)) return;
+    console.log(`[Renderer] Dynamic Font Downloader: ${url} -> ${dest}`);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to download font: ${res.statusText}`);
+    const buffer = await res.buffer();
+    fs.writeFileSync(dest, buffer);
+  };
+
+  try {
+    await Promise.all([
+      downloadFile(urls.regular, regularPath),
+      downloadFile(urls.bold, boldPath)
+    ]);
+  } catch (err) {
+    console.error(`[Renderer] Font download error for ${fontFamily}:`, err);
+  }
+}
+
 export interface SceneItem {
   id: number;
   type: 'hook' | 'body' | 'outro';
@@ -272,6 +341,9 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
     });
   }
 
+  // Ensure the required premium font files are downloaded locally at runtime
+  await ensureFontsDownloaded(tpl.fontFamily || 'Inter');
+
   const d = new Date();
   const today = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
 
@@ -330,13 +402,44 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
     'MAIN_CSS_TRANSFORM': getTransform(tpl.mainAlign || 'center', tpl.mainPlacement || 'center'),
     'MAIN_CSS_ALIGN': getAlignItems(tpl.mainAlign || 'center'),
     'MAIN_CSS_TEXT_ALIGN': tpl.mainAlign || 'center',
-    'FONT_FAMILY': (tpl.fontFamily || 'Inter')
-      .toLowerCase()
-      .replace(/playfair display/g, 'playfair-display')
-      .replace(/jetbrains mono/g, 'jetbrains-mono')
-      .replace(/archivo black/g, 'archivo-black')
-      .replace(/open sans/g, 'open-sans')
-      .replace(/ibm plex mono/g, 'ibm-plex-mono'),
+    'FONT_FAMILY': (() => {
+      const f = (tpl.fontFamily || 'Inter').toLowerCase().trim().replace(/['"]/g, '');
+      if (f === 'be vietnam pro' || f === 'be-vietnam-pro') {
+        return "'Be Vietnam Pro'";
+      }
+      if (f === 'plus jakarta sans' || f === 'plus-jakarta-sans') {
+        return "'Plus Jakarta Sans'";
+      }
+      if (f === 'lexend') {
+        return "'Lexend'";
+      }
+      if (f === 'lora') {
+        return "'Lora'";
+      }
+      if (f === 'fraunces') {
+        return "'Fraunces'";
+      }
+      if (f === 'space grotesk' || f === 'space-grotesk') {
+        return "'Space Grotesk'";
+      }
+      
+      // Fallback mappings for other fonts
+      if (f.includes('archivo') || f.includes('oswald') || f.includes('bebas neue')) {
+        return 'montserrat';
+      }
+      if (f.includes('merriweather') || f.includes('crimson pro') || f.includes('dm serif display') || f.includes('dm-serif-display') || f.includes('newsreader') || f.includes('playfair display') || f.includes('playfair-display')) {
+        return 'playfair-display';
+      }
+      if (f.includes('fira code') || f.includes('jetbrains mono') || f.includes('jetbrains-mono')) {
+        return 'jetbrains-mono';
+      }
+      if (f.includes('archivo black') || f.includes('archivo-black')) return 'archivo-black';
+      if (f.includes('open sans') || f.includes('open-sans')) return 'open-sans';
+      if (f.includes('ibm plex mono') || f.includes('ibm-plex-mono')) return 'ibm-plex-mono';
+      if (f.includes('source code pro') || f.includes('source-code-pro')) return 'source-code-pro';
+      if (f.includes('space mono') || f.includes('space-mono')) return 'space-mono';
+      return f;
+    })(),
     'LINE_HEIGHT': String(tpl.lineHeight || 1.1),
     'SHOW_PROGRESS_BAR': tpl.showProgressBar !== false ? 'block' : 'none',
     'LOGO_IMAGE': tpl.logoImage || '',
@@ -398,6 +501,128 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
 
   // Inject Google Fonts dynamic stylesheet to ensure perfect Unicode font loading for the chosen fontFamily
   const selectedFont = tpl.fontFamily || 'Inter';
+
+  // Inject local @font-face for premium Vietnamese fonts if used
+  let localFontFaceStyle = '';
+  const fontLower = selectedFont.toLowerCase();
+  const fontsDir = path.join(process.cwd(), 'fonts');
+
+  if (fontLower.includes('be vietnam pro') || fontLower.includes('be-vietnam-pro')) {
+    const regularPath = `file:///${path.join(fontsDir, 'be-vietnam-pro-regular.ttf').replace(/\\/g, '/')}`;
+    const boldPath = `file:///${path.join(fontsDir, 'be-vietnam-pro-bold.ttf').replace(/\\/g, '/')}`;
+    localFontFaceStyle = `
+    <style>
+      @font-face {
+        font-family: 'Be Vietnam Pro';
+        font-style: normal;
+        font-weight: 400;
+        src: url('${regularPath}') format('truetype');
+      }
+      @font-face {
+        font-family: 'Be Vietnam Pro';
+        font-style: normal;
+        font-weight: 700;
+        src: url('${boldPath}') format('truetype');
+      }
+    </style>
+    `;
+  } else if (fontLower.includes('plus jakarta sans') || fontLower.includes('plus-jakarta-sans')) {
+    const regularPath = `file:///${path.join(fontsDir, 'plus-jakarta-sans-regular.ttf').replace(/\\/g, '/')}`;
+    const boldPath = `file:///${path.join(fontsDir, 'plus-jakarta-sans-bold.ttf').replace(/\\/g, '/')}`;
+    localFontFaceStyle = `
+    <style>
+      @font-face {
+        font-family: 'Plus Jakarta Sans';
+        font-style: normal;
+        font-weight: 400;
+        src: url('${regularPath}') format('truetype');
+      }
+      @font-face {
+        font-family: 'Plus Jakarta Sans';
+        font-style: normal;
+        font-weight: 700;
+        src: url('${boldPath}') format('truetype');
+      }
+    </style>
+    `;
+  } else if (fontLower.includes('lexend')) {
+    const regularPath = `file:///${path.join(fontsDir, 'lexend-regular.ttf').replace(/\\/g, '/')}`;
+    const boldPath = `file:///${path.join(fontsDir, 'lexend-bold.ttf').replace(/\\/g, '/')}`;
+    localFontFaceStyle = `
+    <style>
+      @font-face {
+        font-family: 'Lexend';
+        font-style: normal;
+        font-weight: 400;
+        src: url('${regularPath}') format('truetype');
+      }
+      @font-face {
+        font-family: 'Lexend';
+        font-style: normal;
+        font-weight: 700;
+        src: url('${boldPath}') format('truetype');
+      }
+    </style>
+    `;
+  } else if (fontLower.includes('lora')) {
+    const regularPath = `file:///${path.join(fontsDir, 'lora-regular.ttf').replace(/\\/g, '/')}`;
+    const boldPath = `file:///${path.join(fontsDir, 'lora-bold.ttf').replace(/\\/g, '/')}`;
+    localFontFaceStyle = `
+    <style>
+      @font-face {
+        font-family: 'Lora';
+        font-style: normal;
+        font-weight: 400;
+        src: url('${regularPath}') format('truetype');
+      }
+      @font-face {
+        font-family: 'Lora';
+        font-style: normal;
+        font-weight: 700;
+        src: url('${boldPath}') format('truetype');
+      }
+    </style>
+    `;
+  } else if (fontLower.includes('fraunces')) {
+    const regularPath = `file:///${path.join(fontsDir, 'fraunces-regular.ttf').replace(/\\/g, '/')}`;
+    const boldPath = `file:///${path.join(fontsDir, 'fraunces-bold.ttf').replace(/\\/g, '/')}`;
+    localFontFaceStyle = `
+    <style>
+      @font-face {
+        font-family: 'Fraunces';
+        font-style: normal;
+        font-weight: 400;
+        src: url('${regularPath}') format('truetype');
+      }
+      @font-face {
+        font-family: 'Fraunces';
+        font-style: normal;
+        font-weight: 700;
+        src: url('${boldPath}') format('truetype');
+      }
+    </style>
+    `;
+  } else if (fontLower.includes('space grotesk') || fontLower.includes('space-grotesk')) {
+    const regularPath = `file:///${path.join(fontsDir, 'space-grotesk-regular.ttf').replace(/\\/g, '/')}`;
+    const boldPath = `file:///${path.join(fontsDir, 'space-grotesk-bold.ttf').replace(/\\/g, '/')}`;
+    localFontFaceStyle = `
+    <style>
+      @font-face {
+        font-family: 'Space Grotesk';
+        font-style: normal;
+        font-weight: 400;
+        src: url('${regularPath}') format('truetype');
+      }
+      @font-face {
+        font-family: 'Space Grotesk';
+        font-style: normal;
+        font-weight: 700;
+        src: url('${boldPath}') format('truetype');
+      }
+    </style>
+    `;
+  }
+
   let fontLoaderScript = '';
   // Avoid loading system fonts via Google Fonts API
   const localFonts = ['arial', 'helvetica', 'sans-serif', 'serif', 'monospace', 'courier', 'segoe ui'];
@@ -406,8 +631,8 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
     fontLoaderScript = `\n  <link rel="preconnect" href="https://fonts.googleapis.com">\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n  <link href="https://fonts.googleapis.com/css2?family=${fontLinkName}:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">`;
   }
 
-  // Inject both Google Font link and seeker script into <head> so it's available immediately
-  rendered = rendered.replace('<head>', `<head>${fontLoaderScript}\n${hfScript}`);
+  // Inject Google Font link, local font faces, and seeker script into <head> so it's available immediately
+  rendered = rendered.replace('<head>', `<head>${fontLoaderScript}\n${localFontFaceStyle}\n${hfScript}`);
 
   // FINAL VERIFICATION: Check if our unique placeholders were replaced
   if (rendered.includes('__SCENE_DURATIONS_INJECTED__')) {

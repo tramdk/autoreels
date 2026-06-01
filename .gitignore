@@ -34,3 +34,6 @@ render_cache/
 scratch/
 check_*.ts
 test_*.ts
+
+# Local Fonts Cache
+/fonts/

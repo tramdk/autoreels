@@ -429,19 +429,46 @@ Trả về duy nhất mã nguồn index.html hoàn chỉnh nhất bên trong kh�
     
     // 3. Chuẩn hóa triệt để bất kỳ phông chữ nào không nằm trong danh sách hỗ trợ của HyperFrames
     const ALLOWED_FONTS = [
-      'montserrat', 'plus jakarta sans', 'plus-jakarta-sans', 'lexend', 'space grotesk', 
-      'be vietnam pro', 'be-vietnam-pro', 'archivo', 'oswald', 'bebas neue',
-      'lora', 'merriweather', 'fraunces', 'crimson pro', 'dm serif display', 'dm-serif-display', 
-      'newsreader', 'jetbrains mono', 'space mono', 'source code pro', 'fira code',
-      'archivo black', 'arial black', 'arial', 'courier new', 'courier', 'din alternate',
-      'futura', 'garamond', 'helvetica bold', 'helvetica neue', 'helvetica', 'ibm plex mono',
-      'league gothic', 'noto sans japanese', 'noto sans jp', 'segoe ui',
+      'montserrat', 'archivo-black', 'archivo black', 'inter', 'lato', 'nunito', 
+      'open-sans', 'open sans', 'oswald', 'outfit', 'playfair-display', 'playfair display', 
+      'poppins', 'roboto', 'source-code-pro', 'source code pro', 'space-mono', 'space mono',
+      'jetbrains-mono', 'jetbrains mono', 'ibm-plex-mono', 'ibm plex mono',
       'inherit', 'initial', 'unset', 'revert'
     ];
     
     sanitizedHtml = sanitizedHtml.replace(/font-family\s*:\s*([^;}]+)/gi, (match, fontVal) => {
-      const fontValLower = fontVal.toLowerCase();
-      const hasAllowed = ALLOWED_FONTS.some(font => fontValLower.includes(font));
+      const f = fontVal.toLowerCase().trim().replace(/['"]/g, '');
+      if (f === 'be vietnam pro' || f === 'be-vietnam-pro') {
+        return "font-family: 'Be Vietnam Pro', sans-serif";
+      }
+      if (f === 'plus jakarta sans' || f === 'plus-jakarta-sans') {
+        return "font-family: 'Plus Jakarta Sans', sans-serif";
+      }
+      if (f === 'lexend') {
+        return "font-family: 'Lexend', sans-serif";
+      }
+      if (f === 'lora') {
+        return "font-family: 'Lora', serif";
+      }
+      if (f === 'fraunces') {
+        return "font-family: 'Fraunces', serif";
+      }
+      if (f === 'space grotesk' || f === 'space-grotesk') {
+        return "font-family: 'Space Grotesk', sans-serif";
+      }
+      
+      // Fallback mappings
+      if (f.includes('archivo') || f.includes('oswald') || f.includes('bebas neue')) {
+        return "font-family: 'montserrat', sans-serif";
+      }
+      if (f.includes('merriweather') || f.includes('crimson pro') || f.includes('dm serif display') || f.includes('dm-serif-display') || f.includes('newsreader') || f.includes('playfair display') || f.includes('playfair-display')) {
+        return "font-family: 'playfair-display', serif";
+      }
+      if (f.includes('fira code') || f.includes('jetbrains mono') || f.includes('jetbrains-mono')) {
+        return "font-family: 'jetbrains-mono', monospace";
+      }
+      
+      const hasAllowed = ALLOWED_FONTS.some(font => f.includes(font));
       if (hasAllowed) {
         return match;
       }
