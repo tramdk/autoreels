@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { aiBeta, getAIClient } from '../lib/ai';
+import { aiBeta, getAIClient, GEMINI_TTS_MODEL } from '../lib/ai';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -103,8 +103,8 @@ const handlers: Record<string, TTSHandler> = {
     const ai = getAIClient(aiBeta);
     if (!ai) throw new Error('Gemini AI not configured');
 
-    console.log('[TTS] Requesting Gemini TTS (2.5 Flash)');
-    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash-preview-tts" });
+    console.log(`[TTS] Requesting Gemini TTS (${GEMINI_TTS_MODEL})`);
+    const model = ai.getGenerativeModel({ model: GEMINI_TTS_MODEL });
     const prompt = `Convert this exact text to audio and do not generate any other text or response:\n\n${text}`;
 
     const response = await model.generateContent({

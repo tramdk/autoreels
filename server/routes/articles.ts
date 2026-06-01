@@ -2,7 +2,7 @@ import { Router } from 'express';
 import prisma from '../lib/prisma';
 import { authenticate } from '../middleware/auth';
 import { scrapeRssSources } from '../services/scraper';
-import { genAI, getAIClient } from '../lib/ai';
+import { genAI, getAIClient, GEMINI_MODEL } from '../lib/ai';
 
 const router = Router();
 
@@ -105,7 +105,7 @@ router.post('/summarize/:id', authenticate, async (req, res) => {
   const selectedTone = toneMap[tone] || toneMap['News'];
 
   try {
-    const model = resolvedAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = resolvedAI.getGenerativeModel({ model: GEMINI_MODEL });
     
     let prompt = '';
     

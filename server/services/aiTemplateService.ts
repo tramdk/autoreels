@@ -1,4 +1,4 @@
-import { genAI, getAIClient } from '../lib/ai';
+import { genAI, getAIClient, GEMINI_HTML_MODEL, GEMINI_MODEL } from '../lib/ai';
 
 /**
  * Sanitize AI-generated HTML to prevent "Bad control character in string literal" errors.
@@ -413,7 +413,7 @@ window.__hf = {
 Trả về duy nhất mã nguồn index.html hoàn chỉnh nhất bên trong khối code markdown \`\`\`html. Tuyệt đối không giải thích thêm hay viết lời mở đầu/kết thúc nào cả.
 `;
   try {
-    const model = resolvedAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = resolvedAI.getGenerativeModel({ model: GEMINI_HTML_MODEL });
     const result = await model.generateContent(prompt);
     const text = result.response.text();
     const cleanHtml = text.replace(/```html/g, '').replace(/```/g, '').trim();
@@ -563,7 +563,7 @@ Trả về duy nhất 1 JSON object hợp lệ chứa đầy đủ các khóa tr
 `;
 
   try {
-    const model = resolvedAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = resolvedAI.getGenerativeModel({ model: GEMINI_MODEL });
     const result = await model.generateContent(prompt);
     const text = result.response.text();
     const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
