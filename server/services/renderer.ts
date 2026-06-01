@@ -1,6 +1,7 @@
 import { spawn, execSync } from 'child_process';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import prisma from '../lib/prisma';
 import fetch from 'node-fetch';
 
@@ -45,7 +46,7 @@ async function ensureFontsDownloaded(fontFamily: string): Promise<void> {
   if (!matchedKey) return;
 
   const urls = PREMIUM_FONTS[matchedKey];
-  const fontsDir = path.join(process.cwd(), 'fonts');
+  const fontsDir = path.join(os.tmpdir(), 'fonts');
   if (!fs.existsSync(fontsDir)) fs.mkdirSync(fontsDir, { recursive: true });
 
   const regularName = `${matchedKey.replace(/\s+/g, '-')}-regular.ttf`;
@@ -505,7 +506,7 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
   // Inject local @font-face for premium Vietnamese fonts if used
   let localFontFaceStyle = '';
   const fontLower = selectedFont.toLowerCase();
-  const fontsDir = path.join(process.cwd(), 'fonts');
+  const fontsDir = path.join(os.tmpdir(), 'fonts');
 
   if (fontLower.includes('be vietnam pro') || fontLower.includes('be-vietnam-pro')) {
     const regularPath = `file:///${path.join(fontsDir, 'be-vietnam-pro-regular.ttf').replace(/\\/g, '/')}`;
