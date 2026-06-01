@@ -57,7 +57,7 @@ export const VideosView: React.FC<VideosViewProps> = ({
   return (
     <div className="flex flex-col">
       {/* Sticky Header */}
-      <div className="sticky top-[76px] lg:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-white/5 px-6 py-6 md:px-12 md:py-8 shrink-0">
+      <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-white/5 px-6 py-6 md:px-12 md:py-8 shrink-0">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white mb-1">{t('videos.title')}</h1>

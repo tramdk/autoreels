@@ -145,7 +145,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   return (
     <div className="flex flex-col">
       {/* Sticky Header */}
-      <div className="sticky top-[76px] lg:top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-white/5 px-6 py-6 md:px-12 md:py-8 shrink-0">
+      <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-white/5 px-6 py-6 md:px-12 md:py-8 shrink-0">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white mb-1">{t('dashboard.title')}</h1>
@@ -178,11 +178,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Main Content Area */}
       <div className="px-6 py-8 md:px-12 md:py-10 pb-32">
         <div className="max-w-7xl mx-auto space-y-10">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <StatCard title={t('dashboard.sources')} value={stats.sources} icon={<Rss className="w-5 h-5" />} color="rose" onClick={() => navigate('/sources')} loading={loading && articles.length === 0} />
-            <StatCard title={t('dashboard.articles')} value={stats.articles} icon={<FileText className="w-5 h-5" />} color="blue" onClick={() => navigate('/dashboard')} loading={loading && articles.length === 0} />
-            <StatCard title={t('dashboard.videos')} value={stats.videos} icon={<VideoIcon className="w-5 h-5" />} color="purple" onClick={() => navigate('/videos')} loading={loading && articles.length === 0} />
-            <StatCard title={t('dashboard.posted')} value={stats.postedVideos} icon={<CheckCircle2 className="w-5 h-5" />} color="green" onClick={() => navigate('/videos?status=posted')} loading={loading && articles.length === 0} />
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="col-span-2 lg:col-span-2">
+              <StatCard title={t('dashboard.sources')} value={stats.sources} icon={<Rss className="w-5 h-5" />} color="rose" onClick={() => navigate('/sources')} loading={loading && articles.length === 0} />
+            </div>
+            <div className="col-span-2 lg:col-span-1">
+              <StatCard title={t('dashboard.articles')} value={stats.articles} icon={<FileText className="w-5 h-5" />} color="blue" onClick={() => navigate('/dashboard')} loading={loading && articles.length === 0} />
+            </div>
+            <div className="col-span-1">
+              <StatCard title={t('dashboard.videos')} value={stats.videos} icon={<VideoIcon className="w-5 h-5" />} color="purple" onClick={() => navigate('/videos')} loading={loading && articles.length === 0} />
+            </div>
+            <div className="col-span-1 lg:col-span-2">
+              <StatCard title={t('dashboard.posted')} value={stats.postedVideos} icon={<CheckCircle2 className="w-5 h-5" />} color="green" onClick={() => navigate('/videos?status=posted')} loading={loading && articles.length === 0} />
+            </div>
           </div>
 
           <div className="glass rounded-[32px] p-6 sm:p-10 border border-white/5">
@@ -216,7 +224,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       <div className="flex items-center gap-3 shrink-0">
                         {getArticleProgress(article.id) !== null ? (
                           <div className="flex flex-col items-end gap-1 min-w-[120px]">
-                            <span className="text-[9px] font-black text-primary uppercase tracking-widest animate-pulse">RENDERING {getArticleProgress(article.id)?.progress || 0}%</span>
+                            <span className="text-[9px] font-mono font-black text-primary uppercase tracking-widest animate-pulse">RENDERING {getArticleProgress(article.id)?.progress || 0}%</span>
                             <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
                               <div className="h-full bg-primary" style={{ width: `${getArticleProgress(article.id)?.progress || 0}%` }} />
                             </div>
@@ -278,7 +286,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingArticle(null)} className="absolute inset-0 bg-black/95 backdrop-blur-xl" />
             <motion.div 
               initial={{ scale: 0.95, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 30 }}
-              className="glass w-full max-w-2xl p-5 sm:p-8 rounded-[40px] border border-white/10 shadow-3xl relative z-10 overflow-hidden flex flex-col max-h-[90vh]"
+              className="glass w-full max-w-2xl p-5 sm:p-8 rounded-[40px] border border-white/10 shadow-3xl relative z-10 overflow-hidden flex flex-col max-h-[85dvh]"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0 border-b border-white/5 pb-6">
                 <div className="flex items-center justify-between w-full sm:w-auto">
@@ -356,7 +364,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsAddingManual(false)} className="absolute inset-0 bg-black/95 backdrop-blur-xl" />
             <motion.div 
               initial={{ scale: 0.95, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 30 }}
-              className="glass w-full max-w-xl p-6 sm:p-10 rounded-[40px] border border-white/10 shadow-3xl relative z-10 overflow-hidden flex flex-col max-h-[90vh]"
+              className="glass w-full max-w-xl p-6 sm:p-10 rounded-[40px] border border-white/10 shadow-3xl relative z-10 overflow-hidden flex flex-col max-h-[85dvh]"
             >
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-xl sm:text-2xl font-black text-white">{t('articles.addManualTitle')}</h2>
@@ -366,7 +374,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <input placeholder={t('articles.placeholderTitle')} value={manualData.title} onChange={e => setManualData({...manualData, title: e.target.value})} className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-primary/50" />
                 <textarea placeholder={t('articles.placeholderContent')} value={manualData.content} onChange={e => setManualData({...manualData, content: e.target.value})} className="w-full bg-white/5 border border-white/5 rounded-2xl p-5 text-white leading-relaxed focus:outline-none focus:border-primary/50 min-h-[250px]" />
               </div>
-              <div className="flex gap-4 mt-8 pt-6 border-t border-white/5">
+              <div className="flex gap-4 mt-8 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:pb-0 border-t border-white/5 shrink-0">
                 <button onClick={() => setIsAddingManual(false)} className="flex-1 py-4 text-slate-500 font-bold uppercase tracking-widest text-[11px]">{t('common.cancel')}</button>
                 <button onClick={handleCreateManual} disabled={!manualData.title || !manualData.content} className="flex-2 bg-primary text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg glow-primary disabled:opacity-50">{t('articles.manualBtn')}</button>
               </div>

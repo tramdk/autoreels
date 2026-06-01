@@ -236,7 +236,7 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
   const [activeTab, setActiveTab] = React.useState<'editor' | 'history'>('editor');
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen lg:h-[calc(100vh - 76px)] overflow-hidden bg-[#0A0A0B]">
+    <div className="flex flex-col lg:flex-row h-full overflow-hidden bg-[#0A0A0B]">
       {/* Mobile Tab Switcher */}
       <div className="lg:hidden flex border-b border-white/5 bg-black/40 p-1 shrink-0">
         <button
@@ -261,11 +261,11 @@ export const StudioView: React.FC<StudioViewProps> = ({ onCreateManualScript, on
 
       {/* Left Sidebar: Controls & Scenes */}
       <div className={cn(
-        "w-full lg:w-[450px] flex flex-col border-r border-white/5 bg-[#0F172A]/20 backdrop-blur-md overflow-hidden",
+        "w-full lg:w-[450px] h-full flex flex-col border-r border-white/5 bg-[#0F172A]/20 backdrop-blur-md overflow-hidden",
         activeTab !== 'editor' && "hidden lg:flex"
       )}>
         {/* Header Controls */}
-        <div className="p-6 border-b border-white/5 space-y-6">
+        <div className="p-6 border-b border-white/5 space-y-6 shrink-0 bg-[#0A0A0B] relative z-10">
           <div className="flex items-center justify-between gap-4">
             <div className="shrink-0">
               <h1 className="text-lg sm:text-xl font-black text-white tracking-tight leading-none mb-1">{t('sidebar.studio')}</h1>

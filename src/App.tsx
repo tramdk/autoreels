@@ -97,77 +97,93 @@ export default function App() {
         renderingVideos={renderingVideos}
       />
 
-      <main className="flex-1 min-w-0 bg-background overflow-y-auto h-screen custom-scrollbar pb-24 lg:pb-0 relative">
+      <main className="flex-1 min-w-0 bg-background overflow-hidden h-screen flex flex-col relative">
         <MobileHeader onLogout={handleLogout} />
-        <div className="flex-1 w-full h-full min-h-0">
+        <div className="flex-1 w-full min-h-0 overflow-hidden">
           <Routes>
             <Route path="/dashboard" element={
-              <DashboardView 
-                sources={sources}
-                articles={articles}
-                videos={videos}
-                loading={loading}
-                onScrape={handleScrape}
-                onSummarize={handleSummarize}
-                onRefresh={reloadCurrentView}
-                onUpdateArticle={updateArticle}
-                onGenerateVideo={handleGenerateVideo}
-                onUpdateScript={handleUpdateScript}
-                onCreateManualArticle={handleCreateManualArticle}
-                onCreateManualScript={handleCreateManualScript}
-                renderingVideos={renderingVideos}
-                stats={stats}
-                page={articlesPage}
-                setPage={setArticlesPage}
-                totalPages={articlesTotalPages}
-              />
+              <div className="overflow-y-auto h-full pb-24 lg:pb-0 custom-scrollbar">
+                <DashboardView 
+                  sources={sources}
+                  articles={articles}
+                  videos={videos}
+                  loading={loading}
+                  onScrape={handleScrape}
+                  onSummarize={handleSummarize}
+                  onRefresh={reloadCurrentView}
+                  onUpdateArticle={updateArticle}
+                  onGenerateVideo={handleGenerateVideo}
+                  onUpdateScript={handleUpdateScript}
+                  onCreateManualArticle={handleCreateManualArticle}
+                  onCreateManualScript={handleCreateManualScript}
+                  renderingVideos={renderingVideos}
+                  stats={stats}
+                  page={articlesPage}
+                  setPage={setArticlesPage}
+                  totalPages={articlesTotalPages}
+                />
+              </div>
             } />
             <Route path="/studio" element={
-              <StudioView 
-                onCreateManualScript={handleCreateManualScript}
-                onGenerateVideo={handleGenerateVideo}
-                loading={loading}
-              />
+              <div className="h-full overflow-hidden">
+                <StudioView 
+                  onCreateManualScript={handleCreateManualScript}
+                  onGenerateVideo={handleGenerateVideo}
+                  loading={loading}
+                />
+              </div>
             } />
             <Route path="/sources" element={
-              <SourcesView 
-                sources={sources}
-                loading={loading}
-                onAdd={handleAddSource}
-                onUpdate={handleUpdateSource}
-                onDelete={handleDeleteSource}
-              />
+              <div className="overflow-y-auto h-full pb-24 lg:pb-0 custom-scrollbar">
+                <SourcesView 
+                  sources={sources}
+                  loading={loading}
+                  onAdd={handleAddSource}
+                  onUpdate={handleUpdateSource}
+                  onDelete={handleDeleteSource}
+                />
+              </div>
             } />
             <Route path="/videos" element={
-              <VideosView 
-                videos={videos}
-                loading={loading}
-                onPost={handlePost}
-                onCheckStatus={handleCheckStatus}
-                onDelete={handleDeleteVideo}
-                onStartPipeline={() => setActiveTab('dashboard')}
-                page={videosPage}
-                setPage={setVideosPage}
-                totalPages={videosTotalPages}
-              />
+              <div className="overflow-y-auto h-full pb-24 lg:pb-0 custom-scrollbar">
+                <VideosView 
+                  videos={videos}
+                  loading={loading}
+                  onPost={handlePost}
+                  onCheckStatus={handleCheckStatus}
+                  onDelete={handleDeleteVideo}
+                  onStartPipeline={() => setActiveTab('dashboard')}
+                  page={videosPage}
+                  setPage={setVideosPage}
+                  totalPages={videosTotalPages}
+                />
+              </div>
             } />
             <Route path="/social" element={
-              <SocialView 
-                isTikTokConnected={isTikTokConnected}
-                onConnectTikTok={handleConnectTikTok}
-                onDisconnectTikTok={handleDisconnectTikTok}
-              />
+              <div className="overflow-y-auto h-full pb-24 lg:pb-0 custom-scrollbar">
+                <SocialView 
+                  isTikTokConnected={isTikTokConnected}
+                  onConnectTikTok={handleConnectTikTok}
+                  onDisconnectTikTok={handleDisconnectTikTok}
+                />
+              </div>
             } />
             <Route path="/voices" element={
-              <VoicesView 
-                voices={voices}
-                loading={loading}
-                onAdd={handleAddVoice}
-                onUpdate={handleUpdateVoice}
-                onDelete={handleDeleteVoice}
-              />
+              <div className="overflow-y-auto h-full pb-24 lg:pb-0 custom-scrollbar">
+                <VoicesView 
+                  voices={voices}
+                  loading={loading}
+                  onAdd={handleAddVoice}
+                  onUpdate={handleUpdateVoice}
+                  onDelete={handleDeleteVoice}
+                />
+              </div>
             } />
-            <Route path="/settings" element={<SettingsView />} />
+            <Route path="/settings" element={
+              <div className="overflow-y-auto h-full pb-24 lg:pb-0 custom-scrollbar">
+                <SettingsView />
+              </div>
+            } />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

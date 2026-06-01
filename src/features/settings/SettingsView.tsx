@@ -404,7 +404,7 @@ export const SettingsView: React.FC = () => {
       <div className="max-w-[1600px] mx-auto space-y-8">
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-8">
+        <div className="sticky top-0 z-30 bg-[#050505]/90 backdrop-blur-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-6 pt-2 shrink-0">
           <div className="space-y-1">
             <h1 className="text-4xl font-black tracking-tight uppercase text-white">Settings</h1>
             <p className="text-white/40 font-medium uppercase text-[10px] tracking-[0.2em]">Production Pipeline Master Control</p>

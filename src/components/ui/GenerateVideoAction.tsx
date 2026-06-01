@@ -235,7 +235,7 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
               role="dialog"
               aria-modal="true"
               aria-labelledby="generate-dialog-title"
-              className="w-full max-w-6xl bg-slate-900/60 rounded-[24px] sm:rounded-[40px] border border-white/10 shadow-2xl relative z-10 overflow-hidden flex flex-col h-[98vh] sm:h-[95vh] md:h-[85vh] max-h-[900px] backdrop-blur-3xl"
+              className="w-full max-w-6xl bg-slate-900/60 rounded-[24px] sm:rounded-[40px] border border-white/10 shadow-2xl relative z-10 overflow-hidden flex flex-col h-[90dvh] sm:h-[95vh] md:h-[85vh] max-h-[900px] backdrop-blur-3xl"
             >
               {/* Header */}
               <div className="px-6 sm:px-8 md:px-12 py-6 sm:py-8 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
@@ -305,7 +305,7 @@ export const GenerateVideoAction: React.FC<GenerateVideoActionProps> = ({
               </div>
 
               {/* Footer */}
-              <div className="px-6 sm:px-8 md:px-12 py-6 sm:py-8 border-t border-white/5 bg-black/60 flex flex-col md:flex-row items-center justify-between shrink-0 gap-6 md:gap-0">
+              <div className="px-6 sm:px-8 md:px-12 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:py-8 border-t border-white/5 bg-black/60 flex flex-col md:flex-row items-center justify-between shrink-0 gap-6 md:gap-0">
                 <div className="flex items-center gap-8">
                    <div className="hidden sm:flex items-center gap-3">
                       <div className="flex -space-x-2">

@@ -50,7 +50,7 @@ export const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color = 
           </p>
           
           <div className="relative">
-            <p className="text-3xl sm:text-5xl font-black text-white tracking-tighter leading-none mb-1">
+            <p className="text-3xl sm:text-5xl font-mono font-black text-white tracking-tighter leading-none mb-1">
               {value}
             </p>
             <div className={`h-1 w-8 mx-auto rounded-full ${styles.bg} opacity-50`} />

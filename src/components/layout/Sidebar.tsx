@@ -92,7 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLog
                          <span className="text-[11px] font-bold text-white truncate max-w-[140px]">
                            {data.title || 'Rendering Video'}
                          </span>
-                         <span className="text-[10px] font-black text-primary">{data.progress}%</span>
+                         <span className="text-[10px] font-mono font-black text-primary tracking-tighter">{data.progress}%</span>
                        </div>
                        <span className="text-[9px] font-medium text-slate-500 italic">
                          {data.phase || 'Processing...'}

@@ -8,7 +8,7 @@ interface MobileHeaderProps {
 
 export const MobileHeader: React.FC<MobileHeaderProps> = ({ onLogout }) => {
   return (
-    <header className="lg:hidden flex items-center justify-between px-6 h-[76px] bg-background sticky top-0 z-50 border-b border-white/5">
+    <header className="lg:hidden flex items-center justify-between px-6 h-[76px] bg-background shrink-0 z-50 border-b border-white/5">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 bg-primary flex items-center justify-center rounded-xl shadow-lg shadow-primary/20">
           <Play size={18} className="text-white fill-current" />
