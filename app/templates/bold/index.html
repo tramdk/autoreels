@@ -17,7 +17,13 @@
   <title>Bold Template</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <script>
+    (function() {
+      var f = "{{ FONT_FAMILY }}".replace(/['"]/g, '');
+      if (f) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=' + f.replace(/ /g, '+') + ':wght@300;400;500;600;700;900&display=swap'; document.head.appendChild(l); }
+    })();
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
   <script src="/assets/js/gsap.min.js"></script>
   <style>
     :root {
@@ -31,7 +37,7 @@
       height: calc({{ HEIGHT }} * 1px);
       overflow: hidden;
       background-color: #000;
-      font-family: inter;
+      font-family: {{ FONT_FAMILY }}, 'Inter', sans-serif;
       will-change: transform, opacity;
     }
 
@@ -123,7 +129,7 @@
     }
 
     .scene-title {
-      font-family: inter;
+      font-family: {{ FONT_FAMILY }}, 'Inter', sans-serif;
       font-size: calc(var(--cqmin) * {{ HOOK_SIZE }} / 720);
       font-weight: 900;
       line-height: 0.9;

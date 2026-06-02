@@ -46,7 +46,7 @@
       height: calc(var(--v-height) * 1px);
       overflow: hidden;
       background-color: #000;
-      font-family: {{ FONT_FAMILY }};
+      font-family: {{ FONT_FAMILY }}, 'Inter', sans-serif;
     }
 
     #root {
@@ -104,21 +104,9 @@
       opacity: var(--v-bg-brightness);
     }
 
-    .scene-content {
+.scene-content {
       position: absolute;
-      top: calc(4% + var(--v-main-top));
-      left: calc(4% + 5%);
-      width: 85%;
-      height: 80%;
-      z-index: 50;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-start;
-    }
-
-    .scene-title {
-      font-family: {{ FONT_FAMILY }};
+      font-family: {{ FONT_FAMILY }}, 'Inter', sans-serif;
       font-weight: 900;
       line-height: {{ LINE_HEIGHT }};
       text-transform: uppercase;

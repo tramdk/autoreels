@@ -5,6 +5,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width={{ WIDTH }}, user-scalable=no">
   <title>Lumina Template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script>
+    (function() {
+      var f = "{{ FONT_FAMILY }}".replace(/['"]/g, '');
+      if (f) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=' + f.replace(/ /g, '+') + ':wght@300;400;500;600;700;900&display=swap'; document.head.appendChild(l); }
+    })();
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
   <style>
     #preloader { position: absolute; width: 0; height: 0; overflow: hidden; opacity: 0; }

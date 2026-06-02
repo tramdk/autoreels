@@ -118,7 +118,7 @@ const DEFAULTS = {
   cardBgColor: 'rgba(0,0,0,0)', cardBorderColor: 'rgba(255,255,255,0.1)',
   cardBorderTop: 0, cardBorderBottom: 0, cardBorderLeft: 0, cardBorderRight: 0, cardBorderRadius: 0,
   showLogo: true, showTag: true, showDatetime: true, showCard: true,
-  fontFamily: 'Inter', lineHeight: 1.1, showProgressBar: true,
+  fontFamily: "'Be Vietnam Pro'", lineHeight: 1.1, showProgressBar: true,
   logoImage: ''
 };
 
@@ -404,12 +404,51 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
     'MAIN_CSS_ALIGN': getAlignItems(tpl.mainAlign || 'center'),
     'MAIN_CSS_TEXT_ALIGN': tpl.mainAlign || 'center',
     'FONT_FAMILY': (() => {
-      const f = (tpl.fontFamily || 'Inter').toLowerCase().trim().replace(/['"]/g, '');
+      const f = (tpl.fontFamily || "'Be Vietnam Pro'").toLowerCase().trim().replace(/['"]/g, '');
       if (f === 'be vietnam pro' || f === 'be-vietnam-pro') {
         return "'Be Vietnam Pro'";
       }
+      if (f === 'nunito') {
+        return "'Nunito'";
+      }
+      if (f === 'montserrat') {
+        return "'Montserrat'";
+      }
+      if (f === 'manrope') {
+        return "'Manrope'";
+      }
       if (f === 'plus jakarta sans' || f === 'plus-jakarta-sans') {
         return "'Plus Jakarta Sans'";
+      }
+      if (f === 'mulish') {
+        return "'Mulish'";
+      }
+      if (f === 'barlow') {
+        return "'Barlow'";
+      }
+      if (f === 'raleway') {
+        return "'Raleway'";
+      }
+      if (f === 'quicksand') {
+        return "'Quicksand'";
+      }
+      if (f === 'inter') {
+        return "'Inter'";
+      }
+      if (f === 'playfair display' || f === 'playfair-display') {
+        return "'Playfair Display'";
+      }
+      if (f === 'fraunces') {
+        return "'Fraunces'";
+      }
+      if (f === 'cormorant') {
+        return "'Cormorant'";
+      }
+      if (f === 'unbounded') {
+        return "'Unbounded'";
+      }
+      if (f === 'phudu') {
+        return "'Phudu'";
       }
       if (f === 'lexend') {
         return "'Lexend'";
@@ -417,28 +456,26 @@ async function _internalRender(options: RenderOptions, templateHtml: string): Pr
       if (f === 'lora') {
         return "'Lora'";
       }
-      if (f === 'fraunces') {
-        return "'Fraunces'";
-      }
       if (f === 'space grotesk' || f === 'space-grotesk') {
         return "'Space Grotesk'";
       }
+      if (f === 'jetbrains mono' || f === 'jetbrains-mono') {
+        return "'JetBrains Mono'";
+      }
       
-      // Fallback mappings for other fonts
       if (f.includes('archivo') || f.includes('oswald') || f.includes('bebas neue')) {
-        return 'montserrat';
+        return "'Montserrat'";
       }
-      if (f.includes('merriweather') || f.includes('crimson pro') || f.includes('dm serif display') || f.includes('dm-serif-display') || f.includes('newsreader') || f.includes('playfair display') || f.includes('playfair-display')) {
-        return 'playfair-display';
+      if (f.includes('merriweather') || f.includes('crimson pro') || f.includes('dm serif display') || f.includes('dm-serif-display') || f.includes('newsreader')) {
+        return "'Playfair Display'";
       }
-      if (f.includes('fira code') || f.includes('jetbrains mono') || f.includes('jetbrains-mono')) {
-        return 'jetbrains-mono';
+      if (f.includes('fira code')) {
+        return "'JetBrains Mono'";
       }
-      if (f.includes('archivo black') || f.includes('archivo-black')) return 'archivo-black';
-      if (f.includes('open sans') || f.includes('open-sans')) return 'open-sans';
-      if (f.includes('ibm plex mono') || f.includes('ibm-plex-mono')) return 'ibm-plex-mono';
-      if (f.includes('source code pro') || f.includes('source-code-pro')) return 'source-code-pro';
-      if (f.includes('space mono') || f.includes('space-mono')) return 'space-mono';
+      if (f.includes('archivo black') || f.includes('archivo-black')) return "'Archivo Black'";
+      if (f.includes('ibm plex mono') || f.includes('ibm-plex-mono')) return "'IBM Plex Mono'";
+      if (f.includes('source code pro') || f.includes('source-code-pro')) return "'Source Code Pro'";
+      if (f.includes('space mono') || f.includes('space-mono')) return "'Space Mono'";
       return f;
     })(),
     'LINE_HEIGHT': String(tpl.lineHeight || 1.1),

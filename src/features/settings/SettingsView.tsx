@@ -247,7 +247,7 @@ export const SettingsView: React.FC = () => {
     transitionStyle: 'crossfade',
     stripHashtags: true,
     aiEnhanceText: false,
-    fontFamily: 'Inter',
+    fontFamily: "'Be Vietnam Pro'",
     lineHeight: 1.1,
     showProgressBar: true,
     logoImage: ''
@@ -508,15 +508,25 @@ export const SettingsView: React.FC = () => {
                                   onChange={e => setTemplate({ ...template, fontFamily: e.target.value })}
                                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white font-bold outline-none focus:border-primary/50 appearance-none cursor-pointer"
                                 >
-                                  <option value="Inter" className="bg-[#050505]">Inter (Modern Sans)</option>
-                                  <option value="'Playfair Display'" className="bg-[#050505]">Playfair (Elegant Serif)</option>
-                                  <option value="'JetBrains Mono'" className="bg-[#050505]">JetBrains (Tech Mono)</option>
-                                  <option value="'Be Vietnam Pro'" className="bg-[#050505]">Be Vietnam Pro (Clean)</option>
+                                  <option value="'Be Vietnam Pro'" className="bg-[#050505]">Be Vietnam Pro (Best Vietnamese)</option>
+                                  <option value="Nunito" className="bg-[#050505]">Nunito (Rounded Sans)</option>
+                                  <option value="Montserrat" className="bg-[#050505]">Montserrat (Geometric Sans)</option>
+                                  <option value="Manrope" className="bg-[#050505]">Manrope (Modern Sans)</option>
                                   <option value="'Plus Jakarta Sans'" className="bg-[#050505]">Plus Jakarta Sans (Modern Geometric)</option>
+                                  <option value="Mulish" className="bg-[#050505]">Mulish (Friendly Sans)</option>
+                                  <option value="Barlow" className="bg-[#050505]">Barlow (Versatile Sans)</option>
+                                  <option value="Raleway" className="bg-[#050505]">Raleway (Elegant Sans)</option>
+                                  <option value="Quicksand" className="bg-[#050505]">Quicksand (Rounded Sans)</option>
+                                  <option value="Inter" className="bg-[#050505]">Inter (Modern Sans)</option>
+                                  <option value="'Playfair Display'" className="bg-[#050505]">Playfair Display (Elegant Serif)</option>
+                                  <option value="'Fraunces'" className="bg-[#050505]">Fraunces (Vintage Serif)</option>
+                                  <option value="Cormorant" className="bg-[#050505]">Cormorant (Classy Serif)</option>
+                                  <option value="Unbounded" className="bg-[#050505]">Unbounded (Display Sans)</option>
+                                  <option value="Phudu" className="bg-[#050505]">Phudu (Grotesque Display)</option>
                                   <option value="'Lexend'" className="bg-[#050505]">Lexend (Highly Readable)</option>
                                   <option value="'Lora'" className="bg-[#050505]">Lora (Elegant Serif)</option>
-                                  <option value="'Fraunces'" className="bg-[#050505]">Fraunces (Vintage Serif)</option>
                                   <option value="'Space Grotesk'" className="bg-[#050505]">Space Grotesk (Tech Grotesque)</option>
+                                  <option value="'JetBrains Mono'" className="bg-[#050505]">JetBrains Mono (Tech Mono)</option>
                                 </select>
                               </div>
                               <SizeSlider label="Line Height" value={template.lineHeight || 1.1} min={0.8} max={2} onChange={v => setTemplate({ ...template, lineHeight: v })} />
